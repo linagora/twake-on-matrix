@@ -937,6 +937,18 @@ class BackgroundPush {
   /// counts are fresh enough to clear their notification.
   final Set<String> _syncedRoomIds = {};
 
+  /// oneShotSync() completes normally on a failed sync: only its status tells.
+  Future<bool> _syncSucceeded() async {
+    try {
+      Logs().v('[Push] single oneShotSync');
+      await client.oneShotSync();
+    } catch (e) {
+      Logs().v('[Push] Error one-shot syncing', e);
+      return false;
+    }
+    return client.onSyncStatus.value?.status != SyncStatus.error;
+  }
+
   Future<void> _onClearingPush({bool getFromServer = true}) async {
     if (_clearingPushLock) {
       return;
@@ -946,50 +958,14 @@ class BackgroundPush {
       late Iterable<String> emptyRooms;
       if (getFromServer) {
         Logs().v('[Push] Got new clearing push');
-        var syncErrored = false;
         if (client.syncPending) {
           Logs().v('[Push] waiting for existing sync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
-            syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
+          await client.oneShotSync().catchError((_) {});
         }
-        if (!syncErrored) {
-          Logs().v('[Push] single oneShotSync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
-            syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
-          if (!syncErrored) {
-            emptyRooms = client.rooms
-                .where(_hasNoPendingNotification)
-                .map((r) => r.id);
-          }
-        }
-        if (syncErrored) {
-          try {
-            Logs().v(
-              '[Push] failed to sync for fallback push, fetching notifications endpoint...',
-            );
-            final notifications = await client.getNotifications(limit: 20);
-            final notificationRooms = notifications.notifications
-                .map((n) => n.roomId)
-                .toSet();
-            emptyRooms = client.rooms
-                .where((r) => !notificationRooms.contains(r.id))
-                .map((r) => r.id);
-          } catch (e) {
-            Logs().v(
-              '[Push] failed to fetch pending notifications for clearing push, falling back...',
-              e,
-            );
-            emptyRooms = client.rooms
-                .where(_hasNoPendingNotification)
-                .map((r) => r.id);
-          }
-        }
+        // Without a fresh sync, the counts are stale: keep the notifications.
+        emptyRooms = await _syncSucceeded()
+            ? client.rooms.where(_hasNoPendingNotification).map((r) => r.id)
+            : const [];
       } else {
         final syncedRoomIds = {..._syncedRoomIds};
         _syncedRoomIds.clear();

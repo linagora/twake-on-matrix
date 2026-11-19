@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/utils/background_push.dart';
 
@@ -16,12 +19,33 @@ const _notificationsChannel = MethodChannel(
 const _unreadRoomId = '!unread:example.com';
 const _readRoomId = '!read:example.com';
 
+class _SyncControlledApi extends FakeMatrixApi {
+  bool failSync = false;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    if (request.url.path.endsWith('/filter')) {
+      return http.StreamedResponse(
+        Stream.value(utf8.encode('{"filter_id":"1234"}')),
+        200,
+      );
+    }
+    if (request.url.path.endsWith('/sync')) {
+      if (failSync) throw http.ClientException('Connection refused');
+    }
+    return super.send(request);
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  late _SyncControlledApi api;
   late Client client;
   late BackgroundPush push;
   late List<int> cancelledIds;
+
+  setUpAll(() => SharedPreferences.setMockInitialValues({}));
 
   setUp(() async {
     cancelledIds = [];
@@ -33,14 +57,21 @@ void main() {
           }
           return null;
         });
-    SharedPreferences.setMockInitialValues({
-      SettingKeys.notificationCurrentIds: json.encode({
-        _unreadRoomId: 1,
-        _readRoomId: 2,
-      }),
-    });
-    // In background the app stops its sync loop.
-    client = await getClient()
+    // One instance for all tests: BackgroundPush keeps the first one.
+    await (await SharedPreferences.getInstance()).setString(
+      SettingKeys.notificationCurrentIds,
+      json.encode({_unreadRoomId: 1, _readRoomId: 2}),
+    );
+    api = _SyncControlledApi();
+    final database = await MatrixSdkDatabase.init(
+      'background_push_clearing_push_test',
+      database: await databaseFactoryFfi.openDatabase(
+        inMemoryDatabasePath,
+        options: OpenDatabaseOptions(singleInstance: false),
+      ),
+      sqfliteFactory: databaseFactoryFfi,
+    );
+    client = await getClient(database: database, httpClient: api)
       ..backgroundSync = false;
     // The room was read on another device; the unread one was not.
     client.rooms.addAll([
@@ -62,22 +93,42 @@ void main() {
         '{}',
   );
 
-  Future<void> settle() async {
-    for (var i = 0; i < 500 && cancelledIds.isEmpty; i++) {
+  Future<void> waitUntil(bool Function() condition) async {
+    for (var i = 0; i < 500 && !condition(); i++) {
       await Future<void>.delayed(const Duration(milliseconds: 20));
     }
   }
 
+  Future<void> settle() => waitUntil(() => cancelledIds.isNotEmpty);
+
+  void clearingPush() => push.onReceiveNotification({
+    'data': {'unread': '1', 'prio': 'high'},
+  });
+
   test(
     'a clearing push removes the notification of a room read elsewhere',
     () async {
-      push.onReceiveNotification({
-        'data': {'unread': '1', 'prio': 'high'},
-      });
+      clearingPush();
       await settle();
 
       expect(cancelledIds, [2]);
       expect((await storedIds()).keys, [_unreadRoomId]);
     },
   );
+
+  test('a failed sync keeps the notifications', () async {
+    api.failSync = true;
+    var syncErrors = 0;
+    final statuses = client.onSyncStatus.stream.listen((update) {
+      if (update.status == SyncStatus.error) syncErrors++;
+    });
+    addTearDown(statuses.cancel);
+
+    clearingPush();
+    await waitUntil(() => syncErrors > 0 && !client.syncPending);
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+
+    expect(cancelledIds, isEmpty);
+    expect((await storedIds()).keys, [_unreadRoomId, _readRoomId]);
+  });
 }
