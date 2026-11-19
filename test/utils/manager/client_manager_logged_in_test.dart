@@ -102,7 +102,11 @@ void main() {
   group('ClientManager.receivingFromPush', () {
     final sender = FakeAccountClient('sender', userID: '@sender:s');
     final receiver = FakeAccountClient('receiver', userID: '@receiver:s');
+    final pushClient = FakeAccountClient('push', userID: '@push:s');
     final held = [sender, receiver];
+
+    Client? receivingFrom(Object? message) =>
+        ClientManager.receivingFromPush(held, message, fallback: pushClient);
 
     test('a push holding receiver_id names its account', () {
       final push = <Object?, Object?>{
@@ -111,7 +115,7 @@ void main() {
         'receiver_id': '@receiver:s',
       };
 
-      expect(ClientManager.receivingFromPush(held, push), same(receiver));
+      expect(receivingFrom(push), same(receiver));
     });
 
     test('a push holding only the pusher identifier names its account', () {
@@ -121,32 +125,50 @@ void main() {
         'pusher_notification_client_identifier': '@receiver:s'.sha256Hash,
       };
 
-      expect(ClientManager.receivingFromPush(held, push), same(receiver));
+      expect(receivingFrom(push), same(receiver));
     });
 
-    test('a push naming no held account: nothing is returned', () {
-      final push = <Object?, Object?>{
+    test('a push naming an account not held here: no client, no fallback', () {
+      final byId = <Object?, Object?>{
         'room_id': '!room:s',
         'receiver_id': '@other:s',
+      };
+      final byPusher = <Object?, Object?>{
+        'room_id': '!room:s',
         'pusher_notification_client_identifier': '@other:s'.sha256Hash,
       };
 
-      expect(ClientManager.receivingFromPush(held, push), isNull);
+      expect(receivingFrom(byId), isNull);
+      expect(receivingFrom(byPusher), isNull);
+    });
+
+    test('a push naming a logged-out account: no client, no fallback', () {
+      final gone = FakeAccountClient('gone', userID: '@gone:s', logged: false);
+      final push = <Object?, Object?>{'receiver_id': '@gone:s'};
+
       expect(
-        ClientManager.receivingFromPush(held, {'room_id': '!room:s'}),
+        ClientManager.receivingFromPush(
+          [gone, sender],
+          push,
+          fallback: pushClient,
+        ),
         isNull,
       );
     });
 
-    test('a message that is no map names no account', () {
-      expect(ClientManager.receivingFromPush(held, 'payload'), isNull);
-      expect(ClientManager.receivingFromPush(held, null), isNull);
+    test('a push naming no account: the fallback serves it', () {
+      expect(receivingFrom({'room_id': '!room:s'}), same(pushClient));
+    });
+
+    test('a message that is no map: the fallback serves it', () {
+      expect(receivingFrom('payload'), same(pushClient));
+      expect(receivingFrom(null), same(pushClient));
     });
 
     test('a key that is no string names no account', () {
       final push = <Object?, Object?>{'receiver_id': 42};
 
-      expect(ClientManager.receivingFromPush(held, push), isNull);
+      expect(receivingFrom(push), same(pushClient));
     });
   });
 

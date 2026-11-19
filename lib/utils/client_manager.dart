@@ -112,21 +112,26 @@ abstract class ClientManager {
     }).firstOrNull;
   }
 
-  /// [receiving] for a raw push message: the iOS NSE sets `receiver_id` and
-  /// the iOS pusher sends `pusher_notification_client_identifier`. A message
-  /// that is no map, or holds neither key as a string, names no account.
-  static Client? receivingFromPush(Iterable<Client> held, Object? message) {
-    if (message is! Map) return null;
+  /// The client that reads a raw push message: the iOS NSE sets `receiver_id`
+  /// and the iOS pusher sends `pusher_notification_client_identifier`. A push
+  /// naming an account this device does not hold gets no client, so another
+  /// account never reads it. A message that is no map, or holds neither key as
+  /// a string, names no account and goes to [fallback].
+  static Client? receivingFromPush(
+    Iterable<Client> held,
+    Object? message, {
+    required Client fallback,
+  }) {
+    if (message is! Map) return fallback;
     String? field(String key) {
       final value = message[key];
       return value is String ? value : null;
     }
 
-    return receiving(
-      held,
-      userId: field('receiver_id'),
-      pusherIdentifier: field('pusher_notification_client_identifier'),
-    );
+    final userId = field('receiver_id');
+    final pusherIdentifier = field('pusher_notification_client_identifier');
+    if (userId == null && pusherIdentifier == null) return fallback;
+    return receiving(held, userId: userId, pusherIdentifier: pusherIdentifier);
   }
 
   /// Deletes what a client stored: its database and, for the SQLite one, the

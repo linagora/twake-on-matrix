@@ -743,19 +743,22 @@ class BackgroundPush {
     _matrixState?.currentClients.whereType<Client>() ?? const [],
   );
 
-  /// The client of the account the push names; without one, [_pushClient]
-  /// serves the push.
-  Client _receivingClient(dynamic message) =>
-      ClientManager.receivingFromPush(
-        _matrixState?.currentClients.whereType<Client>() ?? const [],
-        message,
-      ) ??
-      _pushClient;
+  /// The client of the account the push names, or null when that account is
+  /// not signed in here; a push naming no account goes to [_pushClient].
+  Client? _receivingClient(dynamic message) => ClientManager.receivingFromPush(
+    _matrixState?.currentClients.whereType<Client>() ?? const [],
+    message,
+    fallback: _pushClient,
+  );
 
   void onReceiveNotification(dynamic message) {
     Logs().d('BackgroundPush::onReceiveNotification(): Message $message}');
     final notification = _parseMessagePayload(message);
     final receiving = _receivingClient(message);
+    if (receiving == null) {
+      Logs().w('[Push] Push for an account not signed in here: not shown');
+      return;
+    }
     pushHelper(
       notification,
       client: receiving,
