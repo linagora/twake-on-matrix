@@ -113,7 +113,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(built, unorderedEquals([room, other]));
 
-    // A sync moved [other] out of this list (unpinned on another client).
+    // A sync took [other] out of the list (left on another client).
     await tester.pumpWidget(withRooms([room]));
 
     expect(built, [room]);
