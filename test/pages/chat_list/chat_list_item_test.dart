@@ -45,6 +45,7 @@ MockRoom buildRoom({required String name, String id = '!room:server.tld'}) {
   when(
     room.getLocalizedDisplayname(any),
   ).thenReturn(name.isEmpty ? 'Resolved Hero Name' : name);
+  when(room.summary).thenReturn(RoomSummary.fromJson({}));
   when(room.loadHeroUsers()).thenAnswer((_) async => <User>[]);
   return room;
 }
@@ -99,6 +100,37 @@ void main() {
     await tester.pump();
 
     verifyNever(room.loadHeroUsers());
+  });
+
+  testWidgets('loads hero users once when the same row rebuilds', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(1);
+  });
+
+  testWidgets('loads hero users again when the heroes of the room change', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    final summary = RoomSummary.fromJson({
+      'm.heroes': ['@alice:server.tld'],
+    });
+    when(room.summary).thenReturn(summary);
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    summary.mHeroes = ['@bob:server.tld'];
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
   });
 
   SpaceRowData spaceData({int mentionCount = 0}) => SpaceRowData(
