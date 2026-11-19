@@ -937,6 +937,9 @@ class BackgroundPush {
   /// counts are fresh enough to clear their notification.
   final Set<String> _syncedRoomIds = {};
 
+  /// A clearing push arrived during a sweep: its counts need another sync.
+  bool _serverSweepPending = false;
+
   /// oneShotSync() completes normally on a failed sync: only its status tells.
   Future<bool> _syncSucceeded() async {
     try {
@@ -951,6 +954,7 @@ class BackgroundPush {
 
   Future<void> _onClearingPush({bool getFromServer = true}) async {
     if (_clearingPushLock) {
+      if (getFromServer) _serverSweepPending = true;
       return;
     }
     try {
@@ -994,6 +998,10 @@ class BackgroundPush {
       }
     } finally {
       _clearingPushLock = false;
+    }
+    if (_serverSweepPending) {
+      _serverSweepPending = false;
+      return _onClearingPush();
     }
     // Rooms synced while this sweep ran.
     if (_syncedRoomIds.isNotEmpty) await _onClearingPush(getFromServer: false);

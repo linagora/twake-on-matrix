@@ -21,6 +21,8 @@ const _readRoomId = '!read:example.com';
 
 class _SyncControlledApi extends FakeMatrixApi {
   bool failSync = false;
+  bool holdSync = false;
+  final List<Completer<void>> heldSyncs = [];
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
@@ -31,6 +33,11 @@ class _SyncControlledApi extends FakeMatrixApi {
       );
     }
     if (request.url.path.endsWith('/sync')) {
+      if (holdSync) {
+        final release = Completer<void>();
+        heldSyncs.add(release);
+        await release.future;
+      }
       if (failSync) throw http.ClientException('Connection refused');
     }
     return super.send(request);
@@ -130,5 +137,22 @@ void main() {
 
     expect(cancelledIds, isEmpty);
     expect((await storedIds()).keys, [_unreadRoomId, _readRoomId]);
+  });
+
+  test('a clearing push during a sweep gets its own sync', () async {
+    final readRoom = client.getRoomById(_readRoomId)!..notificationCount = 1;
+    api.holdSync = true;
+    clearingPush();
+    await waitUntil(() => api.heldSyncs.isNotEmpty);
+
+    clearingPush();
+    api.heldSyncs.first.complete();
+    await waitUntil(() => api.heldSyncs.length == 2);
+    readRoom.notificationCount = 0;
+    api.holdSync = false;
+    api.heldSyncs.last.complete();
+    await settle();
+
+    expect(cancelledIds, [2]);
   });
 }
