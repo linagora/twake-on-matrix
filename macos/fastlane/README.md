@@ -39,6 +39,22 @@ Sync developer ID signing certificates
 
 Notarizing the app
 
+### mac build
+
+```sh
+[bundle exec] fastlane mac build
+```
+
+Build the signed Mac App Store package with the certificates already installed
+
+### mac beta
+
+```sh
+[bundle exec] fastlane mac beta
+```
+
+Push a new macOS build to TestFlight
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
