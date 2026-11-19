@@ -690,7 +690,7 @@
 					"@executable_path/../Frameworks",
 				);
 				OTHER_CODE_SIGN_FLAGS = "\"--timestamp\"";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "Twake Chat macOS App Store";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
