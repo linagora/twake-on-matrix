@@ -11,12 +11,9 @@ import 'package:twake_chat/utils/macos_message_notifier.dart';
 
 import 'macos_notification_multi_account_test.mocks.dart';
 
-class _Shown {
-  _Shown(this.id, this.title, this.body, this.payload);
-  final int id;
-  final String title;
-  final String body;
-  final String payload;
+typedef _Shown = ({int id, String title, String body, String payload});
+
+extension on _Shown {
   TwakeLocalNotificationPayload get parsed =>
       TwakeLocalNotificationPayload.fromJson(jsonDecode(payload));
 }
@@ -31,166 +28,217 @@ class _FakePort implements LocalNotificationsPort {
     required String title,
     required String body,
     required String payload,
-  }) async => shown.add(_Shown(id, title, body, payload));
+  }) async => shown.add((id: id, title: title, body: body, payload: payload));
 
-  // Expected new member of the port (cancel one notification by id).
   @override
   Future<void> cancel(int id) async => cancelled.add(id);
 }
 
 const _roomId = '!shared:example.com';
+const _roomOne = '!one:x.org';
+const _roomTwo = '!two:x.org';
 const _secret = 'secret plan';
+const _userA = '@me-a:x.org';
+const _userB = '@me-b:x.org';
+const _me = '@me:x.org';
+const _bob = '@bob:x.org';
 
-MockClient _account(
-  String userId, {
-  required Map<String, int> unread,
-  bool encrypted = false,
-  bool muted = false,
-}) {
+/// One signed-in account and what it knows of [_roomId]: a null [unread]
+/// means the account does not know the room.
+typedef _Setup = ({String userId, int? unread, bool encrypted, bool muted});
+
+const _aWithoutRoom = (
+  userId: _userA,
+  unread: null,
+  encrypted: false,
+  muted: false,
+);
+const _aRead = (userId: _userA, unread: 0, encrypted: false, muted: false);
+const _aUnread = (userId: _userA, unread: 1, encrypted: false, muted: false);
+const _bUnread = (userId: _userB, unread: 1, encrypted: false, muted: false);
+const _bTwoUnread = (userId: _userB, unread: 2, encrypted: false, muted: false);
+const _bThreeUnread = (
+  userId: _userB,
+  unread: 3,
+  encrypted: false,
+  muted: false,
+);
+const _bMuted = (userId: _userB, unread: 1, encrypted: false, muted: true);
+const _bEncrypted = (userId: _userB, unread: 1, encrypted: true, muted: false);
+const _meUnread = (userId: _me, unread: 1, encrypted: false, muted: false);
+
+/// Generic text, app in the background, no room open.
+const _quiet = MacosNotificationState(
+  activeRoomId: null,
+  appInForeground: false,
+  showPreview: false,
+);
+const _withPreview = MacosNotificationState(
+  activeRoomId: null,
+  appInForeground: false,
+  showPreview: true,
+);
+
+PushRuleSet _muteRule() => PushRuleSet(
+  override: [
+    PushRule(ruleId: _roomId, actions: [], enabled: true, default$: false),
+  ],
+);
+
+MockClient _account(_Setup setup) {
   final client = MockClient();
-  when(client.userID).thenReturn(userId);
-  when(client.globalPushRules).thenReturn(
-    muted
-        ? PushRuleSet(
-            override: [
-              PushRule(
-                ruleId: _roomId,
-                actions: [],
-                enabled: true,
-                default$: false,
-              ),
-            ],
-          )
-        : null,
-  );
+  when(client.userID).thenReturn(setup.userId);
+  when(client.globalPushRules).thenReturn(setup.muted ? _muteRule() : null);
   when(client.onRoomState).thenReturn(CachedStreamController());
-  for (final entry in unread.entries) {
-    final room = Room(
-      id: entry.key,
-      client: client,
-      notificationCount: entry.value,
+  final unread = setup.unread;
+  if (unread == null) return client;
+  final room = Room(id: _roomId, client: client, notificationCount: unread);
+  if (setup.encrypted) {
+    room.setState(
+      StrippedStateEvent(
+        type: EventTypes.Encryption,
+        stateKey: '',
+        senderId: setup.userId,
+        content: {'algorithm': 'm.megolm.v1.aes-sha2'},
+      ),
     );
-    if (encrypted) {
-      room.setState(
-        StrippedStateEvent(
-          type: EventTypes.Encryption,
-          stateKey: '',
-          senderId: userId,
-          content: {'algorithm': 'm.megolm.v1.aes-sha2'},
-        ),
-      );
-    }
-    when(client.getRoomById(entry.key)).thenReturn(room);
   }
+  when(client.getRoomById(_roomId)).thenReturn(room);
   return client;
 }
 
-EventUpdate _message({String roomId = _roomId, String sender = '@bob:x.org'}) =>
-    EventUpdate(
-      roomID: roomId,
-      type: EventUpdateType.timeline,
-      content: {
-        'type': EventTypes.Message,
-        'event_id': r'$e1',
-        'sender': sender,
-        'origin_server_ts': 1,
-        'content': {'msgtype': MessageTypes.Text, 'body': _secret},
-      },
-    );
+EventUpdate _textFrom(String sender) => EventUpdate(
+  roomID: _roomId,
+  type: EventUpdateType.timeline,
+  content: {
+    'type': EventTypes.Message,
+    'event_id': r'$e1',
+    'sender': sender,
+    'origin_server_ts': 1,
+    'content': {'msgtype': MessageTypes.Text, 'body': _secret},
+  },
+);
+
+/// Bob writes [_secret] in [_roomId].
+final _fromBob = _textFrom(_bob);
+
+/// Account B writes [_secret] in [_roomId] from another device.
+final _fromMeB = _textFrom(_userB);
 
 Future<bool> _notify(
   _FakePort port,
   Client client,
   EventUpdate update, {
-  bool showPreview = false,
-  String? activeRoomId,
+  MacosNotificationState state = _quiet,
 }) => notifyMacosMessage(
-  port: port,
-  client: client,
-  eventUpdate: update,
-  l10n: L10nEn(),
-  activeRoomId: activeRoomId,
-  appInForeground: false,
-  showPreview: showPreview,
+  port,
+  MacosMessageRequest(
+    client: client,
+    eventUpdate: update,
+    l10n: L10nEn(),
+    state: state,
+  ),
 );
+
+MacosMessageNotifier _notifier(_FakePort port) =>
+    MacosMessageNotifier(port, receiverId: _me, genericBody: 'New message');
+
+/// One event read on one account, and whether it shows a notification.
+typedef _Step = ({_Setup account, EventUpdate update, bool shown});
+
+/// (behaviour, steps in order, receiver of the one notification shown or
+/// null when none is shown).
+final _visibilityCases = <(String, List<_Step>, String?)>[
+  (
+    'a message on an inactive account notifies for that account',
+    [
+      (account: _aWithoutRoom, update: _fromBob, shown: false),
+      (account: _bTwoUnread, update: _fromBob, shown: true),
+    ],
+    _userB,
+  ),
+  (
+    'my own message on the event account shows nothing',
+    [(account: _bTwoUnread, update: _fromMeB, shown: false)],
+    null,
+  ),
+  (
+    'a room on both accounts uses the unread count of the event account',
+    [
+      (account: _aRead, update: _fromBob, shown: false),
+      (account: _bThreeUnread, update: _fromBob, shown: true),
+    ],
+    _userB,
+  ),
+  (
+    'a room muted on the event account stays silent even if the other '
+        'account does not mute it',
+    [
+      (account: _bMuted, update: _fromBob, shown: false),
+      (account: _aUnread, update: _fromBob, shown: true),
+    ],
+    _userA,
+  ),
+];
+
+/// (behaviour, account, state, matcher on the shown text).
+final _textCases = <(String, _Setup, MacosNotificationState, Matcher)>[
+  (
+    'the generic text is shown by default',
+    _bUnread,
+    _quiet,
+    isNot(contains(_secret)),
+  ),
+  (
+    'an encrypted room never shows the text, even with previews on',
+    _bEncrypted,
+    _withPreview,
+    isNot(contains(_secret)),
+  ),
+  (
+    'an unencrypted room shows the text when previews are on',
+    _bUnread,
+    _withPreview,
+    contains(_secret),
+  ),
+];
 
 @GenerateNiceMocks([MockSpec<Client>()])
 void main() {
   late _FakePort port;
   setUp(() => port = _FakePort());
 
-  test('a message on an inactive account notifies for that account', () async {
-    final active = _account('@me-a:x.org', unread: {});
-    final inactive = _account('@me-b:x.org', unread: {_roomId: 2});
-    // The active account (A) does not know the room; the event is from B.
-    expect(active.getRoomById(_roomId), isNull);
+  for (final (behaviour, steps, receiver) in _visibilityCases) {
+    test(behaviour, () async {
+      for (final step in steps) {
+        final client = _account(step.account);
+        if (step.account.unread == null) {
+          expect(client.getRoomById(_roomId), isNull);
+        }
+        expect(await _notify(port, client, step.update), step.shown);
+      }
 
-    final shown = await _notify(port, inactive, _message());
+      if (receiver == null) {
+        expect(port.shown, isEmpty);
+        return;
+      }
+      expect(port.shown, hasLength(1));
+      expect(port.shown.single.parsed.receiverId, receiver);
+      expect(port.shown.single.parsed.roomId, _roomId);
+    });
+  }
 
-    expect(shown, isTrue);
-    expect(port.shown, hasLength(1));
-    expect(port.shown.single.parsed.receiverId, '@me-b:x.org');
-    expect(port.shown.single.parsed.roomId, _roomId);
-  });
-
-  test('my own message on the event account shows nothing', () async {
-    final b = _account('@me-b:x.org', unread: {_roomId: 2});
-    expect(await _notify(port, b, _message(sender: '@me-b:x.org')), isFalse);
-    expect(port.shown, isEmpty);
-  });
-
-  test(
-    'a room on both accounts uses the unread count of the event account',
-    () async {
-      final a = _account('@me-a:x.org', unread: {_roomId: 0});
-      final b = _account('@me-b:x.org', unread: {_roomId: 3});
-
-      expect(await _notify(port, a, _message()), isFalse);
-      expect(await _notify(port, b, _message()), isTrue);
-      expect(port.shown.single.parsed.receiverId, '@me-b:x.org');
-    },
-  );
-
-  test('a room muted on the event account stays silent even if the other '
-      'account does not mute it', () async {
-    final a = _account('@me-a:x.org', unread: {_roomId: 1});
-    final b = _account('@me-b:x.org', unread: {_roomId: 1}, muted: true);
-
-    expect(await _notify(port, b, _message()), isFalse);
-    expect(await _notify(port, a, _message()), isTrue);
-    expect(port.shown.single.parsed.receiverId, '@me-a:x.org');
-  });
-
-  test('the generic text is shown by default', () async {
-    final b = _account('@me-b:x.org', unread: {_roomId: 1});
-    await _notify(port, b, _message());
-    expect(port.shown.single.body, isNot(contains(_secret)));
-  });
-
-  test(
-    'an encrypted room never shows the text, even with previews on',
-    () async {
-      final b = _account('@me-b:x.org', unread: {_roomId: 1}, encrypted: true);
-      await _notify(port, b, _message(), showPreview: true);
-      expect(port.shown.single.body, isNot(contains(_secret)));
-    },
-  );
-
-  test('an unencrypted room shows the text when previews are on', () async {
-    final b = _account('@me-b:x.org', unread: {_roomId: 1});
-    await _notify(port, b, _message(), showPreview: true);
-    expect(port.shown.single.body, contains(_secret));
-  });
+  for (final (behaviour, setup, state, body) in _textCases) {
+    test(behaviour, () async {
+      await _notify(port, _account(setup), _fromBob, state: state);
+      expect(port.shown.single.body, body);
+    });
+  }
 
   test('a room read elsewhere gets its notification cancelled with the id '
       'it was shown with', () async {
-    final notifier = MacosMessageNotifier(
-      port,
-      receiverId: '@me:x.org',
-      genericBody: 'New message',
-    );
-    final b = _account('@me:x.org', unread: {_roomId: 1});
-    await _notify(port, b, _message());
+    final notifier = _notifier(port);
+    await _notify(port, _account(_meUnread), _fromBob);
     final shownId = port.shown.single.id;
 
     await notifier.cancelRoom(_roomId);
@@ -199,16 +247,9 @@ void main() {
   });
 
   test('cancelling one room leaves the other rooms alone', () async {
-    final notifier = MacosMessageNotifier(
-      port,
-      receiverId: '@me:x.org',
-      genericBody: 'New message',
-    );
-    await notifier.cancelRoom('!one:x.org');
-    expect(port.cancelled, [macosNotificationId('!one:x.org')]);
-    expect(
-      macosNotificationId('!one:x.org'),
-      isNot(macosNotificationId('!two:x.org')),
-    );
+    await _notifier(port).cancelRoom(_roomOne);
+
+    expect(port.cancelled, [macosNotificationId(_roomOne)]);
+    expect(macosNotificationId(_roomOne), isNot(macosNotificationId(_roomTwo)));
   });
 }
