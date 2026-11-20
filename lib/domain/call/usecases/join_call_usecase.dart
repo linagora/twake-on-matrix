@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_cancellation.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
@@ -40,7 +42,8 @@ class JoinCallUseCase {
       sharesKeys: room.isEncrypted,
     );
     if (membershipEventId != null && !othersInCall) {
-      await _ring(join, membershipEventId);
+      // Not awaited: a slow ring must not hold the join, nor a hang-up.
+      unawaited(_ring(join, membershipEventId));
     }
     return room;
   }
