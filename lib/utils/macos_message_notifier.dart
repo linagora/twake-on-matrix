@@ -100,17 +100,43 @@ class MacosMessageNotifier {
   }
 }
 
-/// Notifies the user of [eventUpdate], read on the [client] it came from (the
-/// event account, not the active one). Returns whether one was shown.
-Future<bool> notifyMacosMessage({
-  required LocalNotificationsPort port,
-  required Client client,
-  required EventUpdate eventUpdate,
-  required L10n l10n,
-  String? activeRoomId,
-  required bool appInForeground,
-  required bool showPreview,
-}) async {
+/// What the app shows right now, and whether the text may be shown.
+class MacosNotificationState {
+  const MacosNotificationState({
+    required this.activeRoomId,
+    required this.appInForeground,
+    required this.showPreview,
+  });
+
+  final String? activeRoomId;
+  final bool appInForeground;
+  final bool showPreview;
+}
+
+/// An [eventUpdate] read on the [client] it came from (the event account, not
+/// the active one).
+class MacosMessageRequest {
+  const MacosMessageRequest({
+    required this.client,
+    required this.eventUpdate,
+    required this.l10n,
+    required this.state,
+  });
+
+  final Client client;
+  final EventUpdate eventUpdate;
+  final L10n l10n;
+  final MacosNotificationState state;
+}
+
+/// Notifies the user of the [request]. Returns whether one was shown.
+Future<bool> notifyMacosMessage(
+  LocalNotificationsPort port,
+  MacosMessageRequest request,
+) async {
+  final client = request.client;
+  final eventUpdate = request.eventUpdate;
+  final l10n = request.l10n;
   final room = client.getRoomById(eventUpdate.roomID);
   if (room == null) return false;
   final candidate = MessageNotificationCandidate(
@@ -121,14 +147,14 @@ Future<bool> notifyMacosMessage({
     notificationCount: room.notificationCount,
     highlightCount: room.highlightCount,
     isRoomMuted: room.isMuted,
-    activeRoomId: activeRoomId,
-    appInForeground: appInForeground,
+    activeRoomId: request.state.activeRoomId,
+    appInForeground: request.state.appInForeground,
   );
   if (!shouldNotifyMessage(candidate)) return false;
   final locals = MatrixLocals(l10n);
   final event = Event.fromJson(eventUpdate.content, room);
   // The text is read only when it may be shown: never for an encrypted room.
-  final withText = showPreview && !room.encrypted;
+  final withText = request.state.showPreview && !room.encrypted;
   final body = withText
       ? await event.calcLocalizedBody(
           locals,

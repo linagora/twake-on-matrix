@@ -48,14 +48,18 @@ extension LocalNotificationsExtension on MatrixState {
     final port = macosNotifications;
     if (port == null || !mounted) return;
     final shown = await notifyMacosMessage(
-      port: port,
-      client: client,
-      eventUpdate: eventUpdate,
-      l10n: L10n.of(context)!,
-      activeRoomId: activeRoomId,
-      appInForeground: _appInForeground,
-      // The opt-in setting is not built yet: generic by default.
-      showPreview: false,
+      port,
+      MacosMessageRequest(
+        client: client,
+        eventUpdate: eventUpdate,
+        l10n: L10n.of(context)!,
+        state: MacosNotificationState(
+          activeRoomId: activeRoomId,
+          appInForeground: _appInForeground,
+          // The opt-in setting is not built yet: generic by default.
+          showPreview: false,
+        ),
+      ),
     );
     if (shown && client.userID != null) {
       macosNotifiedRooms[eventUpdate.roomID] = client.userID!;
