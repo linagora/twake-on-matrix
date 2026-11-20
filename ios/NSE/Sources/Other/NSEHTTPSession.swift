@@ -123,8 +123,11 @@ struct NSEHTTPSession: MediaProviderProtocol {
         async let direct = isDirectRoom(roomID)
         async let ruleSound = roomRuleSound(roomID)
         let (memberContent, avatarContent, nameContent, isDirect) = await (member, avatar, name, direct)
-        // Without a room rule the server defaults apply: a sound for direct rooms and mentions only.
-        noisy = await ruleSound ?? (isDirect || isMentioned(content))
+        // A mention rings whatever the room rule says (.m.rule.is_user_mention outranks room rules).
+        // Otherwise the room rule decides, and without one the server defaults: a sound for direct rooms only.
+        let rule = await ruleSound
+        noisy = isMentioned(content)
+        if !noisy { noisy = rule ?? isDirect }
         return item(sender: memberContent?["displayname"] as? String,
                     senderAvatar: memberContent?["avatar_url"] as? String,
                     roomName: (nameContent?["name"] as? String).flatMap { $0.isEmpty ? nil : $0 },
