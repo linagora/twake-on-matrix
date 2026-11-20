@@ -1,6 +1,4 @@
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/web_push/web_push.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
@@ -105,47 +103,10 @@ class SettingsNotificationsController
 
   bool get showWebPushTile => kIsWeb && AppConfig.webPushEnabled;
 
-  /// Encrypted previews on iOS: the notification extension gets its own
-  /// device through a second SSO login. null while loading or unsupported.
-  bool? encryptedPreviewsActive;
-
-  /// The app cross-signs the extension's device, so it needs the
-  /// self-signing key in cache.
-  bool encryptedPreviewsLocked = false;
-
-  /// Encrypted rooms never show content in notifications anymore: the tile
-  /// only lets users who already have a dedicated device remove it.
-  bool get showEncryptedPreviewsTile =>
-      PlatformInfos.isIOS && encryptedPreviewsActive == true;
-
   @override
   void initState() {
     super.initState();
     if (showWebPushTile) _loadWebPushStatus();
-    if (PlatformInfos.isIOS) _loadEncryptedPreviewsStatus();
-  }
-
-  Future<void> _loadEncryptedPreviewsStatus() async {
-    final client = _client;
-    final active = await KeychainSharingManager.hasNotificationSession(client);
-    final locked = await KeychainSharingManager.notificationPreviewsLocked(
-      client,
-    );
-    if (!mounted) return;
-    setState(() {
-      encryptedPreviewsActive = active;
-      encryptedPreviewsLocked = locked;
-    });
-  }
-
-  /// The tile is only shown while a dedicated device exists: switching it off
-  /// logs that device out.
-  Future<void> removeEncryptedPreviewsDevice(bool _) async {
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => KeychainSharingManager.logoutNotificationSession(_client),
-    );
-    if (!mounted) return;
-    await _loadEncryptedPreviewsStatus();
   }
 
   Future<void> _loadWebPushStatus() async {

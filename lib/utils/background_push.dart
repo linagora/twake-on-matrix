@@ -227,10 +227,11 @@ class BackgroundPush {
           await _renewOverwrittenSession(targetClient);
           return;
         }
-        await KeychainSharingManager.checkNotificationDevice(targetClient);
-      } else if (sync.deviceLists?.changed?.contains(targetClient.userID) ==
-          true) {
-        await KeychainSharingManager.checkNotificationDevice(targetClient);
+        unawaited(
+          KeychainSharingManager.removeDedicatedNotificationDevice(
+            targetClient,
+          ),
+        );
       }
 
       if (!didSyncRecoveryKey && _isActiveClient(targetClient)) {

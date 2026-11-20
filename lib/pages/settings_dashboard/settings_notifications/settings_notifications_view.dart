@@ -91,27 +91,6 @@ class SettingsNotificationsView extends ConsumerWidget {
                         : (enabled) => controller.toggleWebPush(enabled),
                   ),
                 },
-                if (controller.showEncryptedPreviewsTile) ...{
-                  const Divider(thickness: 1),
-                  SwitchListTile.adaptive(
-                    value: controller.encryptedPreviewsActive ?? false,
-                    title: Text(
-                      L10n.of(context)!.dedicatedNotificationSignIn,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    subtitle: Text(
-                      controller.encryptedPreviewsLocked
-                          ? L10n.of(
-                              context,
-                            )!.encryptedNotificationPreviewsLocked
-                          : L10n.of(context)!.dedicatedNotificationSignInHint,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    onChanged: controller.removeEncryptedPreviewsDevice,
-                  ),
-                },
                 if (!client.allPushNotificationsMuted) ...{
                   const Divider(thickness: 1),
                   ListTile(

@@ -84,26 +84,6 @@ class KeychainSharingManager {
     }
   }
 
-  /// Written by the NSE: the ed25519 key it generated for its device.
-  static const String _nseDeviceKeyPrefix = 'nse_ed25519_';
-
-  /// The app cross-signs the extension's device, so it needs the
-  /// self-signing key in cache. Without cross-signing, senders share keys with
-  /// every device anyway.
-  static Future<bool> notificationPreviewsLocked(Client client) async {
-    final cached = await client.encryption?.crossSigning.isCached() ?? false;
-    return client.userDeviceKeys[client.userID]?.masterKey != null && !cached;
-  }
-
-  /// Whether the extension has its own device for [client].
-  static Future<bool> hasNotificationSession(Client client) async {
-    final userId = client.userID;
-    if (!PlatformInfos.isIOS || userId == null) return false;
-    final token = await read(userId: userId);
-    return token?.dedicated == true &&
-        token?.session.deviceId != client.deviceID;
-  }
-
   /// Removes a keychain session that is not a dedicated extension session.
   ///
   /// Older versions stored the app's own session there, which made the
@@ -116,67 +96,6 @@ class KeychainSharingManager {
     if (token.dedicated != true || token.session.deviceId == client.deviceID) {
       Logs().i('[KeychainSharing] Removing the app session of $userId');
       await delete(userId: userId);
-    }
-  }
-
-  /// Keeps the extension's device usable: forgets it once revoked, and
-  /// cross-signs it so senders that share keys only with cross-signed
-  /// devices (Dart SDK `crossVerifiedIfEnabled`) reach it.
-  ///
-  /// The device publishes its keys on its first push, so signing waits for
-  /// a later call (startup or own device list change).
-  static Future<void> checkNotificationDevice(Client client) async {
-    final userId = client.userID;
-    final homeserver = client.homeserver;
-    if (!PlatformInfos.isIOS || userId == null || homeserver == null) return;
-    final token = await read(userId: userId);
-    if (token?.dedicated != true) return;
-    final session = token!.session;
-    try {
-      await MatrixApi(
-        homeserver: homeserver,
-        accessToken: session.accessToken,
-        httpClient: client.httpClient,
-      ).getTokenOwner();
-    } on MatrixException catch (e) {
-      if (e.error == MatrixError.M_UNKNOWN_TOKEN) {
-        Logs().i('[KeychainSharing] Notification device revoked for $userId');
-        await delete(userId: userId);
-      }
-      return;
-    } catch (_) {
-      return; // offline: try again later
-    }
-    final encryption = client.encryption;
-    if (encryption == null || !await encryption.crossSigning.isCached()) {
-      return;
-    }
-    try {
-      await client.updateUserDeviceKeys();
-      final device =
-          client.userDeviceKeys[userId]?.deviceKeys[session.deviceId];
-      // Same check as a sender's `ShareKeysWith.crossVerifiedIfEnabled`.
-      if (device == null ||
-          device.hasValidSignatureChain(verifiedByTheirMasterKey: true)) {
-        return;
-      }
-      // Sign only the keys the extension generated, never keys the server
-      // published for that device id.
-      final nseKey = await _secureStorage.read(
-        key: '$_nseDeviceKeyPrefix${session.deviceId}',
-      );
-      if (nseKey == null || nseKey != device.ed25519Key) {
-        Logs().w(
-          '[KeychainSharing] Keys of ${device.deviceId} do not match the NSE',
-        );
-        return;
-      }
-      await encryption.crossSigning.sign([device]);
-      Logs().i(
-        '[KeychainSharing] Signed notification device ${device.deviceId}',
-      );
-    } catch (e, s) {
-      Logs().w('[KeychainSharing] Unable to sign notification device', e, s);
     }
   }
 
@@ -218,6 +137,36 @@ class KeychainSharingManager {
       Logs().w('[KeychainSharing] Unable to check device identity', e, s);
     }
     return false;
+  }
+
+  /// Logs out the dedicated notification device that older versions created
+  /// through a second login, then forgets its session. Unlike
+  /// [logoutNotificationSession], the entry stays when the request fails, so
+  /// the next launch tries again.
+  static Future<void> removeDedicatedNotificationDevice(Client client) async {
+    final userId = client.userID;
+    if (!PlatformInfos.isIOS || userId == null) return;
+    try {
+      final token = await read(userId: userId);
+      if (token?.dedicated != true) return;
+      final session = token!.session;
+      if (session.deviceId != client.deviceID) {
+        try {
+          await MatrixApi(
+            homeserver: Uri.parse(session.homeserverUrl),
+            accessToken: session.accessToken,
+            httpClient: client.httpClient,
+          ).logout();
+        } on MatrixException catch (e) {
+          // Already revoked: only the entry is left to remove.
+          if (e.error != MatrixError.M_UNKNOWN_TOKEN) rethrow;
+        }
+      }
+      await delete(userId: userId);
+      Logs().i('[KeychainSharing] Removed the notification device of $userId');
+    } catch (e, s) {
+      Logs().w('[KeychainSharing] Unable to remove notification device', e, s);
+    }
   }
 
   /// Logs the notification device out and forgets its session.
