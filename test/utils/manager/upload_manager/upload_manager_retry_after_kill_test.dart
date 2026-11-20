@@ -200,4 +200,23 @@ void main() {
       expect(sentMessages(), isNotEmpty);
     });
   }
+
+  test('a file the OS removed before the retry cannot be resent', () async {
+    final removedFile = File('${tempDir.path}/removed.txt')
+      ..writeAsBytesSync([1, 2, 3]);
+    await manager.uploadFileMobile(
+      room: room,
+      fileInfos: [FileInfo('removed.txt', filePath: removedFile.path)],
+    );
+    await pumpEventQueue();
+    queue.added.clear();
+    removedFile.deleteSync();
+
+    final result = await manager.retryUpload(
+      eventAfterRestart('restarted-removed'),
+    );
+
+    expect(result, RetryUploadResult.fileDataUnavailable);
+    expect(queue.added, isEmpty);
+  });
 }

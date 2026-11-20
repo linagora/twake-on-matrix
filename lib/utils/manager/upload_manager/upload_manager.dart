@@ -1,5 +1,6 @@
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
+import 'dart:io';
 import 'package:dartz/dartz.dart' hide Task;
 import 'package:dio/dio.dart';
 import 'package:twake_chat/app_state/failure.dart';
@@ -131,9 +132,11 @@ class UploadManager {
       final fileInfo = uploadInfo.fileInfo;
       final matrixFile = uploadInfo.matrixFile;
 
-      // File bytes lost (e.g. web page refresh): keep the event in the timeline
-      // and let the caller tell the user, rather than silently dropping it.
-      if (fileInfo == null && matrixFile == null) {
+      // File bytes lost (web page refresh, cache cleared by the OS): keep the
+      // event in the timeline and let the caller tell the user.
+      final filePath = fileInfo?.filePath;
+      if ((fileInfo == null && matrixFile == null) ||
+          (filePath != null && !File(filePath).existsSync())) {
         Logs().w(
           'UploadManager::retryUpload(): no file data for $txid, '
           'the message cannot be resent',
