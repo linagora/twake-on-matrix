@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -64,8 +66,12 @@ class _FakeRoom extends Fake implements Room {
   /// When set, the room cannot be loaded from the store.
   Exception? loadFailure;
 
+  /// When set, the store answers only once it completes.
+  Completer<void>? loadGate;
+
   @override
   Future<void> postLoad() async {
+    await loadGate?.future;
     if (loadFailure case final error?) throw error;
     states = {...states, ...?notLoaded};
     notLoaded = null;
@@ -1116,6 +1122,37 @@ void main() {
         expect(missedRings(), isEmpty);
         async.elapse(const Duration(seconds: 61));
         expect(missedRings(), [r'$ring']);
+      });
+    });
+
+    // The check of a sync waits on the store; the listener goes meanwhile.
+    final lateChecks = <String, ({List<StrippedStateEvent> then})>{
+      'the caller hung up while the room loaded: nothing after dispose': (
+        then: [_member(_alice, content: {})],
+      ),
+      'the user joined elsewhere while the room loaded: nothing after dispose':
+          (then: [_member(_alice), _member(_bobPhone)]),
+    };
+
+    lateChecks.forEach((name, expected) {
+      test(name, () {
+        final errors = <Object>[];
+        fakeAsync((async) {
+          runZonedGuarded(() {
+            ring(async);
+            syncWith(async, [_member(_alice)]);
+            final store = client.room.loadGate = Completer<void>();
+            syncWith(async, expected.then);
+            final seen = (rings: lists.length, missed: missed.length);
+
+            datasource.dispose();
+            store.complete();
+            async.flushMicrotasks();
+
+            expect((rings: lists.length, missed: missed.length), seen);
+          }, (error, _) => errors.add(error));
+        });
+        expect(errors, isEmpty);
       });
     });
   });
