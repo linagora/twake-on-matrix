@@ -69,7 +69,10 @@ void main() {
 
     await expectLater(join(), throwsA(isA<CallRoomNotFoundException>()));
 
-    expect(repository.calls, contains('connect mic=true camera=true'));
+    expect(
+      repository.calls,
+      contains('connect mic=true camera=true encrypted=false'),
+    );
     expect(repository.calls.last, 'disconnect');
     expect(repository.calls.any((call) => call.startsWith('join')), isFalse);
   });
@@ -114,6 +117,7 @@ void main() {
         'connect mic=true camera=true encrypted=true',
         'startKeys !room',
         'join !room video=true',
+        'ring !room video=true membership=$testMembershipEventId',
       ]);
     },
   );

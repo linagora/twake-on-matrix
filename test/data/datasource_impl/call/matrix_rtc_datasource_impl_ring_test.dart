@@ -108,7 +108,9 @@ class _Ring {
       'm.mentions': {
         'user_ids': [_bobHere.user],
       },
-      'sender_ts': (at ?? DateTime.now()).millisecondsSinceEpoch,
+      // A legacy `call.notify` has no sender_ts.
+      if (type != _legacyRingType)
+        'sender_ts': (at ?? DateTime.now()).millisecondsSinceEpoch,
       ...extra,
     };
 }
@@ -147,6 +149,12 @@ class _FakeClient extends Fake implements Client {
   final pushRules = <_PushRule>[];
   PushRuleSet? rules;
 
+  /// When set, the server refuses what is sent: messages and push rules.
+  Exception? failure;
+
+  /// False: the room is unknown to the client, as after a sync that lost it.
+  var knowsRoom = true;
+
   @override
   final CachedStreamController<Event> onTimelineEvent =
       CachedStreamController();
@@ -161,7 +169,7 @@ class _FakeClient extends Fake implements Client {
   String? get deviceID => 'BOB';
 
   @override
-  Room? getRoomById(String id) => room;
+  Room? getRoomById(String id) => knowsRoom ? room : null;
 
   @override
   String generateUniqueTransactionId() => 'txn';
@@ -173,6 +181,7 @@ class _FakeClient extends Fake implements Client {
     String txnId,
     Map<String, Object?> body,
   ) async {
+    if (failure case final error?) throw error;
     sent.add((roomId: roomId, type: eventType, content: body));
     return r'$sent';
   }
@@ -190,6 +199,7 @@ class _FakeClient extends Fake implements Client {
     List<PushCondition>? conditions,
     String? pattern,
   }) async {
+    if (failure case final error?) throw error;
     pushRules.add((
       kind: kind,
       id: ruleId,
@@ -274,7 +284,7 @@ void main() {
             ..remove('sender_ts')
             ..remove('m.mentions'),
           {
-            'slot_id': 'm.call#',
+            'slot_id': 'm.call#ROOM',
             'notification_type': 'ring',
             'lifetime': 60000,
             'm.relates_to': {'rel_type': 'm.reference', 'event_id': r'$member'},
@@ -567,14 +577,35 @@ void main() {
       });
     });
 
-    test('the earlier name of the ring rings too', () {
-      fakeAsync((async) {
-        listen(async);
+    // A legacy `call.notify` has no sender_ts: the server time counts.
+    final legacyRings = <String, ({Duration age, bool rings})>{
+      'the earlier name of the ring, without sender_ts, rings too': (
+        age: Duration.zero,
+        rings: true,
+      ),
+      'an earlier ring sent long ago, without sender_ts, does not ring': (
+        age: const Duration(minutes: 2),
+        rings: false,
+      ),
+    };
 
-        client.ring(_Ring()..type = _legacyRingType);
-        async.flushMicrotasks();
+    legacyRings.forEach((name, expected) {
+      test(name, () {
+        fakeAsync((async) {
+          listen(async);
+          final at = DateTime.now().subtract(expected.age);
 
-        expect(lists.last.single.eventId, r'$ring');
+          client.ring(
+            _Ring()
+              ..type = _legacyRingType
+              ..at = at,
+          );
+          async.flushMicrotasks();
+
+          expect([
+            for (final ring in everRung()) ring.expiresAt.difference(at),
+          ], expected.rings ? [const Duration(seconds: 60)] : isEmpty);
+        });
       });
     });
 
@@ -878,6 +909,79 @@ void main() {
     });
   });
 
+  group('a sync while it rings', () {
+    final cases =
+        <
+          String,
+          ({
+            List<StrippedStateEvent> members,
+            bool knowsRoom,
+            bool ringsOn,
+            bool missed,
+          })
+        >{
+          'the caller still in the call: it rings on': (
+            members: [_member(_alice)],
+            knowsRoom: true,
+            ringsOn: true,
+            missed: false,
+          ),
+          'the caller hung up: the ring stops, a missed call': (
+            members: [_member(_alice, content: {})],
+            knowsRoom: true,
+            ringsOn: false,
+            missed: true,
+          ),
+          'the user joined on another device: the ring stops, not missed': (
+            members: [_member(_alice), _member(_bobPhone)],
+            knowsRoom: true,
+            ringsOn: false,
+            missed: false,
+          ),
+          'a room the client does not know: it rings on': (
+            members: [],
+            knowsRoom: false,
+            ringsOn: true,
+            missed: false,
+          ),
+        };
+
+    cases.forEach((name, expected) {
+      test(name, () {
+        fakeAsync((async) {
+          final lists = <List<CallRing>>[];
+          final missed = <MissedCall>[];
+          datasource.watchRings().listen(lists.add);
+          datasource.watchMissedCalls().listen(missed.add);
+          async.flushMicrotasks();
+          client.ring();
+          async.flushMicrotasks();
+
+          client.room.states = {
+            _memberType: {
+              for (final member in expected.members) member.stateKey!: member,
+            },
+          };
+          client.knowsRoom = expected.knowsRoom;
+          client.onSync.add(SyncUpdate(nextBatch: 'next'));
+          async.flushMicrotasks();
+
+          expect(lists.last, hasLength(expected.ringsOn ? 1 : 0));
+          expect(missed.map((call) => call.ringEventId), [
+            if (expected.missed) r'$ring',
+          ]);
+
+          // A ring that stopped is never missed again when it lapses.
+          async.elapse(const Duration(seconds: 61));
+          expect(
+            missed,
+            hasLength(expected.missed || expected.ringsOn ? 1 : 0),
+          );
+        });
+      });
+    });
+  });
+
   group('ensureCallRingPushRules', () {
     const ringConditions = [
       {
@@ -959,50 +1063,73 @@ void main() {
       ]);
     });
 
-    test('rules already there, as they should be, cost no request', () async {
-      client.rules = PushRuleSet(underride: [rule(ringRule), rule(legacyRule)]);
+    const otherActions = (
+      id: 'app.twake.chat.call_ring',
+      actions: ['notify'],
+      conditions: ringConditions,
+    );
+    final otherConditions = (
+      id: ringRule.id,
+      actions: ringActions,
+      conditions: [ringConditions.first],
+    );
 
-      await datasource.ensureCallRingPushRules();
+    // A rule already there belongs to whoever set it: it is never rewritten.
+    final present = <String, ({List<_RuleSpec> there, List<String> added})>{
+      'rules already there, as they should be, cost no request': (
+        there: [ringRule, legacyRule],
+        added: [],
+      ),
+      'a rule with other actions is left as it is': (
+        there: [otherActions, legacyRule],
+        added: [],
+      ),
+      'a rule with other conditions is left as it is': (
+        there: [otherConditions, legacyRule],
+        added: [],
+      ),
+      'only the missing rule is added, the one that differs left alone': (
+        there: [otherActions],
+        added: [legacyRule.id],
+      ),
+    };
 
-      expect(client.pushRules, isEmpty);
+    present.forEach((name, expected) {
+      test(name, () async {
+        client.rules = PushRuleSet(
+          underride: [for (final spec in expected.there) rule(spec)],
+        );
+
+        await datasource.ensureCallRingPushRules();
+
+        expect(client.pushRules.map((r) => r.id), expected.added);
+      });
     });
+  });
 
-    test('a rule that differs is replaced, the other left alone', () async {
-      client.rules = PushRuleSet(
-        underride: [
-          rule((
-            id: ringRule.id,
-            actions: ['notify'],
-            conditions: ringConditions,
-          )),
-          rule(legacyRule),
-        ],
-      );
+  group('when the server refuses', () {
+    final actions = <String, Future<void> Function(MatrixRtcDatasourceImpl)>{
+      'a ring not sent is logged and reported to the caller': (datasource) =>
+          datasource.sendRing(_videoJoin, membershipEventId: r'$member'),
+      'push rules not set are logged and reported to the caller':
+          (datasource) => datasource.ensureCallRingPushRules(),
+    };
 
-      await datasource.ensureCallRingPushRules();
+    actions.forEach((name, act) {
+      test(name, () async {
+        client
+          ..room.dmUser = _alice.user
+          ..rules = PushRuleSet(underride: [])
+          ..failure = Exception('M_FORBIDDEN');
+        Logs().outputEvents.clear();
 
-      final replaced = client.pushRules.single;
-      expect(replaced.id, 'app.twake.chat.call_ring');
-      expect(replaced.kind, PushRuleKind.underride);
-      expect(replaced.actions, ringActions);
-      expect(replaced.conditions, ringConditions);
-    });
+        await expectLater(act(datasource), throwsA(isA<Exception>()));
 
-    test('a rule with other conditions is replaced', () async {
-      client.rules = PushRuleSet(
-        underride: [
-          rule((
-            id: ringRule.id,
-            actions: ringActions,
-            conditions: [ringConditions.first],
-          )),
-          rule(legacyRule),
-        ],
-      );
-
-      await datasource.ensureCallRingPushRules();
-
-      expect(client.pushRules.single.conditions, ringConditions);
+        expect(
+          Logs().outputEvents.where((event) => event.level == Level.warning),
+          isNotEmpty,
+        );
+      });
     });
   });
 }
