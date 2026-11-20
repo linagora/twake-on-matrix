@@ -18,9 +18,7 @@ import 'package:twake_chat/domain/model/call/call_ring.dart';
 /// The own membership event of a call: its room and its state key.
 typedef _Slot = ({String roomId, String stateKey});
 
-/// An override push rule that rings for a call notification (MSC4075). Not an
-/// underride: a ring mentions its callee, and `.m.rule.is_user_mention`
-/// would select the default sound first.
+/// An underride push rule that rings for a call notification (MSC4075).
 class _RingPushRule {
   _RingPushRule(this.id, String type, String typeKey)
     : conditions = [
@@ -418,16 +416,14 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   @override
   Future<void> ensureCallRingPushRules() =>
       _logged('push rules not set', () async {
-        final override = _client.globalPushRules?.override ?? const [];
+        final underride = _client.globalPushRules?.underride ?? const [];
         for (final rule in _ringPushRules) {
           // Only when absent: a rule that differs is left to its owner.
-          if (override.any((r) => r.ruleId == rule.id)) continue;
-          // Under the rules of the user (a muted room), above the mention.
+          if (underride.any((r) => r.ruleId == rule.id)) continue;
           await _client.setPushRule(
-            PushRuleKind.override,
+            PushRuleKind.underride,
             rule.id,
             _RingPushRule.actions,
-            before: '.m.rule.is_user_mention',
             conditions: rule.conditions,
           );
         }
