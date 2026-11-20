@@ -13,6 +13,22 @@ extension FileInfoExtension on FileInfo {
 
   String get msgType => mimeType.msgTypeFromMime;
 
+  FileInfo get withTypeFromMime => switch (msgType) {
+    MessageTypes.Image when this is! ImageFileInfo => ImageFileInfo(
+      fileName,
+      filePath: filePath,
+      bytes: bytes,
+      customMimeType: customMimeType,
+    ),
+    MessageTypes.Video when this is! VideoFileInfo => VideoFileInfo(
+      fileName,
+      filePath: filePath,
+      bytes: bytes,
+      customMimeType: customMimeType,
+    ),
+    _ => this,
+  };
+
   Future<MatrixFile> toMatrixFile() async {
     Uint8List matrixBytes = Uint8List(0);
     if (bytes != null) {
