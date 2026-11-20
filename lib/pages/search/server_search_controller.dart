@@ -75,70 +75,50 @@ class ServerSearchController with SearchDebouncerMixin {
   }
 
   void _handleListenServerSearch(Either<Failure, Success> searchResult) {
-    searchResult.fold((failure) => resetNextBatch(), (success) {
-      if (!searchTermIsNotEmpty) {
-        return;
-      }
-
-      if (success is ServerSearchInitial) {
-        searchResultsNotifier.value = PresentationServerSideInitial();
-      }
-
-      if (success is ServerSearchChatSuccess) {
-        updateNextBatch(success.nextBatch);
-        if (success.results?.isEmpty == true) {
-          if (isLoadingMoreNotifier.value) {
-            searchResultsNotifier.value = PresentationServerSideSearch(
-              searchResults:
-                  [
-                        if (searchResultsNotifier.value
-                            is PresentationServerSideSearch)
-                          ...(searchResultsNotifier.value
-                                  as PresentationServerSideSearch)
-                              .searchResults,
-                        ...success.results ?? <Result>[],
-                      ]
-                      .where(
-                        (result) => result.isDisplayableResult(
-                          context: currentContext,
-                          event: result.getEvent(currentContext),
-                          matrixLocalizations: currentContext == null
-                              ? const MatrixDefaultLocalizations()
-                              : MatrixLocals(L10n.of(currentContext!)!),
-                          searchWord: _searchCategories!.searchTerm,
-                        ),
-                      )
-                      .toList(),
-            );
-          } else {
-            searchResultsNotifier.value = PresentationServerSideEmptySearch();
-          }
-        } else {
-          searchResultsNotifier.value = PresentationServerSideSearch(
-            searchResults:
-                [
-                      if (searchResultsNotifier.value
-                          is PresentationServerSideSearch)
-                        ...(searchResultsNotifier.value
-                                as PresentationServerSideSearch)
-                            .searchResults,
-                      ...success.results ?? <Result>[],
-                    ]
-                    .where(
-                      (result) => result.isDisplayableResult(
-                        context: currentContext,
-                        event: result.getEvent(currentContext),
-                        matrixLocalizations: currentContext == null
-                            ? const MatrixDefaultLocalizations()
-                            : MatrixLocals(L10n.of(currentContext!)!),
-                        searchWord: _searchCategories!.searchTerm,
-                      ),
-                    )
-                    .toList(),
-          );
+    searchResult.fold(
+      (failure) {
+        resetNextBatch();
+        if (searchTermIsNotEmpty && !isLoadingMoreNotifier.value) {
+          searchResultsNotifier.value = PresentationServerSideEmptySearch();
         }
-      }
-    });
+      },
+      (success) {
+        if (!searchTermIsNotEmpty) {
+          return;
+        }
+
+        if (success is ServerSearchInitial) {
+          searchResultsNotifier.value = PresentationServerSideInitial();
+        }
+
+        if (success is ServerSearchChatSuccess) {
+          updateNextBatch(success.nextBatch);
+          final searchResults =
+              [
+                    if (searchResultsNotifier.value
+                        is PresentationServerSideSearch)
+                      ...(searchResultsNotifier.value
+                              as PresentationServerSideSearch)
+                          .searchResults,
+                    ...success.results ?? <Result>[],
+                  ]
+                  .where(
+                    (result) => result.isDisplayableResult(
+                      context: currentContext,
+                      event: result.getEvent(currentContext),
+                      matrixLocalizations: currentContext == null
+                          ? const MatrixDefaultLocalizations()
+                          : MatrixLocals(L10n.of(currentContext!)!),
+                      searchWord: _searchCategories!.searchTerm,
+                    ),
+                  )
+                  .toList();
+          searchResultsNotifier.value = searchResults.isEmpty
+              ? PresentationServerSideEmptySearch()
+              : PresentationServerSideSearch(searchResults: searchResults);
+        }
+      },
+    );
   }
 
   void resetSearchResults() {
