@@ -9,8 +9,8 @@ import 'package:twake_chat/domain/app_state/search/search_state.dart';
 import 'package:twake_chat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:twake_chat/pages/search/public_groups_search_term.dart';
 import 'package:twake_chat/pages/search/search_contacts_and_chats_controller.dart';
-import 'package:twake_chat/pages/search/search_controller.dart';
-import 'package:twake_chat/pages/search/search_state.dart';
+import 'package:twake_chat/pages/search/search_result_controller.dart';
+import 'package:twake_chat/pages/search/search_result_state.dart';
 import 'package:twake_chat/pages/search/search_view.dart';
 import 'package:twake_chat/pages/search/server_search_controller.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
@@ -20,7 +20,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/scroll_controller_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
@@ -107,7 +107,7 @@ class SearchScreenState extends ConsumerState<Search>
       if (matrixId == null || matrixId.isEmpty) return;
       unawaited(
         ref
-            .read(searchControllerProvider.notifier)
+            .read(searchResultControllerProvider.notifier)
             .openContact(
               matrixId: matrixId,
               displayName: presentationSearch.displayName,
@@ -118,13 +118,13 @@ class SearchScreenState extends ConsumerState<Search>
     }
   }
 
-  void _onStateChanged(SearchState? _, SearchState next) {
+  void _onStateChanged(SearchResultState? _, SearchResultState next) {
     switch (next) {
-      case SearchOwnProfile():
+      case SearchResultOwnProfile():
         const ProfileRoute().go(context);
-      case SearchRoom(:final roomId):
+      case SearchResultRoom(:final roomId):
         RoomRoute(roomid: roomId).go(context);
-      case SearchDraft(:final matrixId, :final displayName):
+      case SearchResultDraft(:final matrixId, :final displayName):
         DraftChatRoute(
           $extra: {
             PresentationContactConstant.receiverId: matrixId,
@@ -132,7 +132,7 @@ class SearchScreenState extends ConsumerState<Search>
             PresentationContactConstant.status: '',
           },
         ).go(context);
-      case SearchIdle() || SearchOpening():
+      case SearchResultIdle() || SearchResultOpening():
         break;
     }
   }
@@ -204,7 +204,7 @@ class SearchScreenState extends ConsumerState<Search>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(searchControllerProvider, _onStateChanged);
+    ref.listen(searchResultControllerProvider, _onStateChanged);
     return SearchView(this);
   }
 }

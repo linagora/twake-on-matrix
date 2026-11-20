@@ -19,7 +19,7 @@ import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/search/empty_search_widget.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';

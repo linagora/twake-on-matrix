@@ -1,15 +1,15 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/direct_chat/usecases/find_direct_chat_usecase.provider.dart';
-import 'package:twake_chat/pages/search/search_state.dart';
+import 'package:twake_chat/pages/search/search_result_state.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 
-part 'search_controller.g.dart';
+part 'search_result_controller.g.dart';
 
 @riverpod
-class SearchController extends _$SearchController {
+class SearchResultController extends _$SearchResultController {
   @override
-  SearchState build() => const SearchState.idle();
+  SearchResultState build() => const SearchResultState.idle();
 
   /// Ends in `ownProfile`, `room` or `draft`, which the screen navigates to;
   /// ignored while a lookup is running.
@@ -17,10 +17,10 @@ class SearchController extends _$SearchController {
     required String matrixId,
     String? displayName,
   }) async {
-    if (state is SearchOpening) return;
-    state = const SearchState.opening();
+    if (state is SearchResultOpening) return;
+    state = const SearchResultState.opening();
     if (matrixId == ref.read(activeUserIdProvider)) {
-      state = const SearchState.ownProfile();
+      state = const SearchResultState.ownProfile();
       return;
     }
     try {
@@ -29,18 +29,21 @@ class SearchController extends _$SearchController {
           .execute(contactMxId: matrixId);
       if (!ref.mounted) return;
       state = roomId == null
-          ? SearchState.draft(matrixId: matrixId, displayName: displayName)
-          : SearchState.room(roomId);
+          ? SearchResultState.draft(
+              matrixId: matrixId,
+              displayName: displayName,
+            )
+          : SearchResultState.room(roomId);
     } catch (error, stackTrace) {
       if (!ref.mounted) return;
       ref.read(reportFailureProvider)(
         error,
         stackTrace,
-        'SearchController::openContact',
+        'SearchResultController::openContact',
       );
     } finally {
-      if (ref.mounted && state is SearchOpening) {
-        state = const SearchState.idle();
+      if (ref.mounted && state is SearchResultOpening) {
+        state = const SearchResultState.idle();
       }
     }
   }

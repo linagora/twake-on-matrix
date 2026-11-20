@@ -11,7 +11,7 @@ import 'package:twake_chat/presentation/model/search/presentation_server_side_em
 import 'package:twake_chat/presentation/model/search/presentation_server_side_search.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show Consumer;

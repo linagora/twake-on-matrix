@@ -6,8 +6,8 @@ import 'package:twake_chat/data/direct_chat/repositories/direct_chat_repository_
 import 'package:twake_chat/domain/direct_chat/repositories/direct_chat_repository.dart';
 import 'package:twake_chat/domain/direct_chat/usecases/find_direct_chat_usecase.dart';
 import 'package:twake_chat/domain/direct_chat/usecases/find_direct_chat_usecase.provider.dart';
-import 'package:twake_chat/pages/search/search_controller.dart';
-import 'package:twake_chat/pages/search/search_state.dart';
+import 'package:twake_chat/pages/search/search_result_controller.dart';
+import 'package:twake_chat/pages/search/search_result_state.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 
@@ -43,7 +43,7 @@ void main() {
 
   late _FakeDirectChatRepository repository;
   late ProviderContainer container;
-  late List<SearchState> states;
+  late List<SearchResultState> states;
   late List<Object> reported;
 
   setUp(() {
@@ -60,15 +60,21 @@ void main() {
       ],
     );
     states = [];
-    container.listen(searchControllerProvider, (_, next) => states.add(next));
+    container.listen(
+      searchResultControllerProvider,
+      (_, next) => states.add(next),
+    );
   });
 
-  SearchController controller() =>
-      container.read(searchControllerProvider.notifier);
+  SearchResultController controller() =>
+      container.read(searchResultControllerProvider.notifier);
 
   test('build_always_startsIdle', () {
     // Assert
-    expect(container.read(searchControllerProvider), const SearchState.idle());
+    expect(
+      container.read(searchResultControllerProvider),
+      const SearchResultState.idle(),
+    );
   });
 
   test('openContact_withExistingDirectChat_opensTheRoom', () async {
@@ -80,8 +86,8 @@ void main() {
 
     // Assert
     expect(states, const [
-      SearchState.opening(),
-      SearchState.room('!dm:server'),
+      SearchResultState.opening(),
+      SearchResultState.room('!dm:server'),
     ]);
   });
 
@@ -92,7 +98,7 @@ void main() {
     // Assert
     expect(
       states.last,
-      const SearchState.draft(matrixId: contact, displayName: 'Alice'),
+      const SearchResultState.draft(matrixId: contact, displayName: 'Alice'),
     );
   });
 
@@ -101,7 +107,10 @@ void main() {
     await controller().openContact(matrixId: me);
 
     // Assert
-    expect(states, const [SearchState.opening(), SearchState.ownProfile()]);
+    expect(states, const [
+      SearchResultState.opening(),
+      SearchResultState.ownProfile(),
+    ]);
     expect(repository.lookups, isEmpty);
   });
 
@@ -111,7 +120,7 @@ void main() {
     await controller().openContact(matrixId: me);
 
     // Assert
-    expect(states.whereType<SearchOwnProfile>(), hasLength(2));
+    expect(states.whereType<SearchResultOwnProfile>(), hasLength(2));
   });
 
   test('openContact_whenTheLookupFails_reportsAndBackToIdle', () async {
@@ -122,7 +131,10 @@ void main() {
     await controller().openContact(matrixId: contact);
 
     // Assert
-    expect(container.read(searchControllerProvider), const SearchState.idle());
+    expect(
+      container.read(searchResultControllerProvider),
+      const SearchResultState.idle(),
+    );
     expect(reported, [isA<StateError>()]);
   });
 
@@ -143,12 +155,14 @@ void main() {
 
     test('openContact_whileAlreadyOpening_runsASingleLookup', () async {
       // Arrange
-      final pendingStates = <SearchState>[];
+      final pendingStates = <SearchResultState>[];
       pendingContainer.listen(
-        searchControllerProvider,
+        searchResultControllerProvider,
         (_, next) => pendingStates.add(next),
       );
-      final notifier = pendingContainer.read(searchControllerProvider.notifier);
+      final notifier = pendingContainer.read(
+        searchResultControllerProvider.notifier,
+      );
 
       // Act
       final first = notifier.openContact(matrixId: contact);
@@ -159,20 +173,20 @@ void main() {
       // Assert
       expect(useCase.lookups, hasLength(1));
       expect(pendingStates, const [
-        SearchState.opening(),
-        SearchState.room('!dm:server'),
+        SearchResultState.opening(),
+        SearchResultState.room('!dm:server'),
       ]);
     });
 
     test('openContact_disposedDuringTheLookup_leavesTheStateAlone', () async {
       // Arrange
-      final pendingStates = <SearchState>[];
+      final pendingStates = <SearchResultState>[];
       final subscription = pendingContainer.listen(
-        searchControllerProvider,
+        searchResultControllerProvider,
         (_, next) => pendingStates.add(next),
       );
       final opening = pendingContainer
-          .read(searchControllerProvider.notifier)
+          .read(searchResultControllerProvider.notifier)
           .openContact(matrixId: contact);
       subscription.close();
       await pendingContainer.pump();
@@ -182,8 +196,8 @@ void main() {
       await opening;
 
       // Assert
-      expect(pendingContainer.exists(searchControllerProvider), isFalse);
-      expect(pendingStates, const [SearchState.opening()]);
+      expect(pendingContainer.exists(searchResultControllerProvider), isFalse);
+      expect(pendingStates, const [SearchResultState.opening()]);
     });
   });
 }
