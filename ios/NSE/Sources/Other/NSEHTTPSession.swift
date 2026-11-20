@@ -20,6 +20,7 @@ import UIKit
 
 /// Notification built from plain Matrix HTTP calls (no Rust client, no crypto).
 /// `body == nil` means the event is still encrypted, unless `isInvite` is set.
+/// `isNeutral` means the room state is unknown: the builder shows the default text.
 struct HTTPNotificationItem: NotificationItemProxyProtocol {
     let eventID: String
     let roomID: String
@@ -32,15 +33,26 @@ struct HTTPNotificationItem: NotificationItemProxyProtocol {
     let isRoomDirect: Bool
     let body: String?
     let isInvite: Bool
+    let isNoisy: Bool
+    let isNeutral: Bool
 
     var event: NotificationEvent? { nil }
     var roomCanonicalAlias: String? { nil }
-    // no push rules evaluated over HTTP, always play the sound
-    var isNoisy: Bool { true }
     /// Encrypted events carry no body: `body == nil` is handled by the builder.
     var isRoomEncrypted: Bool { false }
     // a direct room is assumed to have 2 members
     var roomJoinedMembers: Int { isRoomDirect ? 2 : 0 }
+}
+
+/// What the `m.room.encryption` lookup said: 404 is clear, 200 encrypted, anything else unknown.
+private enum RoomEncryption {
+    case clear, encrypted, unknown
+}
+
+private struct ClassifiedEvent {
+    var body: String?
+    var isInvite = false
+    var encryption = RoomEncryption.encrypted
 }
 
 struct NSEHTTPSession: MediaProviderProtocol {
@@ -56,22 +68,11 @@ struct NSEHTTPSession: MediaProviderProtocol {
             return nil
         }
         let content = event["content"] as? [String: Any]
-        let body: String?
-        var isInvite = false
-        switch event["type"] as? String {
-        case "m.room.encrypted":
-            body = nil
-        case "m.room.message":
-            guard let text = messageText(content) else { return nil }
-            // A clear event can sit in an encrypted room (bots, bridges): the room decides.
-            body = await isRoomEncrypted(roomID) ? nil : text
-        case "m.room.member":
-            guard content?["membership"] as? String == "invite", event["state_key"] as? String == credentials.userId else { return nil }
-            isInvite = true
-            body = nil
-        default:
-            return nil
-        }
+        guard let classified = await classify(event, content: content, roomID: roomID) else { return nil }
+        let body = classified.body
+        let isInvite = classified.isInvite
+        let neutral = classified.encryption == .unknown
+        var noisy = true
 
         func item(sender senderName: String?, senderAvatar: String?, roomName: String?, roomAvatar: String?, isDirect: Bool) -> HTTPNotificationItem {
             HTTPNotificationItem(eventID: eventID,
@@ -85,7 +86,9 @@ struct NSEHTTPSession: MediaProviderProtocol {
                                  roomAvatarMediaSource: roomAvatar.flatMap(mediaSource),
                                  isRoomDirect: isDirect,
                                  body: body,
-                                 isInvite: isInvite)
+                                 isInvite: isInvite,
+                                 isNoisy: noisy,
+                                 isNeutral: neutral)
         }
 
         if isInvite {
@@ -101,7 +104,13 @@ struct NSEHTTPSession: MediaProviderProtocol {
                         isDirect: content?["is_direct"] as? Bool ?? false)
         }
 
+        // Unknown room state: nothing else is read, the default text is shown.
+        guard !neutral else {
+            return item(sender: nil, senderAvatar: nil, roomName: nil, roomAvatar: nil, isDirect: false)
+        }
+
         guard body != nil else {
+            noisy = await isRoomNoisy(roomID)
             return item(sender: nil, senderAvatar: nil, roomName: nil, roomAvatar: nil, isDirect: false)
         }
 
@@ -109,7 +118,9 @@ struct NSEHTTPSession: MediaProviderProtocol {
         async let avatar = state(roomID, "m.room.avatar")
         async let name = state(roomID, "m.room.name")
         async let direct = json("/_matrix/client/v3/user/\(enc(credentials.userId))/account_data/m.direct", label: "account_data/m.direct", timeout: 4)
+        async let roomNoisy = isRoomNoisy(roomID)
         let (memberContent, avatarContent, nameContent, directContent) = await (member, avatar, name, direct)
+        noisy = await roomNoisy
 
         let isDirect = directContent?.values.contains { ($0 as? [String]).map { $0.contains(roomID) } ?? false } ?? false
         return item(sender: memberContent?["displayname"] as? String,
@@ -117,6 +128,23 @@ struct NSEHTTPSession: MediaProviderProtocol {
                     roomName: (nameContent?["name"] as? String).flatMap { $0.isEmpty ? nil : $0 },
                     roomAvatar: avatarContent?["url"] as? String,
                     isDirect: isDirect)
+    }
+
+    private func classify(_ event: [String: Any], content: [String: Any]?, roomID: String) async -> ClassifiedEvent? {
+        switch event["type"] as? String {
+        case "m.room.encrypted":
+            return ClassifiedEvent()
+        case "m.room.message":
+            guard let text = messageText(content) else { return nil }
+            // A clear event can sit in an encrypted room (bots, bridges): the room decides.
+            let encryption = await roomEncryption(roomID)
+            return ClassifiedEvent(body: encryption == .clear ? text : nil, encryption: encryption)
+        case "m.room.member":
+            guard content?["membership"] as? String == "invite", event["state_key"] as? String == credentials.userId else { return nil }
+            return ClassifiedEvent(isInvite: true)
+        default:
+            return nil
+        }
     }
 
     /// A user who is not in the room (invitation) cannot read the event: look for it in the notifications instead.
@@ -155,9 +183,26 @@ struct NSEHTTPSession: MediaProviderProtocol {
         return lines[(blank + 1)...].joined(separator: "\n")
     }
 
-    /// 404 means a clear room. Any other failure counts as encrypted: a wrong label costs less than a leaked body.
-    private func isRoomEncrypted(_ roomID: String) async -> Bool {
-        await fetch("/_matrix/client/v3/rooms/\(enc(roomID))/state/m.room.encryption/", label: "state/m.room.encryption", timeout: 4).status != 404
+    private func roomEncryption(_ roomID: String) async -> RoomEncryption {
+        switch await fetch("/_matrix/client/v3/rooms/\(enc(roomID))/state/m.room.encryption/", label: "state/m.room.encryption", timeout: 4).status {
+        case 404: return .clear
+        case 200: return .encrypted
+        default: return .unknown
+        }
+    }
+
+    /// The room rule of the user, as the app writes it: no rule (404) keeps the sound, and so does an empty rule
+    /// ("mentions only": the push is a mention). A rule that notifies without a sound tweak stays silent.
+    /// Any other failure stays silent, like the Rust path (`isNoisy ?? false`): a banner without a ring beats a ring in a silenced room.
+    private func isRoomNoisy(_ roomID: String) async -> Bool {
+        let answer = await fetch("/_matrix/client/v3/pushrules/global/room/\(enc(roomID))", label: "pushrules/room", timeout: 4)
+        if answer.status == 404 { return true }
+        guard let data = answer.data,
+              let rule = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return false }
+        guard rule["enabled"] as? Bool != false, let actions = rule["actions"] as? [Any] else { return true }
+        let notifies = actions.contains { $0 as? String == "notify" }
+        let sounds = actions.contains { ($0 as? [String: Any])?["set_tweak"] as? String == "sound" }
+        return sounds || !notifies
     }
 
     private func state(_ roomID: String, _ type: String, _ key: String = "") async -> [String: Any]? {

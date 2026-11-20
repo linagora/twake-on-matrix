@@ -39,6 +39,9 @@ struct NotificationContentBuilder {
 
     /// Same as `content(for:mediaProvider:)` for an item fetched over HTTP.
     func content(for item: HTTPNotificationItem, mediaProvider: MediaProviderProtocol?) async throws -> UNMutableNotificationContent {
+        if item.isNeutral {
+            return processEmpty(notificationItem: item)
+        }
         if item.isInvite {
             return try await processInvited(notificationItem: item, mediaProvider: mediaProvider)
         }
