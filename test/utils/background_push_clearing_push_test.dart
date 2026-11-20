@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/utils/background_push.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 import '../fake_client.dart';
 
@@ -42,6 +43,20 @@ class _SyncControlledApi extends FakeMatrixApi {
     }
     return super.send(request);
   }
+}
+
+class _FakeMatrixState extends Fake implements MatrixState {
+  _FakeMatrixState(this.currentClients);
+
+  @override
+  final List<Client?> currentClients;
+
+  @override
+  String? get activeRoomId => null;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      'MatrixState';
 }
 
 void main() {
@@ -155,4 +170,49 @@ void main() {
 
     expect(cancelledIds, [2]);
   });
+
+  // Last: the service keeps the host they set for the tests that follow.
+  test(
+    'the account served logged out: the sweep clears for the one still logged in',
+    () async {
+      final departed = Client(
+        'departed',
+        httpClient: api,
+        database: await MatrixSdkDatabase.init(
+          'departed',
+          database: await databaseFactoryFfi.openDatabase(
+            inMemoryDatabasePath,
+            options: OpenDatabaseOptions(singleInstance: false),
+          ),
+          sqfliteFactory: databaseFactoryFfi,
+        ),
+      );
+      push.rebind(departed);
+      BackgroundPush(_FakeMatrixState([departed, client]), departed);
+
+      clearingPush();
+      await settle();
+
+      expect(cancelledIds, [2]);
+      expect((await storedIds()).keys, [_unreadRoomId]);
+    },
+  );
+
+  test(
+    'a clearing push for an account not signed in here does nothing',
+    () async {
+      BackgroundPush(_FakeMatrixState([client]), client);
+      api.holdSync = true;
+
+      push.onReceiveNotification({
+        'receiver_id': '@stranger:example.com',
+        'unread': '1',
+        'prio': 'high',
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(api.heldSyncs, isEmpty);
+      expect(cancelledIds, isEmpty);
+    },
+  );
 }
