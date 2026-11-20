@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
@@ -21,23 +19,16 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 
 const _userId = '@alice:example.com';
-const _appDeviceId = 'APPDEVICE';
-const _dedicatedToken = 'dedicated-token';
+
+// The l10n key of the old tile is gone, so its English title is spelled out.
+const _oldTileTitle = 'Dedicated notification sign-in';
 
 class _FakeClient extends Fake implements Client {
-  _FakeClient(this.httpClient);
-
-  @override
-  final http.Client httpClient;
-
   @override
   String? get userID => _userId;
 
   @override
-  String? get deviceID => _appDeviceId;
-
-  @override
-  Uri? get homeserver => Uri.parse('https://example.com');
+  String? get deviceID => 'APPDEVICE';
 
   @override
   Encryption? get encryption => null;
@@ -53,27 +44,22 @@ class _FakeClient extends Fake implements Client {
       CachedStreamController();
 }
 
-String _dedicatedSlot() => jsonEncode(
-  KeychainSharingRestoreToken(
-    session: KeychainSharingSession(
-      accessToken: _dedicatedToken,
-      userId: _userId,
-      deviceId: 'NSEDEVICE',
-      homeserverUrl: 'https://example.com',
-    ),
-    dedicated: true,
-  ).toJson(),
-);
-
 void main() {
-  late Map<String, String> store;
-  late List<http.Request> requests;
-
   setUp(() {
     GetIt.instance.registerSingleton(ResponsiveUtils());
-    store = {};
-    requests = [];
-    FlutterSecureStorage.setMockInitialValues(store);
+    FlutterSecureStorage.setMockInitialValues({
+      _userId: jsonEncode(
+        KeychainSharingRestoreToken(
+          session: KeychainSharingSession(
+            accessToken: 'dedicated-token',
+            userId: _userId,
+            deviceId: 'NSEDEVICE',
+            homeserverUrl: 'https://example.com',
+          ),
+          dedicated: true,
+        ).toJson(),
+      ),
+    });
     PlatformInfos.isTestingForIOS = true;
   });
 
@@ -82,73 +68,32 @@ void main() {
     GetIt.instance.reset();
   });
 
-  final title = lookupL10n(const Locale('en')).dedicatedNotificationSignIn;
-
-  Future<void> settle(WidgetTester tester) async {
-    for (var i = 0; i < 5; i++) {
-      await tester.pump(const Duration(milliseconds: 200));
-    }
-  }
-
-  Future<void> pumpSettings(WidgetTester tester) async {
-    final httpClient = MockClient((request) async {
-      requests.add(request);
-      return http.Response('{}', 200);
-    });
-    await tester.pumpWidget(
-      ProviderScope(
-        retry: (_, _) => null,
-        overrides: [
-          matrixClientProvider.overrideWithValue(_FakeClient(httpClient)),
-        ],
-        child: Builder(
-          builder: (context) => MaterialApp(
-            navigatorKey: TwakeApp.routerKey = GlobalKey<NavigatorState>(),
-            locale: const Locale('en'),
-            localizationsDelegates: L10n.localizationsDelegates,
-            supportedLocales: L10n.supportedLocales,
-            theme: TwakeThemes.buildTheme(context, Brightness.light, null),
-            home: const SettingsNotifications(),
+  testWidgets(
+    'with a dedicated notification device, settings show no tile for it',
+    (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          retry: (_, _) => null,
+          overrides: [matrixClientProvider.overrideWithValue(_FakeClient())],
+          child: Builder(
+            builder: (context) => MaterialApp(
+              navigatorKey: TwakeApp.routerKey = GlobalKey<NavigatorState>(),
+              locale: const Locale('en'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              theme: TwakeThemes.buildTheme(context, Brightness.light, null),
+              home: const SettingsNotifications(),
+            ),
           ),
         ),
-      ),
-    );
-    await settle(tester);
-  }
+      );
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
 
-  testWidgets('a user with a dedicated device sees its tile, switched on', (
-    tester,
-  ) async {
-    store[_userId] = _dedicatedSlot();
-
-    await pumpSettings(tester);
-
-    final tile = find.widgetWithText(SwitchListTile, title);
-    expect(tile, findsOneWidget);
-    expect(tester.widget<SwitchListTile>(tile).value, isTrue);
-  });
-
-  testWidgets('without a dedicated device, the tile is not shown', (
-    tester,
-  ) async {
-    await pumpSettings(tester);
-
-    expect(find.text(title), findsNothing);
-  });
-
-  testWidgets('turning the tile off logs the dedicated device out', (
-    tester,
-  ) async {
-    store[_userId] = _dedicatedSlot();
-    await pumpSettings(tester);
-
-    await tester.tap(find.widgetWithText(SwitchListTile, title));
-    await settle(tester);
-
-    final logout = requests.where((r) => r.url.path.endsWith('/logout'));
-    expect(logout, hasLength(1));
-    expect(logout.single.headers['authorization'], 'Bearer $_dedicatedToken');
-    expect(store.containsKey(_userId), isFalse);
-    expect(find.text(title), findsNothing);
-  });
+      expect(find.text(_oldTileTitle), findsNothing);
+      // Notifications are muted: only the master switch is left.
+      expect(find.byType(SwitchListTile), findsOneWidget);
+    },
+  );
 }
