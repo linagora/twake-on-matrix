@@ -85,6 +85,26 @@ double _offsetToReveal(
       .clamp(position.minScrollExtent, position.maxScrollExtent);
 }
 
+/// The oldest event after [fullyRead] that someone else sent and that the
+/// list builds as a row. [events] is newest first, like `Timeline.events`.
+String? firstUnreadReceivedEventId(
+  List<Event> events, {
+  required String fullyRead,
+  required String? userId,
+}) {
+  if (fullyRead.isEmpty) return null;
+  final fullyReadIndex = events.indexWhere(
+    (event) => event.eventId == fullyRead,
+  );
+  if (fullyReadIndex <= 0) return null;
+  return events
+      .getRange(0, fullyReadIndex)
+      .lastWhereOrNull(
+        (event) => event.senderId != userId && event.isVisibleInGui,
+      )
+      ?.eventId;
+}
+
 /// Puts the row of [rowContext] at the top of the viewport, without animation.
 bool jumpToRowTop(ScrollController controller, BuildContext? rowContext) {
   final item = rowContext?.findRenderObject();
