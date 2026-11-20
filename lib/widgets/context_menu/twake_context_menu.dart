@@ -1,4 +1,6 @@
 // reference to: https://pub.dev/packages/contextmenu
+import 'dart:math';
+
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action_item_widget.dart';
@@ -65,6 +67,8 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _animationController.forward();
+      final width = _menuKey.currentContext?.size?.width;
+      if (mounted && width != null) setState(() => _menuWidth = width);
     });
   }
 
@@ -75,6 +79,20 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
   }
 
   final Map<ValueKey, double> _heights = {};
+  final GlobalKey _menuKey = GlobalKey();
+  double? _menuWidth;
+
+  // showDialog wraps the menu in a SafeArea, so the Stack starts after it.
+  EdgeInsets get _safePadding =>
+      MediaQueryData.fromView(View.of(context)).padding;
+
+  double get _stackWidth =>
+      MediaQuery.sizeOf(context).width - _safePadding.horizontal;
+
+  double get _maxMenuWidth => min(
+    TwakeContextMenuStyle.menuMaxWidth,
+    _stackWidth - 2 * TwakeContextMenuStyle.menuScreenMargin,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +140,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                     );
                   },
                   child: Card(
+                    key: _menuKey,
                     elevation: TwakeContextMenuStyle.menuElevation,
                     margin: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
@@ -136,9 +155,12 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                       child: Material(
                         color: TwakeContextMenuStyle.defaultMenuColor(context),
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minWidth: TwakeContextMenuStyle.menuMinWidth,
-                            maxWidth: TwakeContextMenuStyle.menuMaxWidth,
+                          constraints: BoxConstraints(
+                            minWidth: min(
+                              TwakeContextMenuStyle.menuMinWidth,
+                              _maxMenuWidth,
+                            ),
+                            maxWidth: _maxMenuWidth,
                           ),
                           child: IntrinsicWidth(
                             child: Padding(
@@ -226,19 +248,23 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
       positionBottom = 0;
     }
 
-    final double positionLeftTap = widget.position.dx;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double positionLeftTap = widget.position.dx - _safePadding.left;
+    final double screenWidth = _stackWidth;
     final double availableRightSpace = screenWidth - positionLeftTap;
     double? positionLeft;
     double? positionRight;
     Alignment alignment = Alignment.topLeft;
 
-    if (availableRightSpace < TwakeContextMenuStyle.menuMaxWidth &&
+    const margin = TwakeContextMenuStyle.menuScreenMargin;
+    final menuWidth = _menuWidth ?? _maxMenuWidth;
+    final maxOffset = max(margin, screenWidth - menuWidth - margin);
+
+    if (availableRightSpace < menuWidth + margin &&
         !widget.respectLeftPosition) {
-      positionRight = screenWidth - positionLeftTap;
+      positionRight = (screenWidth - positionLeftTap).clamp(margin, maxOffset);
       alignment = Alignment.topRight;
     } else {
-      positionLeft = positionLeftTap;
+      positionLeft = positionLeftTap.clamp(margin, maxOffset);
     }
 
     return ContextMenuPosition(
