@@ -591,7 +591,7 @@ class ChatController extends ConsumerState<Chat>
   bool _markingLatestRead = false;
 
   void _markLatestReadIfAtBottom() {
-    if (!_isAtLiveBottom) return;
+    if (isOpeningOnUnread || !_isAtLiveBottom) return;
     if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
     if (_markingLatestRead) return;
     _markingLatestRead = true;
@@ -684,21 +684,29 @@ class ChatController extends ConsumerState<Chat>
   void _initUnreadLocation(String fullyRead) {
     _markerReadLocation = fullyRead;
     unreadReceivedMessageLocation = _findUnreadReceivedMessageLocation();
-    final firstUnread = unreadReceivedMessageLocation ?? fullyRead;
-    // The list mounts on the next frame: build it up to the first unread row.
-    jumpCacheExtent.startUnreadOpening();
     isOpeningOnUnread = true;
+    _openOnUnread(unreadReceivedMessageLocation ?? fullyRead, raised: false);
+  }
+
+  void _openOnUnread(String eventId, {required bool raised}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      if (!raised && !_isRowMounted(eventId)) {
+        // Build the list up to the first unread row, hidden for one frame.
+        jumpCacheExtent.startUnreadOpening();
+        rebuildChatForJump();
+        _openOnUnread(eventId, raised: true);
+        return;
+      }
       // Stay on the live timeline so returning to the bottom can still mark
       // the room read (`allowNewEvent` must remain true).
-      scrollToEventId(
-        firstUnread,
-        highlight: false,
-        allowContextualReload: false,
-      );
       isOpeningOnUnread = false;
-      jumpCacheExtent.endUnreadOpening(jumpInFlight: _isProgrammaticScrolling);
+      scrollToEventId(eventId, highlight: false, allowContextualReload: false);
+      if (raised) {
+        jumpCacheExtent.endUnreadOpening(
+          jumpInFlight: _isProgrammaticScrolling,
+        );
+      }
       rebuildChatForJump();
     });
   }
