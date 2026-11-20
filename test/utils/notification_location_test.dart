@@ -20,6 +20,8 @@ void main() {
 
   setUp(() {
     flagBefore = AppConfig.threadsEnabled;
+    // Written for the threads on: pinned, not left to the default of the flag.
+    AppConfig.threadsEnabled = true;
     _client = MockClient();
     _room = MockRoom();
     when(_room.id).thenReturn(_roomId);

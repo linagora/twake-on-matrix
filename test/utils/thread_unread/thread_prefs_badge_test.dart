@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/datasource_impl/thread/thread_prefs_datasource_impl.dart';
 import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
@@ -20,6 +21,14 @@ import '../../data/datasource_impl/thread/thread_account.dart';
 /// applies at the next sync, without a restart.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Written for the threads on: pinned, not left to the default of the flag.
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});

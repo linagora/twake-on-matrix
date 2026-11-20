@@ -25,8 +25,9 @@ void main() {
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
+    final flagBefore = AppConfig.threadsEnabled;
     AppConfig.threadsEnabled = false;
-    addTearDown(() => AppConfig.threadsEnabled = true);
+    addTearDown(() => AppConfig.threadsEnabled = flagBefore);
     account = ThreadAccount(RecordingHomeserver());
     await account.receiveRoomState(const []);
     account.server.answer(

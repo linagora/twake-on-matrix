@@ -22,6 +22,14 @@ import '../../datasource_impl/thread/thread_account.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  // Written for the threads on: pinned, not left to the default of the flag.
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
+
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     _account = ThreadAccount(RecordingHomeserver());

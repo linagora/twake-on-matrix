@@ -17,6 +17,14 @@ import 'pins_fakes.dart';
 /// the room stays where it is. A pinned message of the room still scrolls
 /// the room to it. In the bar of a thread, a tap jumps within the thread.
 void main() {
+  // Written for the threads on: pinned, not left to the default of the flag.
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
+
   late PinsRoom room;
   final controllers = <FakePinsChatController>[];
 

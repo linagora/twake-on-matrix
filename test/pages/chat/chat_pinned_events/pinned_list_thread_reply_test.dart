@@ -45,6 +45,14 @@ class _FakeMatrixState extends Fake implements MatrixState {
 /// reply opens the screen of its thread, scrolled to the reply, with the room
 /// under it; on a message of the room it still opens the room on it.
 void main() {
+  // Written for the threads on: pinned, not left to the default of the flag.
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
+
   late ({PinsClient client, PinsRoom room}) fixture;
 
   setUp(() {
