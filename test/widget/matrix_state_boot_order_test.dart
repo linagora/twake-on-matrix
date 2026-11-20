@@ -1928,6 +1928,43 @@ void main() {
     expect(tom.clears, 0);
   });
 
+  testWidgets('logging in again during the deletion of the downloaded files '
+      'keeps the ToM data', (tester) async {
+    final last = _BootClient('a', userID: '@a:s');
+    final tom = _CountingToMDatabase();
+    getIt.registerSingleton<HiveCollectionToMDatabase>(tom);
+    final harness = _handoverHarness(tester, [last]);
+    const channel = MethodChannel('plugins.flutter.io/path_provider');
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final deletionStarted = Completer<void>();
+    final release = Completer<void>();
+    addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+    await harness.run(() async {
+      await _recordedSwitch(harness);
+      messenger.setMockMethodCallHandler(channel, (_) async {
+        if (!deletionStarted.isCompleted) deletionStarted.complete();
+        await release.future;
+        return Directory.systemTemp.path;
+      });
+      await _logoutAndWait(harness, last, () => deletionStarted.isCompleted);
+      harness.container
+          .read(accountClientRegistryProvider)
+          .add(_BootClient('a', userID: '@a:s'));
+      await harness.tester.runAsync(
+        () => harness.container
+            .read(accountsProvider.notifier)
+            .addAccount(const AccountId('a')),
+      );
+      release.complete();
+      await _pumpUntil(harness, () => false);
+    });
+
+    expect(harness.container.read(accountsProvider), isA<Active>());
+    expect(tom.clears, 0);
+  });
+
   group('the login host of MatrixState', () {
     testWidgets('removing an account of a rolled-back login keeps the screen', (
       tester,

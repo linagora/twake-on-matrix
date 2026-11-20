@@ -160,6 +160,38 @@ void main() {
       },
     );
 
+    test('deleteDownloadedFiles_whenAFileIsNamedLikeAnEvent_keepsIt', () async {
+      // Arrange
+      final userFile = File(p.join(tempDir.path, r'$budget.pdf'))..createSync();
+
+      // Act
+      await StorageDirectoryManager.instance.deleteDownloadedFiles();
+
+      // Assert
+      expect(userFile.existsSync(), isTrue);
+    });
+
+    test(
+      'deleteDownloadedFiles_whenOnlyDownloadsIsAvailable_deletesNothing',
+      () async {
+        // Arrange
+        final downloads = Directory(p.join(tempDir.path, 'Downloads'));
+        final userFolder = Directory(p.join(downloads.path, r'$photos'))
+          ..createSync(recursive: true);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(pathProviderChannel, (call) async {
+              if (call.method == 'getDownloadsDirectory') return downloads.path;
+              throw PlatformException(code: 'unavailable');
+            });
+
+        // Act
+        await StorageDirectoryManager.instance.deleteDownloadedFiles();
+
+        // Assert
+        expect(userFolder.existsSync(), isTrue);
+      },
+    );
+
     test('deleteDownloadedFiles_calledTwiceAtOnce_bothComplete', () async {
       // Arrange
       final [decrypted, downloaded, _] = await placeFiles();
