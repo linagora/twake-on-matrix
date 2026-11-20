@@ -42,6 +42,7 @@ import 'package:twake_chat/pages/chat/context_item_chat_action.dart';
 import 'package:twake_chat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:twake_chat/pages/chat/jump_cache_extent.dart';
 import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
 import 'package:twake_chat/pages/chat/providers/message_link_providers.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
@@ -202,15 +203,9 @@ class ChatController extends ConsumerState<Chat>
 
   /// When non-null, [ChatScrollView] uses this as `cacheExtent` so jump
   /// targets outside the normal cache can mount `AutoScrollTag`s.
-  double? jumpListCacheExtent;
+  final jumpCacheExtent = JumpCacheExtent();
 
-  /// Pre-jump `jumpListCacheExtent` captured once for an overlapping jump
-  /// sequence; restored only when the latest generation finishes.
-  ///
-  /// [_hasJumpCacheExtentBaseline] distinguishes "not captured yet" from a
-  /// captured null baseline (`??=` cannot record null).
-  double? _jumpCacheExtentBaseline;
-  bool _hasJumpCacheExtentBaseline = false;
+  double? get jumpListCacheExtent => jumpCacheExtent.value;
 
   /// Allows [ChatScrollToEventMixin] (extension in the same library) to
   /// rebuild; extensions cannot call protected [State.setState].
@@ -701,8 +696,7 @@ class ChatController extends ConsumerState<Chat>
     unreadReceivedMessageLocation = _findUnreadReceivedMessageLocation();
     final firstUnread = unreadReceivedMessageLocation ?? fullyRead;
     // The list mounts on the next frame: build it up to the first unread row.
-    final cacheExtent = jumpListCacheExtent;
-    jumpListCacheExtent = ChatScrollToEventMixin._jumpMountCacheExtent;
+    jumpCacheExtent.startUnreadOpening();
     isOpeningOnUnread = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -714,7 +708,7 @@ class ChatController extends ConsumerState<Chat>
         allowContextualReload: false,
       );
       isOpeningOnUnread = false;
-      if (!_isProgrammaticScrolling) jumpListCacheExtent = cacheExtent;
+      jumpCacheExtent.endUnreadOpening(jumpInFlight: _isProgrammaticScrolling);
       rebuildChatForJump();
     });
   }

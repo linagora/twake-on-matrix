@@ -124,7 +124,6 @@ extension ChatScrollToEventMixin on ChatController {
   GlobalObjectKey _rowKey(String eventId) =>
       messageRowKey(eventId, timeline?.events ?? const []);
 
-  static const double _jumpMountCacheExtent = 20000;
   static const int _jumpWindowMaxEvents = 60;
   static const int _maxMountFrames = 90;
   static const int _maxSeekPages = 25;
@@ -267,30 +266,10 @@ extension ChatScrollToEventMixin on ChatController {
   }
 
   Future<void> _raiseJumpMountCacheExtent() async {
-    if (jumpListCacheExtent == _jumpMountCacheExtent) return;
-    jumpListCacheExtent = _jumpMountCacheExtent;
+    if (!jumpCacheExtent.raiseForJump()) return;
     rebuildChatForJump();
     await SchedulerBinding.instance.endOfFrame;
     await SchedulerBinding.instance.endOfFrame;
-  }
-
-  void _captureJumpCacheBaselineIfNeeded() {
-    // First jump in an overlapping sequence owns the pre-jump baseline
-    // (including a legitimate null).
-    if (_hasJumpCacheExtentBaseline) return;
-    _hasJumpCacheExtentBaseline = true;
-    _jumpCacheExtentBaseline = jumpListCacheExtent;
-  }
-
-  void _restoreJumpCacheBaselineIfCurrent(ChatJumpRequest request) {
-    if (request.generation != _scrollGeneration) return;
-    if (!_hasJumpCacheExtentBaseline) return;
-    if (jumpListCacheExtent != _jumpCacheExtentBaseline) {
-      jumpListCacheExtent = _jumpCacheExtentBaseline;
-      rebuildChatForJump();
-    }
-    _jumpCacheExtentBaseline = null;
-    _hasJumpCacheExtentBaseline = false;
   }
 
   bool _shouldLogMountWait(int frame) {
@@ -666,7 +645,11 @@ extension ChatScrollToEventMixin on ChatController {
   }
 
   void _finishContextualJump(ChatJumpRequest request) {
-    _restoreJumpCacheBaselineIfCurrent(request);
+    if (jumpCacheExtent.endJump(
+      isLatest: request.generation == _scrollGeneration,
+    )) {
+      rebuildChatForJump();
+    }
     _endProgrammaticScroll();
     Logs().d(
       'Chat::scrollToEventId(): [gen=${request.generation}] '
@@ -697,7 +680,7 @@ extension ChatScrollToEventMixin on ChatController {
     );
     _claimUrlHighlight(request);
     _beginProgrammaticScroll();
-    _captureJumpCacheBaselineIfNeeded();
+    jumpCacheExtent.startJump();
     var succeeded = false;
     try {
       succeeded = await _performContextualJump(request);
