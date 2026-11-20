@@ -109,11 +109,7 @@ class SettingsNotificationsView extends ConsumerWidget {
                           : L10n.of(context)!.dedicatedNotificationSignInHint,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    onChanged:
-                        controller.encryptedPreviewsLocked &&
-                            controller.encryptedPreviewsActive != true
-                        ? null
-                        : controller.toggleEncryptedPreviews,
+                    onChanged: controller.removeEncryptedPreviewsDevice,
                   ),
                 },
                 if (!client.allPushNotificationsMuted) ...{

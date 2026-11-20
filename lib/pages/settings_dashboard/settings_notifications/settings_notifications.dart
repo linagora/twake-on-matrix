@@ -1,6 +1,5 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/web_push/web_push.dart';
@@ -109,7 +108,6 @@ class SettingsNotificationsController
   /// Encrypted previews on iOS: the notification extension gets its own
   /// device through a second SSO login. null while loading or unsupported.
   bool? encryptedPreviewsActive;
-  String? _ssoProviderId;
 
   /// The app cross-signs the extension's device, so it needs the
   /// self-signing key in cache.
@@ -129,9 +127,6 @@ class SettingsNotificationsController
 
   Future<void> _loadEncryptedPreviewsStatus() async {
     final client = _client;
-    _ssoProviderId = await KeychainSharingManager.notificationSsoProviderId(
-      client,
-    );
     final active = await KeychainSharingManager.hasNotificationSession(client);
     final locked = await KeychainSharingManager.notificationPreviewsLocked(
       client,
@@ -143,35 +138,12 @@ class SettingsNotificationsController
     });
   }
 
-  Future<void> toggleEncryptedPreviews(bool enabled) async {
-    final client = _client;
-    if (enabled) {
-      final providerId = _ssoProviderId;
-      final homeserver = client.homeserver;
-      if (providerId == null || homeserver == null) return;
-      final String callback;
-      try {
-        callback = await ConnectPageMixin.webAuthenticate(
-          homeserver: homeserver.toString(),
-          id: providerId,
-        );
-      } catch (e) {
-        Logs().w('SSO for encrypted previews cancelled', e);
-        return;
-      }
-      final loginToken = Uri.parse(callback).queryParameters['loginToken'];
-      if (loginToken == null || loginToken.isEmpty || !mounted) return;
-      await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => KeychainSharingManager.createNotificationSession(
-          client,
-          loginToken,
-        ),
-      );
-    } else {
-      await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => KeychainSharingManager.logoutNotificationSession(client),
-      );
-    }
+  /// The tile is only shown while a dedicated device exists: switching it off
+  /// logs that device out.
+  Future<void> removeEncryptedPreviewsDevice(bool _) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => KeychainSharingManager.logoutNotificationSession(_client),
+    );
     if (!mounted) return;
     await _loadEncryptedPreviewsStatus();
   }
