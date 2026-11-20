@@ -267,4 +267,39 @@ void main() {
       expect(cancelledIds, isEmpty);
     },
   );
+
+  test(
+    'a queued account that logged out does not hold back the next one',
+    () async {
+      final leaving =
+          await getClient(
+              database: await MatrixSdkDatabase.init(
+                'leaving',
+                database: await databaseFactoryFfi.openDatabase(
+                  inMemoryDatabasePath,
+                  options: OpenDatabaseOptions(singleInstance: false),
+                ),
+                sqfliteFactory: databaseFactoryFfi,
+              ),
+              httpClient: api,
+            )
+            ..backgroundSync = false;
+      BackgroundPush.resetForTesting();
+      push = BackgroundPush(_FakeMatrixState([leaving, client]), leaving);
+      api.holdSync = true;
+      clearingPush();
+      await waitUntil(() => api.heldSyncs.isNotEmpty);
+
+      clearingPush();
+      // The push helper reads the token back from the database a logout clears.
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      leaving.accessToken = null;
+      clearingPush();
+      api.holdSync = false;
+      api.heldSyncs.first.complete();
+      await settle();
+
+      expect(cancelledIds, [2]);
+    },
+  );
 }

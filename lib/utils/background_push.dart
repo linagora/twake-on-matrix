@@ -1022,10 +1022,10 @@ class BackgroundPush {
     } finally {
       _clearingPushLock = false;
     }
-    if (_pendingServerSweeps.isNotEmpty) {
+    while (_pendingServerSweeps.isNotEmpty) {
       final next = _pendingServerSweeps.first;
       _pendingServerSweeps.remove(next);
-      return _onClearingPush(receiving: next);
+      if (next.isLogged()) return _onClearingPush(receiving: next);
     }
     // Rooms synced while this sweep ran.
     if (_syncedRoomIds.isNotEmpty) await _onClearingPush();
