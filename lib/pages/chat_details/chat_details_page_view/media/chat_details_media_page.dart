@@ -12,7 +12,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:twake_chat/widgets/blur_hash_background.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:twake_chat/utils/dismissible_media_view.dart';
@@ -83,8 +83,9 @@ class _ImageItem extends StatelessWidget {
       fit: BoxFit.cover,
       onTapPreview: () {},
       isPreview: true,
-      placeholder: (context) =>
-          BlurHash(hash: event.blurHash ?? AppConfig.defaultImageBlurHash),
+      placeholder: (context) => BlurHashBackground(
+        hash: event.blurHash ?? AppConfig.defaultImageBlurHash,
+      ),
       cacheKey: event.eventId,
       cacheMap: cacheMap,
       closeRightColumn: closeRightColumn,
