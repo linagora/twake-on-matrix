@@ -62,6 +62,9 @@ class UploadManager {
         try {
           // Nothing uploads it since the app restarted: it can only be retried.
           final info = UploadFileInfo.fromJson(uploadInfoMap)..isFailed = true;
+          // Only the base FileInfo is serialized: HEIC conversion and
+          // thumbnails need the image or video type back.
+          info.fileInfo = info.fileInfo?.withTypeFromMime;
           if (info.fileInfo != null || info.matrixFile != null) {
             _eventIdMapUploadFileInfo[eventId] = info;
           }

@@ -14,6 +14,7 @@ import 'package:twake_chat/data/model/media/upload_file_json.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/image_file_info.dart';
 import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
@@ -76,6 +77,25 @@ class _PickedFile extends FileAssetEntity {
 
   @override
   String get messageType => MessageTypes.File;
+}
+
+class _PickedHeicPhoto extends FileAssetEntity {
+  _PickedHeicPhoto(this.path)
+    : super(assetEntity: AssetEntity(id: '2', typeInt: 1, width: 4, height: 3));
+
+  final String path;
+
+  @override
+  Future<FileInfo?> toFileInfo() async => ImageFileInfo(
+    'photo.heic',
+    filePath: path,
+    customMimeType: 'image/heic',
+    width: 4,
+    height: 3,
+  );
+
+  @override
+  String get messageType => MessageTypes.Image;
 }
 
 void main() {
@@ -218,5 +238,24 @@ void main() {
 
     expect(result, RetryUploadResult.fileDataUnavailable);
     expect(queue.added, isEmpty);
+  });
+
+  test('a HEIC photo restored after a process kill is still an image, so the '
+      'retry converts it to JPG', () async {
+    final photo = File('${tempDir.path}/photo.heic')..writeAsBytesSync([1, 2]);
+    await manager.uploadMediaMobile(
+      room: room,
+      entities: [_PickedHeicPhoto(photo.path)],
+    );
+    await pumpEventQueue();
+    queue.added.clear();
+
+    final restored = await manager.getUploadFileInfo(
+      eventAfterRestart('restarted-heic').eventId,
+      room: room,
+    );
+
+    expect(restored?.fileInfo, isA<ImageFileInfo>());
+    expect(restored?.fileInfo?.mimeType, 'image/heic');
   });
 }
