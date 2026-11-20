@@ -79,10 +79,12 @@ jobs:
       - name: Install Android SDK packages
         if: matrix.os == 'android'
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
+          sdk="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          sdkmanager="$sdk/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$sdkmanager" --licenses > /dev/null || true
           for attempt in 1 2 3; do
-            sdkmanager "platforms;android-31" "platforms;android-33" "cmake;3.22.1" \
-              && [ -x "$ANDROID_SDK_ROOT/cmake/3.22.1/bin/cmake" ] && exit 0
+            "$sdkmanager" "platforms;android-31" "platforms;android-33" "cmake;3.22.1" \
+              && [ -x "$sdk/cmake/3.22.1/bin/cmake" ] && exit 0
             echo "sdkmanager attempt $attempt failed, retrying"
             sleep 10
           done
