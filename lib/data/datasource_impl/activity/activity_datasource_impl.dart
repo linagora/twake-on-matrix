@@ -63,8 +63,14 @@ class ActivityDatasourceImpl implements ActivityDatasource {
   }
 
   @override
-  Future<void> markRoomRead(String roomId) async =>
-      _client?.getRoomById(roomId)?.markRoomAndAllThreadsRead();
+  Future<void> markRoomRead(String roomId) async {
+    try {
+      await _client?.getRoomById(roomId)?.markRoomAndAllThreadsRead();
+    } on Exception catch (e, s) {
+      Logs().w('Unable to mark the room as read', e, s);
+      rethrow;
+    }
+  }
 
   /// The choices and rooms stored on the device are read: none when they
   /// cannot be.

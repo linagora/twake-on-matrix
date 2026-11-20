@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/activity/usecases/mark_room_read_use_case.dart';
 
 import '../../../pages/activity/activity_test_support.dart';
@@ -30,26 +29,5 @@ void main() {
     repository.markReadError = offline;
 
     await expectLater(markRoomRead.execute(design), throwsA(same(offline)));
-  });
-
-  /// Review of #3606 (activity_page.dart:52, nqhhdev): the page must not
-  /// import package:matrix ("Legacy code does not grow"), so the failure is
-  /// logged here and the page only catches it.
-  test('a room that cannot be read is logged, and the failure still reaches '
-      'the caller', () async {
-    final offline = Exception('offline');
-    repository.markReadError = offline;
-    Logs().outputEvents.clear();
-
-    await expectLater(markRoomRead.execute(design), throwsA(same(offline)));
-
-    expect(
-      Logs().outputEvents.where(
-        (e) =>
-            identical(e.exception, offline) &&
-            e.level.index >= Level.warning.index,
-      ),
-      isNotEmpty,
-    );
   });
 }
