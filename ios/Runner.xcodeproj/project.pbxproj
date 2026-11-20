@@ -82,6 +82,7 @@
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		78A318222AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A318212AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
+		7A1E0C0B2EC00A0000A1B2C3 /* NSEHTTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1E0C0A2EC00A0000A1B2C3 /* NSEHTTPSession.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		A17B5E012F0A000100C0FFEE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A17B5E002F0A000100C0FFEE /* PrivacyInfo.xcprivacy */; };
@@ -293,6 +294,7 @@
 		751D29042D6F0DD54AEFF075 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		7837EAD849F49A2EB4BE40E7 /* Pods-Runner-RunnerUITests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner-RunnerUITests.profile.xcconfig"; path = "Target Support Files/Pods-Runner-RunnerUITests/Pods-Runner-RunnerUITests.profile.xcconfig"; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
+		7A1E0C0A2EC00A0000A1B2C3 /* NSEHTTPSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSEHTTPSession.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		8FF85FAFBCD5A68C48793DEA /* Pods-TwakeShareExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TwakeShareExtension.profile.xcconfig"; path = "Target Support Files/Pods-TwakeShareExtension/Pods-TwakeShareExtension.profile.xcconfig"; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
@@ -471,6 +473,7 @@
 				06EA9C572B21CF0100351529 /* UNNotificationRequest.swift */,
 				06EA9C582B21CF0100351529 /* DataProtectionManager.swift */,
 				06EA9C592B21CF0100351529 /* NSELogger.swift */,
+				7A1E0C0A2EC00A0000A1B2C3 /* NSEHTTPSession.swift */,
 			);
 			path = Other;
 			sourceTree = "<group>";
@@ -1007,6 +1010,7 @@
 				06EA9C832B21CF0100351529 /* RoomMessageEventStringBuilder.swift in Sources */,
 				06EA9C802B21CF0100351529 /* AttributedStringBuilder.swift in Sources */,
 				06EA9C942B21CF0100351529 /* NSELogger.swift in Sources */,
+				7A1E0C0B2EC00A0000A1B2C3 /* NSEHTTPSession.swift in Sources */,
 				06EA9C982B21CF0100351529 /* Task.swift in Sources */,
 				06EA9C6B2B21CF0100351529 /* Date.swift in Sources */,
 				06EA9C812B21CF0100351529 /* DTHTMLElement+AttributedStringBuilder.swift in Sources */,

@@ -34,9 +34,6 @@ class _FakeController extends Fake implements SettingsNotificationsController {
   bool get showWebPushTile => false;
 
   @override
-  bool get showEncryptedPreviewsTile => false;
-
-  @override
   bool? getNotificationSetting(NotificationSettingsItem item) => true;
 
   @override
