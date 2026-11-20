@@ -1,0 +1,58 @@
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "macos/**"
+      - "lib/**"
+      - "pubspec.*"
+      - ".github/workflows/macos-build.yaml"
+
+name: macOS build
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.47.8
+  XCODE_VERSION: 26.2
+
+jobs:
+  build_debug_macos:
+    name: Build debug version for macOS
+    runs-on: macos-26
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}"
+
+      # flutter_vodozemac and super_native_extensions compile Rust through cargokit
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Select Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Get Flutter dependencies and run codegen
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Build debug macOS app
+        run: flutter build macos --debug
