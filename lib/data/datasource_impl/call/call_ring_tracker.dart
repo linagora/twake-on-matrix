@@ -119,8 +119,8 @@ class CallRingTracker {
   /// account. A legacy `call.notify` has no `sender_ts`: the server time.
   bool _isForUs(Event event) {
     final userId = _client.userID;
-    if (userId == null || _isOwnOrKnown(event) || !_isRing(event)) return false;
-    if (_isInCallHere(event.room)) return false;
+    if (userId == null || _isOwnOrKnown(event)) return false;
+    if (!_isRing(event) || _isInCallHere(event.room)) return false;
     final senderTs = event.content['sender_ts'];
     return RtcNotificationContent(
       senderTs: senderTs is int
