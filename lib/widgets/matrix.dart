@@ -69,6 +69,7 @@ import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/offline_failure.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -265,6 +266,10 @@ class MatrixState extends ConsumerState<Matrix>
   // The switch side effects: the coordinator decides when and in which order,
   // these are the bodies that need this state's context and interceptors.
   @override
+  Future<void> loadCachedHomeserverInfo(Client client, SwitchToken token) =>
+      _loadCachedHomeserverInformation(client, token);
+
+  @override
   Future<void> setUpToM(Client client, SwitchToken token) =>
       _setUpToMServicesWhenChangingActiveClient(client, token);
 
@@ -313,15 +318,14 @@ class MatrixState extends ConsumerState<Matrix>
     _cancelSupportChat();
     Object createSupportChatState = CreateSupportChatInitial();
     supportChatRoomId = null;
+    // Read now: another account's switch may replace the summary before the first sync.
+    final discovery = loginHomeserverSummary?.discoveryInformation;
     _supportChatSyncSubscription = client.onSync.stream.listen((_) {
       if (createSupportChatState is! CreateSupportChatInitial) return;
       createSupportChatState = CreatingSupportChat();
       _supportChatSubscription = getIt
           .get<CreateSupportChatInteractor>()
-          .execute(
-            client,
-            cachedDiscovery: loginHomeserverSummary?.discoveryInformation,
-          )
+          .execute(client, cachedDiscovery: discovery)
           .listen((state) {
             createSupportChatState = state.fold(
               (failure) => failure,
@@ -1420,7 +1424,8 @@ class MatrixState extends ConsumerState<Matrix>
   void setUpAuthorization(Client client) {
     final authorizationInterceptor = ref.read(authorizationInterceptorProvider);
     Logs().d(
-      'MatrixState::setUpAuthorization: accessToken ${client.accessToken}',
+      'MatrixState::setUpAuthorization: accessToken '
+      '${client.accessToken == null ? 'cleared' : 'set'}',
     );
     authorizationInterceptor.accessToken = client.accessToken;
   }
@@ -1552,6 +1557,25 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   final HomeserverCheckLog _homeserverCheckLog = HomeserverCheckLog();
+
+  /// A summary already held for this homeserver is newer than the cache.
+  Future<void> _loadCachedHomeserverInformation(
+    Client newClient,
+    SwitchToken token,
+  ) async {
+    final discovery = await newClient.getCachedWellKnown();
+    if (discovery == null ||
+        !mounted ||
+        !_isCurrent(token) ||
+        (loginHomeserverSummary?.describes(newClient.homeserver) ?? false)) {
+      return;
+    }
+    loginHomeserverSummary = HomeserverSummary(
+      discoveryInformation: discovery,
+      versions: GetVersionsResponse(versions: []),
+      loginFlows: [],
+    );
+  }
 
   Future<void> _getHomeserverInformation(
     Client newClient, [
@@ -1745,6 +1769,57 @@ class MatrixState extends ConsumerState<Matrix>
     );
   }
 
+  /// The replaced screens read the client that the last logout drops.
+  Future<void> _leaveLoggedInScreens(String location, {Object? extra}) async {
+    TwakeApp.router.go(location, extra: extra);
+    try {
+      await _coveredRoutesUnmounted().timeout(_leaveScreensTimeout);
+    } on TimeoutException catch (e, s) {
+      // Without frames (app in the background) the wait is expected to expire.
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        _report(e, s, 'screens behind login still mounted at the last logout');
+      } else {
+        Logs().w(
+          'MatrixState::_leaveLoggedInScreens: still covered after '
+          '$_leaveScreensTimeout',
+        );
+      }
+    }
+  }
+
+  static const _leaveScreensTimeout = Duration(seconds: 2);
+
+  Future<void> _coveredRoutesUnmounted() async {
+    await SchedulerBinding.instance.endOfFrame;
+    final entering = _topRoute();
+    final animation = entering is TransitionRoute ? entering.animation : null;
+    if (animation != null && !animation.isCompleted) {
+      final settled = Completer<void>();
+      void onStatus(AnimationStatus status) {
+        if (!status.isAnimating && !settled.isCompleted) settled.complete();
+      }
+
+      animation.addStatusListener(onStatus);
+      try {
+        await settled.future;
+      } finally {
+        animation.removeStatusListener(onStatus);
+      }
+    }
+    // Covered routes unmount on the frame after the entering one turns opaque.
+    await SchedulerBinding.instance.endOfFrame;
+  }
+
+  /// `popUntil` with a predicate that is true at once pops nothing.
+  Route<dynamic>? _topRoute() {
+    Route<dynamic>? top;
+    TwakeApp.routerKey.currentState?.popUntil((route) {
+      top = route;
+      return true;
+    });
+    return top;
+  }
+
   Future<void> _handleLastLogout({required Client loggedOut}) async {
     waitForFirstSync = false;
     // Clear first: the last logout rebuilds the contact services, and the wipe
@@ -1759,6 +1834,17 @@ class MatrixState extends ConsumerState<Matrix>
         _report(e, s, 'keychain sync cancel of ${loggedOut.clientName}');
       }
     }
+    Sentry.configureScope((scope) => scope.setUser(null));
+    if (PlatformInfos.isMobile) {
+      await _deletePersistActiveAccount();
+      await _leaveLoggedInScreens(const HomeTwakeWelcomeRoute().location);
+    } else {
+      if (kIsWeb) await removeWebPush(loggedOut);
+      await _leaveLoggedInScreens(
+        const HomeRoute($extra: true).location,
+        extra: true,
+      );
+    }
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.accounts.length == 1) {
       // A switch or a removal can change the state between the check and the
@@ -1768,16 +1854,19 @@ class MatrixState extends ConsumerState<Matrix>
       } catch (e, s) {
         _report(e, s, 'last logout of ${loggedOut.clientName}');
       }
+    } else if ((accounts is Active || accounts is Switching) &&
+        accounts.accounts.any((a) => a.id == loggedOut.clientName)) {
+      // Another account logged in during the wait: leave as one of several.
+      await _removeLoggedOutAccount(
+        LoginState.loggedOut,
+        loggedOut,
+        announce: false,
+      );
     }
-    Sentry.configureScope((scope) => scope.setUser(null));
-    if (PlatformInfos.isMobile) {
-      await _deletePersistActiveAccount();
-      TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
-    } else {
-      if (kIsWeb) await removeWebPush(loggedOut);
-      TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
+    // An account that logged in during the wait owns the ToM data now.
+    if (ref.read(accountsProvider) case LastLoggedOut() || NoAccount()) {
+      await _deleteAllTomConfigurations();
     }
-    await _deleteAllTomConfigurations();
   }
 
   /// Stops the phonebook lookup in progress (logout, account switch): its

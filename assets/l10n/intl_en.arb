@@ -2755,6 +2755,7 @@
   "couldNotLaunchUrl": "Could not launch URL",
   "deviceVerificationWaring": "Encrypted messages may be unavailable because some of your devices are out of sync",
   "deviceVerificationWarningOnSettingsScreen": "Some sessions are unverified. Encrypted messages may not decrypt correctly until all sessions are verified or removed.",
+  "deviceHasNoEncryptionKeys": "This device can't be verified because it has no encryption keys.",
   "verifyThisDevice": "Verify this device",
   "verifyThisDeviceDescription": "Confirm it's you to unlock your encrypted messages.",
   "useAnotherDevice": "Use another device",
@@ -3378,5 +3379,10 @@
         "type": "int"
       }
     }
+  },
+  "cannotJoinRoomEveryoneLeft": "This chat can no longer be joined because everyone in it has left. The invitation was removed.",
+  "@cannotJoinRoomEveryoneLeft": {
+    "type": "text",
+    "placeholders": {}
   }
 }

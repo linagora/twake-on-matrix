@@ -61,6 +61,10 @@ class _RoomListSliver extends ConsumerWidget {
       rooms: rooms,
       sortingRoomsNotifier: controller.sortingRoomsNotifier,
       builder: (sortedRooms, previewByRoomId) {
+        // Every room belonged to an account that just logged out.
+        if (sortedRooms.isEmpty && rooms.isNotEmpty) {
+          return const SliverToBoxAdapter();
+        }
         final roomById = {for (final room in sortedRooms) room.id: room};
         final rows = buildRoomListRows(
           <RoomListEntry>[for (final room in sortedRooms) ?entryById[room.id]],

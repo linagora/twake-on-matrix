@@ -12,7 +12,7 @@ import 'package:twake_chat/utils/extension/image_size_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:twake_chat/widgets/blur_hash_background.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -101,7 +101,9 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
               calculatedWidth: maxWidth,
             ),
             height: bubbleHeight,
-            child: const BlurHash(hash: MessageContentStyle.defaultBlurHash),
+            child: const BlurHashBackground(
+              hash: MessageContentStyle.defaultBlurHash,
+            ),
           ),
           if (_thumbnailBytes != null)
             Image(

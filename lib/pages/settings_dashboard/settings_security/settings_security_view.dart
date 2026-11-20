@@ -6,27 +6,29 @@ import 'package:twake_chat/pages/settings_dashboard/settings/settings_item_build
 import 'package:twake_chat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/beautify_string_extension.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 import 'settings_security.dart';
 
-class SettingsSecurityView extends StatelessWidget {
+class SettingsSecurityView extends ConsumerWidget {
   final SettingsSecurityController controller;
   final responsive = getIt.get<ResponsiveUtils>();
 
   SettingsSecurityView(this.controller, {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(matrixClientProvider);
     final l10n = L10n.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     final refColorTertiary30 = LinagoraRefColors.material().tertiary[30];
@@ -179,7 +181,7 @@ class SettingsSecurityView extends StatelessWidget {
                   );
                 },
               ),
-              if (Matrix.of(context).client.encryption != null) ...{
+              if (client.encryption != null) ...{
                 if (PlatformInfos.isMobile)
                   Column(
                     children: [
@@ -212,9 +214,7 @@ class SettingsSecurityView extends StatelessWidget {
                     height: 116,
                     title: l10n.yourPublicKey,
                     titleColor: colorScheme.onSurface,
-                    subtitle: Matrix.of(
-                      context,
-                    ).client.fingerprintKey.beautified,
+                    subtitle: client.fingerprintKey.beautified,
                     subtitleStyle: linagoraTextStyleBodyMedium.copyWith(
                       color: refColorTertiary30,
                       fontFamily: 'monospace',

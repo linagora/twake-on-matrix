@@ -4,9 +4,10 @@ import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/web_push/web_push.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
@@ -87,7 +88,7 @@ class NotificationSettingsItem {
   ];
 }
 
-class SettingsNotifications extends StatefulWidget {
+class SettingsNotifications extends ConsumerStatefulWidget {
   const SettingsNotifications({super.key});
 
   @override
@@ -95,12 +96,13 @@ class SettingsNotifications extends StatefulWidget {
       SettingsNotificationsController();
 }
 
-class SettingsNotificationsController extends State<SettingsNotifications> {
+class SettingsNotificationsController
+    extends ConsumerState<SettingsNotifications> {
   /// Web Push on this browser. null while loading; web-only.
   bool? webPushActive;
   bool webPushPermissionDenied = false;
 
-  Client get _client => Matrix.of(context).client;
+  Client get _client => ref.read(matrixClientProvider);
 
   bool get showWebPushTile => kIsWeb && AppConfig.webPushEnabled;
 

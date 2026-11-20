@@ -24,6 +24,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:hive/hive.dart';
 
 import 'package:matrix/encryption/utils/olm_session.dart';
@@ -1845,6 +1846,7 @@ class HiveCollectionsDatabase extends DatabaseApi {
   }
 }
 
+@immutable
 class TupleKey {
   final List<String> parts;
 

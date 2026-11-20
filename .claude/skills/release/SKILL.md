@@ -134,6 +134,10 @@ gh run list --workflow=image.yaml --limit 5
 | Play Store | Promote from internal → alpha/beta/production in Play Console |
 | Docker | Update Helm values / deployment manifests to `vx.y.z` image tag |
 
+### Step 7 — Release note (mandatory for mobile)
+
+After a TestFlight / Play Store build, post the non-technical release note in `#twake-chat-mobile-release-notes:linagora.com`. See the `twake-mobile-release` skill.
+
 ## Security Policy
 
 This skill only executes git, gh, and read operations on the local repo.

@@ -1,6 +1,7 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -64,7 +65,10 @@ class _InviteFriendButton extends ConsumerWidget {
           final url = ref.read(matrixClientProvider).personalInviteUrl;
           try {
             if (PlatformInfos.isMobile) {
-              await Share.share(url);
+              await Share.share(
+                url,
+                sharePositionOrigin: context.sharePositionOrigin,
+              );
             } else if (PlatformInfos.isWeb) {
               await Clipboard.setData(ClipboardData(text: url));
               TwakeSnackBar.show(

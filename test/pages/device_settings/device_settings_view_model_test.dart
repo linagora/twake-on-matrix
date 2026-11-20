@@ -91,6 +91,31 @@ Future<void> _initialLoadFailureSetsErrorState(_) async {
   );
 }
 
+class _KeysClient extends Fake implements Client {
+  _KeysClient({this.failing = false});
+
+  final bool failing;
+
+  @override
+  Future<void> updateUserDeviceKeys({Set<String>? additionalUsers}) async {
+    if (failing) throw Exception('network error');
+  }
+}
+
+Future<int> _keysRevisionAfterSync({required bool failing}) async {
+  final devices = [Device(deviceId: 'QBUAZIFURK', displayName: 'android')];
+  final container = _container(FakeGetDevicesInteractor([_success(devices)]));
+  addTearDown(container.dispose);
+  final notifier = container.read(devicesSettingsViewModelProvider.notifier);
+  final client = _KeysClient(failing: failing);
+  await notifier.loadUserDevices(client);
+
+  await notifier.syncDeviceKeys(client);
+
+  final state = container.read(devicesSettingsViewModelProvider);
+  return (state as DevicesSettingsLoaded).keysRevision;
+}
+
 void main() {
   test(
     'soft reload failure after renameDevice preserves the loaded devices '
@@ -101,5 +126,15 @@ void main() {
   test(
     'initial load failure still surfaces an error state',
     () => _initialLoadFailureSetsErrorState(null),
+  );
+
+  test(
+    'syncDeviceKeys rebuilds the rows once the device keys are refetched',
+    () async => expect(await _keysRevisionAfterSync(failing: false), 1),
+  );
+
+  test(
+    'syncDeviceKeys keeps the list as it is when the refetch fails',
+    () async => expect(await _keysRevisionAfterSync(failing: true), 0),
   );
 }

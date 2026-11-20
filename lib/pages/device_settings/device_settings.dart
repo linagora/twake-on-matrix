@@ -20,6 +20,7 @@ import 'package:twake_chat/pages/key_verification/key_verification_dialog.dart';
 import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/device_extension.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -34,9 +35,14 @@ class DevicesSettings extends ConsumerStatefulWidget {
 }
 
 class _DevicesSettingsState extends ConsumerState<DevicesSettings> {
-  late final Future<void> _loadDevicesFuture = ref
-      .read(devicesSettingsViewModelProvider.notifier)
-      .loadUserDevices(Matrix.of(context).client);
+  late final Future<void> _loadDevicesFuture = _loadDevices();
+
+  Future<void> _loadDevices() async {
+    final client = Matrix.of(context).client;
+    final notifier = ref.read(devicesSettingsViewModelProvider.notifier);
+    await notifier.loadUserDevices(client);
+    unawaited(notifier.syncDeviceKeys(client));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -294,21 +300,22 @@ Future<void> verifyDeviceAction(
 ) async {
   final client = Matrix.of(context).client;
   // Keep a handle so a dismissed loading dialog cannot orphan the request.
-  final verificationFuture = client
-      .userDeviceKeys[client.userID!]!
-      .deviceKeys[device.deviceId]!
-      .startVerification();
+  final verificationFuture = _startDeviceVerification(client, device);
   // Block the list while the request is set up so Verify can't be re-tapped.
   final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
     future: () => verificationFuture,
   );
   final req = result.result;
   if (req == null) {
+    // A null result without an error means the device has no device keys.
+    if (result.error == null && context.mounted) {
+      TwakeSnackBar.show(context, L10n.of(context)!.deviceHasNoEncryptionKeys);
+    }
     // System back (or other pop) can dismiss while startVerification is still
     // in flight; cancel when it completes so KeyVerification is not orphaned.
     unawaited(
       verificationFuture.then(
-        (pending) => pending.cancel(KeyVerificationCodeEnum.user.code),
+        (pending) => pending?.cancel(KeyVerificationCodeEnum.user.code),
         onError: (_, __) {},
       ),
     );
@@ -324,4 +331,20 @@ Future<void> verifyDeviceAction(
     }
   };
   await KeyVerificationDialog(request: req).show(context);
+}
+
+/// Null when the device has no device keys, even after refreshing them: keys
+/// missing locally may only be outdated, not absent on the server.
+Future<KeyVerification?> _startDeviceVerification(
+  Client client,
+  Device device,
+) async {
+  DeviceKeys? lookUpKeys() =>
+      client.userDeviceKeys[client.userID]?.deviceKeys[device.deviceId];
+  var deviceKeys = lookUpKeys();
+  if (deviceKeys == null) {
+    await client.updateUserDeviceKeys();
+    deviceKeys = lookUpKeys();
+  }
+  return deviceKeys?.startVerification();
 }
