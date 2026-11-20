@@ -1,3 +1,6 @@
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/utils/desktop_lifecycle.dart';
+import 'package:twake_chat/utils/dock_badge.dart';
 import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -482,6 +485,37 @@ class MatrixState extends ConsumerState<Matrix>
       ? FlutterLocalNotificationsPort()
       : null;
 
+  final _desktopLifecycle = DesktopLifecycle(
+    MethodChannelDesktopLifecyclePort(),
+    isMacOS: PlatformInfos.isMacOS,
+  );
+  final _dockBadge = DockBadgeUpdater(FlutterAppBadgerDockPort());
+
+  /// macOS: keep the app alive in the Dock while an account is signed in, and
+  /// show the unread total of all accounts on the Dock icon.
+  void _updateMacosDock({Client? loggedOut}) {
+    if (!PlatformInfos.isMacOS) return;
+    final clients = accountClients.where((c) => c != loggedOut).toList();
+    unawaited(
+      _desktopLifecycle.onLoginStateChanged(
+        isLoggedIn: clients.any((c) => c.isLogged()),
+      ),
+    );
+    unawaited(
+      _dockBadge.update([
+        for (final c in clients)
+          for (final r in c.rooms)
+            // switch to unreadBadgeCount once threads land
+            DockBadgeRoom(
+              notificationCount: r.notificationCount,
+              highlightCount: r.highlightCount,
+              isInvite: r.membership == Membership.invite,
+              isMuted: r.isMuted,
+            ),
+      ]),
+    );
+  }
+
   /// Rooms with a macOS notification on screen, with the account it is for.
   final Map<String, String> macosNotifiedRooms = {};
 
@@ -652,6 +686,15 @@ class MatrixState extends ConsumerState<Matrix>
           )
           .cancel,
     );
+    if (PlatformInfos.isMacOS) {
+      _subscriptions.keep(
+        name,
+        'dockBadge',
+        () => currentClient.onSync.stream
+            .listen((_) => _updateMacosDock())
+            .cancel,
+      );
+    }
     _subscriptions.keep(
       name,
       'uiaRequest',
@@ -812,6 +855,7 @@ class MatrixState extends ConsumerState<Matrix>
   Future<void> _listenLoginStateChanged(LoginState state, Client client) async {
     if (state != LoginState.loggedIn) _homeserverCheckLog.forget(client);
     if (_quietLogouts.consume(client.clientName, state)) return;
+    _updateMacosDock(loggedOut: state == LoginState.loggedIn ? null : client);
     final loggedInWithMultipleClients = accountClients.length > 1;
     if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
       await _handleLogoutWithMultipleAccount(state, client);

@@ -31,5 +31,12 @@ bool shouldNotifyMessage(MessageNotificationCandidate c) {
   if (c.senderId == c.ownUserId) return false;
   if (c.appInForeground && c.activeRoomId == c.roomId) return false;
   if (c.notificationCount == 0) return false;
-  return !c.isRoomMuted || c.highlightCount > 0;
+  return countsDespiteMute(
+    isMuted: c.isRoomMuted,
+    highlightCount: c.highlightCount,
+  );
 }
+
+/// A muted room still counts when it mentions the user.
+bool countsDespiteMute({required bool isMuted, required int highlightCount}) =>
+    !isMuted || highlightCount > 0;

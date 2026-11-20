@@ -32,6 +32,7 @@ extension LocalNotificationsExtension on MatrixState {
     senderId: eventUpdate.content['sender'] as String? ?? '',
     ownUserId: client.userID,
     eventType: eventUpdate.content['type'] as String? ?? '',
+    // switch to unreadBadgeCount once threads land
     notificationCount: room.notificationCount,
     highlightCount: room.highlightCount,
     isRoomMuted: room.isMuted,
