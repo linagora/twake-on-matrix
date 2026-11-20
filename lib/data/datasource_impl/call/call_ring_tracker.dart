@@ -42,6 +42,8 @@ class CallRingTracker {
     for (final timer in _timers.values) {
       timer.cancel();
     }
+    // A check awaiting a room load must find nothing left to settle.
+    _rings.clear();
     _subscription.cancel().ignore();
     _syncSubscription.cancel().ignore();
     _changes.close().ignore();
