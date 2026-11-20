@@ -11,7 +11,7 @@ import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 class ProfileBottomSheet extends ConsumerWidget {
   final String userId;
@@ -23,8 +23,8 @@ class ProfileBottomSheet extends ConsumerWidget {
     super.key,
   });
 
-  void _startDirectChat(BuildContext context) async {
-    final client = Matrix.of(context).client;
+  Future<void> _startDirectChat(BuildContext context, WidgetRef ref) async {
+    final client = ref.read(matrixClientProvider);
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen<String>(
       future: () => client.startDirectChat(userId),
     );
@@ -41,6 +41,7 @@ class ProfileBottomSheet extends ConsumerWidget {
     if (contact != null) {
       return _build(
         context,
+        ref,
         displayName: contact.resolvedDisplayName ?? userId.localpart ?? userId,
         avatarUrl: contact.avatarUrl,
       );
@@ -53,6 +54,7 @@ class ProfileBottomSheet extends ConsumerWidget {
       ).read(matrixUserProfileProvider(userId).future),
       builder: (context, snapshot) => _build(
         context,
+        ref,
         displayName: snapshot.data?.displayName ?? userId.localpart ?? userId,
         avatarUrl: snapshot.data?.avatarUrl,
       ),
@@ -60,7 +62,8 @@ class ProfileBottomSheet extends ConsumerWidget {
   }
 
   Widget _build(
-    BuildContext context, {
+    BuildContext context,
+    WidgetRef ref, {
     required String displayName,
     required String? avatarUrl,
   }) {
@@ -84,7 +87,7 @@ class ProfileBottomSheet extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: OutlinedButton.icon(
-                onPressed: () => _startDirectChat(context),
+                onPressed: () => _startDirectChat(context, ref),
                 icon: Icon(Icons.adaptive.share_outlined),
                 label: Text(L10n.of(context)!.share),
               ),
@@ -108,7 +111,7 @@ class ProfileBottomSheet extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               child: FloatingActionButton.extended(
-                onPressed: () => _startDirectChat(context),
+                onPressed: () => _startDirectChat(context, ref),
                 label: Text(L10n.of(context)!.newChat),
                 icon: const Icon(Icons.send_outlined),
               ),
