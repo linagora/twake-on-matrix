@@ -5,6 +5,7 @@ import 'package:twake_chat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -143,6 +144,8 @@ class ContactsTabController extends ConsumerState<ContactsTab>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
+    final client = ref.read(activeMatrixClientProvider);
+    if (client == null) return;
     await handleDidChangeAppLifecycleState(
       state,
       context: context,
