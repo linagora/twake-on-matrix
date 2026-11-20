@@ -18,6 +18,7 @@ import 'package:twake_chat/pages/device_settings/device_settings_state.dart';
 import 'package:twake_chat/pages/device_settings/device_settings_view_model.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_dialog.dart';
 import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/device_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -25,7 +26,6 @@ import 'package:twake_chat/widgets/layouts/max_width_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'user_device_list_item.dart';
-import '../../widgets/matrix.dart';
 
 class DevicesSettings extends ConsumerStatefulWidget {
   const DevicesSettings({super.key});
@@ -35,10 +35,16 @@ class DevicesSettings extends ConsumerStatefulWidget {
 }
 
 class _DevicesSettingsState extends ConsumerState<DevicesSettings> {
-  late final Future<void> _loadDevicesFuture = _loadDevices();
+  late final Future<void> _loadDevicesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDevicesFuture = _loadDevices();
+  }
 
   Future<void> _loadDevices() async {
-    final client = Matrix.of(context).client;
+    final client = ref.read(matrixClientProvider);
     final notifier = ref.read(devicesSettingsViewModelProvider.notifier);
     await notifier.loadUserDevices(client);
     unawaited(notifier.syncDeviceKeys(client));
@@ -46,7 +52,7 @@ class _DevicesSettingsState extends ConsumerState<DevicesSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
+    final client = ref.watch(matrixClientProvider);
     final notifier = ref.read(devicesSettingsViewModelProvider.notifier);
 
     return Scaffold(
@@ -141,7 +147,7 @@ class _DevicesList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final client = Matrix.of(context).client;
+    final client = ref.watch(matrixClientProvider);
     final notifier = ref.read(devicesSettingsViewModelProvider.notifier);
     final state = ref.watch(devicesSettingsViewModelProvider);
     final thisDevice = notifier.thisDevice(client);
@@ -163,8 +169,10 @@ class _DevicesList extends ConsumerWidget {
               if (thisDevice != null)
                 UserDeviceListItem(
                   thisDevice,
-                  rename: (d) => renameDeviceAction(context, notifier, d),
-                  verify: (d) => verifyDeviceAction(context, notifier, d),
+                  rename: (d) =>
+                      renameDeviceAction(context, client, notifier, d),
+                  verify: (d) =>
+                      verifyDeviceAction(context, client, notifier, d),
                 ),
               Padding(
                 padding: EdgeInsets.only(
@@ -192,6 +200,7 @@ class _DevicesList extends ConsumerWidget {
                       ? null
                       : () => removeDevicesAction(
                           context,
+                          client,
                           notifier,
                           notThisDevice,
                           removeAll: true,
@@ -223,9 +232,9 @@ class _DevicesList extends ConsumerWidget {
         final device = notThisDevice[i];
         return UserDeviceListItem(
           device,
-          rename: (d) => renameDeviceAction(context, notifier, d),
-          remove: (d) => removeDevicesAction(context, notifier, [d]),
-          verify: (d) => verifyDeviceAction(context, notifier, d),
+          rename: (d) => renameDeviceAction(context, client, notifier, d),
+          remove: (d) => removeDevicesAction(context, client, notifier, [d]),
+          verify: (d) => verifyDeviceAction(context, client, notifier, d),
           showDivider: isMobile,
         );
       },
@@ -235,6 +244,7 @@ class _DevicesList extends ConsumerWidget {
 
 Future<void> removeDevicesAction(
   BuildContext context,
+  Client client,
   DevicesSettingsViewModel notifier,
   List<Device> devices, {
   bool removeAll = false,
@@ -258,7 +268,6 @@ Future<void> removeDevicesAction(
   if (confirmResult != ConfirmResult.ok || !context.mounted) {
     return;
   }
-  final client = Matrix.of(context).client;
   final deviceIds = devices.map((d) => d.deviceId).toList();
 
   try {
@@ -278,10 +287,10 @@ Future<void> removeDevicesAction(
 
 Future<void> renameDeviceAction(
   BuildContext context,
+  Client client,
   DevicesSettingsViewModel notifier,
   Device device,
 ) async {
-  final client = Matrix.of(context).client;
   await ChangeDeviceNameDialog.show(
     context,
     initialName: device.displayname,
@@ -295,10 +304,10 @@ Future<void> renameDeviceAction(
 
 Future<void> verifyDeviceAction(
   BuildContext context,
+  Client client,
   DevicesSettingsViewModel notifier,
   Device device,
 ) async {
-  final client = Matrix.of(context).client;
   // Keep a handle so a dismissed loading dialog cannot orphan the request.
   final verificationFuture = _startDeviceVerification(client, device);
   // Block the list while the request is set up so Verify can't be re-tapped.
