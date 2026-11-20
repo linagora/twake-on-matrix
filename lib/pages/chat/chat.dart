@@ -525,27 +525,17 @@ class ChatController extends ConsumerState<Chat>
       selectedEvents.any((e) => e.eventId == event.eventId);
 
   String? _findUnreadReceivedMessageLocation() {
+    final timeline = this.timeline;
     if (timeline == null) return null;
-    final events = timeline!.events;
-    if (_markerReadLocation != '' && _markerReadLocation.isNotEmpty) {
-      final lastIndexReadEvent = events.indexWhere(
-        (event) => event.eventId == _markerReadLocation,
-      );
-      if (lastIndexReadEvent > 0) {
-        final afterFullyRead = events.getRange(0, lastIndexReadEvent);
-        final unreadEvents = afterFullyRead
-            .where((event) => event.senderId != client.userID)
-            .toList();
-        if (unreadEvents.isEmpty) return null;
-        Logs().d(
-          "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
-        );
-        return unreadEvents.last.eventId;
-      }
-    } else {
-      return null;
+    final eventId = firstUnreadReceivedEventId(
+      timeline.events,
+      fullyRead: _markerReadLocation,
+      userId: client.userID,
+    );
+    if (eventId != null) {
+      Logs().d("Chat::getFirstUnreadEvent(): First unread event $eventId");
     }
-    return null;
+    return eventId;
   }
 
   void recreateChat() async {
