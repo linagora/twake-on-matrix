@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart' hide State;
+import 'package:flutter/foundation.dart' show SynchronousFuture;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override, ProviderException;
@@ -33,7 +34,9 @@ import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart
 import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/domain/model/rtc_focus.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/domain/model/tom_configurations.dart';
 import 'package:twake_chat/domain/model/tom_server_information.dart';
@@ -274,6 +277,11 @@ class _ToMOnlyEffects implements AccountSwitchEffects {
 
   final MatrixState matrix;
 
+  // Sync: an extra await would reorder the switches these effects overtake.
+  @override
+  Future<void> loadCachedHomeserverInfo(Client client, SwitchToken token) =>
+      SynchronousFuture(null);
+
   @override
   Future<void> setUpToM(Client client, SwitchToken token) =>
       matrix.setUpToM(client, token);
@@ -313,6 +321,51 @@ class _UserInfoOnlyEffects extends _ToMOnlyEffects {
   @override
   Future<void> loadUserInfo(Client client, SwitchToken token) =>
       matrix.loadUserInfo(client, token);
+}
+
+/// The switch effects that note the video call url the app holds when the
+/// user info, the first network step, starts.
+class _DiscoveryEffects extends _ToMOnlyEffects {
+  _DiscoveryEffects(super.matrix);
+
+  String? videoCallUrlAtUserInfo;
+
+  @override
+  Future<void> loadCachedHomeserverInfo(Client client, SwitchToken token) =>
+      matrix.loadCachedHomeserverInfo(client, token);
+
+  @override
+  Future<void> setUpToM(Client client, SwitchToken token) async {}
+
+  @override
+  Future<void> loadUserInfo(Client client, SwitchToken token) async =>
+      videoCallUrlAtUserInfo = matrix.loginHomeserverSummary?.videoCallBaseUrl;
+}
+
+/// A database that holds the well-known [cached] on a previous run.
+class _WellKnownDatabase extends Fake implements DatabaseApi {
+  _WellKnownDatabase(this.cached);
+
+  final Map<String, Object?> cached;
+
+  @override
+  Future<({Map<String, Object?> content, DateTime savedAt})?>
+  getCustomCacheObject(String cacheKey) async => cacheKey == 'well_known'
+      ? (content: cached, savedAt: DateTime.now())
+      : null;
+}
+
+/// A client whose database holds the well-known it cached on a previous run.
+class _CachedDiscoveryClient extends _ToMClient {
+  _CachedDiscoveryClient(
+    super.clientName, {
+    super.userID,
+    super.server,
+    required Map<String, Object?> wellKnown,
+  }) : database = _WellKnownDatabase(wellKnown);
+
+  @override
+  final DatabaseApi database;
 }
 
 /// The switch effects with no step of `MatrixState`: records the accounts
@@ -1208,6 +1261,44 @@ void main() {
       expect(repository.saved, isEmpty);
       expect(tomServer.baseUrl, isNull);
       expect(harness.matrix.loginHomeserverSummary, isNull);
+    });
+
+    testWidgets('publishes the cached discovery before the user info', (
+      tester,
+    ) async {
+      final harness = _Harness(
+        tester,
+        [
+          _ToMClient('a', userID: '@a:s', server: serverA),
+          _CachedDiscoveryClient(
+            'b',
+            userID: '@b:s',
+            server: serverB,
+            wellKnown: {
+              'm.homeserver': {'base_url': serverB.toString()},
+              RtcFocus.rtcFociKey: [
+                {'type': 'livekit', 'livekit_base_url': 'https://meet.b'},
+              ],
+            },
+          ),
+        ],
+        overrides: [
+          federationConfigurationsRepositoryProvider.overrideWithValue(
+            _RecordingFederation(),
+          ),
+          phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+        ],
+      );
+      late _DiscoveryEffects effects;
+
+      await harness.run(() async {
+        final coordinator = await harness.switchingWith(
+          (matrix) => effects = _DiscoveryEffects(matrix),
+        );
+        await tester.runAsync(() => coordinator.apply(harness.clients[1]));
+      });
+
+      expect(effects.videoCallUrlAtUserInfo, 'https://meet.b');
     });
 
     testWidgets('keeps the summary held for its own homeserver', (

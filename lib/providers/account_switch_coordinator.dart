@@ -17,9 +17,10 @@ part 'account_switch_coordinator.g.dart';
 /// owns the order, the stale-switch guard and the error policy; an
 /// implementation owns the body of each step.
 ///
-/// A step that catches its own errors never ends the switch (ToM set-up,
-/// persisting the active account, the user info); every other step lets its
-/// error through, which ends the switch with a failure.
+/// A step that catches its own errors never ends the switch (cached
+/// homeserver information, ToM set-up, persisting the active account, the
+/// user info); every other step lets its error through, which ends the switch
+/// with a failure.
 ///
 /// A step that awaits and then writes shared state (interceptors, locale, the
 /// persisted account) checks its [SwitchToken] right before each write and
@@ -27,6 +28,7 @@ part 'account_switch_coordinator.g.dart';
 /// between steps.
 abstract class AccountSwitchEffects {
   void createVoipPlugin();
+  Future<void> loadCachedHomeserverInfo(Client client, SwitchToken token);
   Future<void> setUpToM(Client client, SwitchToken token);
   Future<void> persistActiveAccount(Client client, SwitchToken token);
   Future<void> loadUserInfo(Client client, SwitchToken token);
@@ -295,6 +297,9 @@ class AccountSwitchCoordinator {
       // VoIP is not supported yet: `createVoipPlugin` is an empty stub, so
       // running it on every apply is harmless.
       effects.createVoipPlugin();
+      // Before the network steps, so the call UI does not wait for them.
+      await effects.loadCachedHomeserverInfo(client, token);
+      if (!token.isCurrent) return false;
       await effects.setUpToM(client, token);
       if (!token.isCurrent) return false;
       await effects.persistActiveAccount(client, token);

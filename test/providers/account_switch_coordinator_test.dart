@@ -75,6 +75,10 @@ class FakeSwitchEffects implements AccountSwitchEffects {
   void createVoipPlugin() => log.add('voip');
 
   @override
+  Future<void> loadCachedHomeserverInfo(Client client, SwitchToken token) =>
+      _step('cached', client, token);
+
+  @override
   Future<void> setUpToM(Client client, SwitchToken token) =>
       _step('tom', client, token);
 
@@ -126,6 +130,7 @@ void main() {
 
   const fullRun = [
     'voip',
+    'cached',
     'tom',
     'persist',
     'userInfo',
@@ -326,6 +331,7 @@ void main() {
       await expectLater(switchTo('b'), throwsStateError);
       const failedRun = [
         'voip',
+        'cached:b',
         'tom:b',
         'persist:b',
         'userInfo:b',
@@ -459,11 +465,13 @@ void main() {
       expectOriginUntouchedAndStoreOn('c');
       expect(effects.log.where((e) => e == 'homeserver:b'), isEmpty);
       expect(effects.log.where((e) => e.endsWith(':b')), [
+        'cached:b',
         'tom:b',
         'persist:b',
         'userInfo:b',
       ]);
       expect(effects.log.where((e) => e.endsWith(':c')), [
+        'cached:c',
         'tom:c',
         'persist:c',
         'userInfo:c',
@@ -477,7 +485,7 @@ void main() {
   });
 
   group('a switch replaced while a step is held', () {
-    const steps = ['tom', 'persist', 'userInfo', 'homeserver'];
+    const steps = ['cached', 'tom', 'persist', 'userInfo', 'homeserver'];
     for (var held = 0; held < steps.length; held++) {
       test('at ${steps[held]} it runs no step after it', () async {
         boot();
@@ -498,6 +506,7 @@ void main() {
       boot();
       await switchTo('b');
       expect(effects.checks, [
+        'cached:b:true',
         'tom:b:true',
         'persist:b:true',
         'userInfo:b:true',
@@ -513,6 +522,7 @@ void main() {
       expect(effects.checks, contains('userInfo:b:false'));
       expect(effects.checks, contains('userInfo:c:true'));
       expect(effects.store, {
+        'cached': 'c',
         'tom': 'c',
         'persist': 'c',
         'userInfo': 'c',
@@ -571,6 +581,7 @@ void main() {
 
       expect(effects.log, [
         'voip',
+        'cached:b',
         'tom:b',
         'persist:b',
         'userInfo:b',
