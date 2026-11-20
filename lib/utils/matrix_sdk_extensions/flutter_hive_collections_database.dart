@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,7 +6,6 @@ import 'package:twake_chat/migrate_steps/migrate_v6_to_v7/migrate_v6_to_v7.dart'
 import 'package:twake_chat/utils/matrix_sdk_extensions/hive_collections_database.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
@@ -37,7 +37,6 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
         throw MissingPluginException();
       }
 
-      const secureStorage = FlutterSecureStorage();
       final containsEncryptionKey =
           await secureStorage.read(key: cipherStorageKey) != null;
       if (!containsEncryptionKey) {
@@ -56,14 +55,10 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
 
       hiverCipher = HiveAesCipher(base64Url.decode(rawEncryptionKey));
     } on MissingPluginException catch (_) {
-      const FlutterSecureStorage()
-          .delete(key: cipherStorageKey)
-          .catchError((_) {});
+      secureStorage.delete(key: cipherStorageKey).catchError((_) {});
       Logs().i('Hive encryption is not supported on this platform');
     } catch (e, s) {
-      const FlutterSecureStorage()
-          .delete(key: cipherStorageKey)
-          .catchError((_) {});
+      secureStorage.delete(key: cipherStorageKey).catchError((_) {});
       Logs().w('Unable to init Hive encryption', e, s);
     }
 
@@ -78,7 +73,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       await db.open();
     } catch (e, s) {
       Logs().w('Unable to open Hive. Delete database and storage key...', e, s);
-      const FlutterSecureStorage().delete(key: cipherStorageKey);
+      secureStorage.delete(key: cipherStorageKey);
       await db
           .clear(supportDeleteCollections: !PlatformInfos.isWeb)
           .catchError((_) {});
