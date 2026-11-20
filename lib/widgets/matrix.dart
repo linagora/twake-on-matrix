@@ -67,6 +67,7 @@ import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/data/account/quiet_logouts.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
@@ -1761,6 +1762,14 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
+  Future<void> _deleteDownloadedFiles() async {
+    try {
+      await StorageDirectoryManager.instance.deleteDownloadedFiles();
+    } catch (e, s) {
+      _report(e, s, 'deletion of the downloaded files at the last logout');
+    }
+  }
+
   Future<void> _deleteAllTomConfigurations() async {
     final hiveCollectionToMDatabase = getIt.get<HiveCollectionToMDatabase>();
     await hiveCollectionToMDatabase.clear();
@@ -1865,7 +1874,11 @@ class MatrixState extends ConsumerState<Matrix>
     }
     // An account that logged in during the wait owns the ToM data now.
     if (ref.read(accountsProvider) case LastLoggedOut() || NoAccount()) {
-      await _deleteAllTomConfigurations();
+      // Files are kept by event id, which no account owns.
+      await _deleteDownloadedFiles();
+      if (ref.read(accountsProvider) case LastLoggedOut() || NoAccount()) {
+        await _deleteAllTomConfigurations();
+      }
     }
   }
 
