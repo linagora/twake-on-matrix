@@ -5,13 +5,32 @@ import 'package:twake_chat/utils/macos_message_notifier.dart';
 class FlutterLocalNotificationsPort implements LocalNotificationsPort {
   final _plugin = FlutterLocalNotificationsPlugin();
 
-  /// Asks the macOS permission at start; [onTap] gets the tapped notification.
+  /// Starts the plugin without asking the permission (see
+  /// [requestPermission]); [onTap] gets the tapped notification.
   Future<void> init(void Function(NotificationResponse) onTap) async {
     await _plugin.initialize(
-      const InitializationSettings(macOS: DarwinInitializationSettings()),
+      const InitializationSettings(
+        macOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
+      ),
       onDidReceiveNotificationResponse: onTap,
     );
   }
+
+  /// Asks the macOS permission: called once the user is logged in.
+  Future<void> requestPermission() async {
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin
+        >()
+        ?.requestPermissions(alert: true, badge: true, sound: true);
+  }
+
+  @override
+  Future<void> cancel(int id) => _plugin.cancel(id);
 
   @override
   Future<void> show({
