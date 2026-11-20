@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/utils/background_push.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -31,6 +32,14 @@ class _FakeMatrixState extends Fake implements MatrixState {
 /// to find out.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Written for the threads on: pinned, not left to the default of the flag.
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
 
   const roomId = '!room:example.com';
   const rootId = r'$root';

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_mentions_repository.dart';
@@ -21,6 +22,14 @@ import '../../datasource_impl/thread/thread_account.dart';
 /// there) and the start of its root.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Written for the threads on: pinned, not left to the default of the flag.
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});

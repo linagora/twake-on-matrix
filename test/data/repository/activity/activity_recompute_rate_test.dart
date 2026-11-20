@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
@@ -21,6 +22,14 @@ import '../../datasource_impl/thread/thread_account.dart';
 /// lasted, plus the last one.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Written for the threads on: pinned, not left to the default of the flag.
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
 
   late ThreadAccount account;
   late ActivityRepository repository;

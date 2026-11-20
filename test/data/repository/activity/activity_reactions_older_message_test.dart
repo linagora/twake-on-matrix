@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/repository/activity/activity_reactions_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_reactions_repository.dart';
@@ -18,6 +19,14 @@ import '../../datasource_impl/thread/thread_account.dart';
 /// message is found: on the device first, then on the server.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Written for the threads on: pinned, not left to the default of the flag.
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
 
   Future<void> open({List<Map<String, Object?>>? storedTimeline}) async {
     SharedPreferences.setMockInitialValues({});
