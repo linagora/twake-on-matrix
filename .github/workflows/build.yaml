@@ -75,6 +75,19 @@ jobs:
         if: matrix.os == 'ios'
         run: ./scripts/prepare-ios.sh
 
+      # Not on the runner image: Gradle would download them without retrying a corrupt archive.
+      - name: Install Android SDK packages
+        if: matrix.os == 'android'
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          for attempt in 1 2 3; do
+            sdkmanager "platforms;android-31" "platforms;android-33" "cmake;3.22.1" \
+              && [ -x "$ANDROID_SDK_ROOT/cmake/3.22.1/bin/cmake" ] && exit 0
+            echo "sdkmanager attempt $attempt failed, retrying"
+            sleep 10
+          done
+          exit 1
+
       - name: Build debug APK
         if: matrix.os == 'android'
         run: |
