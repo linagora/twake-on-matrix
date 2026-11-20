@@ -22,6 +22,7 @@ class CallRingTracker {
   final _rings = <String, CallRing>{};
   final _timers = <String, Timer>{};
   final _pending = <String, MissedCall>{};
+  final _seenLive = <String>{};
   final _changes = StreamController<List<CallRing>>.broadcast();
   final _missed = StreamController<MissedCall>.broadcast();
 
@@ -68,22 +69,41 @@ class CallRingTracker {
     inRoom.forEach(_remove);
   }
 
-  /// A join can come with a limited sync only as room state. A room whose
-  /// call has no member left rings no more: the caller hung up, a missed call.
-  void _onSync() {
-    for (final ring in _rings.values.toList()) {
-      final room = _client.getRoomById(ring.room.id);
-      if (room == null) continue;
-      final live = (room.states[CallEventTypes.callMember]?.values ?? const [])
-          .where(isLiveMembership)
-          .toList();
-      if (live.any((member) => member.senderId == _client.userID)) {
-        _remove(ring.eventId);
-      } else if (live.isEmpty) {
-        _lapse(ring.eventId);
-      }
+  /// A join can come with a limited sync only as room state. A call that had
+  /// a member and has none left rings no more: the caller hung up, a missed
+  /// call. Before a member was seen the ring runs to its end: the membership
+  /// may not have come yet, or not as a state event.
+  void _onSync() => _rings.keys.toList().forEach(_checkCall);
+
+  Future<void> _checkCall(String ringId) async {
+    final room = _client.getRoomById(_rings[ringId]?.room.id ?? '');
+    if (room == null || !await _isLoaded(room)) return;
+    if (!_rings.containsKey(ringId)) return;
+    final live = _liveMembers(room);
+    if (live.any((member) => member.senderId == _client.userID)) {
+      _remove(ringId);
+    } else if (live.isNotEmpty) {
+      _seenLive.add(ringId);
+    } else if (_seenLive.contains(ringId)) {
+      _lapse(ringId);
     }
   }
+
+  /// A partial room keeps no call member in its states: no member is not
+  /// known to be none until it is loaded.
+  static Future<bool> _isLoaded(Room room) async {
+    try {
+      await room.postLoad();
+      return true;
+    } on Exception catch (error, stackTrace) {
+      Logs().w('CallRingTracker: room not loaded', error, stackTrace);
+      return false;
+    }
+  }
+
+  static List<StrippedStateEvent> _liveMembers(Room room) => [
+    ...?room.states[CallEventTypes.callMember]?.values.where(isLiveMembership),
+  ];
 
   void _onDecline(Event event) {
     if (event.senderId != _client.userID) return;
@@ -116,16 +136,15 @@ class CallRingTracker {
   }
 
   /// A ring of someone else, not yet answered here, that mentions the
-  /// account. A legacy `call.notify` has no `sender_ts`: the server time.
+  /// account.
   bool _isForUs(Event event) {
     final userId = _client.userID;
     if (userId == null || _isOwnOrKnown(event)) return false;
     if (!_isRing(event) || _isInCallHere(event.room)) return false;
-    final senderTs = event.content['sender_ts'];
+    // The server time, as the ring is tracked: the clock of the sender
+    // counts neither for the expiry nor for the lifetime.
     return RtcNotificationContent(
-      senderTs: senderTs is int
-          ? DateTime.fromMillisecondsSinceEpoch(senderTs)
-          : event.originServerTs,
+      senderTs: event.originServerTs,
       notificationType: RtcNotificationType.ring,
       lifetime: _lifetimeOf(event),
     ).shouldNotifyUser(event: event, currentUserId: userId);
@@ -182,6 +201,7 @@ class CallRingTracker {
   void _remove(String ringId) {
     _rings.remove(ringId);
     _pending.remove(ringId);
+    _seenLive.remove(ringId);
     _timers.remove(ringId)?.cancel();
     _emit();
   }
