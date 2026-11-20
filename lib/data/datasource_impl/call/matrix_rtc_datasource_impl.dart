@@ -18,7 +18,9 @@ import 'package:twake_chat/domain/model/call/call_ring.dart';
 /// The own membership event of a call: its room and its state key.
 typedef _Slot = ({String roomId, String stateKey});
 
-/// An underride push rule that rings for a call notification (MSC4075).
+/// An override push rule that rings for a call notification (MSC4075). Not an
+/// underride: a ring mentions its callee, and `.m.rule.is_user_mention`
+/// would select the default sound first.
 class _RingPushRule {
   _RingPushRule(this.id, String type, String typeKey)
     : conditions = [
@@ -324,7 +326,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     required String membershipEventId,
   }) async {
     final room = _room(join.room);
-    final callee = room.isDirectChat ? room.directChatMatrixID : null;
+    final callee = _isDirectOfTwo(room) ? room.directChatMatrixID : null;
     // The slot of the room, as the web client sends it (matrix-js-sdk 43).
     return _logged(
       'ring not sent',
@@ -343,6 +345,14 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         'm.call.intent': join.isVideo ? 'video' : 'audio',
       }),
     );
+  }
+
+  /// `m.direct` alone does not tell a third member in. An unknown count of
+  /// members is not held against the room.
+  static bool _isDirectOfTwo(Room room) {
+    if (!room.isDirectChat) return false;
+    final joined = room.summary.mJoinedMemberCount;
+    return joined == null || joined == 2;
   }
 
   Future<void> _logged(String what, Future<void> Function() action) async {
@@ -408,14 +418,16 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   @override
   Future<void> ensureCallRingPushRules() =>
       _logged('push rules not set', () async {
-        final underride = _client.globalPushRules?.underride ?? const [];
+        final override = _client.globalPushRules?.override ?? const [];
         for (final rule in _ringPushRules) {
           // Only when absent: a rule that differs is left to its owner.
-          if (underride.any((r) => r.ruleId == rule.id)) continue;
+          if (override.any((r) => r.ruleId == rule.id)) continue;
+          // Under the rules of the user (a muted room), above the mention.
           await _client.setPushRule(
-            PushRuleKind.underride,
+            PushRuleKind.override,
             rule.id,
             _RingPushRule.actions,
+            before: '.m.rule.is_user_mention',
             conditions: rule.conditions,
           );
         }
