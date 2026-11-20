@@ -1,3 +1,87 @@
+## [2.27.1] - 2026-11-17
+### Added
+- #3620: In-app MatrixRTC calls in encrypted rooms
+- #3605: Send messages, files and drafts to a thread
+- #3604: Copy a link to a message
+- #3613: TW-3612: Album acts as one message (mobile)
+
+### Changed
+- #3667: Scroll the chat list header away with the list on one column
+- #3560, #3664: Move emoji data and profile screens to Riverpod
+- #3512, #3652: Remove VoIP leftovers and unused Android call permissions
+- #3653: Cancel superseded Docker image builds on main
+
+### Fixed
+- #3670: Declare the location purpose string DKCamera requires under SPM
+- #3668: Open the room when an iOS notification is tapped
+- #3659: Center a search result whose part of the list is off screen
+- #3642: Keep Android Back on the page after a dialog closes
+- #3660: Mark an empty chat as read without a null check error
+- #3663: Give the notification switch a fixed label
+
+### Tests
+- #3655, #3662: Cover new private chat guards, retry the contacts permission
+
+## [2.27.0] - 2026-11-16
+### Added
+- #3593: In-app MatrixRTC calls in unencrypted rooms
+- #3575: Show call events in the timeline
+- #3594: Group the images of one send into an album, in sync with web
+- #3591: Add a file from Twake Drive in the attachment menu (mobile)
+- #3558: Matrix spaces, channels and folders
+- #3556, #3554, #3559: Browse public groups, set who can join from Edit
+- #3562: Keep public groups on their server through a server ACL
+- #3577, #3578: Preview a room from its address, show groups to join in search
+- #3509, #3542, #3543, #3544, #3545: TW-3302: Multiple accounts and switching
+- #3521: #2147: Add a clear button to the add-members search field
+
+### Changed
+- #3566: Migrate the iOS project to Swift Package Manager
+- #3580: Add livekit_client and flutter_webrtc for MatrixRTC calls
+- #3527, #3530, #3532, #3537, #3538, #3539: Move modules to Riverpod
+- #3540, #3541, #3551, #3574, #3638, #3646: Move more screens to Riverpod
+- #3547, #3522: Use the design-system background and onSurface tokens
+- #3572: Build the diacritic-insensitive search matcher once per keyword
+- #3552, #3637: Remove the PR web preview and labels outside the taxonomy
+
+### Fixed
+- #3570: Stop tablet crashes from the Cozy check outside the web
+- #3571: Show events that land between displayed ones
+- #3573: Keep the stored homeserver when it is unreachable at startup
+- #3534: Stop awaiting a throwaway ToM Hive before login events
+- #3639, #3568, #3585: Fix adding a second account and switching accounts
+- #3582: Keep the port of a homeserver typed without a scheme
+- #3614: Show a dimmed hint in empty login fields
+- #3602, #3583: Copy the media itself and the texts of all selected messages
+- #3587: Keep the file when editing a media caption
+- #3586, #3600: Keep attachment file names and their folder
+- #3597: Offer to send a failed upload again on long press
+- #3616: Show an error and close the loader when a download fails
+- #3617: Keep the real orientation of a compressed video in its preview
+- #3561: Send .webm files as videos
+- #3596: Send an image pasted into the composer
+- #3548: TW-3518: Show newest photos first in the image picker
+- #3565: TW-3267: Read the picked image size for the sending bubble
+- #3563: TW-3237: Strip nested reply fallbacks entirely
+- #3564, #3584, #3595, #3519: Fix how reactions are sent, merged and ordered
+- #3588: Tint a jumped-to message softly until the next touch
+- #3647: Hide the edited tag on a deleted message
+- #3523: #3305: Ignore diacritics when searching encrypted chat rooms
+- #3524: #3352: Render filenames as plain text instead of dead links
+- #3549: #2990: Select the group name without expanding the avatar
+- #3601: Show a dimmed placeholder under a floating label in Edit group
+- #3603: Stop blocking Add members on a slow federated invite
+- #3641: Ask before leaving a group from its details
+- #3645: Leave chat list selection mode on Android Back
+- #3649: Label the notification switch by its state
+- #3592: Ignore public group pages from a previous load
+- #3520: Label the empty chats menu option "New Group Chat"
+
+### Tests
+- #3528, #3529, #3533, #3550, #3553: Add Patrol scenarios
+- #3644, #3648: Run the Android suite on API 35, report skipped tests
+- #3618: Add a QA environment (Android app + Synapse)
+
 ## [2.26.1] - 2026-10-29
 ### Added
 - #3495: iOS: opt-in message previews in notifications, with a dedicated device

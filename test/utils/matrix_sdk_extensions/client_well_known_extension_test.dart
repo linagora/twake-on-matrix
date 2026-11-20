@@ -253,4 +253,40 @@ void main() {
       );
     });
   });
+
+  group('ClientWellKnownExtension::getCachedWellKnown', () {
+    late Client client;
+
+    tearDown(() async {
+      await client.dispose(closeDatabase: false);
+    });
+
+    test(
+      'reads the stored well-known, however old, without the network',
+      () async {
+        final database = CachingDatabase();
+        final recorder = RecordingHttpClient();
+        client = await getClient(database: database, httpClient: recorder);
+        database.cache['well_known'] = (
+          content: wellKnownWithLiveKit(null),
+          savedAt: DateTime.now().subtract(const Duration(days: 1)),
+        );
+        recorder.requestedUris.clear();
+
+        final discovery = await client.getCachedWellKnown();
+
+        expect(
+          summaryOf(discovery).videoCallBaseUrl,
+          'https://livekit.example.com',
+        );
+        expect(recorder.requestedUris, isEmpty);
+      },
+    );
+
+    test('is null when nothing was stored', () async {
+      client = await getClient(database: CachingDatabase());
+
+      expect(await client.getCachedWellKnown(), isNull);
+    });
+  });
 }

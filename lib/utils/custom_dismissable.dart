@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class CustomDismissible extends StatefulWidget {
@@ -9,6 +10,7 @@ class CustomDismissible extends StatefulWidget {
     this.enabled = true,
     this.handleDragStart,
     this.handleDragEnd,
+    this.dismissOverChildDrags = false,
   });
 
   final Widget child;
@@ -17,6 +19,9 @@ class CustomDismissible extends StatefulWidget {
   final bool enabled;
   final Function(DragStartDetails dragStartDetails)? handleDragStart;
   final Function(DragEndDetails dragEndDetails)? handleDragEnd;
+
+  /// Raw pointers, so a child that claims vertical drags cannot block it.
+  final bool dismissOverChildDrags;
 
   @override
   State<CustomDismissible> createState() => _CustomDismissibleState();
@@ -33,6 +38,8 @@ class _CustomDismissibleState extends State<CustomDismissible>
 
   double _dragExtent = 0;
   bool _dragUnderway = false;
+  int? _pointer;
+  Offset _pointerDownPosition = Offset.zero;
 
   bool get _isActive => _dragUnderway || _animateController.isAnimating;
 
@@ -46,6 +53,14 @@ class _CustomDismissibleState extends State<CustomDismissible>
     );
 
     _updateMoveAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomDismissible oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.dismissOverChildDrags && oldWidget.enabled && !widget.enabled) {
+      _cancelPointerDrag();
+    }
   }
 
   @override
@@ -133,6 +148,50 @@ class _CustomDismissibleState extends State<CustomDismissible>
     }
   }
 
+  void _handlePointerDown(PointerDownEvent event) {
+    if (_pointer != null) return;
+    _pointer = event.pointer;
+    _pointerDownPosition = event.position;
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (event.pointer != _pointer) return;
+    if (!_dragUnderway) {
+      final offset = event.position - _pointerDownPosition;
+      if (offset.distance <= kTouchSlop) return;
+      if (offset.dy.abs() <= offset.dx.abs()) {
+        _pointer = null;
+        return;
+      }
+      _handleDragStart(DragStartDetails(globalPosition: event.position));
+    }
+    _handleDragUpdate(
+      DragUpdateDetails(
+        globalPosition: event.position,
+        delta: Offset(0, event.delta.dy),
+        primaryDelta: event.delta.dy,
+      ),
+    );
+  }
+
+  void _handlePointerUp(PointerUpEvent event) {
+    if (event.pointer != _pointer) return;
+    _pointer = null;
+    if (_dragUnderway) _handleDragEnd(DragEndDetails());
+  }
+
+  void _handlePointerCancel(PointerCancelEvent event) {
+    if (event.pointer != _pointer) return;
+    _cancelPointerDrag();
+  }
+
+  void _cancelPointerDrag() {
+    _pointer = null;
+    if (!_dragUnderway) return;
+    _dragUnderway = false;
+    _animateController.reverse();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Widget content = DecoratedBoxTransition(
@@ -142,6 +201,17 @@ class _CustomDismissibleState extends State<CustomDismissible>
         child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
       ),
     );
+
+    if (widget.dismissOverChildDrags) {
+      return Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: widget.enabled ? _handlePointerDown : null,
+        onPointerMove: widget.enabled ? _handlePointerMove : null,
+        onPointerUp: _handlePointerUp,
+        onPointerCancel: _handlePointerCancel,
+        child: content,
+      );
+    }
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,

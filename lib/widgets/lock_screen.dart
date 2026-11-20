@@ -27,6 +27,8 @@ class LockScreenState extends State<LockScreen> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // The app above decides whether Back stays in Flutter.
+      onNavigationNotification: (_) => false,
       theme: TwakeThemes.buildTheme(context, Brightness.light),
       darkTheme: TwakeThemes.buildTheme(context, Brightness.dark),
       localizationsDelegates: L10n.localizationsDelegates,

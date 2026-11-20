@@ -39,6 +39,7 @@ class UnreadCountBadge extends StatelessWidget {
       ),
       child: Center(
         widthFactor: 1,
+        heightFactor: 1,
         child: Text(displayText, style: textStyle ?? defaultTextStyle),
       ),
     );

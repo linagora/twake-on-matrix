@@ -5,14 +5,16 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/events/message/message_context_menu_action.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/emoji_data_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
-class MessageReactionDialog extends StatelessWidget {
+class MessageReactionDialog extends ConsumerWidget {
   final Event event;
   final Timeline timeline;
   final ValueNotifier<bool> displayEmojiPicker;
@@ -32,6 +34,10 @@ class MessageReactionDialog extends StatelessWidget {
   final Key dialogSafeAreaKey;
   final bool showReactions;
 
+  /// Every image of an album, when [event] leads one: the reaction marked
+  /// as mine may be on any of them.
+  final List<Event>? albumEvents;
+
   const MessageReactionDialog({
     super.key,
     required this.event,
@@ -44,18 +50,14 @@ class MessageReactionDialog extends StatelessWidget {
     required this.iconContextMenu,
     required this.dialogSafeAreaKey,
     this.onToggleEmojiReaction,
+    this.albumEvents,
     this.showReactions = true,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final myReaction = event
-        .aggregatedEvents(timeline, RelationshipTypes.reaction)
-        .where(
-          (event) =>
-              event.senderId == event.room.client.userID &&
-              event.type == 'm.reaction',
-        )
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myReaction = (albumEvents ?? [event])
+        .myReactionsIn(timeline)
         .firstOrNull;
     final relatesTo =
         (myReaction?.content as Map<String, dynamic>?)?['m.relates_to'];
@@ -86,7 +88,9 @@ class MessageReactionDialog extends StatelessWidget {
                           ? const SizedBox.shrink()
                           : display
                           ? emojiPickerBuilder(
-                              emojiData: Matrix.of(context).emojiData,
+                              emojiData: ref
+                                  .read(emojiDataProvider)
+                                  .requireValue,
                               myReaction: myReaction,
                               event: event,
                               relatesTo: relatesTo,

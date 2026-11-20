@@ -61,7 +61,9 @@ class ImageViewerController extends State<ImageViewer> {
 
   final downloadMediaFileInteractor = getIt.get<DownloadMediaFileInteractor>();
 
-  StreamSubscription? streamSubcription;
+  StreamSubscription? _downloadSubscription;
+
+  StreamSubscription? _thumbnailSubscription;
 
   final _webOverlay = MediaViewerWebOverlay.image();
   String? _webAttachmentEventId;
@@ -114,7 +116,8 @@ class ImageViewerController extends State<ImageViewer> {
 
   Future<void> handleDownloadFile(Event event) async {
     try {
-      streamSubcription = downloadMediaFileInteractor
+      _downloadSubscription?.cancel();
+      _downloadSubscription = downloadMediaFileInteractor
           .execute(event: event)
           .listen((state) {
             state.fold(
@@ -155,9 +158,20 @@ class ImageViewerController extends State<ImageViewer> {
     }
   }
 
+  /// Starts the main download again after a failure.
+  void retryDownload() {
+    final event = widget.event;
+    if (event == null) return;
+    setState(() {
+      downloadFailed = false;
+    });
+    handleDownloadFile(event);
+  }
+
   Future<void> handleDownloadThumbnailFile(Event event) async {
     try {
-      streamSubcription = downloadMediaFileInteractor
+      _thumbnailSubscription?.cancel();
+      _thumbnailSubscription = downloadMediaFileInteractor
           .execute(event: event, getThumbnail: true)
           .listen((state) {
             state.fold(
@@ -199,7 +213,8 @@ class ImageViewerController extends State<ImageViewer> {
   @override
   void dispose() {
     _webOverlay.dispose();
-    streamSubcription?.cancel();
+    _downloadSubscription?.cancel();
+    _thumbnailSubscription?.cancel();
     transformationController.removeListener(_handleZoomChanged);
     transformationController.dispose();
     showAppbarPreview.dispose();

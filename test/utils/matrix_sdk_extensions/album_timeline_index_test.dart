@@ -33,6 +33,26 @@ void main() {
     status: EventStatus.synced,
   );
 
+  /// What Matrix keeps of a deleted image of '@a': no content, no batch key.
+  Event deleted(String id, int second) => Event(
+    senderId: '@a:example.com',
+    type: 'm.room.message',
+    room: room,
+    eventId: id,
+    content: const {},
+    unsigned: {
+      'redacted_because': {
+        'type': 'm.room.redaction',
+        'event_id': 'redaction-$id',
+        'sender': '@a:example.com',
+        'origin_server_ts': 0,
+        'content': const <String, Object?>{},
+      },
+    },
+    originServerTs: DateTime.utc(2026, 11, 9, 10, 0, second),
+    status: EventStatus.synced,
+  );
+
   late Event newer, a, b, c, older;
   late AlbumTimelineIndex index;
 
@@ -52,6 +72,13 @@ void main() {
     expect(index.isHiddenMember('A'), isTrue);
     expect(index.isHiddenMember('B'), isTrue);
     expect(index.isHiddenMember('C'), isFalse);
+  });
+
+  test('a hidden image leads to the row that draws its album', () {
+    expect(index.albumLeaderOf('A'), 'C');
+    expect(index.albumLeaderOf('B'), 'C');
+    expect(index.albumLeaderOf('C'), isNull);
+    expect(index.albumLeaderOf('newer'), isNull);
   });
 
   test('the first unread image starts a new album', () {
@@ -86,5 +113,47 @@ void main() {
   test('an event that is not in the list has no neighbours', () {
     expect(index.newerNeighbour(text('x', 1)), isNull);
     expect(index.olderNeighbour(text('x', 1)), isNull);
+  });
+
+  test('a deleted image inside an album is hidden and does not split it', () {
+    final gone = deleted('B', 11);
+    final reflowed = AlbumTimelineIndex([newer, a, gone, c, older]);
+
+    expect(reflowed.albumLedBy('C')!.map((e) => e.eventId), ['C', 'A']);
+    expect(reflowed.isHiddenMember('B'), isTrue);
+    expect(reflowed.newerNeighbour(c), same(newer));
+  });
+
+  test('deleting every image leaves one deleted message per image', () {
+    final all = [deleted('A', 12), deleted('B', 11), deleted('C', 10)];
+    final gone = AlbumTimelineIndex([newer, ...all, older]);
+
+    for (final id in ['A', 'B', 'C']) {
+      expect(gone.isHiddenMember(id), isFalse, reason: id);
+      expect(gone.albumLeaderOf(id), isNull, reason: id);
+    }
+    expect(gone.albumLedBy('C'), isNull);
+    expect(gone.newerNeighbour(all.last), same(all[1]));
+  });
+
+  test('a deleted image hidden in an album leads to the album', () {
+    final inAlbum = AlbumTimelineIndex([newer, a, deleted('B', 11), c, older]);
+
+    expect(inAlbum.albumLeaderOf('B'), 'C');
+  });
+
+  test('two deleted images inside an album lead to the album', () {
+    final reflowed = AlbumTimelineIndex([
+      newer,
+      a,
+      deleted('B', 11),
+      deleted('X', 10),
+      image('D', 9),
+      older,
+    ]);
+
+    expect(reflowed.albumLedBy('D')!.map((e) => e.eventId), ['D', 'A']);
+    expect(reflowed.albumLeaderOf('B'), 'D');
+    expect(reflowed.albumLeaderOf('X'), 'D');
   });
 }

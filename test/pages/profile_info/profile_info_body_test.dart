@@ -1,17 +1,17 @@
 import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:provider/provider.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 
 class _FakeGetUserInfoInteractor extends Fake implements GetUserInfoInteractor {
   @override
@@ -25,15 +25,6 @@ class _FakeClient extends Fake implements Client {
 
   @override
   Map<String, CachedPresence> get presences => {};
-}
-
-class _FakeMatrixState extends Fake implements MatrixState {
-  @override
-  Client get client => _FakeClient();
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
-      '_FakeMatrixState';
 }
 
 class _FakeRoom extends Fake implements Room {
@@ -104,14 +95,14 @@ void main() {
 
       testWidgets('$outcome for a ${membership.name} member', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(
-              extensions: [LinagoraTextThemeExtension.material()],
-            ),
-            localizationsDelegates: L10n.localizationsDelegates,
-            home: Provider<MatrixState>.value(
-              value: _FakeMatrixState(),
-              child: Scaffold(
+          ProviderScope(
+            overrides: [matrixClientProvider.overrideWithValue(_FakeClient())],
+            child: MaterialApp(
+              theme: ThemeData(
+                extensions: [LinagoraTextThemeExtension.material()],
+              ),
+              localizationsDelegates: L10n.localizationsDelegates,
+              home: Scaffold(
                 body: SingleChildScrollView(
                   child: ProfileInfoBody(user: _FakeUser(membership)),
                 ),

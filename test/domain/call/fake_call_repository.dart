@@ -82,10 +82,19 @@ class FakeCallRepository implements CallRepository {
 
   @override
   Future<void> connectMedia(CallServer server, CallMediaState media) async {
-    calls.add('connect mic=${media.isMicrophoneOn} camera=${media.isCameraOn}');
+    calls.add(
+      'connect mic=${media.isMicrophoneOn} camera=${media.isCameraOn} '
+      'encrypted=${media.isEncrypted}',
+    );
     await connectGate?.future;
     if (connectError case final error?) throw error;
   }
+
+  @override
+  void startMediaKeys(CallRoom room) => calls.add('startKeys ${room.id}');
+
+  @override
+  Future<void> stopMediaKeys() async => calls.add('stopKeys');
 
   @override
   Future<void> disconnectMedia() async {

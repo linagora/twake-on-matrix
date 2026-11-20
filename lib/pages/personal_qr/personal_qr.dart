@@ -7,6 +7,7 @@ import 'package:twake_chat/pages/personal_qr/personal_qr_view.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/permission_dialog.dart';
+import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/permission_service.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -54,6 +55,7 @@ class PersonalQrController extends State<PersonalQr> {
     File? tempFile;
     try {
       final l10n = L10n.of(context)!;
+      final origin = context.sharePositionOrigin;
 
       final imageBytes = await _captureQrImage(context, l10n);
       if (imageBytes == null) {
@@ -62,9 +64,11 @@ class PersonalQrController extends State<PersonalQr> {
 
       tempFile = await _createTempFile(imageBytes);
 
-      final shareResult = await Share.shareXFiles([
-        XFile(tempFile.path),
-      ], text: l10n.shareQrCode);
+      final shareResult = await Share.shareXFiles(
+        [XFile(tempFile.path)],
+        text: l10n.shareQrCode,
+        sharePositionOrigin: origin,
+      );
 
       // Clean up immediately if share was dismissed/completed
       // For platforms that don't return result, fall back to delayed cleanup

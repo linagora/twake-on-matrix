@@ -1,5 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+
+import '../../utils/pump_localized.dart';
 
 class MockAudioMixin with AudioMixin {}
 
@@ -475,6 +480,38 @@ void main() {
       expect(result.length, 2);
       expect(result[0], 12.5); // 25 (min value) maps to minHeight
       expect(result[1], 37.5); // 75 (max value) maps to maxHeight
+    });
+  });
+
+  group('preventActionWhileRecordingMobile', () {
+    testWidgets('shows a close icon that dismisses the dialog', (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await pumpLocalized(
+        tester,
+        container,
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                audioMixin.preventActionWhileRecordingMobile(context: context),
+            child: const Text('open'),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final closeButton = find.descendant(
+        of: find.byKey(TwakeDialog.showConfirmAlertDialogKey),
+        matching: find.byType(IconButton),
+      );
+      expect(find.text('Recording in progress'), findsOneWidget);
+      expect(closeButton, findsOneWidget);
+
+      await tester.tap(closeButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Recording in progress'), findsNothing);
     });
   });
 }

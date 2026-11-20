@@ -34,6 +34,8 @@ class UserDeviceListItem extends StatelessWidget {
         client.userDeviceKeys[client.userID]?.deviceKeys[userDevice.deviceId];
     final isOwnDevice = userDevice.deviceId == client.deviceID;
     final verified = isOwnDevice || keys?.verified == true;
+    // A device without device keys cannot be verified, so Verify is not offered.
+    final canVerify = !verified && keys != null;
     final lastActiveText = l10n.lastActiveAgo(
       DateTime.fromMillisecondsSinceEpoch(
         userDevice.lastSeenTs ?? 0,
@@ -52,7 +54,9 @@ class UserDeviceListItem extends StatelessWidget {
         ),
         actions: SessionActions(
           onChangeName: () => rename?.call(userDevice),
-          onStartVerification: isOwnDevice ? null : () => verify(userDevice),
+          onStartVerification: isOwnDevice || keys == null
+              ? null
+              : () => verify(userDevice),
           onRemove: isOwnDevice ? null : () => remove?.call(userDevice),
         ),
       ),
@@ -63,7 +67,7 @@ class UserDeviceListItem extends StatelessWidget {
         verified: verified,
         unverifiedLabel: l10n.unverified,
         verifyLabel: l10n.verify,
-        onVerifyPressed: verified ? null : () => verify(userDevice),
+        onVerifyPressed: canVerify ? () => verify(userDevice) : null,
         onDelete: remove == null ? null : () => remove?.call(userDevice),
         showDivider: showDivider,
       ),

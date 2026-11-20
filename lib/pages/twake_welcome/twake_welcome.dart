@@ -110,7 +110,6 @@ class TwakeWelcomeController extends ConsumerState<TwakeWelcome>
           intentFlags: ephemeralIntentFlags,
         ),
       );
-      Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
       if (!mounted) return;
       final result = await handleTokenFromRegistrationSite(
         matrix: matrix,

@@ -42,6 +42,10 @@ class ChatListItemStyle {
     end: 8,
   );
 
+  // Keeps the title of a space aligned with the titles of the rooms.
+  static const EdgeInsetsDirectional paddingSpaceAvatar =
+      EdgeInsetsDirectional.only(end: 16);
+
   static const EdgeInsetsDirectional paddingBody =
       EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4);
 

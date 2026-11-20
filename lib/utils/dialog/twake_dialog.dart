@@ -308,10 +308,13 @@ Future<ConfirmResult> showConfirmAlertDialog({
           Navigator.of(context).pop(ConfirmResult.cancel);
           onClose?.call();
         },
-        onCloseButtonAction: () {
-          Navigator.of(context).pop(ConfirmResult.cancel);
-          onClose?.call();
-        },
+        // The builder draws the close icon whenever this callback is set.
+        onCloseButtonAction: showCloseButton
+            ? () {
+                Navigator.of(context).pop(ConfirmResult.cancel);
+                onClose?.call();
+              }
+            : null,
       );
     },
   );

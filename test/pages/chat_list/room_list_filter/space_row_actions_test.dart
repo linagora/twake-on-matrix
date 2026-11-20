@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/space_row_actions.dart';
 import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
+import 'package:twake_chat/widgets/twake_components/unread_count_badge.dart';
 
 import '../../../utils/pump_localized.dart';
 
@@ -54,6 +55,33 @@ void main() {
       await tester.tap(find.byIcon(Icons.add));
 
       expect(added, 1);
+    });
+
+    testWidgets('unreadCount_inATallRow_keepsTheBadgeHeight', (tester) async {
+      await pumpLocalized(
+        tester,
+        ProviderContainer.test(retry: (_, _) => null),
+        Scaffold(
+          body: SizedBox(
+            height: 48,
+            child: Row(
+              children: [
+                SpaceRowActions(
+                  name: 'Team',
+                  space: SpaceRowData(
+                    fold: SpaceFold.folded,
+                    unreadCount: 28,
+                    mentionCount: 1,
+                    onToggleFold: () {},
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byType(UnreadCountBadge)).height, 20);
     });
   });
 }

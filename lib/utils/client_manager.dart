@@ -7,6 +7,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/flutter_hive_collections_
 import 'package:twake_chat/utils/matrix_sdk_extensions/twake_client.dart';
 import 'package:twake_chat/utils/open_sqflite_db.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
@@ -94,6 +95,44 @@ abstract class ClientManager {
       preferred.isLogged()
       ? preferred
       : loggedIn(held).firstOrNull ?? preferred;
+
+  /// The logged-in client of the account a push was sent to, named by its
+  /// Matrix id or by its pusher identifier (the SHA-256 of that id). Several
+  /// accounts can share the room of the push, so another account's client
+  /// would read the event as that account.
+  static Client? receiving(
+    Iterable<Client> held, {
+    String? userId,
+    String? pusherIdentifier,
+  }) {
+    if (userId == null && pusherIdentifier == null) return null;
+    return loggedIn(held).where((client) {
+      final id = client.userID;
+      return id != null && (id == userId || id.sha256Hash == pusherIdentifier);
+    }).firstOrNull;
+  }
+
+  /// The client that reads a raw push message: the iOS NSE sets `receiver_id`
+  /// and the iOS pusher sends `pusher_notification_client_identifier`. A push
+  /// naming an account this device does not hold gets no client, so another
+  /// account never reads it. A message that is no map, or holds neither key as
+  /// a string, names no account and goes to [fallback].
+  static Client? receivingFromPush(
+    Iterable<Client> held,
+    Object? message, {
+    required Client fallback,
+  }) {
+    if (message is! Map) return fallback;
+    String? field(String key) {
+      final value = message[key];
+      return value is String ? value : null;
+    }
+
+    final userId = field('receiver_id');
+    final pusherIdentifier = field('pusher_notification_client_identifier');
+    if (userId == null && pusherIdentifier == null) return fallback;
+    return receiving(held, userId: userId, pusherIdentifier: pusherIdentifier);
+  }
 
   /// Deletes what a client stored: its database and, for the SQLite one, the
   /// file.

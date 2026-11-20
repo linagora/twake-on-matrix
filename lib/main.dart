@@ -12,7 +12,6 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/sentry_init.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
@@ -33,7 +32,6 @@ import 'package:twake_chat/providers/sso_token_vault_provider.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 import 'utils/background_push.dart';
-import 'widgets/lock_screen.dart';
 import 'widgets/twake_app.dart';
 
 void main() async {
@@ -155,13 +153,7 @@ Future<void> startGui(ProviderContainer container) async {
     runApp: runApp,
     app: UncontrolledProviderScope(
       container: container,
-      child: PlatformInfos.isMobile
-          ? AppLock(
-              builder: (args) => const TwakeApp(),
-              lockScreen: const LockScreen(),
-              enabled: pin?.isNotEmpty ?? false,
-            )
-          : const TwakeApp(),
+      child: TwakeApp(appLockEnabled: pin?.isNotEmpty ?? false),
     ),
   );
 }
