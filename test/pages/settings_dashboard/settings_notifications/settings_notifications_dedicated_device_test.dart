@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -9,24 +10,22 @@ import 'package:http/testing.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
-import 'package:provider/provider.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_session.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_notifications/settings_notifications.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 
 const _userId = '@alice:example.com';
 const _appDeviceId = 'APPDEVICE';
 const _dedicatedToken = 'dedicated-token';
 
-/// A homeserver without SSO: only password login.
-class _PasswordOnlyClient extends Fake implements Client {
-  _PasswordOnlyClient(this.httpClient);
+class _FakeClient extends Fake implements Client {
+  _FakeClient(this.httpClient);
 
   @override
   final http.Client httpClient;
@@ -52,22 +51,6 @@ class _PasswordOnlyClient extends Fake implements Client {
   @override
   final CachedStreamController<BasicEvent> onAccountData =
       CachedStreamController();
-
-  @override
-  Future<List<LoginFlow>?> getLoginFlows() async => [
-    LoginFlow(type: AuthenticationTypes.password),
-  ];
-}
-
-class _FakeMatrix extends Fake implements MatrixState {
-  _FakeMatrix(this.client);
-
-  @override
-  final Client client;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
-      '_FakeMatrix';
 }
 
 String _dedicatedSlot() => jsonEncode(
@@ -113,8 +96,11 @@ void main() {
       return http.Response('{}', 200);
     });
     await tester.pumpWidget(
-      Provider<MatrixState>.value(
-        value: _FakeMatrix(_PasswordOnlyClient(httpClient)),
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          matrixClientProvider.overrideWithValue(_FakeClient(httpClient)),
+        ],
         child: Builder(
           builder: (context) => MaterialApp(
             navigatorKey: TwakeApp.routerKey = GlobalKey<NavigatorState>(),
@@ -130,18 +116,17 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets(
-    'without SSO, a user with a dedicated device sees its tile, switched on',
-    (tester) async {
-      store[_userId] = _dedicatedSlot();
+  testWidgets('a user with a dedicated device sees its tile, switched on', (
+    tester,
+  ) async {
+    store[_userId] = _dedicatedSlot();
 
-      await pumpSettings(tester);
+    await pumpSettings(tester);
 
-      final tile = find.widgetWithText(SwitchListTile, title);
-      expect(tile, findsOneWidget);
-      expect(tester.widget<SwitchListTile>(tile).value, isTrue);
-    },
-  );
+    final tile = find.widgetWithText(SwitchListTile, title);
+    expect(tile, findsOneWidget);
+    expect(tester.widget<SwitchListTile>(tile).value, isTrue);
+  });
 
   testWidgets('without a dedicated device, the tile is not shown', (
     tester,
@@ -151,20 +136,19 @@ void main() {
     expect(find.text(title), findsNothing);
   });
 
-  testWidgets(
-    'without SSO, turning the tile off logs the dedicated device out',
-    (tester) async {
-      store[_userId] = _dedicatedSlot();
-      await pumpSettings(tester);
+  testWidgets('turning the tile off logs the dedicated device out', (
+    tester,
+  ) async {
+    store[_userId] = _dedicatedSlot();
+    await pumpSettings(tester);
 
-      await tester.tap(find.widgetWithText(SwitchListTile, title));
-      await settle(tester);
+    await tester.tap(find.widgetWithText(SwitchListTile, title));
+    await settle(tester);
 
-      final logout = requests.where((r) => r.url.path.endsWith('/logout'));
-      expect(logout, hasLength(1));
-      expect(logout.single.headers['authorization'], 'Bearer $_dedicatedToken');
-      expect(store.containsKey(_userId), isFalse);
-      expect(find.text(title), findsNothing);
-    },
-  );
+    final logout = requests.where((r) => r.url.path.endsWith('/logout'));
+    expect(logout, hasLength(1));
+    expect(logout.single.headers['authorization'], 'Bearer $_dedicatedToken');
+    expect(store.containsKey(_userId), isFalse);
+    expect(find.text(title), findsNothing);
+  });
 }
