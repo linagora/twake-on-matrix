@@ -43,6 +43,17 @@ class TwakeClipboard {
     await Clipboard.setData(ClipboardData(text: text));
   }
 
+  /// Copies [text]; returns false and logs when the clipboard refuses.
+  Future<bool> tryCopyText(String text) async {
+    try {
+      await copyText(text);
+      return true;
+    } on Exception catch (e, s) {
+      Logs().e('Clipboard::tryCopyText(): clipboard write failed', e, s);
+      return false;
+    }
+  }
+
   Future<void> copyImageAsStream(File image, {String? mimeType}) async {
     final item = DataWriterItem(suggestedName: image.path);
     final imageStream = image.openRead();

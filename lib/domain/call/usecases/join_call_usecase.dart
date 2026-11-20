@@ -1,4 +1,3 @@
-import 'package:matrix/matrix.dart' show Logs;
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_cancellation.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
@@ -25,15 +24,21 @@ class JoinCallUseCase {
     await _repository.endStaleOwnMembership(join.room);
     final server = await _repository.fetchServer(join);
     if (cancel.isCancelled) return null;
-    if (!await _connect(server, join, cancel)) return null;
-    final bool othersInCall;
-    try {
-      othersInCall = _repository.hasOtherMembers(join.room);
-    } on CallException {
-      await _repository.disconnectMedia();
-      rethrow;
-    }
-    final membershipEventId = await _sendMembership(join, cancel);
+    // DECISION.md D14: a call is encrypted when its room is.
+    final media = CallMediaState(
+      isMicrophoneOn: true,
+      isCameraOn: join.isVideo,
+      isEncrypted: room.isEncrypted,
+    );
+    if (!await _connect(server, media, cancel)) return null;
+    final othersInCall = await _hasOthers(join.room);
+    // Before the membership: the others send their keys once they see it.
+    if (room.isEncrypted) _repository.startMediaKeys(join.room);
+    final membershipEventId = await _sendMembership(
+      join,
+      cancel,
+      sharesKeys: room.isEncrypted,
+    );
     if (membershipEventId != null && !othersInCall) {
       await _ring(join, membershipEventId);
     }
@@ -55,8 +60,6 @@ class JoinCallUseCase {
 
   CallRoomInfo _checkRoom(CallRoom room) {
     final info = _repository.getRoomInfo(room);
-    // DECISION.md D14: a call is encrypted when its room is.
-    if (info.isEncrypted) throw const CallEncryptionUnsupportedException();
     // Before the token and the microphone: a member may not hold the state
     // event of the call in a group (power level).
     if (!info.canJoin) throw const CallNoPermissionException();
@@ -67,13 +70,10 @@ class JoinCallUseCase {
   /// again.
   Future<bool> _connect(
     CallServer server,
-    CallJoin join,
+    CallMediaState media,
     CallCancellation cancellation,
   ) async {
-    await _repository.connectMedia(
-      server,
-      CallMediaState(isMicrophoneOn: true, isCameraOn: join.isVideo),
-    );
+    await _repository.connectMedia(server, media);
     if (!cancellation.isCancelled) return true;
     await _repository.disconnectMedia();
     return false;
@@ -83,27 +83,43 @@ class JoinCallUseCase {
   /// it has been sent. Gives the id of the membership event, null when left.
   Future<String?> _sendMembership(
     CallJoin join,
-    CallCancellation cancellation,
-  ) async {
+    CallCancellation cancellation, {
+    required bool sharesKeys,
+  }) async {
     final sent = _repository.joinMembership(join);
     try {
       await Future.any([sent, cancellation.whenCancelled]);
       if (!cancellation.isCancelled) return await sent;
-      await _repository.disconnectMedia();
+      await _stopMedia(sharesKeys: sharesKeys);
       await sent;
       return null;
+    } on CallException {
+      await _stopMedia(sharesKeys: sharesKeys);
+      rethrow;
+    }
+  }
+
+  Future<void> _stopMedia({required bool sharesKeys}) async {
+    await _repository.disconnectMedia();
+    if (sharesKeys) await _repository.stopMediaKeys();
+  }
+
+  /// A room that cannot be read leaves no call to join: the media stops.
+  Future<bool> _hasOthers(CallRoom room) async {
+    try {
+      return _repository.hasOtherMembers(room);
     } on CallException {
       await _repository.disconnectMedia();
       rethrow;
     }
   }
 
-  /// A ring that cannot be sent leaves the call going.
+  /// A ring that cannot be sent leaves the call going. The data layer logs it.
   Future<void> _ring(CallJoin join, String membershipEventId) async {
     try {
       await _repository.sendRing(join, membershipEventId: membershipEventId);
-    } on Exception catch (error, stackTrace) {
-      Logs().w('JoinCallUseCase: ring not sent', error, stackTrace);
+    } on Exception {
+      // Only the ring is lost.
     }
   }
 }

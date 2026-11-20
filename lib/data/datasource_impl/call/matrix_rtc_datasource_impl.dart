@@ -1,15 +1,16 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart' hide CallParticipant;
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/data/datasource_impl/call/call_membership_extender.dart';
 import 'package:twake_chat/data/datasource_impl/call/call_ring_tracker.dart';
+import 'package:twake_chat/data/datasource_impl/call/matrix_rtc_media_keys.dart';
 import 'package:twake_chat/data/model/call/call_member_content.dart';
 import 'package:twake_chat/data/model/call/sfu_token_request.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
+import 'package:twake_chat/domain/model/call/call_media_key.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/domain/model/call/call_ring.dart';
@@ -36,11 +37,6 @@ class _RingPushRule {
 
   final String id;
   final List<PushCondition> conditions;
-
-  bool matches(PushRule rule) =>
-      jsonEncode(rule.actions) == jsonEncode(actions) &&
-      jsonEncode([...?rule.conditions?.map((c) => c.toJson())]) ==
-          jsonEncode([for (final c in conditions) c.toJson()]);
 }
 
 final _ringPushRules = [
@@ -323,23 +319,39 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   /// A direct chat rings the other user. A group, or any room that is not a
   /// direct chat of two, only notifies: nobody is rung by `room: true`.
   @override
-  Future<void> sendRing(CallJoin join, {required String membershipEventId}) {
+  Future<void> sendRing(
+    CallJoin join, {
+    required String membershipEventId,
+  }) async {
     final room = _room(join.room);
     final callee = room.isDirectChat ? room.directChatMatrixID : null;
-    return _send(join.room, RtcNotificationContent.eventType, {
-      'slot_id': 'm.call#',
-      'notification_type': callee != null ? 'ring' : 'notification',
-      'sender_ts': DateTime.now().millisecondsSinceEpoch,
-      'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
-      'm.mentions': {
-        'user_ids': <String>[?callee],
-      },
-      'm.relates_to': {
-        'rel_type': 'm.reference',
-        'event_id': membershipEventId,
-      },
-      'm.call.intent': join.isVideo ? 'video' : 'audio',
-    });
+    // The slot of the room, as the web client sends it (matrix-js-sdk 43).
+    return _logged(
+      'ring not sent',
+      () => _send(join.room, RtcNotificationContent.eventType, {
+        'slot_id': 'm.call#ROOM',
+        'notification_type': callee != null ? 'ring' : 'notification',
+        'sender_ts': DateTime.now().millisecondsSinceEpoch,
+        'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
+        'm.mentions': {
+          'user_ids': <String>[?callee],
+        },
+        'm.relates_to': {
+          'rel_type': 'm.reference',
+          'event_id': membershipEventId,
+        },
+        'm.call.intent': join.isVideo ? 'video' : 'audio',
+      }),
+    );
+  }
+
+  Future<void> _logged(String what, Future<void> Function() action) async {
+    try {
+      await action();
+    } on Exception catch (error, stackTrace) {
+      Logs().w('MatrixRtcDatasource: $what', error, stackTrace);
+      rethrow;
+    }
   }
 
   @override
@@ -394,34 +406,35 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       _watch((tracker) => tracker.missedCalls);
 
   @override
-  Future<void> ensureCallRingPushRules() async {
-    final underride = _client.globalPushRules?.underride ?? const [];
-    for (final rule in _ringPushRules) {
-      final current = underride.where((r) => r.ruleId == rule.id).firstOrNull;
-      if (current != null && rule.matches(current)) continue;
-      await _client.setPushRule(
-        PushRuleKind.underride,
-        rule.id,
-        _RingPushRule.actions,
-        conditions: rule.conditions,
-      );
-    }
-  }
+  Future<void> ensureCallRingPushRules() =>
+      _logged('push rules not set', () async {
+        final underride = _client.globalPushRules?.underride ?? const [];
+        for (final rule in _ringPushRules) {
+          // Only when absent: a rule that differs is left to its owner.
+          if (underride.any((r) => r.ruleId == rule.id)) continue;
+          await _client.setPushRule(
+            PushRuleKind.underride,
+            rule.id,
+            _RingPushRule.actions,
+            conditions: rule.conditions,
+          );
+        }
+      });
 
   @override
   Stream<void> watchRoomEncrypted(CallRoom call) async* {
     final client = _maybeClient;
     if (client == null) return;
     // Encrypted during the join, before this listened.
-    if (_isEncryptedJoined(client, call)) {
+    var isEncrypted = _isEncryptedJoined(client, call);
+    if (isEncrypted) yield null;
+    // The state block of a limited sync never reaches onTimelineEvent. Watches
+    // on once encrypted: the call of an encrypted room still ends with it.
+    await for (final _ in client.onSync.stream) {
+      if (!_isEncryptedJoined(client, call) || isEncrypted) continue;
+      isEncrypted = true;
       yield null;
-      return;
     }
-    // The state block of a limited sync never reaches onTimelineEvent.
-    yield* client.onSync.stream
-        .where((_) => _isEncryptedJoined(client, call))
-        .take(1)
-        .map((_) {});
   }
 
   /// Throws once this account left the room or was removed from it.
@@ -431,6 +444,12 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       throw const CallRoomNotFoundException();
     }
     return room.encrypted;
+  }
+
+  @override
+  Stream<CallMediaKey> watchMediaKeys(CallRoom call) {
+    _room(call);
+    return MatrixRtcMediaKeys(_client, call.id, memberEventType).run();
   }
 
   void dispose() {

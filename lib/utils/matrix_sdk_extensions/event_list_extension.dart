@@ -83,6 +83,19 @@ int? _transactionCreatedAt(String eventId) {
 /// Extension for managing and syncing lists of Matrix events.
 /// Provides efficient operations for detecting changes, additions, and removals.
 extension EventListExtension on List<Event> {
+  /// The current user's reactions on any of these events: an album has one
+  /// list of reactions for all its images.
+  List<Event> myReactionsIn(Timeline timeline) => [
+    for (final event in this)
+      ...event
+          .aggregatedEvents(timeline, RelationshipTypes.reaction)
+          .where(
+            (reaction) =>
+                reaction.senderId == reaction.room.client.userID &&
+                reaction.type == EventTypes.Reaction,
+          ),
+  ];
+
   static const _textMessageTypes = {
     MessageTypes.Text,
     MessageTypes.Notice,

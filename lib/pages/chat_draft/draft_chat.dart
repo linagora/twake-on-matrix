@@ -1,16 +1,16 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_success.dart';
+import 'package:twake_chat/domain/direct_chat/exceptions/create_direct_chat_exception.dart';
+import 'package:twake_chat/domain/direct_chat/usecases/create_direct_chat_usecase.provider.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
 import 'package:twake_chat/domain/model/extensions/xfile/xfile_extension.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
-import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.dart';
 import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.provider.dart';
 import 'package:twake_chat/domain/reactions/usecases/store_recent_reactions_usecase.provider.dart';
@@ -22,7 +22,6 @@ import 'package:twake_chat/pages/chat_draft/draft_chat_view.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
-import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_fake_event_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_web_extension.dart';
@@ -34,21 +33,24 @@ import 'package:twake_chat/presentation/mixins/unblock_user_mixin.dart';
 import 'package:twake_chat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' show Category;
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart'
+    show Category, EmojiData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/providers/emoji_data_provider.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
@@ -86,14 +88,11 @@ class DraftChatController extends ConsumerState<DraftChat>
         DragDrogFileMixin,
         UnblockUserMixin,
         AudioMixin {
+  EmojiData get emojiData => ref.read(emojiDataProvider).requireValue;
+
   Client get client => Matrix.read(context).client;
 
-  final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
-
-  final NetworkConnectionService networkConnectionService = getIt
-      .get<NetworkConnectionService>();
-
-  final uploadManager = getIt.get<UploadManager>();
+  late final UploadManager uploadManager = ref.read(uploadManagerProvider);
 
   late final GetRecentReactionsUseCase _getRecentReactions;
 
@@ -103,17 +102,13 @@ class DraftChatController extends ConsumerState<DraftChat>
   final FocusSuggestionController focusSuggestionController =
       FocusSuggestionController();
 
-  StreamSubscription? _createRoomSubscription;
+  int _createRoomRequestId = 0;
 
   final ValueKey<String> draftChatComposerTypeAheadKey =
       ChatKeys.draftComposerTypeAhead.valueKey;
 
   final ValueKey<String> _draftChatMediaPickerTypeAheadKey =
       ChatKeys.draftMediaPickerTypeAhead.valueKey;
-
-  final ValueNotifier<bool> isBlockedUserNotifier = ValueNotifier(false);
-
-  StreamSubscription? ignoredUsersStreamSub;
 
   FocusNode inputFocus = FocusNode();
   FocusNode keyboardFocus = FocusNode();
@@ -162,6 +157,7 @@ class DraftChatController extends ConsumerState<DraftChat>
     String? caption,
     Room? room,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) {
     sendController.clear();
     return _createRoom(
@@ -171,6 +167,7 @@ class DraftChatController extends ConsumerState<DraftChat>
           room: newRoom,
           caption: caption,
           inReplyTo: inReplyTo,
+          thread: thread,
         );
       },
     );
@@ -227,7 +224,6 @@ class DraftChatController extends ConsumerState<DraftChat>
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getProfile();
-      listenIgnoredUser();
     });
   }
 
@@ -237,7 +233,6 @@ class DraftChatController extends ConsumerState<DraftChat>
     scrollController.dispose();
     sendController.dispose();
     forwardListController.dispose();
-    _createRoomSubscription?.cancel();
     focusSuggestionController.dispose();
     inputText.dispose();
     showEmojiPickerComposerNotifier.dispose();
@@ -246,25 +241,10 @@ class DraftChatController extends ConsumerState<DraftChat>
     inputFocus.dispose();
     keyboardFocus.dispose();
     disposeUnblockUserSubscription();
-    ignoredUsersStreamSub?.cancel();
-    isBlockedUserNotifier.dispose();
     _captionsController.dispose();
     disposeAudioMixin();
     draggingNotifier.dispose();
     super.dispose();
-  }
-
-  bool get isBlockedUser => Matrix.of(
-    context,
-  ).client.ignoredUsers.contains(widget.contact.matrixId ?? '');
-
-  void listenIgnoredUser() {
-    isBlockedUserNotifier.value = isBlockedUser;
-    ignoredUsersStreamSub = Matrix.of(context).client.ignoredUsersStream.listen(
-      (value) {
-        isBlockedUserNotifier.value = isBlockedUser;
-      },
-    );
   }
 
   TextEditingController sendController = TextEditingController();
@@ -400,7 +380,6 @@ class DraftChatController extends ConsumerState<DraftChat>
     );
     inputFocus.unfocus();
     final textEvent = await _triggerTagGreetingMessage();
-    isSendingNotifier.value = true;
     _createRoom(
       onRoomCreatedSuccess: (room) => unawaited(
         sendTextMessageInteractor.execute(room: room, text: textEvent),
@@ -413,60 +392,66 @@ class DraftChatController extends ConsumerState<DraftChat>
     OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onRoomCreatedFailed,
   }) async {
-    _createRoomSubscription?.cancel();
-    _createRoomSubscription = createDirectChatInteractor
-        .execute(
-          contactMxId: presentationContact.matrixId!,
-          client: Matrix.of(context).client,
-          enableEncryption: false,
-        )
-        .listen((event) {
-          event.fold(
-            (failure) {
-              onRoomCreatedFailed?.call();
-              Logs().d("_createRoom: $failure");
-              isSendingNotifier.value = false;
-            },
-            (success) async {
-              if (success is CreateDirectChatSuccess) {
-                final intendedMxId = presentationContact.matrixId;
-                final room = Matrix.of(
-                  context,
-                ).client.getRoomById(success.roomId);
-                if (room == null) return;
-                if (intendedMxId == null ||
-                    !room.isUsableDirectChatWith(intendedMxId)) {
-                  Logs().w(
-                    'DraftChat: refusing non-matching room '
-                    'intended=$intendedMxId room=${room.id} '
-                    'isDirect=${room.isDirectChat} '
-                    'peer=${room.directChatMatrixID} '
-                    'joined=${room.summary.mJoinedMemberCount}',
-                  );
-                  isSendingNotifier.value = false;
-                  if (mounted) {
-                    TwakeSnackBar.show(
-                      context,
-                      L10n.of(context)!.roomCreationFailed,
-                    );
-                  }
-                  return;
-                }
-                onRoomCreatedSuccess?.call(room);
-                RoomRoute(
-                  roomid: room.id,
-                  $extra: ChatRouterInputArgument(
-                    type: ChatRouterInputArgumentType.draft,
-                    data:
-                        _userProfile.value?.resolvedDisplayName ??
-                        presentationContact.displayName ??
-                        room.name,
-                  ),
-                ).go(context);
-              }
-            },
-          );
-        });
+    // Every sender (text, media, voice) blocks the screen until it ends.
+    isSendingNotifier.value = true;
+    // Only the latest request reports back, as the cancelled stream did.
+    final requestId = ++_createRoomRequestId;
+    final intendedMxId = presentationContact.matrixId!;
+    // One client for the whole request: the use case captures it on read.
+    final client = ref.read(activeMatrixClientProvider);
+    String? roomId;
+    CreateDirectChatException? failure;
+    try {
+      roomId = await ref
+          .read(createDirectChatUseCaseProvider)
+          .execute(contactMxId: intendedMxId);
+    } on CreateDirectChatException catch (e) {
+      failure = e;
+    } catch (e, s) {
+      // Not a typed failure (an Error or a missing client): the screen must not
+      // stay blocked, and the cause is reported instead of hidden.
+      Logs().e('_createRoom: unexpected failure', e, s);
+      failure = CreateDirectChatFailedException(e);
+    }
+    if (!mounted || requestId != _createRoomRequestId) return;
+
+    if (!identical(ref.read(activeMatrixClientProvider), client)) {
+      // The account changed during the request: its room is not ours to open.
+      isSendingNotifier.value = false;
+      return;
+    }
+    if (failure is CreateDirectChatRoomMismatchException) {
+      _refuseRoom();
+      return;
+    }
+    if (failure != null) {
+      onRoomCreatedFailed?.call();
+      Logs().d('_createRoom: $failure');
+      isSendingNotifier.value = false;
+      return;
+    }
+    // Only the legacy success callback needs the Room itself.
+    final room = client?.getRoomById(roomId!);
+    if (room == null) {
+      _refuseRoom();
+      return;
+    }
+    onRoomCreatedSuccess?.call(room);
+    RoomRoute(
+      roomid: room.id,
+      $extra: ChatRouterInputArgument(
+        type: ChatRouterInputArgumentType.draft,
+        data:
+            _userProfile.value?.resolvedDisplayName ??
+            presentationContact.displayName ??
+            room.name,
+      ),
+    ).go(context);
+  }
+
+  void _refuseRoom() {
+    isSendingNotifier.value = false;
+    TwakeSnackBar.show(context, L10n.of(context)!.roomCreationFailed);
   }
 
   void onEmojiAction(TapDownDetails details) {
@@ -487,7 +472,7 @@ class DraftChatController extends ConsumerState<DraftChat>
 
   void typeEmoji(String emoji) {
     if (emoji.isEmpty) return;
-    final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji);
+    final emojiId = emojiData.getIdByEmoji(emoji);
 
     unawaited(
       ref
@@ -638,7 +623,6 @@ class DraftChatController extends ConsumerState<DraftChat>
         break;
       case SendMediaWithCaptionStatus.done:
       case SendMediaWithCaptionStatus.emptyRoom:
-        isSendingNotifier.value = true;
         _createRoom(
           onRoomCreatedSuccess: (newRoom) {
             if (matrixFilesList.first is MatrixImageFile) {

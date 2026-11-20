@@ -86,6 +86,26 @@ jobs:
         run: |
           yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper/dists
+            !~/.gradle/caches/modules-2/*.lock
+          key: gradle-debug-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('android/**/*.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: gradle-debug-${{ runner.os }}-${{ runner.arch }}-
+
+      # Not on the runner image: Gradle installs them during the build.
+      - name: Cache Android SDK packages installed by Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-31
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-33
+            ${{ env.ANDROID_SDK_ROOT }}/cmake/3.22.1
+          key: android-sdk-${{ runner.os }}-${{ runner.arch }}-platforms-31-33-cmake-3.22.1
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -101,7 +121,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
 
       - name: Start Synapse (Docker)
         run: ./scripts/integration-server-synapse.sh
@@ -131,8 +151,8 @@ jobs:
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
-          # Tests needing the staging TOM backend or real hardware are not
-          # registered against this local harness (see TestBase.runPatrolTest).
+          # Tests needing the staging TOM backend or real hardware are
+          # reported as skipped against this local harness (see TestBase.runPatrolTest).
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
@@ -156,7 +176,8 @@ jobs:
           # evaluated by the shell even inside double quotes.
           PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         with:
-          api-level: 34
+          # The API 34 image kills the next test process 1 s after `pm clear`; Android 15 fixed it.
+          api-level: 35
           target: google_apis
           arch: x86_64
           profile: pixel_6
@@ -296,6 +317,26 @@ jobs:
         run: |
           yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper/dists
+            !~/.gradle/caches/modules-2/*.lock
+          key: gradle-debug-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('android/**/*.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: gradle-debug-${{ runner.os }}-${{ runner.arch }}-
+
+      # Not on the runner image: Gradle installs them during the build.
+      - name: Cache Android SDK packages installed by Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-31
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-33
+            ${{ env.ANDROID_SDK_ROOT }}/cmake/3.22.1
+          key: android-sdk-${{ runner.os }}-${{ runner.arch }}-platforms-31-33-cmake-3.22.1
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -311,7 +352,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
 
       - name: Start Synapse (Docker)
         run: ./scripts/integration-server-synapse.sh
@@ -341,8 +382,8 @@ jobs:
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
-          # Tests needing the staging TOM backend or real hardware are not
-          # registered against this local harness (see TestBase.runPatrolTest).
+          # Tests needing the staging TOM backend or real hardware are
+          # reported as skipped against this local harness (see TestBase.runPatrolTest).
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
@@ -360,7 +401,8 @@ jobs:
       - name: Run Patrol shard on x86_64 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          # The API 34 image kills the next test process 1 s after `pm clear`; Android 15 fixed it.
+          api-level: 35
           target: google_apis
           arch: x86_64
           profile: pixel_6
@@ -438,6 +480,26 @@ jobs:
         run: |
           yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper/dists
+            !~/.gradle/caches/modules-2/*.lock
+          key: gradle-profile-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('android/**/*.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: gradle-profile-${{ runner.os }}-${{ runner.arch }}-
+
+      # Not on the runner image: Gradle installs them during the build.
+      - name: Cache Android SDK packages installed by Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-31
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-33
+            ${{ env.ANDROID_SDK_ROOT }}/cmake/3.22.1
+          key: android-sdk-${{ runner.os }}-${{ runner.arch }}-platforms-31-33-cmake-3.22.1
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -457,7 +519,7 @@ jobs:
           INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
           ORG_GRADLE_PROJECT_patrolTestBuildType: profile
         run: |
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
           flutter build apk --config-only
 
           # The secret may hold either base64-encoded content or the raw env

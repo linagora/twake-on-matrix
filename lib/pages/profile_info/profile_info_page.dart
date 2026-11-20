@@ -1,9 +1,10 @@
 import 'package:twake_chat/pages/profile_info/profile_info_view.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
 
-class ProfileInfoPage extends StatefulWidget {
+class ProfileInfoPage extends ConsumerStatefulWidget {
   const ProfileInfoPage({
     super.key,
     required this.roomId,
@@ -20,11 +21,11 @@ class ProfileInfoPage extends StatefulWidget {
   final VoidCallback? onTransferOwnershipSuccess;
 
   @override
-  State<ProfileInfoPage> createState() => ProfileInfoPageState();
+  ConsumerState<ProfileInfoPage> createState() => ProfileInfoPageState();
 }
 
-class ProfileInfoPageState extends State<ProfileInfoPage> {
-  Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
+class ProfileInfoPageState extends ConsumerState<ProfileInfoPage> {
+  Room? get room => ref.read(matrixClientProvider).getRoomById(widget.roomId);
 
   User? get user => room?.unsafeGetUserFromMemoryOrFallback(widget.userId);
 

@@ -314,7 +314,7 @@ mixin ConnectPageMixin {
       redirectUrl: redirectUrl,
     );
     final urlScheme = _getRedirectUrlScheme(redirectUrl);
-    final uri = await FlutterWebAuth2.authenticate(
+    await FlutterWebAuth2.authenticate(
       url: url,
       callbackUrlScheme: urlScheme,
       options: const FlutterWebAuth2Options(
@@ -322,7 +322,6 @@ mixin ConnectPageMixin {
         windowName: windowNameValue,
       ),
     );
-    Logs().d("ConnectPageMixin:_redirectRegistrationUrl: URI - $uri");
   }
 
   String _generatePostLogoutRedirectUrl() {

@@ -57,8 +57,17 @@ class TestBase {
 
     // LOCAL_HARNESS: throwaway Synapse, no TOM backend or real hardware.
     const localHarness = bool.fromEnvironment('LOCAL_HARNESS');
-    if (localHarness && (requiresBackend || requiresHardware)) return;
-    if (!localHarness && requiresDisposableServer) return;
+    final skipReason = switch ((
+      localHarness,
+      requiresBackend,
+      requiresHardware,
+      requiresDisposableServer,
+    )) {
+      (true, true, _, _) => 'needs the TOM backend, absent from LOCAL_HARNESS',
+      (true, _, true, _) => 'needs real hardware, absent from LOCAL_HARNESS',
+      (false, _, _, true) => 'changes server state, LOCAL_HARNESS only',
+      _ => null,
+    };
 
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
@@ -100,7 +109,9 @@ class TestBase {
       findTimeout: const Duration(milliseconds: nativeFindTimeoutMs),
     );
     patrolTest(
-      description,
+      // Patrol's skip takes no reason, so the report shows it in the name.
+      skipReason == null ? description : '$description [skipped: $skipReason]',
+      skip: skipReason != null,
       timeout: testTimeout,
       config: patrolConfig,
       nativeAutomatorConfig: defaultNativeConfig,

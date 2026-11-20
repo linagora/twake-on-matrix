@@ -2,7 +2,7 @@ import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permis
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:twake_chat/widgets/blur_hash_background.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -165,7 +165,8 @@ class StoryView extends StatelessWidget {
           final hash = event.infoMap['xyz.amorgan.blurhash'];
           return Stack(
             children: [
-              if (hash is String) BlurHash(hash: hash, imageFit: BoxFit.cover),
+              if (hash is String)
+                BlurHashBackground(hash: hash, fit: BoxFit.cover),
               if ({
                     MessageTypes.Video,
                     MessageTypes.Audio,

@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -52,6 +53,7 @@ extension SendFileExtension on Room {
     required SyncUpdate fakeImageEvent,
     required String txid,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     String? editEventId,
     int? shrinkImageMaxDimension,
     ImageFileInfo? thumbnail,
@@ -178,6 +180,7 @@ extension SendFileExtension on Room {
         txid: txid,
         messageType: msgType,
         inReplyTo: inReplyTo,
+        thread: thread,
         editEventId: editEventId,
         shrinkImageMaxDimension: shrinkImageMaxDimension,
         extraContent: extraContent,
@@ -194,53 +197,7 @@ extension SendFileExtension on Room {
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
     } else if (fileInfo is VideoFileInfo) {
-      // Compress video before upload to reduce file size (especially iOS
-      // MOV/HEVC which can be 100 MB+ raw). Falls back to the original file
-      // on any error so the send is never blocked.
-      var videoInfo = fileInfo;
-      final videoPath = videoInfo.filePath;
-      if (videoPath != null) {
-        try {
-          Logs().d(
-            'sendFileEventMobile::Compressing video '
-            '(${videoInfo.fileSize} bytes)',
-          );
-          final mediaInfo = await VideoCompress.compressVideo(
-            videoPath,
-            quality: VideoQuality.MediumQuality,
-            deleteOrigin: false,
-          );
-          final compressedFile = mediaInfo?.file;
-          if (compressedFile != null && await compressedFile.exists()) {
-            final compressedSize = await compressedFile.length();
-            if (compressedSize < videoInfo.fileSize && compressedSize > 0) {
-              Logs().d(
-                'sendFileEventMobile::Video compressed '
-                '${videoInfo.fileSize} → $compressedSize bytes '
-                '(${(100 - compressedSize * 100 ~/ videoInfo.fileSize)}% saved)',
-              );
-              videoInfo = VideoFileInfo(
-                videoInfo.fileName,
-                filePath: compressedFile.path,
-                width: mediaInfo?.width,
-                height: mediaInfo?.height,
-              );
-            } else {
-              Logs().d(
-                'sendFileEventMobile::Compressed video not smaller, '
-                'using original',
-              );
-              try {
-                await compressedFile.delete();
-              } catch (_) {
-                // best-effort cleanup
-              }
-            }
-          }
-        } catch (e, s) {
-          Logs().w('sendFileEventMobile::Video compression failed', e, s);
-        }
-      }
+      final videoInfo = await compressVideoForUpload(fileInfo);
       fileInfo = videoInfo;
 
       await updateFakeSync(
@@ -261,18 +218,13 @@ extension SendFileExtension on Room {
           videoInfo.height == null ||
           videoInfo.width == 0 ||
           videoInfo.height == 0) {
-        fileInfo = VideoFileInfo(
-          videoInfo.fileName,
-          filePath: videoInfo.filePath,
-          bytes: videoInfo.bytes,
-          width: thumbnail?.width,
-          height: thumbnail?.height,
-        );
+        fileInfo = videoInfoWithThumbnailSize(videoInfo, thumbnail);
         fakeImageEvent = await sendFakeFileInfoEvent(
           fileInfo,
           txid: txid,
           messageType: msgType,
           inReplyTo: inReplyTo,
+          thread: thread,
           editEventId: editEventId,
           shrinkImageMaxDimension: shrinkImageMaxDimension,
           extraContent: extraContent,
@@ -570,6 +522,8 @@ extension SendFileExtension on Room {
       content,
       txid: txid,
       inReplyTo: inReplyTo,
+      threadRootEventId: thread?.rootEventId,
+      threadLastEventId: thread?.lastEventId,
       editEventId: editEventId,
     );
     if (eventId != null) {
@@ -733,6 +687,7 @@ extension SendFileExtension on Room {
     required List<FileAssetEntity> entities,
     String? captionInfo,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     final txIdMapToImageFile = <TransactionId, FakeSendingFileInfo>{};
     for (final entity in entities) {
@@ -746,6 +701,7 @@ extension SendFileExtension on Room {
           messageType: entity.messageType,
           captionInfo: captionInfo,
           inReplyTo: inReplyTo,
+          thread: thread,
         );
         txIdMapToImageFile[txid] = FakeSendingFileInfo(
           fileInfo: fileInfo,
@@ -871,3 +827,69 @@ extension SendFileExtension on Room {
     return encrypted && client.fileEncryptionEnabled;
   }
 }
+
+@visibleForTesting
+Future<VideoFileInfo> compressVideoForUpload(VideoFileInfo fileInfo) async {
+  // Compress video before upload to reduce file size (especially iOS
+  // MOV/HEVC which can be 100 MB+ raw). Falls back to the original file
+  // on any error so the send is never blocked.
+  var videoInfo = fileInfo;
+  final videoPath = videoInfo.filePath;
+  if (videoPath != null) {
+    try {
+      Logs().d(
+        'sendFileEventMobile::Compressing video '
+        '(${videoInfo.fileSize} bytes)',
+      );
+      final mediaInfo = await VideoCompress.compressVideo(
+        videoPath,
+        quality: VideoQuality.MediumQuality,
+        deleteOrigin: false,
+      );
+      final compressedFile = mediaInfo?.file;
+      if (compressedFile != null && await compressedFile.exists()) {
+        final compressedSize = await compressedFile.length();
+        if (compressedSize < videoInfo.fileSize && compressedSize > 0) {
+          Logs().d(
+            'sendFileEventMobile::Video compressed '
+            '${videoInfo.fileSize} → $compressedSize bytes '
+            '(${(100 - compressedSize * 100 ~/ videoInfo.fileSize)}% saved)',
+          );
+          // video_compress swaps w/h on Android; the thumbnail gives the size.
+          videoInfo = VideoFileInfo(
+            videoInfo.fileName,
+            filePath: compressedFile.path,
+            duration: videoInfo.duration,
+          );
+        } else {
+          Logs().d(
+            'sendFileEventMobile::Compressed video not smaller, '
+            'using original',
+          );
+          try {
+            await compressedFile.delete();
+          } catch (_) {
+            // best-effort cleanup
+          }
+        }
+      }
+    } catch (e, s) {
+      Logs().w('sendFileEventMobile::Video compression failed', e, s);
+    }
+  }
+  return videoInfo;
+}
+
+@visibleForTesting
+VideoFileInfo videoInfoWithThumbnailSize(
+  VideoFileInfo videoInfo,
+  ImageFileInfo? thumbnail,
+) => VideoFileInfo(
+  videoInfo.fileName,
+  filePath: videoInfo.filePath,
+  bytes: videoInfo.bytes,
+  customMimeType: videoInfo.customMimeType,
+  width: thumbnail?.width,
+  height: thumbnail?.height,
+  duration: videoInfo.duration,
+);

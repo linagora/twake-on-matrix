@@ -18,6 +18,7 @@ import 'package:twake_chat/pages/call/call_screen.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_video_call_button.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 
@@ -159,7 +160,7 @@ void main() {
       );
     });
 
-    testWidgets('build_withATokenServiceInAnEncryptedRoom_isHidden', (
+    testWidgets('build_withATokenServiceInAnEncryptedRoom_offersTheCall', (
       tester,
     ) async {
       // Arrange
@@ -169,7 +170,31 @@ void main() {
       await pumpButton(tester, withTokenService: true);
 
       // Assert
-      expect(find.byType(TwakeIconButton), findsNothing);
+      expect(find.byTooltip('Start Call'), findsOneWidget);
+    });
+
+    testWidgets('onTap_onWebInAnEncryptedRoom_sendsTheMeetLink', (
+      tester,
+    ) async {
+      // Arrange
+      PlatformInfos.isTestingForWeb = true;
+      addTearDown(() => PlatformInfos.isTestingForWeb = false);
+      when(mockRoom.encrypted).thenReturn(true);
+      await pumpButton(tester, withTokenService: true);
+
+      // Act
+      await tester.tap(find.byType(TwakeIconButton));
+      await tester.pump();
+
+      // Assert
+      expect(find.byTooltip('Start Call'), findsNothing);
+      verify(
+        mockUseCase.execute(
+          roomId: testRoomId,
+          baseUrl: 'https://meet.example.com',
+          startedTitle: 'Has started a video call',
+        ),
+      ).called(1);
     });
 
     testWidgets(

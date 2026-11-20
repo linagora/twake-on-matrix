@@ -21,6 +21,7 @@ class CallRingTracker {
   late final StreamSubscription<SyncUpdate> _syncSubscription;
   final _rings = <String, CallRing>{};
   final _timers = <String, Timer>{};
+  final _pending = <String, MissedCall>{};
   final _changes = StreamController<List<CallRing>>.broadcast();
   final _missed = StreamController<MissedCall>.broadcast();
 
@@ -67,23 +68,21 @@ class CallRingTracker {
     inRoom.forEach(_remove);
   }
 
-  /// A join can come with a limited sync only as room state.
+  /// A join can come with a limited sync only as room state. A room whose
+  /// call has no member left rings no more: the caller hung up, a missed call.
   void _onSync() {
-    final joined = [
-      for (final ring in _rings.values)
-        if (_client
-                .getRoomById(ring.room.id)
-                ?.states[CallEventTypes.callMember]
-                ?.values
-                .any(
-                  (member) =>
-                      member.senderId == _client.userID &&
-                      isLiveMembership(member),
-                ) ??
-            false)
-          ring.eventId,
-    ];
-    joined.forEach(_remove);
+    for (final ring in _rings.values.toList()) {
+      final room = _client.getRoomById(ring.room.id);
+      if (room == null) continue;
+      final live = (room.states[CallEventTypes.callMember]?.values ?? const [])
+          .where(isLiveMembership)
+          .toList();
+      if (live.any((member) => member.senderId == _client.userID)) {
+        _remove(ring.eventId);
+      } else if (live.isEmpty) {
+        _lapse(ring.eventId);
+      }
+    }
   }
 
   void _onDecline(Event event) {
@@ -105,27 +104,35 @@ class CallRingTracker {
     final left = ring.expiresAt.difference(DateTime.now());
     if (left <= Duration.zero) return;
     _rings[ring.eventId] = ring;
-    _timers[ring.eventId] = Timer(left, () => _lapse(ring, event));
+    _pending[ring.eventId] = MissedCall(
+      ringEventId: ring.eventId,
+      room: ring.room,
+      callerId: ring.senderId,
+      sentAt: event.originServerTs,
+      isVideo: ring.isVideo,
+    );
+    _timers[ring.eventId] = Timer(left, () => _lapse(ring.eventId));
     _emit();
   }
 
+  /// A ring of someone else, not yet answered here, that mentions the
+  /// account. A legacy `call.notify` has no `sender_ts`: the server time.
   bool _isForUs(Event event) {
     final userId = _client.userID;
+    if (userId == null || _isOwnOrKnown(event) || !_isRing(event)) return false;
+    if (_isInCallHere(event.room)) return false;
     final senderTs = event.content['sender_ts'];
-    if (userId == null ||
-        senderTs is! int ||
-        event.senderId == userId ||
-        _rings.containsKey(event.eventId) ||
-        !_isRing(event) ||
-        _isInCallHere(event.room)) {
-      return false;
-    }
     return RtcNotificationContent(
-      senderTs: DateTime.fromMillisecondsSinceEpoch(senderTs),
+      senderTs: senderTs is int
+          ? DateTime.fromMillisecondsSinceEpoch(senderTs)
+          : event.originServerTs,
       notificationType: RtcNotificationType.ring,
       lifetime: _lifetimeOf(event),
     ).shouldNotifyUser(event: event, currentUserId: userId);
   }
+
+  bool _isOwnOrKnown(Event event) =>
+      event.senderId == _client.userID || _rings.containsKey(event.eventId);
 
   static bool _isRing(Event event) {
     final key = event.type == CallEventTypes.callNotify
@@ -166,21 +173,15 @@ class CallRingTracker {
         createdTs + expires >= DateTime.now().millisecondsSinceEpoch;
   }
 
-  void _lapse(CallRing ring, Event event) {
-    _remove(ring.eventId);
-    _missed.add(
-      MissedCall(
-        ringEventId: ring.eventId,
-        room: ring.room,
-        callerId: ring.senderId,
-        sentAt: event.originServerTs,
-        isVideo: ring.isVideo,
-      ),
-    );
+  void _lapse(String ringId) {
+    final missed = _pending[ringId];
+    _remove(ringId);
+    if (missed != null) _missed.add(missed);
   }
 
   void _remove(String ringId) {
     _rings.remove(ringId);
+    _pending.remove(ringId);
     _timers.remove(ringId)?.cancel();
     _emit();
   }

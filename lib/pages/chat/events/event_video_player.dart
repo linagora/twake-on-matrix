@@ -11,7 +11,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:twake_chat/widgets/blur_hash_background.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
@@ -93,7 +93,7 @@ class EventVideoPlayer extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                BlurHash(hash: blurHash),
+                BlurHashBackground(hash: blurHash),
                 if (thumbnailPath != null)
                   Image(
                     image: FileImage(File(thumbnailPath!)).resizeToFit(

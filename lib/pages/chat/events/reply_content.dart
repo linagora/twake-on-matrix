@@ -8,7 +8,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:twake_chat/widgets/blur_hash_background.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -49,8 +49,11 @@ class ReplyContent extends StatelessWidget {
         !displayEvent.redacted &&
         displayEvent.content['format'] == 'org.matrix.custom.html' &&
         displayEvent.content['formatted_body'] is String) {
-      String html = fixDoubleEncodedCodeBlocks(
-        displayEvent.content['formatted_body'] as String? ?? '',
+      String html = fixDoubleEncodedAutolinks(
+        fixDoubleEncodedCodeBlocks(
+          displayEvent.content['formatted_body'] as String? ?? '',
+        ),
+        source: displayEvent.body,
       );
       if (displayEvent.messageType == MessageTypes.Emote) {
         html = '* $html';
@@ -206,7 +209,7 @@ class BlurHashPlaceHolder extends StatelessWidget {
     return SizedBox(
       width: ReplyContentStyle.replyContentSize,
       height: ReplyContentStyle.replyContentSize,
-      child: BlurHash(hash: blurHashString, imageFit: BoxFit.cover),
+      child: BlurHashBackground(hash: blurHashString, fit: BoxFit.cover),
     );
   }
 }

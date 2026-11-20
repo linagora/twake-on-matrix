@@ -1,4 +1,3 @@
-import 'package:matrix/matrix.dart' show Logs;
 import 'package:twake_chat/domain/repository/call/call_repository.dart';
 
 class EnsureCallRingPushRuleUseCase {
@@ -10,8 +9,8 @@ class EnsureCallRingPushRuleUseCase {
   Future<void> execute() async {
     try {
       await _repository.ensureCallRingPushRules();
-    } on Exception catch (error, stackTrace) {
-      Logs().w('EnsureCallRingPushRule: rules not set', error, stackTrace);
+    } on Exception {
+      // Only the ring sound is lost. The data layer logs it.
     }
   }
 }

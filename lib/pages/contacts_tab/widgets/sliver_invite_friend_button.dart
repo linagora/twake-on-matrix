@@ -1,12 +1,14 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -36,18 +38,37 @@ class _InviteFriendButtonDelegate extends SliverPersistentHeaderDelegate {
     BuildContext context,
     double shrinkOffset,
     bool overlapsContent,
-  ) {
+  ) => const _InviteFriendButton();
+
+  @override
+  double get maxExtent => 64;
+
+  @override
+  double get minExtent => 0;
+
+  @override
+  bool shouldRebuild(covariant _InviteFriendButtonDelegate oldDelegate) =>
+      oldDelegate.userId != userId;
+}
+
+class _InviteFriendButton extends ConsumerWidget {
+  const _InviteFriendButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final sysColor = LinagoraSysColors.material();
     final textTheme = Theme.of(context).textTheme;
-    final client = Matrix.of(context).client;
     return Material(
       color: sysColor.onPrimary,
       child: InkWell(
         onTap: () async {
-          final url = client.personalInviteUrl;
+          final url = ref.read(matrixClientProvider).personalInviteUrl;
           try {
             if (PlatformInfos.isMobile) {
-              await Share.share(url);
+              await Share.share(
+                url,
+                sharePositionOrigin: context.sharePositionOrigin,
+              );
             } else if (PlatformInfos.isWeb) {
               await Clipboard.setData(ClipboardData(text: url));
               TwakeSnackBar.show(
@@ -98,14 +119,4 @@ class _InviteFriendButtonDelegate extends SliverPersistentHeaderDelegate {
       ),
     );
   }
-
-  @override
-  double get maxExtent => 64;
-
-  @override
-  double get minExtent => 0;
-
-  @override
-  bool shouldRebuild(covariant _InviteFriendButtonDelegate oldDelegate) =>
-      oldDelegate.userId != userId;
 }

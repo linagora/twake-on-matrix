@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/image_viewer/image_viewer_style.dart';
 import 'package:twake_chat/pages/image_viewer/media_viewer_app_bar.dart';
 import 'package:twake_chat/utils/extension/mime_type_extension.dart';
@@ -172,6 +173,13 @@ class _ImageWidget extends StatelessWidget {
               return const SizedBox();
             }
           },
+        );
+      } else if (controller.downloadFailed) {
+        return IconButton(
+          onPressed: controller.retryDownload,
+          tooltip: L10n.of(context)!.tapToRetry,
+          color: Colors.white,
+          icon: const Icon(Icons.broken_image_outlined),
         );
       } else {
         return const CupertinoActivityIndicator(

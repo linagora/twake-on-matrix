@@ -75,10 +75,23 @@ class CoreRobot {
     // handles its own prompts and nothing surfaces through Patrol's
     // native automator, which itself is unavailable on the web target.
     if (kIsWeb) return;
-    try {
-      await $.native.grantPermissionWhenInUse();
-    } catch (e) {
-      ignoreException();
+    const maxAttempts = 3;
+    var waitForDialog = const Duration(seconds: 5);
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      if (!await $.native.isPermissionDialogVisible(timeout: waitForDialog)) {
+        return;
+      }
+      // The tap can be lost while the keyboard is hiding: check and retry.
+      try {
+        await $.native.grantPermissionWhenInUse();
+      } catch (_) {}
+      await Future<void>.delayed(const Duration(seconds: 1));
+      waitForDialog = const Duration(seconds: 1);
+    }
+    if (await $.native.isPermissionDialogVisible(timeout: waitForDialog)) {
+      throw StateError(
+        'Contacts permission dialog still visible after $maxAttempts grants',
+      );
     }
   }
 

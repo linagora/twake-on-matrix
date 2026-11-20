@@ -126,6 +126,14 @@ RUN set -eux; \
 
 # Final image — lean nginx:alpine with no extra packages needed
 FROM nginx:${NGINX_VERSION}-alpine AS final-image
+# The pinned nginx tag is not rebuilt for every Alpine security fix, so pulling a
+# fresh base is not enough: apply the pending Alpine updates here. nginx itself
+# comes from nginx.org, whose repository is not configured in the image, so this
+# never moves nginx away from NGINX_VERSION (the brotli module stays compatible).
+# CI sets APK_UPGRADE_CACHE_BUST to its run id: with an unchanged base digest the
+# layer cache would otherwise replay an older upgrade and miss later fixes.
+ARG APK_UPGRADE_CACHE_BUST=""
+RUN apk upgrade --no-cache
 ARG TWAKECHAT_BASE_HREF
 ENV TWAKECHAT_BASE_HREF=${TWAKECHAT_BASE_HREF:-/web/}
 ENV TWAKECHAT_LISTEN_PORT="80"

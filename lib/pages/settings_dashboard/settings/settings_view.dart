@@ -60,9 +60,16 @@ class SettingsView extends StatelessWidget {
                     padding: SettingsViewStyle.itemBuilderPadding,
                     child: Row(
                       children: [
-                        ValueListenableBuilder(
-                          valueListenable: controller.avatarUriNotifier,
-                          builder: (context, avatarUrl, __) {
+                        // The initials come from the display name, so the
+                        // avatar follows both notifiers.
+                        ListenableBuilder(
+                          listenable: Listenable.merge([
+                            controller.avatarUriNotifier,
+                            controller.displayNameNotifier,
+                          ]),
+                          builder: (context, _) {
+                            final avatarUrl =
+                                controller.avatarUriNotifier.value;
                             return Padding(
                               padding: SettingsViewStyle.avatarPadding,
                               child: Material(
@@ -142,16 +149,29 @@ class SettingsView extends StatelessWidget {
               ),
             ),
             if (!controller.matrix.twakeSupported)
-              ValueListenableBuilder(
-                valueListenable: controller.showChatBackupSwitch,
-                builder: (_, backUpAvailable, _) {
+              ListenableBuilder(
+                listenable: Listenable.merge([
+                  controller.showChatBackupSwitch,
+                  controller.backupStateLoading,
+                ]),
+                builder: (_, child) {
+                  final backUpAvailable = controller.showChatBackupSwitch.value;
+                  // Still checking: show the loading tile, not an off switch.
+                  if (backUpAvailable == null &&
+                      controller.backupStateLoading.value) {
+                    return child!;
+                  }
                   return SwitchListTile(
                     controlAffinity: .trailing,
                     contentPadding: SettingsViewStyle.backupSwitchPadding,
                     value: backUpAvailable == false,
                     secondary: const Icon(Icons.backup_outlined),
                     title: Text(l10n.chatBackup),
-                    onChanged: controller.firstRunBootstrapAction,
+                    // Unknown state: no action, a tap must not confirm that
+                    // the backup is enabled.
+                    onChanged: backUpAvailable == null
+                        ? null
+                        : controller.firstRunBootstrapAction,
                   );
                 },
                 child: ListTile(

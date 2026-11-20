@@ -7,6 +7,10 @@ on:
 
 name: Build Docker images
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   pull-requests: read
   contents: read
@@ -73,6 +77,7 @@ jobs:
           # SENTRY_RELEASE/DIST default to pubspec.yaml values inside the build
           build-args: |
             FLUTTER_VERSION=${{ steps.flutter.outputs.version }}
+            APK_UPGRADE_CACHE_BUST=${{ github.run_id }}
             SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
             SENTRY_ORG=${{ secrets.SENTRY_ORG }}
             SENTRY_DSN=${{ secrets.SENTRY_DSN }}
@@ -146,6 +151,7 @@ jobs:
           # SENTRY_DIST defaults to the build number from pubspec.yaml inside the build
           build-args: |
             FLUTTER_VERSION=${{ steps.flutter.outputs.version }}
+            APK_UPGRADE_CACHE_BUST=${{ github.run_id }}
             SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}
             SENTRY_ORG=${{ secrets.SENTRY_ORG }}
             SENTRY_RELEASE=${{ steps.sentry_version.outputs.release }}

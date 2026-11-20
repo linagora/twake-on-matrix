@@ -35,10 +35,6 @@ void main() {
           home: Scaffold(
             body: MessageReactionsBottomSheet(
               reactionList: reactions,
-              allReactionEvents: {
-                for (final r in reactions)
-                  for (var i = 0; i < r.count; i++) MockEvent(),
-              },
               scrollController: ScrollController(),
             ),
           ),
@@ -54,6 +50,15 @@ void main() {
     expect(find.text('alice'), findsOneWidget);
     expect(find.text('bob'), findsOneWidget);
     expect(find.text('carol'), findsOneWidget);
+  });
+
+  testWidgets('the All tab counts one row per reactor', (tester) async {
+    await pumpSheet(tester, [
+      reaction('👍', [user('alice'), user('bob')]),
+      reaction('🎉', [user('carol')]),
+    ]);
+
+    expect(find.text('All 3'), findsOneWidget);
   });
 
   testWidgets('filters the reactors by the selected tab', (tester) async {

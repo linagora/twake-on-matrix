@@ -83,10 +83,19 @@ class Message extends StatefulWidget {
   final void Function(BuildContext, Event)? onDelete;
   final void Function(Event)? onForward;
   final void Function(Event)? onCopy;
+  final void Function(Event)? onCopyLink;
   final void Function(Event)? onReport;
   final void Function(Event)? onPin;
   final void Function(Event)? onSaveToDownload;
   final void Function(Event)? onSaveToGallery;
+  final void Function(List<Event>)? onForwardAlbum;
+  final void Function(List<Event>)? onSaveAlbumToGallery;
+  final void Function(BuildContext, List<Event>)? onDeleteAlbum;
+  final void Function(List<Event>)? onReportAlbum;
+  final void Function(List<Event>)? onSelectAlbum;
+  final void Function(Event caption)? onCopyAlbumCaption;
+  final Future<void> Function(String emoji, List<Event> album)?
+  onToggleAlbumReaction;
   final void Function(BuildContext context, Event, TapDownDetails, double)?
   onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
@@ -130,10 +139,18 @@ class Message extends StatefulWidget {
     this.onDelete,
     this.onForward,
     this.onCopy,
+    this.onCopyLink,
     this.onReport,
     this.onPin,
     this.onSaveToDownload,
     this.onSaveToGallery,
+    this.onForwardAlbum,
+    this.onSaveAlbumToGallery,
+    this.onDeleteAlbum,
+    this.onReportAlbum,
+    this.onSelectAlbum,
+    this.onCopyAlbumCaption,
+    this.onToggleAlbumReaction,
     this.onTapMoreButton,
     this.recentEmojiFuture,
     this.onRetryTextMessage,
@@ -300,11 +317,19 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           onDelete: widget.onDelete,
           onForward: widget.onForward,
           onCopy: widget.onCopy,
+          onCopyLink: widget.onCopyLink,
           onReport: widget.onReport,
           onLongPressMessage: widget.onLongPressMessage,
           onPin: widget.onPin,
           saveToDownload: widget.onSaveToDownload,
           saveToGallery: widget.onSaveToGallery,
+          onForwardAlbum: widget.onForwardAlbum,
+          onSaveAlbumToGallery: widget.onSaveAlbumToGallery,
+          onDeleteAlbum: widget.onDeleteAlbum,
+          onReportAlbum: widget.onReportAlbum,
+          onSelectAlbum: widget.onSelectAlbum,
+          onCopyAlbumCaption: widget.onCopyAlbumCaption,
+          onToggleAlbumReaction: widget.onToggleAlbumReaction,
           onTapMoreButton: widget.onTapMoreButton,
           recentEmojiFuture: widget.recentEmojiFuture,
           onRetryTextMessage: widget.onRetryTextMessage,

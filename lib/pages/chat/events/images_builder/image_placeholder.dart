@@ -2,7 +2,7 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:twake_chat/widgets/blur_hash_background.dart';
 import 'package:matrix/matrix.dart';
 
 class ImagePlaceholder extends StatelessWidget {
@@ -41,11 +41,11 @@ class ImagePlaceholder extends StatelessWidget {
       child: SizedBox(
         width: this.width,
         height: this.height,
-        child: BlurHash(
+        child: BlurHashBackground(
           hash: blurHashString,
           decodingWidth: width,
           decodingHeight: height,
-          imageFit: fit,
+          fit: fit,
         ),
       ),
     );
