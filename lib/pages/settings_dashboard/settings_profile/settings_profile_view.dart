@@ -9,18 +9,20 @@ import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_pr
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view_style.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view_web.dart';
 import 'package:twake_chat/presentation/model/settings/settings_profile_presentation.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
-class SettingsProfileView extends StatelessWidget {
+class SettingsProfileView extends ConsumerWidget {
   final SettingsProfileController controller;
   final ProfileEditCapabilities? capabilities;
   final UserInfo? userInfo;
@@ -33,7 +35,8 @@ class SettingsProfileView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(matrixClientProvider);
     final responsive = getIt.get<ResponsiveUtils>();
     return Scaffold(
       appBar: TwakeAppBar(
@@ -97,7 +100,7 @@ class SettingsProfileView extends StatelessWidget {
             key: SettingsKeys.profileViewMobile.valueKey,
             builder: (_) {
               return SettingsProfileViewMobile(
-                client: controller.client,
+                client: client,
                 responsive: responsive,
                 settingsProfileUIState: controller.pickAvatarUIState,
                 onTapAvatar: controller.onTapAvatarInMobile,
@@ -166,7 +169,7 @@ class SettingsProfileView extends StatelessWidget {
               return SettingsProfileViewWeb(
                 currentProfile: controller.currentProfile,
                 settingsProfileUIState: controller.pickAvatarUIState,
-                client: controller.client,
+                client: client,
                 menuChildren: controller.listContextMenuBuilder(context),
                 menuController: controller.menuController,
                 basicInfoWidget: ListView.separated(

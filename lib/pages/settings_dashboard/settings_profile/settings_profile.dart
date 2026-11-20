@@ -32,11 +32,11 @@ import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:twake_chat/presentation/multiple_account/twake_chat_presentation_account.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:flutter/material.dart';
@@ -48,14 +48,14 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
-class SettingsProfile extends StatefulWidget {
+class SettingsProfile extends ConsumerStatefulWidget {
   const SettingsProfile({super.key});
 
   @override
-  State<SettingsProfile> createState() => SettingsProfileController();
+  ConsumerState<SettingsProfile> createState() => SettingsProfileController();
 }
 
-class SettingsProfileController extends State<SettingsProfile>
+class SettingsProfileController extends ConsumerState<SettingsProfile>
     with
         CommonMediaPickerMixin,
         SingleImagePickerMixin,
@@ -90,7 +90,7 @@ class SettingsProfileController extends State<SettingsProfile>
     Right(GetClientsInitialUIState()),
   );
 
-  Client get client => Matrix.of(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   String? get _editedDisplayName => SettingsProfileEditRules.editedDisplayName(
     text: displayNameEditingController.text,
@@ -679,7 +679,7 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void updateNewProfileForAccount() {
     listenOnProfileChangeStream(
-      client: Matrix.of(context).client,
+      client: client,
       currentProfile: currentProfile.value,
       onProfileChanged: (newProfile) {
         final indexOldAccount = _multipleAccounts.indexWhere(
@@ -689,9 +689,9 @@ class SettingsProfileController extends State<SettingsProfile>
           return;
         }
         final newAccount = ClientProfilePresentation(
-          client: Matrix.of(context).client,
+          client: client,
           profile: newProfile,
-        ).toTwakeChatPresentationAccount(Matrix.of(context).client);
+        ).toTwakeChatPresentationAccount(client);
         _multipleAccounts[indexOldAccount] = newAccount;
         settingsMultiAccountsUIState.value = Right<Failure, Success>(
           GetClientsSuccessUIState(multipleAccounts: _multipleAccounts),

@@ -11,6 +11,7 @@ class LeaveCallUseCase {
     try {
       await _repository.disconnectMedia();
     } finally {
+      await _repository.stopMediaKeys();
       await _repository.leaveMembership(CallRoom(roomId));
     }
   }

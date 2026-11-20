@@ -2028,6 +2028,7 @@
     }
   },
   "loadingStatus": "正在加载状态…",
+  "previous": "上一步",
   "onlineStatus": "在线",
   "cannotEnableKeyBackup": "无法启用聊天备份。请转到设置重试。",
   "@cannotEnableKeyBackup": {

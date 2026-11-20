@@ -22,19 +22,19 @@ import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart'
 import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-class ChatProfileInfo extends StatefulWidget {
+class ChatProfileInfo extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
   final VoidCallback? onSearch;
   final String? roomId;
@@ -53,10 +53,10 @@ class ChatProfileInfo extends StatefulWidget {
   });
 
   @override
-  State<ChatProfileInfo> createState() => ChatProfileInfoController();
+  ConsumerState<ChatProfileInfo> createState() => ChatProfileInfoController();
 }
 
-class ChatProfileInfoController extends State<ChatProfileInfo>
+class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
     with
         HandleVideoDownloadMixin,
         PlayVideoActionMixin,
@@ -80,7 +80,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   @override
   Room? get room => widget.roomId != null
-      ? Matrix.read(context).client.getRoomById(widget.roomId!)
+      ? ref.read(matrixClientProvider).getRoomById(widget.roomId!)
       : null;
 
   @override
@@ -110,7 +110,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   void onUnblockUser() {
     _unblockUserInteractor
         .execute(
-          client: Matrix.of(context).client,
+          client: ref.read(matrixClientProvider),
           userId: user?.id ?? presentationContact?.matrixId ?? '',
         )
         .listen(
@@ -166,7 +166,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   void onBlockUser() {
     _blockUserInteractor
         .execute(
-          client: Matrix.of(context).client,
+          client: ref.read(matrixClientProvider),
           userId: user?.id ?? presentationContact?.matrixId ?? '',
         )
         .listen(
@@ -209,14 +209,18 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   }
 
   void listenIgnoredUser() {
-    isBlockedUser.value = Matrix.read(context).client.ignoredUsers.contains(
-      presentationContact?.matrixId ?? user?.id ?? '',
-    );
-    ignoredUsersStreamSub = Matrix.read(context).client.ignoredUsersStream
+    isBlockedUser.value = ref
+        .read(matrixClientProvider)
+        .ignoredUsers
+        .contains(presentationContact?.matrixId ?? user?.id ?? '');
+    ignoredUsersStreamSub = ref
+        .read(matrixClientProvider)
+        .ignoredUsersStream
         .listen((value) {
-          final userBlocked = Matrix.read(context).client.ignoredUsers.contains(
-            presentationContact?.matrixId ?? user?.id ?? '',
-          );
+          final userBlocked = ref
+              .read(matrixClientProvider)
+              .ignoredUsers
+              .contains(presentationContact?.matrixId ?? user?.id ?? '');
           blockUserLoadingNotifier.value = false;
           isBlockedUser.value = userBlocked;
         });
@@ -282,7 +286,9 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
     final matrixId = presentationContact?.matrixId ?? user?.id;
     if (matrixId == null) return;
-    final roomId = Matrix.of(context).client.getDirectChatFromUserId(matrixId);
+    final roomId = ref
+        .read(matrixClientProvider)
+        .getDirectChatFromUserId(matrixId);
 
     if (roomId == null) {
       final extra = {

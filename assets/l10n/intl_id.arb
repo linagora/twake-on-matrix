@@ -2061,6 +2061,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "previous": "Sebelumnya",
   "aWhileAgo": "beberapa saat yang lalu",
   "@aWhileAgo": {
     "type": "text",

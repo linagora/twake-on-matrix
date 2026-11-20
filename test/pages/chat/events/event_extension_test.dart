@@ -1,4 +1,6 @@
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
@@ -725,6 +727,45 @@ void main() {
 
       expect(event.bodyWithoutReplyFallback, 'my caption');
     });
+
+    group(
+      'a thread reply (is_falling_back: true) with a quote-prefixed body',
+      () {
+        late bool flagBefore;
+        const threadRelation = {
+          'rel_type': 'm.thread',
+          'event_id': '\$root',
+          'is_falling_back': true,
+          'm.in_reply_to': {'event_id': '\$last'},
+        };
+        const quotePrefixed = '> <@a:example.com> hi\n\nmy caption';
+
+        Event imageThreadReply() => createEvent({
+          'msgtype': 'm.image',
+          'body': quotePrefixed,
+          'filename': 'photo.jpg',
+          'url': 'mxc://example.org/img',
+          'm.relates_to': threadRelation,
+        });
+
+        setUp(() => flagBefore = AppConfig.threadsEnabled);
+        tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
+        test('GIVEN threads off\n'
+            'THEN it is a plain reply: copy strips the quote\n', () {
+          AppConfig.threadsEnabled = false;
+
+          expect(imageThreadReply().bodyWithoutReplyFallback, 'my caption');
+        });
+
+        test('GIVEN threads on\n'
+            'THEN the text the user typed is kept as is\n', () {
+          AppConfig.threadsEnabled = true;
+
+          expect(imageThreadReply().bodyWithoutReplyFallback, quotePrefixed);
+        });
+      },
+    );
   });
 
   group('isCaptionModeOrReply test', () {
@@ -1366,6 +1407,40 @@ void main() {
           originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
         );
       }
+
+      testWidgets('GIVEN an image whose caption was edited\n'
+          'THEN the copied text is the new caption', (tester) async {
+        Map<String, dynamic> image(String caption) => {
+          'msgtype': MessageTypes.Image,
+          'body': caption,
+          'filename': 'photo.jpg',
+          'url': 'mxc://example.com/photo',
+        };
+        final original = createOriginal(
+          eventId: '\$caption',
+          content: image('old caption'),
+        );
+        final edit = createEdit(
+          originalEventId: '\$caption',
+          eventId: '\$caption_edit',
+          newContent: image('new caption'),
+        );
+        final timeline = buildTimeline([original, edit]);
+        late BuildContext context;
+        await tester.pumpWidget(
+          Builder(
+            builder: (c) {
+              context = c;
+              return const SizedBox();
+            },
+          ),
+        );
+
+        expect(
+          original.getSelectedEventString(context, timeline),
+          'new caption',
+        );
+      });
 
       test('GIVEN a never-edited message\n'
           'THEN the displayed time is the original post time', () {

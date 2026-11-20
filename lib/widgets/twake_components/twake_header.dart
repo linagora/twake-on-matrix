@@ -67,8 +67,8 @@ class _TwakeHeaderState extends State<TwakeHeader>
   @override
   void didUpdateWidget(covariant TwakeHeader oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (Matrix.of(context).isValidActiveClient &&
-        widget.client != oldWidget.client) {
+    if (widget.client != oldWidget.client &&
+        Matrix.of(context).isValidActiveClient) {
       getCurrentProfile(widget.client);
       onAccountDataSubscription?.cancel();
       listenOnProfileChangeStream(

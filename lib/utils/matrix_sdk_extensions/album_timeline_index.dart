@@ -12,14 +12,20 @@ class AlbumTimelineIndex {
   final List<Event> _visibleNewestFirst;
   final Map<String, int> _position;
   final Map<String, List<Event>> _albumByLeader;
-  final Set<String> _hiddenIds;
+
+  /// Every event that a leader stands for, mapped to that leader.
+  final Map<String, String> _leaderByHidden;
+
+  /// How many timeline events each leader stands for: its album with the
+  /// deleted images hidden in it.
+  final Map<String, int> _spanByLeader;
 
   AlbumTimelineIndex._(
     this._visibleNewestFirst,
-    this._position,
     this._albumByLeader,
-    this._hiddenIds,
-  );
+    this._leaderByHidden,
+    this._spanByLeader,
+  ) : _position = _positions(_visibleNewestFirst);
 
   /// [visibleNewestFirst] is the visible events, newest first; [breakBefore]
   /// is the first unread event, which starts a new album.
@@ -29,14 +35,18 @@ class AlbumTimelineIndex {
   }) {
     final oldestFirst = visibleNewestFirst.reversed.toList();
     final byId = {for (final e in oldestFirst) e.eventId: e};
-    final albums = const GroupMediaEventsPolicy().execute([
+    final snapshots = [
       for (final e in oldestFirst) e.toMediaSnapshotIfBatched(),
-    ], breakBefore: breakBefore);
+    ];
+    final albums = const GroupMediaEventsPolicy().execute(
+      snapshots,
+      breakBefore: breakBefore,
+    );
     return AlbumTimelineIndex._(
       visibleNewestFirst,
-      _positions(visibleNewestFirst),
       _albumsByLeader(albums, byId),
       _hiddenMembers(albums),
+      _albumSpans(albums),
     );
   }
 
@@ -52,35 +62,36 @@ class AlbumTimelineIndex {
       a.leaderEventId: [for (final id in a.eventIds) byId[id]!],
   };
 
-  static Set<String> _hiddenMembers(List<MediaAlbum> albums) => {
-    for (final a in albums) ...a.eventIds.where((id) => id != a.leaderEventId),
+  static Map<String, String> _hiddenMembers(List<MediaAlbum> albums) => {
+    for (final a in albums)
+      for (final id in [...a.eventIds, ...a.hiddenEventIds])
+        if (id != a.leaderEventId) id: a.leaderEventId,
+  };
+
+  static Map<String, int> _albumSpans(List<MediaAlbum> albums) => {
+    for (final a in albums)
+      a.leaderEventId: a.eventIds.length + a.hiddenEventIds.length,
   };
 
   /// The images of the album that [eventId] leads, oldest first, else null.
   List<Event>? albumLedBy(String eventId) => _albumByLeader[eventId];
 
-  /// True for an album image that the leader draws.
-  bool isHiddenMember(String eventId) => _hiddenIds.contains(eventId);
+  /// True for an event that a leader stands for: an album image it draws or
+  /// a deleted image hidden in its album.
+  bool isHiddenMember(String eventId) => _leaderByHidden.containsKey(eventId);
 
-  /// The leader that draws the hidden image [eventId], else null (the event
-  /// is drawn on its own row).
-  String? albumLeaderOf(String eventId) {
-    if (!isHiddenMember(eventId)) return null;
-    for (final entry in _albumByLeader.entries) {
-      if (entry.value.any((event) => event.eventId == eventId)) {
-        return entry.key;
-      }
-    }
-    return null;
-  }
+  /// The leader that draws the hidden event [eventId] (an album image or a
+  /// deleted image hidden in an album), else null (the event is drawn on its
+  /// own row).
+  String? albumLeaderOf(String eventId) => _leaderByHidden[eventId];
 
-  /// The newer neighbour. For a leader it is the event newer than the newest
-  /// image of its album, not another image of it.
+  /// The newer neighbour. For a leader it is the event newer than everything
+  /// it stands for, not one of those events.
   Event? newerNeighbour(Event event) {
     final position = _position[event.eventId];
     if (position == null) return null;
-    final members = _albumByLeader[event.eventId];
-    final index = position - 1 - (members == null ? 0 : members.length - 1);
+    final span = _spanByLeader[event.eventId] ?? 1;
+    final index = position - span;
     return index >= 0 ? _visibleNewestFirst[index] : null;
   }
 

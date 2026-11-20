@@ -3,14 +3,16 @@ import 'package:twake_chat/domain/model/extensions/common_settings/common_settin
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:linagora_design_flutter/utils/web_link_generator.dart';
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingsProfileRedirectionEditButton extends StatelessWidget {
+class SettingsProfileRedirectionEditButton extends ConsumerWidget {
   const SettingsProfileRedirectionEditButton({
     super.key,
     required this.capabilities,
@@ -21,10 +23,10 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
   final UserInfo? userInfo;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final matrix = Matrix.of(context);
-    final userId = matrix.client.userID;
+    final userId = ref.watch(matrixClientProvider).userID;
     final commonSettingsInformation = matrix
         .loginHomeserverSummary
         ?.appTwakeInformation

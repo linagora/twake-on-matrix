@@ -7,8 +7,8 @@ import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_blocked_users/settings_blocked_users_search_state.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
@@ -20,7 +20,7 @@ import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'settings_blocked_users_view.dart';
 
-class BlockedUsers extends StatefulWidget {
+class BlockedUsers extends ConsumerStatefulWidget {
   final String? initialUserId;
 
   const BlockedUsers({super.key, this.initialUserId});
@@ -29,9 +29,9 @@ class BlockedUsers extends StatefulWidget {
   SettingsIgnoreListController createState() => SettingsIgnoreListController();
 }
 
-class SettingsIgnoreListController extends State<BlockedUsers>
+class SettingsIgnoreListController extends ConsumerState<BlockedUsers>
     with SearchDebouncerMixin {
-  Client get client => Matrix.read(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   /// `null` when the profile cannot be resolved: the user is then skipped.
   Future<Profile?> _fetchProfile(String userId) async {

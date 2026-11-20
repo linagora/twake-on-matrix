@@ -16,20 +16,21 @@ import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_bod
 import 'package:twake_chat/presentation/enum/profile_info/profile_info_body_enum.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/dialog/warning_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/user_extension.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class ProfileInfoBody extends StatefulWidget {
+class ProfileInfoBody extends ConsumerStatefulWidget {
   const ProfileInfoBody({
     required this.user,
     this.onNewChatOpen,
@@ -47,10 +48,10 @@ class ProfileInfoBody extends StatefulWidget {
   final VoidCallback? onTransferOwnershipSuccess;
 
   @override
-  State<ProfileInfoBody> createState() => ProfileInfoBodyController();
+  ConsumerState<ProfileInfoBody> createState() => ProfileInfoBodyController();
 }
 
-class ProfileInfoBodyController extends State<ProfileInfoBody>
+class ProfileInfoBodyController extends ConsumerState<ProfileInfoBody>
     with SingleTickerProviderStateMixin {
   static const int _animationDuration = 100;
 
@@ -104,7 +105,9 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
 
   void openNewChat() {
     if (user == null) return;
-    final roomId = Matrix.of(context).client.getDirectChatFromUserId(user!.id);
+    final roomId = ref
+        .read(matrixClientProvider)
+        .getDirectChatFromUserId(user!.id);
 
     if (roomId == null) {
       if (!PlatformInfos.isMobile && widget.onNewChatOpen != null) {
@@ -136,7 +139,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
     required ContactPresentationSearch contactPresentationSearch,
   }) {
     if (contactPresentationSearch.matrixId ==
-        Matrix.of(context).client.userID) {
+        ref.read(matrixClientProvider).userID) {
       return;
     }
 

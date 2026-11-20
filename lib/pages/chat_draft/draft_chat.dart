@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -43,11 +44,13 @@ import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' show Category;
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart'
+    show Category, EmojiData;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/providers/emoji_data_provider.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
@@ -85,6 +88,8 @@ class DraftChatController extends ConsumerState<DraftChat>
         DragDrogFileMixin,
         UnblockUserMixin,
         AudioMixin {
+  EmojiData get emojiData => ref.read(emojiDataProvider).requireValue;
+
   Client get client => Matrix.read(context).client;
 
   late final UploadManager uploadManager = ref.read(uploadManagerProvider);
@@ -152,6 +157,7 @@ class DraftChatController extends ConsumerState<DraftChat>
     String? caption,
     Room? room,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) {
     sendController.clear();
     return _createRoom(
@@ -161,6 +167,7 @@ class DraftChatController extends ConsumerState<DraftChat>
           room: newRoom,
           caption: caption,
           inReplyTo: inReplyTo,
+          thread: thread,
         );
       },
     );
@@ -465,7 +472,7 @@ class DraftChatController extends ConsumerState<DraftChat>
 
   void typeEmoji(String emoji) {
     if (emoji.isEmpty) return;
-    final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji);
+    final emojiId = emojiData.getIdByEmoji(emoji);
 
     unawaited(
       ref

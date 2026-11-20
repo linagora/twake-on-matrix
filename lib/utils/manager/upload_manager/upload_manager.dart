@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
 import 'package:dartz/dartz.dart' hide Task;
 import 'package:dio/dio.dart';
@@ -146,7 +147,15 @@ class UploadManager {
       }
 
       final caption = uploadInfo.captionInfo?.caption;
-      final inReplyTo = uploadInfo.inReplyToEventId == null
+      final threadRootId = uploadInfo.threadRootEventId;
+      final threadLastId = uploadInfo.threadLastEventId;
+      final thread = threadRootId == null || threadLastId == null
+          ? null
+          : ThreadSendTarget(
+              rootEventId: threadRootId,
+              lastEventId: threadLastId,
+            );
+      final inReplyTo = thread != null || uploadInfo.inReplyToEventId == null
           ? null
           : await room.getEventById(uploadInfo.inReplyToEventId!);
       uploadInfo.isFailed = false;
@@ -161,6 +170,7 @@ class UploadManager {
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
             extraContent: _batchStamp.contentFor(uploadInfo.batchId),
+            thread: thread,
           );
         } else {
           fakeImageEvent = await room.sendFakeFileEvent(
@@ -170,6 +180,7 @@ class UploadManager {
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
             extraContent: _batchStamp.contentFor(uploadInfo.batchId),
+            thread: thread,
           );
         }
       } catch (e) {
@@ -196,6 +207,7 @@ class UploadManager {
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
+            thread: thread,
           );
         } else {
           await _addFileTaskToWorkerQueueWeb(
@@ -210,6 +222,7 @@ class UploadManager {
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
+            thread: thread,
           );
         }
       } catch (e) {
@@ -250,6 +263,7 @@ class UploadManager {
     String? captionInfo,
     Event? inReplyTo,
     String? batchId,
+    ThreadSendTarget? thread,
   }) {
     final uploadController = BehaviorSubject<Either<Failure, Success>>();
 
@@ -266,6 +280,8 @@ class UploadManager {
           : null,
       inReplyToEventId: inReplyTo?.eventId,
       batchId: batchId,
+      threadRootEventId: thread?.rootEventId,
+      threadLastEventId: thread?.lastEventId,
     );
   }
 
@@ -281,11 +297,14 @@ class UploadManager {
     required List<FileAssetEntity> entities,
     String? caption,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
+    inReplyTo = thread.withoutQuote(inReplyTo);
     final txids = await room.sendPlaceholdersForImagePickerFiles(
       entities: entities,
       captionInfo: caption,
       inReplyTo: inReplyTo,
+      thread: thread,
     );
 
     final batchId = _batchStamp.newBatchIdFor(txids.length);
@@ -308,6 +327,7 @@ class UploadManager {
         captionInfo: isLastFile ? caption : null,
         inReplyTo: isFirstFile ? inReplyTo : null,
         batchId: batchId,
+        thread: thread,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
@@ -320,6 +340,7 @@ class UploadManager {
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
         inReplyTo: isFirstFile ? inReplyTo : null,
         extraContent: _batchContentOf(txidKey),
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txidKey]?.toJson(),
       );
 
@@ -356,6 +377,7 @@ class UploadManager {
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
         inReplyTo: isFirstFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txidKey]?.toJson(),
       );
     }
@@ -367,7 +389,9 @@ class UploadManager {
     Map<MatrixFile, MatrixImageFile?>? thumbnails,
     String? caption,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
+    inReplyTo = thread.withoutQuote(inReplyTo);
     // Store txids and fake events for all files
     final uploadTasks = <String, SyncUpdate>{};
 
@@ -388,6 +412,7 @@ class UploadManager {
         captionInfo: isLastFile ? caption : null,
         inReplyTo: isFirstFile ? inReplyTo : null,
         batchId: batchId,
+        thread: thread,
       );
 
       room.sendingFilePlaceholders[txid] = fileInfo;
@@ -397,6 +422,7 @@ class UploadManager {
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isFirstFile ? inReplyTo : null,
         extraContent: _batchContentOf(txid),
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
@@ -452,6 +478,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isFirstFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
     }
@@ -462,7 +489,9 @@ class UploadManager {
     required List<FileInfo> fileInfos,
     String? caption,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
+    inReplyTo = thread.withoutQuote(inReplyTo);
     final batchId = _batchStamp.newBatchIdFor(fileInfos.length);
 
     for (final fileInfo in fileInfos.asMap().entries) {
@@ -485,6 +514,7 @@ class UploadManager {
         captionInfo: isLastFile ? caption : null,
         inReplyTo: isFirstFile ? inReplyTo : null,
         batchId: batchId,
+        thread: thread,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
@@ -497,6 +527,7 @@ class UploadManager {
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isFirstFile ? inReplyTo : null,
         extraContent: _batchContentOf(txid),
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
@@ -532,6 +563,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isFirstFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
     }
@@ -584,6 +616,7 @@ class UploadManager {
     int? shrinkImageMaxDimension,
     String? captionInfo,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     Map<String, dynamic>? uploadInfo,
   }) {
     final info = _eventIdMapUploadFileInfo[txid];
@@ -604,6 +637,7 @@ class UploadManager {
       shrinkImageMaxDimension: shrinkImageMaxDimension,
       captionInfo: captionInfo,
       inReplyTo: inReplyTo,
+      thread: thread,
       uploadInfo: uploadInfo,
     );
     if (fileInfo is PendingFileInfo) {
@@ -661,6 +695,7 @@ class UploadManager {
               sentDate: job.sentDate,
               captionInfo: job.captionInfo,
               inReplyTo: job.inReplyTo,
+              thread: job.thread,
               uploadInfo: job.uploadInfo,
               extraContent: _batchStamp.contentFor(job.info?.batchId),
             );
@@ -701,6 +736,7 @@ class UploadManager {
     required StreamController<Either<Failure, Success>> streamController,
     required CancelToken cancelToken,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     MatrixImageFile? thumbnail,
     DateTime? sentDate,
     String? captionInfo,
@@ -728,6 +764,7 @@ class UploadManager {
               captionInfo: captionInfo,
               inReplyTo: inReplyTo,
               extraContent: _batchStamp.contentFor(info?.batchId),
+              thread: thread,
             );
             if (eventId == null) {
               throw Exception('File upload failed');
@@ -806,6 +843,7 @@ class _MobileSendJob {
     this.shrinkImageMaxDimension,
     this.captionInfo,
     this.inReplyTo,
+    this.thread,
     this.uploadInfo,
   });
 
@@ -819,5 +857,6 @@ class _MobileSendJob {
   final int? shrinkImageMaxDimension;
   final String? captionInfo;
   final Event? inReplyTo;
+  final ThreadSendTarget? thread;
   final Map<String, dynamic>? uploadInfo;
 }

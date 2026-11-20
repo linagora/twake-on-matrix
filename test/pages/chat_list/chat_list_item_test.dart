@@ -16,6 +16,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart'
+    show TwakeListItem;
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -205,6 +207,55 @@ void main() {
 
       // Assert
       expect(shownBadge(tester), isNull);
+    });
+
+    testWidgets('build_whenSpace_keepsTheBadgeAboveTheDivider', (tester) async {
+      // Arrange
+      final room = buildRoom(name: 'Team');
+      when(room.isDirectChat).thenReturn(false);
+      when(room.isSpace).thenReturn(true);
+
+      // Act
+      await tester.pumpWidget(wrap(ChatListItem(room, space: spaceData())));
+      await tester.pump();
+
+      // Assert
+      final row = tester.getRect(find.byType(TwakeListItem));
+      final badge = tester.getRect(
+        find.descendant(
+          of: find.byType(AvatarWithKindBadge),
+          matching: find.byType(Icon),
+        ),
+      );
+      expect(badge.bottom, lessThanOrEqualTo(row.bottom - 1));
+    });
+
+    testWidgets('build_whenSpace_alignsTheTitleWithTheRooms', (tester) async {
+      // Arrange
+      final space = buildRoom(name: 'Team', id: '!space:server.tld');
+      when(space.isDirectChat).thenReturn(false);
+      when(space.isSpace).thenReturn(true);
+      final room = buildRoom(name: 'General');
+      when(room.isDirectChat).thenReturn(false);
+
+      // Act
+      await tester.pumpWidget(
+        wrap(
+          Column(
+            children: [
+              ChatListItem(space, space: spaceData()),
+              ChatListItem(room),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Assert
+      expect(
+        tester.getTopLeft(find.text('Team')).dx,
+        tester.getTopLeft(find.text('General')).dx,
+      );
     });
 
     for (final (description, joinRules, isFeed, badge) in [

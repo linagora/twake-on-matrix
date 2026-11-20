@@ -313,11 +313,14 @@ extension LocalizedBody on Event {
     TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
   }
 
+  /// The text shown for this event, so an edited caption or reply copies its
+  /// latest text.
   String getSelectedEventString(BuildContext context, Timeline timeline) {
+    final display = getDisplayEventWithoutEditEvent(timeline);
     if (isCaptionModeOrReply()) {
-      return bodyWithoutReplyFallback;
+      return display.bodyWithoutReplyFallback;
     }
-    return getDisplayEventWithoutEditEvent(timeline).calcLocalizedBodyFallback(
+    return display.calcLocalizedBodyFallback(
       MatrixLocals(L10n.of(context)!),
       hideReply: true,
     );
@@ -511,7 +514,11 @@ extension LocalizedBody on Event {
 
   /// Returns true if this event is a reply to another event.
   bool isReplyEvent() {
-    return inReplyToEventId() != null;
+    // With threads on, a thread reply carries m.in_reply_to only as a fallback
+    // (is_falling_back: true); it is not a quote. With threads off, keep the
+    // previous behavior: the quote is kept.
+    return inReplyToEventId(includingFallback: !AppConfig.threadsEnabled) !=
+        null;
   }
 
   bool isReplyEventWithAudio() {

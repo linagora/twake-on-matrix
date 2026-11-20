@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:twake_chat/utils/clipboard.dart';
@@ -16,6 +17,7 @@ mixin PasteImageMixin {
     String? pendingText,
     VoidCallback? onSendFileCallback,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     if (!(await TwakeClipboard.instance.isReadableImageFormat(
       clipboardReader: clipboardReader,
@@ -43,6 +45,7 @@ mixin PasteImageMixin {
           files: matrixFiles!.nonNulls.toList(),
           pendingText: pendingText,
           inReplyTo: inReplyTo,
+          thread: thread,
         );
       },
     );

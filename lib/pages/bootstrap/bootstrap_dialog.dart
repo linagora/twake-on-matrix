@@ -10,6 +10,7 @@ import 'package:twake_chat/pages/bootstrap/verify_device_screen.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_error_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_success_view.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -145,12 +146,9 @@ class _RecoveryKeyDisplay extends StatelessWidget {
   const _RecoveryKeyDisplay({required this.state, required this.notifier});
 
   void _copyToClipboard(BuildContext context) {
-    final box = context.findRenderObject() as RenderBox?;
     Share.share(
       state.recoveryKey,
-      sharePositionOrigin: box != null && box.hasSize
-          ? box.localToGlobal(Offset.zero) & box.size
-          : null,
+      sharePositionOrigin: context.sharePositionOrigin,
     );
     notifier.confirmRecoveryKeyCopied();
   }

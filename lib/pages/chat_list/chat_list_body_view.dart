@@ -17,7 +17,26 @@ import 'package:matrix/matrix.dart';
 class ChatListBodyView extends StatelessWidget {
   final ChatListController controller;
 
-  const ChatListBodyView(this.controller, {super.key});
+  /// Shown at the top of the body, collapsing with the list; null when the
+  /// header is the fixed app bar of the Scaffold.
+  final Widget? header;
+  final double headerHeight;
+
+  const ChatListBodyView(
+    this.controller, {
+    super.key,
+    this.header,
+    this.headerHeight = 0,
+  });
+
+  Widget _withHeader(Widget content) => header == null
+      ? content
+      : Column(
+          children: [
+            SizedBox(height: headerHeight, child: header),
+            Expanded(child: content),
+          ],
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -50,61 +69,90 @@ class ChatListBodyView extends StatelessWidget {
               if (controller.activeClient.prevBatch != null) {
                 final rooms = controller.activeClient.listedRooms;
                 if (rooms.isEmpty) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: ChatListBodyViewStyle.paddingIconSkeletons,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(Assets.images.icSkeletons.path),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: ChatListBodyViewStyle.paddingOwnProfile,
-                        child: FutureBuilder<Profile?>(
-                          future: controller.activeClient.fetchOwnProfile(
-                            getFromRooms: false,
+                  return _withHeader(
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: ChatListBodyViewStyle.paddingIconSkeletons,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SvgPicture.asset(Assets.images.icSkeletons.path),
+                            ],
                           ),
-                          builder: (context, snapshotProfile) {
-                            if (snapshotProfile.connectionState !=
-                                ConnectionState.done) {
-                              return const SizedBox();
-                            }
-                            final name =
-                                snapshotProfile.data?.displayName ?? '👋';
-                            return Column(
-                              children: [
-                                Text(
-                                  L10n.of(context)!.welcomeToTwake(name),
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                  textAlign: TextAlign.center,
-                                ),
-                                Padding(
-                                  padding: ChatListBodyViewStyle
-                                      .paddingTextStartNewChatMessage,
-                                  child: Text(
-                                    L10n.of(context)!.startNewChatMessage,
+                        ),
+                        Padding(
+                          padding: ChatListBodyViewStyle.paddingOwnProfile,
+                          child: FutureBuilder<Profile?>(
+                            future: controller.activeClient.fetchOwnProfile(
+                              getFromRooms: false,
+                            ),
+                            builder: (context, snapshotProfile) {
+                              if (snapshotProfile.connectionState !=
+                                  ConnectionState.done) {
+                                return const SizedBox();
+                              }
+                              final name =
+                                  snapshotProfile.data?.displayName ?? '👋';
+                              return Column(
+                                children: [
+                                  Text(
+                                    L10n.of(context)!.welcomeToTwake(name),
                                     style: Theme.of(
                                       context,
-                                    ).textTheme.bodyMedium,
+                                    ).textTheme.titleLarge,
                                     textAlign: TextAlign.center,
                                   ),
-                                ),
-                              ],
-                            );
-                          },
+                                  Padding(
+                                    padding: ChatListBodyViewStyle
+                                        .paddingTextStartNewChatMessage,
+                                    child: Text(
+                                      L10n.of(context)!.startNewChatMessage,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   );
                 }
                 return CustomScrollView(
                   controller: controller.scrollController,
                   slivers: [
+                    if (header != null)
+                      ValueListenableBuilder(
+                        valueListenable: controller.selectModeNotifier,
+                        builder: (context, selectMode, _) => SliverAppBar(
+                          floating: true,
+                          snap: true,
+                          pinned: selectMode.isSelectMode,
+                          primary: false,
+                          automaticallyImplyLeading: false,
+                          toolbarHeight: headerHeight,
+                          titleSpacing: 0,
+                          elevation: 0,
+                          scrolledUnderElevation: 0,
+                          surfaceTintColor: Colors.transparent,
+                          backgroundColor:
+                              LinagoraSysColors.material().onPrimary,
+                          // The AppBar inside the header would otherwise take the
+                          // SliverAppBar's isScrolledUnder (overlapsContent).
+                          flexibleSpace: FlexibleSpaceBar.createSettings(
+                            currentExtent: 0,
+                            isScrolledUnder: false,
+                            child: header!,
+                          ),
+                        ),
+                      ),
                     SliverToBoxAdapter(
                       child: AnimatedContainer(
                         height: ChatListBodyViewStyle.heightIsTorBrowser(
@@ -131,9 +179,9 @@ class ChatListBodyView extends StatelessWidget {
                 );
               }
               if (controller.matrixState.waitForFirstSync) {
-                return const ChatListSkeletonizerWidget();
+                return _withHeader(const ChatListSkeletonizerWidget());
               }
-              return const SizedBox.shrink();
+              return _withHeader(const SizedBox.shrink());
             },
           ),
         ),
