@@ -3,6 +3,7 @@ import 'package:twake_chat/utils/desktop_lifecycle.dart';
 import 'package:twake_chat/utils/dock_badge.dart';
 import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
@@ -105,6 +106,8 @@ import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/background_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:twake_chat/data/model/push/twake_local_notification_payload.dart';
 import 'package:twake_chat/utils/flutter_local_notifications_port.dart';
 
 class Matrix extends ConsumerStatefulWidget {
@@ -513,6 +516,19 @@ class MatrixState extends ConsumerState<Matrix>
     );
   }
 
+  /// Rooms with a macOS notification on screen, with the account it is for.
+  final Map<String, String> macosNotifiedRooms = {};
+
+  static String? _payloadEventId(NotificationResponse? r) {
+    try {
+      return TwakeLocalNotificationPayload.fromJson(
+        jsonDecode(r?.payload ?? '{}') as Map<String, dynamic>,
+      ).eventId;
+    } catch (_) {
+      return null;
+    }
+  }
+
   late final _loginHost = _MatrixLoginHost(this);
   late final LoginSessions _loginSessions;
 
@@ -526,15 +542,19 @@ class MatrixState extends ConsumerState<Matrix>
     // The boot clients and the persisted state are overridden by `main` when
     // the container is made; the account state adopts them on its first read.
     _subscriptions = ref.read(clientSubscriptionsProvider);
-    // The macOS permission is asked here, at start. A tap reuses the mobile
-    // push routing (account switch, then the room).
+    // The macOS permission is asked after the first sync, not here. A tap
+    // reuses the mobile push routing (account switch, then the room).
     unawaited(
-      macosNotifications?.init(
-        (r) => (backgroundPush ??= BackgroundPush(
-          this,
-          client,
-        )).onSelectNotification(r),
-      ),
+      macosNotifications
+          ?.init(
+            (r) => (backgroundPush ??= BackgroundPush(
+              this,
+              client,
+            )).onSelectNotification(r, eventId: _payloadEventId(r)),
+          )
+          .catchError(
+            (Object e, StackTrace s) => _report(e, s, 'notification init'),
+          ),
     );
     _quietLogouts = ref.read(quietLogoutsProvider);
     _logoutRemovals = ref.read(logoutRemovalsProvider);
@@ -712,6 +732,26 @@ class MatrixState extends ConsumerState<Matrix>
         // Cancelled (a rollback, a logout) before this ran: set nothing up.
         if (!_subscriptions.isOpen(name)) return;
         // `keep` starts nothing for a name that was closed meanwhile.
+        if (PlatformInfos.isMacOS) {
+          unawaited(
+            macosNotifications?.requestPermission().catchError(
+              (Object e, StackTrace s) =>
+                  _report(e, s, 'notification permission'),
+            ),
+          );
+          _subscriptions.keep(
+            name,
+            'notificationClear',
+            () => currentClient.onSync.stream
+                .listen(
+                  (_) => clearReadMacosNotifications(currentClient).catchError(
+                    (Object e, StackTrace s) =>
+                        _report(e, s, 'notification clear'),
+                  ),
+                )
+                .cancel,
+          );
+        }
         _subscriptions.keep(
           name,
           'notification',
@@ -724,11 +764,15 @@ class MatrixState extends ConsumerState<Matrix>
                     ) &&
                     e.content['sender'] != currentClient.userID,
               )
-              .listen(
-                PlatformInfos.isMacOS
-                    ? showMacosNotification
-                    : showLocalNotification,
-              )
+              .listen((e) {
+                if (!PlatformInfos.isMacOS) return showLocalNotification(e);
+                unawaited(
+                  showMacosNotification(currentClient, e).catchError(
+                    (Object err, StackTrace s) =>
+                        _report(err, s, 'notification of $name'),
+                  ),
+                );
+              })
               .cancel,
         );
       }
