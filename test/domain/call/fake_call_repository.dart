@@ -55,6 +55,9 @@ class FakeCallRepository implements CallRepository {
   Completer<void>? leaveGate;
   Completer<void>? joinGate;
 
+  /// The ring is sent only once this completes.
+  Completer<void>? ringGate;
+
   final calls = <String>[];
   final participants = StreamController<List<CallParticipant>>.broadcast();
   final encryptions = StreamController<void>.broadcast();
@@ -103,6 +106,7 @@ class FakeCallRepository implements CallRepository {
       'ring ${join.room.id} video=${join.isVideo} '
       'membership=$membershipEventId',
     );
+    await ringGate?.future;
     if (ringError case final error?) throw error;
   }
 

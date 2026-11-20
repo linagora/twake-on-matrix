@@ -88,6 +88,18 @@ void main() {
     expect(repository.calls.any((call) => call.startsWith('leave')), isFalse);
   });
 
+  test('a ring the server never answers does not hold the call', () async {
+    repository.ringGate = Completer<void>();
+
+    final room = await join().timeout(const Duration(seconds: 2));
+
+    expect(room, repository.roomInfo);
+    expect(
+      repository.calls.last,
+      'ring !room video=true membership=$testMembershipEventId',
+    );
+  });
+
   test('execute_withoutATokenService_touchesNothing', () async {
     // Act & Assert
     await expectLater(

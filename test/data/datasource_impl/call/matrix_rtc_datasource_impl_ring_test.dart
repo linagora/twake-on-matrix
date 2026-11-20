@@ -33,8 +33,9 @@ class _FakeRoom extends Fake implements Room {
   /// The other user of a direct chat, null for a group.
   String? dmUser;
 
-  /// What the server says of the room: the members who joined.
-  var joinedCount = 3;
+  /// What the server says of the room: the members who joined. Null when
+  /// the server said nothing yet.
+  int? joinedCount = 3;
 
   @override
   String? get directChatMatrixID => dmUser;
@@ -43,8 +44,9 @@ class _FakeRoom extends Fake implements Room {
   bool get isDirectChat => dmUser != null;
 
   @override
-  RoomSummary get summary =>
-      RoomSummary.fromJson({'m.joined_member_count': joinedCount});
+  RoomSummary get summary => RoomSummary.fromJson({
+    if (joinedCount case final count?) 'm.joined_member_count': count,
+  });
 
   @override
   Membership get membership => Membership.join;
@@ -54,6 +56,20 @@ class _FakeRoom extends Fake implements Room {
 
   @override
   Map<String, Map<String, StrippedStateEvent>> states = {};
+
+  /// The states of a partial room still in the store: in [states] only once
+  /// the room is loaded.
+  Map<String, Map<String, StrippedStateEvent>>? notLoaded;
+
+  /// When set, the room cannot be loaded from the store.
+  Exception? loadFailure;
+
+  @override
+  Future<void> postLoad() async {
+    if (loadFailure case final error?) throw error;
+    states = {...states, ...?notLoaded};
+    notLoaded = null;
+  }
 }
 
 typedef _Sent = ({String roomId, String type, Map<String, Object?> content});
@@ -234,6 +250,13 @@ StrippedStateEvent _member(_Who who, {Map<String, Object?>? content}) =>
       content: content ?? {'application': 'm.call', 'device_id': who.device},
     );
 
+/// The call members of a room state.
+Map<String, Map<String, StrippedStateEvent>> _callMembers(
+  List<StrippedStateEvent> members,
+) => {
+  _memberType: {for (final member in members) member.stateKey!: member},
+};
+
 /// A membership as the room state holds it once synced, with its server time.
 Event _memberEvent(
   _Who who, {
@@ -294,22 +317,50 @@ void main() {
       },
     );
 
-    test(
-      'in a group of more than two the room is notified, not rung',
-      () async {
+    // `m.direct` alone does not say who is in the room: a third member may
+    // have joined it.
+    final callees = <String, ({String? dmUser, int? joined, String? callee})>{
+      'a direct chat of two rings the other user': (
+        dmUser: _alice.user,
+        joined: 2,
+        callee: _alice.user,
+      ),
+      'a direct chat whose members the server did not count rings the other '
+          'user': (
+        dmUser: _alice.user,
+        joined: null,
+        callee: _alice.user,
+      ),
+      'a direct chat with a third member is notified, nobody rung': (
+        dmUser: _alice.user,
+        joined: 3,
+        callee: null,
+      ),
+      'a group of more than two is notified, nobody rung': (
+        dmUser: null,
+        joined: 3,
+        callee: null,
+      ),
+    };
+
+    callees.forEach((name, expected) {
+      test(name, () async {
         client.room
-          ..dmUser = null
-          ..joinedCount = 3;
+          ..dmUser = expected.dmUser
+          ..joinedCount = expected.joined;
 
         await datasource.sendRing(_join, membershipEventId: r'$member');
 
-        final sent = client.sent.single;
-        expect(sent.type, 'org.matrix.msc4075.rtc.notification');
-        expect(sent.content['notification_type'], 'notification');
-        final mentions = sent.content['m.mentions'] as Map?;
-        expect(mentions?['room'], isNot(true));
-      },
-    );
+        final content = client.sent.single.content;
+        expect(
+          content['notification_type'],
+          expected.callee == null ? 'notification' : 'ring',
+        );
+        final mentions = content['m.mentions']! as Map;
+        expect(mentions['user_ids'], [?expected.callee]);
+        expect(mentions['room'], isNot(true));
+      });
+    });
 
     test('an audio call says so in its intent', () async {
       await datasource.sendRing(_join, membershipEventId: r'$member');
@@ -606,6 +657,31 @@ void main() {
             for (final ring in everRung()) ring.expiresAt.difference(at),
           ], expected.rings ? [const Duration(seconds: 60)] : isEmpty);
         });
+      });
+    });
+
+    test('a ring on time by the server rings, whatever the sender clock', () {
+      fakeAsync((async) {
+        listen(async);
+        // Received 20 s after the server time, with a sender clock 15 s
+        // behind: on time by the server, past its lifetime by the sender.
+        final at = DateTime.now().subtract(const Duration(seconds: 20));
+        final senderTs = at.subtract(const Duration(seconds: 15));
+
+        client.ring(
+          _Ring()
+            ..at = at
+            ..extra = {
+              'sender_ts': senderTs.millisecondsSinceEpoch,
+              'lifetime': 30000,
+            },
+        );
+        async.flushMicrotasks();
+
+        expect(
+          [for (final ring in everRung()) ring.expiresAt.difference(at)],
+          [const Duration(seconds: 30)],
+        );
       });
     });
 
@@ -910,36 +986,78 @@ void main() {
   });
 
   group('a sync while it rings', () {
+    late List<List<CallRing>> lists;
+    late List<MissedCall> missed;
+
+    void ring(FakeAsync async) {
+      lists = [];
+      missed = [];
+      datasource.watchRings().listen(lists.add);
+      datasource.watchMissedCalls().listen(missed.add);
+      async.flushMicrotasks();
+      client.ring();
+      async.flushMicrotasks();
+    }
+
+    void sync(FakeAsync async) {
+      client.onSync.add(SyncUpdate(nextBatch: 'next'));
+      async.flushMicrotasks();
+    }
+
+    void syncWith(FakeAsync async, List<StrippedStateEvent> members) {
+      client.room.states = _callMembers(members);
+      sync(async);
+    }
+
+    Iterable<String> missedRings() => missed.map((call) => call.ringEventId);
+
+    // Each sync gives the call members of the room state at that time.
     final cases =
         <
           String,
           ({
-            List<StrippedStateEvent> members,
+            List<List<StrippedStateEvent>> syncs,
             bool knowsRoom,
             bool ringsOn,
             bool missed,
           })
         >{
           'the caller still in the call: it rings on': (
-            members: [_member(_alice)],
+            syncs: [
+              [_member(_alice)],
+            ],
             knowsRoom: true,
             ringsOn: true,
             missed: false,
           ),
-          'the caller hung up: the ring stops, a missed call': (
-            members: [_member(_alice, content: {})],
+          'the caller seen in the call, then gone: the ring stops, missed': (
+            syncs: [
+              [_member(_alice)],
+              [_member(_alice, content: {})],
+            ],
             knowsRoom: true,
             ringsOn: false,
             missed: true,
           ),
+          'nobody seen in the call yet: it rings on to its end': (
+            syncs: [
+              [],
+              [_member(_alice, content: {})],
+            ],
+            knowsRoom: true,
+            ringsOn: true,
+            missed: false,
+          ),
           'the user joined on another device: the ring stops, not missed': (
-            members: [_member(_alice), _member(_bobPhone)],
+            syncs: [
+              [_member(_alice), _member(_bobPhone)],
+            ],
             knowsRoom: true,
             ringsOn: false,
             missed: false,
           ),
           'a room the client does not know: it rings on': (
-            members: [],
+            syncs: [[]],
             knowsRoom: false,
             ringsOn: true,
             missed: false,
@@ -949,35 +1067,55 @@ void main() {
     cases.forEach((name, expected) {
       test(name, () {
         fakeAsync((async) {
-          final lists = <List<CallRing>>[];
-          final missed = <MissedCall>[];
-          datasource.watchRings().listen(lists.add);
-          datasource.watchMissedCalls().listen(missed.add);
-          async.flushMicrotasks();
-          client.ring();
-          async.flushMicrotasks();
-
-          client.room.states = {
-            _memberType: {
-              for (final member in expected.members) member.stateKey!: member,
-            },
-          };
+          ring(async);
           client.knowsRoom = expected.knowsRoom;
-          client.onSync.add(SyncUpdate(nextBatch: 'next'));
-          async.flushMicrotasks();
+
+          for (final members in expected.syncs) {
+            syncWith(async, members);
+          }
 
           expect(lists.last, hasLength(expected.ringsOn ? 1 : 0));
-          expect(missed.map((call) => call.ringEventId), [
-            if (expected.missed) r'$ring',
-          ]);
+          expect(missedRings(), [if (expected.missed) r'$ring']);
 
-          // A ring that stopped is never missed again when it lapses.
+          // A ring that stopped is never missed again when it lapses; one
+          // that rings on is missed at its end.
           async.elapse(const Duration(seconds: 61));
           expect(
             missed,
             hasLength(expected.missed || expected.ringsOn ? 1 : 0),
           );
         });
+      });
+    });
+
+    test('a partial room is loaded before its call is judged', () {
+      fakeAsync((async) {
+        ring(async);
+        // Only the store knows that the user joined on another device.
+        client.room.notLoaded = _callMembers([
+          _member(_alice),
+          _member(_bobPhone),
+        ]);
+
+        sync(async);
+
+        expect(lists.last, isEmpty);
+        expect(missedRings(), isEmpty);
+      });
+    });
+
+    test('a room that cannot be loaded leaves the ring ringing', () {
+      fakeAsync((async) {
+        ring(async);
+        syncWith(async, [_member(_alice)]);
+        client.room.loadFailure = Exception('store closed');
+
+        syncWith(async, [_member(_alice, content: {})]);
+
+        expect(lists.last, hasLength(1));
+        expect(missedRings(), isEmpty);
+        async.elapse(const Duration(seconds: 61));
+        expect(missedRings(), [r'$ring']);
       });
     });
   });
