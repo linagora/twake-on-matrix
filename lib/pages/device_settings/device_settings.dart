@@ -169,8 +169,10 @@ class _DevicesList extends ConsumerWidget {
               if (thisDevice != null)
                 UserDeviceListItem(
                   thisDevice,
-                  rename: (d) => renameDeviceAction(context, ref, notifier, d),
-                  verify: (d) => verifyDeviceAction(context, ref, notifier, d),
+                  rename: (d) =>
+                      renameDeviceAction(context, client, notifier, d),
+                  verify: (d) =>
+                      verifyDeviceAction(context, client, notifier, d),
                 ),
               Padding(
                 padding: EdgeInsets.only(
@@ -198,7 +200,7 @@ class _DevicesList extends ConsumerWidget {
                       ? null
                       : () => removeDevicesAction(
                           context,
-                          ref,
+                          client,
                           notifier,
                           notThisDevice,
                           removeAll: true,
@@ -230,9 +232,9 @@ class _DevicesList extends ConsumerWidget {
         final device = notThisDevice[i];
         return UserDeviceListItem(
           device,
-          rename: (d) => renameDeviceAction(context, ref, notifier, d),
-          remove: (d) => removeDevicesAction(context, ref, notifier, [d]),
-          verify: (d) => verifyDeviceAction(context, ref, notifier, d),
+          rename: (d) => renameDeviceAction(context, client, notifier, d),
+          remove: (d) => removeDevicesAction(context, client, notifier, [d]),
+          verify: (d) => verifyDeviceAction(context, client, notifier, d),
           showDivider: isMobile,
         );
       },
@@ -242,7 +244,7 @@ class _DevicesList extends ConsumerWidget {
 
 Future<void> removeDevicesAction(
   BuildContext context,
-  WidgetRef ref,
+  Client client,
   DevicesSettingsViewModel notifier,
   List<Device> devices, {
   bool removeAll = false,
@@ -266,7 +268,6 @@ Future<void> removeDevicesAction(
   if (confirmResult != ConfirmResult.ok || !context.mounted) {
     return;
   }
-  final client = ref.read(matrixClientProvider);
   final deviceIds = devices.map((d) => d.deviceId).toList();
 
   try {
@@ -286,11 +287,10 @@ Future<void> removeDevicesAction(
 
 Future<void> renameDeviceAction(
   BuildContext context,
-  WidgetRef ref,
+  Client client,
   DevicesSettingsViewModel notifier,
   Device device,
 ) async {
-  final client = ref.read(matrixClientProvider);
   await ChangeDeviceNameDialog.show(
     context,
     initialName: device.displayname,
@@ -304,11 +304,10 @@ Future<void> renameDeviceAction(
 
 Future<void> verifyDeviceAction(
   BuildContext context,
-  WidgetRef ref,
+  Client client,
   DevicesSettingsViewModel notifier,
   Device device,
 ) async {
-  final client = ref.read(matrixClientProvider);
   // Keep a handle so a dismissed loading dialog cannot orphan the request.
   final verificationFuture = _startDeviceVerification(client, device);
   // Block the list while the request is set up so Verify can't be re-tapped.
