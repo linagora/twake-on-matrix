@@ -155,7 +155,7 @@ class KeychainSharingManager {
         (flow) => flow.type == AuthenticationTypes.sso,
       );
       final providers = sso?.additionalProperties['identity_providers'];
-      // ponytail: first provider; pick the app's own one if a server ever
+      // first provider; pick the app's own one if a server ever
       // offers several.
       return providers is List && providers.isNotEmpty
           ? (providers.first as Map)['id'] as String?
