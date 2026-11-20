@@ -32,24 +32,8 @@ struct NotificationContentBuilder {
             return processEmpty(notificationItem: notificationItem)
         case .invite:
             return try await processInvited(notificationItem: notificationItem, mediaProvider: mediaProvider)
-        case .timeline(let event):
-            // Encrypted rooms never show content, even when the extension could decrypt it.
-            if notificationItem.isRoomEncrypted {
-                return processEmpty(notificationItem: notificationItem, body: encryptedBody)
-            }
-            switch try? event.content() {
-            case .messageLike(content: let content):
-                switch content {
-                case .roomMessage(messageType: let messageType, inReplyToEventId: _):
-                    return try await processRoomMessage(notificationItem: notificationItem, messageType: messageType, mediaProvider: mediaProvider)
-                case .roomEncrypted:
-                    return processEmpty(notificationItem: notificationItem, body: encryptedBody)
-                default:
-                    return processEmpty(notificationItem: notificationItem)
-                }
-            default:
-                return processEmpty(notificationItem: notificationItem)
-            }
+        case .timeline:
+            return try await processTimeline(notificationItem: notificationItem, mediaProvider: mediaProvider)
         }
     }
 
@@ -84,6 +68,18 @@ struct NotificationContentBuilder {
         return notification
     }
     
+    private func processTimeline(notificationItem: NotificationItemProxyProtocol, mediaProvider: MediaProviderProtocol?) async throws -> UNMutableNotificationContent {
+        // Encrypted rooms never show content, even when the extension could decrypt it.
+        if notificationItem.isRoomEncrypted || notificationItem.isEncrypted {
+            return processEmpty(notificationItem: notificationItem, body: encryptedBody)
+        }
+        guard case .timeline(let event) = notificationItem.event,
+              case .messageLike(content: .roomMessage(messageType: let messageType, inReplyToEventId: _)) = try? event.content() else {
+            return processEmpty(notificationItem: notificationItem)
+        }
+        return try await processRoomMessage(notificationItem: notificationItem, messageType: messageType, mediaProvider: mediaProvider)
+    }
+
     private func processEmpty(notificationItem: NotificationItemProxyProtocol, body: String = L10n.notification) -> UNMutableNotificationContent {
         let notification = baseMutableContent(for: notificationItem)
         notification.title = InfoPlistReader(bundle: .app).bundleDisplayName

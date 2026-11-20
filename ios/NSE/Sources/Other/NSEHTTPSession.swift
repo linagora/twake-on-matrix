@@ -63,7 +63,8 @@ struct NSEHTTPSession: MediaProviderProtocol {
             body = nil
         case "m.room.message":
             guard let text = messageText(content) else { return nil }
-            body = text
+            // A clear event can sit in an encrypted room (bots, bridges): the room decides.
+            body = await isRoomEncrypted(roomID) ? nil : text
         case "m.room.member":
             guard content?["membership"] as? String == "invite", event["state_key"] as? String == credentials.userId else { return nil }
             isInvite = true
@@ -89,7 +90,7 @@ struct NSEHTTPSession: MediaProviderProtocol {
 
         if isInvite {
             // The user is not in the room yet: its state may be forbidden, so every field is optional.
-            async let profile = json("/_matrix/client/v3/profile/\(enc(sender))", timeout: 4)
+            async let profile = json("/_matrix/client/v3/profile/\(enc(sender))", label: "profile", timeout: 4)
             async let avatar = state(roomID, "m.room.avatar")
             async let name = state(roomID, "m.room.name")
             let (profileContent, avatarContent, nameContent) = await (profile, avatar, name)
@@ -107,7 +108,7 @@ struct NSEHTTPSession: MediaProviderProtocol {
         async let member = state(roomID, "m.room.member", sender)
         async let avatar = state(roomID, "m.room.avatar")
         async let name = state(roomID, "m.room.name")
-        async let direct = json("/_matrix/client/v3/user/\(enc(credentials.userId))/account_data/m.direct", timeout: 4)
+        async let direct = json("/_matrix/client/v3/user/\(enc(credentials.userId))/account_data/m.direct", label: "account_data/m.direct", timeout: 4)
         let (memberContent, avatarContent, nameContent, directContent) = await (member, avatar, name, direct)
 
         let isDirect = directContent?.values.contains { ($0 as? [String]).map { $0.contains(roomID) } ?? false } ?? false
@@ -120,10 +121,10 @@ struct NSEHTTPSession: MediaProviderProtocol {
 
     /// A user who is not in the room (invitation) cannot read the event: look for it in the notifications instead.
     private func fetchEvent(roomID: String, eventID: String) async -> [String: Any]? {
-        if let event = await json("/_matrix/client/v3/rooms/\(enc(roomID))/event/\(enc(eventID))", timeout: 8) {
+        if let event = await json("/_matrix/client/v3/rooms/\(enc(roomID))/event/\(enc(eventID))", label: "event", timeout: 8) {
             return event
         }
-        let notifications = await json("/_matrix/client/v3/notifications?limit=20", timeout: 4)
+        let notifications = await json("/_matrix/client/v3/notifications?limit=20", label: "notifications", timeout: 4)
         return (notifications?["notifications"] as? [[String: Any]])?
             .first { $0["room_id"] as? String == roomID && ($0["event"] as? [String: Any])?["event_id"] as? String == eventID }?["event"] as? [String: Any]
     }
@@ -134,12 +135,15 @@ struct NSEHTTPSession: MediaProviderProtocol {
         case "m.video": return L10n.commonVideo
         case "m.audio": return L10n.commonAudio
         case "m.file": return L10n.commonFile
-        default:
+        case "m.text", "m.notice", "m.emote":
             let edited = content?["m.new_content"] as? [String: Any]
             if let body = edited?["body"] as? String { return body }
             guard let body = content?["body"] as? String else { return nil }
             let isReply = (content?["m.relates_to"] as? [String: Any])?["m.in_reply_to"] != nil
             return isReply ? withoutQuoteFallback(body) : body
+        default:
+            // Location, verification requests and unknown types stay neutral.
+            return nil
         }
     }
 
@@ -151,8 +155,13 @@ struct NSEHTTPSession: MediaProviderProtocol {
         return lines[(blank + 1)...].joined(separator: "\n")
     }
 
+    /// 404 means a clear room. Any other failure counts as encrypted: a wrong label costs less than a leaked body.
+    private func isRoomEncrypted(_ roomID: String) async -> Bool {
+        await fetch("/_matrix/client/v3/rooms/\(enc(roomID))/state/m.room.encryption/", label: "state/m.room.encryption", timeout: 4).status != 404
+    }
+
     private func state(_ roomID: String, _ type: String, _ key: String = "") async -> [String: Any]? {
-        await json("/_matrix/client/v3/rooms/\(enc(roomID))/state/\(type)/\(enc(key))", timeout: 4)
+        await json("/_matrix/client/v3/rooms/\(enc(roomID))/state/\(type)/\(enc(key))", label: "state/\(type)", timeout: 4)
     }
 
     private func mediaSource(_ mxc: String) -> MediaSourceProxy? {
@@ -165,33 +174,44 @@ struct NSEHTTPSession: MediaProviderProtocol {
         value.addingPercentEncoding(withAllowedCharacters: .alphanumerics.union(.init(charactersIn: "-._~"))) ?? value
     }
 
-    private func json(_ path: String, timeout: TimeInterval) async -> [String: Any]? {
-        guard let data = await get(path, timeout: timeout) else { return nil }
+    private func json(_ path: String, label: String, timeout: TimeInterval) async -> [String: Any]? {
+        guard let data = await get(path, label: label, timeout: timeout) else { return nil }
         return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
     }
 
-    /// The body of a 200 answer, nil for anything else. The access token is never logged.
-    private func get(_ path: String, timeout: TimeInterval) async -> Data? {
+    /// The body of a 200 answer, nil for anything else.
+    private func get(_ path: String, label: String, timeout: TimeInterval) async -> Data? {
+        await fetch(path, label: label, timeout: timeout).data
+    }
+
+    /// `status` is 0 without an answer. Logs only `label` and the status: paths hold Matrix IDs, and the access token is never logged.
+    private func fetch(_ path: String, label: String, timeout: TimeInterval) async -> (data: Data?, status: Int) {
         let base = credentials.homeserverUrl.hasSuffix("/") ? String(credentials.homeserverUrl.dropLast()) : credentials.homeserverUrl
-        guard let url = URL(string: base + path) else { return nil }
+        guard let url = URL(string: base + path) else { return (nil, 0) }
         var request = URLRequest(url: url, timeoutInterval: timeout)
         request.setValue("Bearer \(credentials.accessToken)", forHTTPHeaderField: "Authorization")
         guard let (data, response) = try? await URLSession.shared.data(for: request),
-              (response as? HTTPURLResponse)?.statusCode == 200 else {
-            MXLog.info("NSE HTTP: \(path.components(separatedBy: "?")[0]) failed")
-            return nil
+              let status = (response as? HTTPURLResponse)?.statusCode else {
+            MXLog.info("NSE HTTP: \(label) failed (no answer)")
+            return (nil, 0)
         }
-        return data
+        guard status == 200 else {
+            MXLog.info("NSE HTTP: \(label) failed (\(status))")
+            return (nil, status)
+        }
+        return (data, status)
     }
 
     // MARK: - MediaProviderProtocol
 
     func loadThumbnailForSource(_ source: MediaSourceProxy, size: CGSize) async -> Result<Data, MediaProviderError> {
-        guard let server = source.url.host else { return .failure(.failedRetrievingImage) }
+        guard let host = source.url.host else { return .failure(.failedRetrievingImage) }
+        // `host` drops the port of a server name such as media.example.org:8448.
+        let server = source.url.port.map { "\(host):\($0)" } ?? host
         let tail = "thumbnail/\(enc(server))/\(enc(source.url.lastPathComponent))?width=\(Int(size.width))&height=\(Int(size.height))&method=crop"
         // Authenticated media first, legacy endpoint for older homeservers.
         for prefix in ["/_matrix/client/v1/media/", "/_matrix/media/v3/"] {
-            if let data = await get(prefix + tail, timeout: 3) {
+            if let data = await get(prefix + tail, label: "thumbnail", timeout: 3) {
                 return .success(data)
             }
         }

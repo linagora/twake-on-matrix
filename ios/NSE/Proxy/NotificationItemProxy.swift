@@ -50,7 +50,8 @@ struct NotificationItemProxy: NotificationItemProxyProtocol {
     }
 
     var isRoomEncrypted: Bool {
-        notificationItem.roomInfo.isEncrypted == true
+        // Unknown counts as encrypted: a wrong label costs less than a leaked body.
+        notificationItem.roomInfo.isEncrypted != false
     }
 
     var isRoomDirect: Bool {
