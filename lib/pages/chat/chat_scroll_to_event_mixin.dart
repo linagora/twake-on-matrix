@@ -77,6 +77,17 @@ double offsetToCenter(RenderBox item, ScrollPosition position) {
   );
 }
 
+/// `animateTo` completes before its last frame is laid out: wait for it.
+Future<void> scrollAndLayOut(
+  ScrollController controller,
+  double offset, {
+  required Duration duration,
+  Curve curve = Curves.easeInOut,
+}) async {
+  await controller.animateTo(offset, duration: duration, curve: curve);
+  await SchedulerBinding.instance.endOfFrame;
+}
+
 /// Scrolls the chat timeline to a target event and optionally highlights it.
 ///
 /// Center-anchored `_top`/`_bottom` lists break naive `scrollToIndex` /
@@ -346,12 +357,12 @@ extension ChatScrollToEventMixin on ChatController {
       return null;
     }
 
-    await scrollController.animateTo(
+    await scrollAndLayOut(
+      scrollController,
       next,
       duration: const Duration(milliseconds: 120),
       curve: Curves.linear,
     );
-    await SchedulerBinding.instance.endOfFrame;
     return _hasFiniteTarget(session.request);
   }
 
@@ -405,10 +416,10 @@ extension ChatScrollToEventMixin on ChatController {
     final targetOffset = offsetToCenter(itemBox, scrollController.position);
     if ((targetOffset - scrollController.offset).abs() < 1) return;
 
-    await scrollController.animateTo(
+    await scrollAndLayOut(
+      scrollController,
       targetOffset,
       duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
     );
   }
 
