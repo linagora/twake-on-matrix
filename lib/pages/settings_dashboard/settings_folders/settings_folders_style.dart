@@ -41,10 +41,14 @@ class SettingsFoldersStyle {
     vertical: LinagoraSpacing.base * 1.5,
   );
 
-  /// The delete icon, not its tap target, ends on the right edge.
-  static EdgeInsets get folderRowPadding => checkRowPadding.copyWith(
-    right: checkRowPadding.right - deletePadding.right,
-  );
+  /// The delete icon, not its tap target, ends on the end edge.
+  static const EdgeInsetsDirectional folderRowPadding =
+      EdgeInsetsDirectional.fromSTEB(
+        LinagoraSpacing.base * 2,
+        LinagoraSpacing.base * 1.5,
+        LinagoraSpacing.base * 2 - (deleteTapSize - deleteIconSize) / 2,
+        LinagoraSpacing.base * 1.5,
+      );
   static const EdgeInsets blockPadding = EdgeInsets.symmetric(
     horizontal: LinagoraSpacing.base * 2,
   );

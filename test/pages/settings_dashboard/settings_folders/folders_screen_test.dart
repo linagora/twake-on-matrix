@@ -33,6 +33,7 @@ Future<void> _pump(
   WidgetTester tester,
   List<Folder> folders, {
   Set<BuiltinFolder> builtinsShown = const {},
+  TextDirection textDirection = TextDirection.ltr,
 }) async {
   tester.view.physicalSize = const Size(900, 1400);
   tester.view.devicePixelRatio = 1;
@@ -52,7 +53,11 @@ Future<void> _pump(
       foldersRepositoryProvider.overrideWithValue(_repository),
     ],
   );
-  await pumpLocalized(tester, container, const FoldersScreen());
+  await pumpLocalized(
+    tester,
+    container,
+    Directionality(textDirection: textDirection, child: const FoldersScreen()),
+  );
   await tester.pump();
   _saved.add([
     for (final kind in BuiltinFolder.values)
@@ -168,6 +173,20 @@ void _foldersScreenTests() {
         matching: find.byIcon(Icons.delete_outline),
       );
       expect(tester.getTopRight(icon).dx, tester.view.physicalSize.width - 16);
+    });
+
+    testWidgets('inRightToLeft_mirrorsTheBadgeAndDeleteEdges', (tester) async {
+      await _pump(tester, const [
+        Folder.user('Work'),
+      ], textDirection: TextDirection.rtl);
+
+      final icon = find.descendant(
+        of: find.byKey(const ValueKey('folder_delete')),
+        matching: find.byIcon(Icons.delete_outline),
+      );
+      final width = tester.view.physicalSize.width;
+      expect(tester.getTopRight(find.byType(FolderBadge)).dx, width - 16);
+      expect(tester.getTopLeft(icon).dx, 16);
     });
 
     testWidgets('whenABuiltinIsMissing_offersToAddItBack', (tester) async {
