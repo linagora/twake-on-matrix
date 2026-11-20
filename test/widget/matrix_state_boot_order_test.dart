@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart' hide State;
@@ -16,6 +16,7 @@ import 'package:http/testing.dart' show MockClient;
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
@@ -538,6 +539,29 @@ Future<void> _until(bool Function() done) async {
   for (var i = 0; i < 100 && !done(); i++) {
     await Future<void>.delayed(const Duration(milliseconds: 10));
   }
+}
+
+/// A file opened in an encrypted room, one in a clear room, and a file of
+/// another library, in the directory that path_provider returns.
+({List<File> downloads, File other}) _downloadedFiles() {
+  const channel = MethodChannel('plugins.flutter.io/path_provider');
+  final tempDir = Directory.systemTemp.createTempSync('logout_downloads');
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+  messenger.setMockMethodCallHandler(channel, (_) async => tempDir.path);
+  addTearDown(() {
+    messenger.setMockMethodCallHandler(channel, null);
+    if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
+  });
+  final downloads = [
+    File(p.join(tempDir.path, 'decrypted', r'$e1:s', 'Secret.pdf')),
+    File(p.join(tempDir.path, r'$e2:s', 'Plain.pdf')),
+  ];
+  final other = File(p.join(tempDir.path, 'flutter_callback_cache.json'));
+  for (final file in [...downloads, other]) {
+    file.createSync(recursive: true);
+  }
+  return (downloads: downloads, other: other);
 }
 
 Future<void> _logoutAndWait(
@@ -1736,6 +1760,47 @@ void main() {
       expect(coordinator.isAppliedTo(last), isFalse);
       expect(effects.applied, isEmpty);
     });
+
+    testWidgets('the last logout deletes the downloaded files', (tester) async {
+      final files = _downloadedFiles();
+      final tom = _CountingToMDatabase();
+      getIt.registerSingleton<HiveCollectionToMDatabase>(tom);
+      final last = _BootClient('a', userID: '@a:s');
+      final harness = _handoverHarness(tester, [last]);
+
+      await harness.run(() async {
+        await _recordedSwitch(harness);
+        await _logoutAndWait(harness, last, () => tom.clears > 0);
+        await _pumpUntil(
+          harness,
+          () => files.downloads.every((f) => !f.existsSync()),
+        );
+      });
+
+      expect(files.downloads.where((f) => f.existsSync()), isEmpty);
+      expect(files.other.existsSync(), isTrue);
+    });
+
+    testWidgets('logging out one of two accounts keeps the downloaded files', (
+      tester,
+    ) async {
+      final files = _downloadedFiles();
+      final hand = _activeAndNext(tester);
+
+      await hand.harness.run(() async {
+        final recorded = await _recordedSwitch(hand.harness);
+        await _logoutAndWait(
+          hand.harness,
+          hand.active,
+          () => recorded.coordinator.isAppliedTo(hand.next),
+        );
+        await _pumpUntil(hand.harness, () => false);
+        await hand.harness.unmount();
+      });
+
+      expect(files.downloads.where((f) => f.existsSync()), files.downloads);
+    });
+
     testWidgets('the last logout unmounts the screens reading the client '
         'before the accounts drop it', (tester) async {
       final last = _BootClient('a', userID: '@a:s');

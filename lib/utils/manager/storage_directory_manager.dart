@@ -4,6 +4,7 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/utils/exception/save_to_downloads_exception.dart';
 import 'package:matrix/matrix.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:external_path/external_path.dart';
 
@@ -14,6 +15,8 @@ class StorageDirectoryManager {
 
   static StorageDirectoryManager get instance => _instance;
 
+  static const _decryptedFolder = 'decrypted';
+
   Future<String> getFileStoreDirectory() async {
     try {
       try {
@@ -23,6 +26,21 @@ class StorageDirectoryManager {
       }
     } catch (_) {
       return (await getDownloadsDirectory())!.path;
+    }
+  }
+
+  /// Only what [getFilePathInAppDownloads] and [getDecryptedFilePath] write.
+  Future<void> deleteDownloadedFiles() async {
+    final directory = Directory(await getFileStoreDirectory());
+    if (!await directory.exists()) return;
+    await for (final entity in directory.list()) {
+      final name = p.basename(entity.path);
+      if (name != _decryptedFolder && !name.startsWith(r'$')) continue;
+      try {
+        await entity.delete(recursive: true);
+      } on PathNotFoundException {
+        // Two last logouts can run at once.
+      }
     }
   }
 
@@ -83,7 +101,7 @@ class StorageDirectoryManager {
   }) async {
     final fileStoreDirectory = await StorageDirectoryManager.instance
         .getFileStoreDirectory();
-    return '$fileStoreDirectory/decrypted/$eventId/${fileName.safeFileName}';
+    return '$fileStoreDirectory/$_decryptedFolder/$eventId/${fileName.safeFileName}';
   }
 
   String convertFileExtension(String filename, String newExtension) {
