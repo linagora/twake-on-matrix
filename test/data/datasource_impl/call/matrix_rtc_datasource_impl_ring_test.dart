@@ -337,6 +337,27 @@ void main() {
         joined: null,
         callee: _alice.user,
       ),
+      // The partner may not have joined yet, or may have left.
+      'a direct chat with one member rings the partner': (
+        dmUser: _alice.user,
+        joined: 1,
+        callee: _alice.user,
+      ),
+      'a direct chat counted empty rings the partner': (
+        dmUser: _alice.user,
+        joined: 0,
+        callee: _alice.user,
+      ),
+      'a direct chat with the user as partner is notified, nobody rung': (
+        dmUser: _bobHere.user,
+        joined: 1,
+        callee: null,
+      ),
+      'a direct chat without a partner is notified, nobody rung': (
+        dmUser: '',
+        joined: 2,
+        callee: null,
+      ),
       'a direct chat with a third member is notified, nobody rung': (
         dmUser: _alice.user,
         joined: 3,
