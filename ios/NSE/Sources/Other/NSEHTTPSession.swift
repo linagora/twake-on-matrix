@@ -110,19 +110,21 @@ struct NSEHTTPSession: MediaProviderProtocol {
         }
 
         guard body != nil else {
-            noisy = await isRoomNoisy(roomID)
+            // An encrypted event hides its mentions: only a rule or a direct room can ring.
+            let ruleSound = await roomRuleSound(roomID)
+            let isDirect = await isDirectRoom(roomID)
+            noisy = ruleSound ?? isDirect
             return item(sender: nil, senderAvatar: nil, roomName: nil, roomAvatar: nil, isDirect: false)
         }
 
         async let member = state(roomID, "m.room.member", sender)
         async let avatar = state(roomID, "m.room.avatar")
         async let name = state(roomID, "m.room.name")
-        async let direct = json("/_matrix/client/v3/user/\(enc(credentials.userId))/account_data/m.direct", label: "account_data/m.direct", timeout: 4)
-        async let roomNoisy = isRoomNoisy(roomID)
-        let (memberContent, avatarContent, nameContent, directContent) = await (member, avatar, name, direct)
-        noisy = await roomNoisy
-
-        let isDirect = directContent?.values.contains { ($0 as? [String]).map { $0.contains(roomID) } ?? false } ?? false
+        async let direct = isDirectRoom(roomID)
+        async let ruleSound = roomRuleSound(roomID)
+        let (memberContent, avatarContent, nameContent, isDirect) = await (member, avatar, name, direct)
+        // Without a room rule the server defaults apply: a sound for direct rooms and mentions only.
+        noisy = await ruleSound ?? (isDirect || isMentioned(content))
         return item(sender: memberContent?["displayname"] as? String,
                     senderAvatar: memberContent?["avatar_url"] as? String,
                     roomName: (nameContent?["name"] as? String).flatMap { $0.isEmpty ? nil : $0 },
@@ -191,15 +193,26 @@ struct NSEHTTPSession: MediaProviderProtocol {
         }
     }
 
-    /// The room rule of the user, as the app writes it: no rule (404) keeps the sound, and so does an empty rule
-    /// ("mentions only": the push is a mention). A rule that notifies without a sound tweak stays silent.
-    /// Any other failure stays silent, like the Rust path (`isNoisy ?? false`): a banner without a ring beats a ring in a silenced room.
-    private func isRoomNoisy(_ roomID: String) async -> Bool {
+    private func isDirectRoom(_ roomID: String) async -> Bool {
+        let direct = await json("/_matrix/client/v3/user/\(enc(credentials.userId))/account_data/m.direct", label: "account_data/m.direct", timeout: 4)
+        return direct?.values.contains { ($0 as? [String]).map { $0.contains(roomID) } ?? false } ?? false
+    }
+
+    private func isMentioned(_ content: [String: Any]?) -> Bool {
+        let mentions = content?["m.mentions"] as? [String: Any]
+        if (mentions?["user_ids"] as? [String])?.contains(credentials.userId) == true { return true }
+        return mentions?["room"] as? Bool == true
+    }
+
+    /// Whether the room rule of the user rings: nil without a rule (404), the server defaults then decide.
+    /// A rule that notifies without a sound tweak is silent; an empty rule ("mentions only") means the push is a mention, so it rings.
+    /// Any other failure is silent, like the Rust path (`isNoisy ?? false`): a banner without a ring beats a ring in a silenced room.
+    private func roomRuleSound(_ roomID: String) async -> Bool? {
         let answer = await fetch("/_matrix/client/v3/pushrules/global/room/\(enc(roomID))", label: "pushrules/room", timeout: 4)
-        if answer.status == 404 { return true }
+        if answer.status == 404 { return nil }
         guard let data = answer.data,
               let rule = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return false }
-        guard rule["enabled"] as? Bool != false, let actions = rule["actions"] as? [Any] else { return true }
+        guard rule["enabled"] as? Bool != false, let actions = rule["actions"] as? [Any] else { return nil }
         let notifies = actions.contains { $0 as? String == "notify" }
         let sounds = actions.contains { ($0 as? [String: Any])?["set_tweak"] as? String == "sound" }
         return sounds || !notifies
