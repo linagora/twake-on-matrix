@@ -1,44 +1,32 @@
 ---
 name: twake-mobile-release
-description: Use when someone wants to ship, deploy or release the Twake Chat mobile app (twake-on-matrix, Flutter) to iOS TestFlight or the Android Play Store (beta, internal, alpha, production): bump version, CHANGELOG, tag, CI check, then ALWAYS post a non-technical release note in the Matrix channel #twake-chat-mobile-release-notes:linagora.com, with a short video for the biggest features. Not for web or Docker images.
+description: Use only to write the release note of a Twake Chat mobile build (twake-on-matrix) that was already deployed, when asked for "release note", "announce what changed" or "note for the mobile release notes channel". Drafts a non-technical note, with a short video for the biggest features, for the person who deployed to post in #twake-chat-mobile-release-notes:linagora.com. Does not cut, tag or deploy a release: that is the `release` skill.
 ---
 
-# Mobile release (iOS TestFlight, Play Store)
+# Mobile release note
 
-Full reference: `docs/adr/0036-release-process.md`. The `release` skill covers the same delivery steps; this skill adds the mandatory release note.
-Hotfix branching and store promotion are out of scope (manual steps after CI).
+Cutting the release (CHANGELOG, bump, tag, CI) is the `release` skill; reference: `docs/adr/0036-release-process.md`. This skill starts once the tag is pushed and writes the note. Store promotion (TestFlight to testers, Play Console beyond internal) is out of scope.
 
 ## The rule
 
-**Every mobile deploy is announced by whoever deploys it**, in the channel
-[`#twake-chat-mobile-release-notes:linagora.com`](https://chat-ng.linagora.com/rooms/%23twake-chat-mobile-release-notes%3Alinagora.com). No note posted = deploy not finished. It applies to TestFlight builds, Play Store tracks, RC tags (`vX.Y.Z-rcNN`) and stable tags (`vX.Y.Z`). Any member of the channel can post; ask to be invited before deploying if you are not one.
+**Every mobile deploy is announced** in the channel
+[`#twake-chat-mobile-release-notes:linagora.com`](https://chat-ng.linagora.com/rooms/%23twake-chat-mobile-release-notes%3Alinagora.com) by the person who deployed. No note posted = deploy not finished. The agent has no Matrix access: it drafts the note and hands it to that person, who posts it from their own account (any member of the channel can post; ask to be invited if you are not one).
 
 ## Steps
 
-1. **Confirm branch and HEAD.** `git branch --show-current`, `git log -1 --oneline`, `git status --short`. The tree must be clean. Show the branch and last commit and get an explicit yes. The branch choice is intentional: do not force `main`.
-2. **CHANGELOG.** New section at the top of `CHANGELOG.md`:
-   ```
-   ## [x.y.z] - YYYY-MM-DD
-   ### Added
-   - TW-XXXX: Short description (80 characters max)
-   ### Changed
-   ### Fixed
-   ```
-   One line per `TW-XXXX` ticket (merge commits sharing an id), 80 characters and 2 lines max per item, a short imperative phrase when there is no ticket. Commits since the last tag: `git log $(git describe --tags --abbrev=0)..HEAD --oneline`.
-3. **Bump `pubspec.yaml`**: `version: x.y.z+NNNN`. Change `x.y.z` only; never touch the `+NNNN` build number (CI manages it). Commit CHANGELOG and pubspec together: `chore: bump version to vx.y.z`.
-4. **Tag and push.** `git tag vx.y.z` (RC: `vx.y.z-rcNN`), `git push origin HEAD`, `git push origin refs/tags/vx.y.z`. Never skip CI, force-push a tag or bypass signing.
-5. **CI** (triggered by the tag, `.github/workflows/release.yaml`): Android APK to Play Store internal, iOS IPA to TestFlight, GitHub Release. Watch it: `gh run list --workflow=release.yaml --limit 5`. Wait for the iOS and Android jobs to be green before announcing.
-6. **Store promotion (manual):** TestFlight build to testers in App Store Connect; Play Console internal to alpha, beta or production as planned.
-7. **Release note** (below), then the video for big features, then tell the user: tag, CI links, stores reached, link to the posted message. If the note could not be posted, say it: the deploy is not complete.
+1. **Find the release.** Tag `vX.Y.Z` and its CI run: `gh run list --workflow=release.yaml --limit 5`. The Android and iOS jobs must be green before the note says a store got the build. A release tag is cut on a `chore/release-x.y.z` branch and is not on `main`.
+2. **Collect what ships.** Read the `## [X.Y.Z]` section of `CHANGELOG.md` (lines are `#PR: description`, with a `### Tests` section to skip). Check the PRs with `gh pr view <n>` when a line is not enough. Do not use `git describe --tags` on `main`: the tags are not on it, so it returns an old tag and lists shipped releases again.
+3. **Draft the note** (below), and the video for big features.
+4. **Hand over.** Give the person who deployed: tag, CI run links, stores reached, the note text, and the video files. Tell them it must be posted; until then the deploy is not complete.
 
 ## Release note
 
-Markdown, English, written for non-technical readers. Collect what ships from the PRs between the previous tag and this one (`gh pr view <n>` when a title is not enough).
+Markdown, English, written for non-technical readers.
 
 ```
 ## Twake Chat mobile X.Y.Z: what's new
 
-**Available on:** TestFlight (iOS) · Play Store beta (Android)
+**Available on:** TestFlight (iOS) · Play Store internal (Android)
 
 ### What changes for you
 - One plain sentence per visible change: what the user sees or can now do.
@@ -47,14 +35,14 @@ Markdown, English, written for non-technical readers. Collect what ships from th
 - What no longer goes wrong, in the user's words.
 ```
 
-- Say only the stores that really got the build.
+- Say only the stores that really got the build. CI sends Android to the Play Store internal track and iOS to TestFlight; name another track only if the deployer says it was promoted.
 - No PR numbers, ticket ids, class names or jargon; short sentences.
 - Skip internal work (refactor, CI, tests, dependencies) unless users feel it. Nothing visible: "Stability and performance improvements".
-- Post it yourself in the channel, from your Matrix account. Never put secrets or personal data in it.
+- Never put secrets or personal data in it.
 
 ## Video for big features
 
-For each big visible feature (not fixes, not small changes), make a short motion-design video with the `twake-feature-video` skill from the [twake-guidelines](https://github.com/linagora/twake-guidelines) plugin (`/plugin install twake-guidelines@twake-guidelines`; iPhone frame, portrait, the app's real look, the feature alone) and post it under the note. Without the tooling, a screen recording of the real app is acceptable.
+For each big visible feature (not fixes, not small changes), make a short motion-design video with the `twake-feature-video` skill from the [twake-guidelines](https://github.com/linagora/twake-guidelines) plugin (`/plugin install twake-guidelines@twake-guidelines`; iPhone frame, portrait, the app's real look, the feature alone) for the deployer to post under the note. Without the tooling, a screen recording of the real app is acceptable.
 
 ## Security
 
