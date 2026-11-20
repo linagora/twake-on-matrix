@@ -8,9 +8,14 @@ import 'package:flutter/material.dart';
 /// is zoomed in or a pinch is in progress so those gestures move or zoom the
 /// image instead of closing the viewer.
 class DismissibleMediaView extends StatefulWidget {
-  const DismissibleMediaView({super.key, required this.itemBuilder});
+  const DismissibleMediaView({
+    super.key,
+    required this.itemBuilder,
+    this.dismissOverChildDrags = false,
+  });
 
   final Widget itemBuilder;
+  final bool dismissOverChildDrags;
 
   @override
   State<DismissibleMediaView> createState() => _DismissibleMediaViewState();
@@ -39,6 +44,7 @@ class _DismissibleMediaViewState extends State<DismissibleMediaView> {
             return CustomDismissible(
               onDismissed: () => Navigator.of(context).pop(),
               enabled: !isZoomed && !_pinching && !PlatformInfos.isWeb,
+              dismissOverChildDrags: widget.dismissOverChildDrags,
               child: child!,
             );
           },
