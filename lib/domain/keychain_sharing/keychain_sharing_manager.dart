@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_session.dart';
-import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 
@@ -69,8 +69,7 @@ class KeychainSharingManager {
           'accessToken': accessToken,
           'userId': userId,
           'homeserverUrl': homeserver.toString(),
-          'pusherNotificationClientIdentifier':
-              client.pusherNotificationClientIdentifier,
+          'pusherNotificationClientIdentifier': userId.sha256Hash,
         }),
       );
     } catch (e, s) {

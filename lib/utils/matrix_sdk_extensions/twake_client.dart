@@ -87,6 +87,7 @@ class TwakeClient extends Client {
   Future<void> clear({
     SessionClearReason reason = SessionClearReason.unspecified,
   }) async {
+    final id = userID;
     // Never let the notification cleanup keep the app session alive.
     await KeychainSharingManager.logoutNotificationSession(this)
         .timeout(const Duration(seconds: 10))
@@ -94,10 +95,13 @@ class TwakeClient extends Client {
           (e, s) => Logs().w('Unable to log the NSE device out', e, s),
         );
     await KeychainSharingManager.deleteRecoveryKey(userId: userID);
-    if (userID case final id?) {
-      await KeychainSharingManager.deleteHttpSession(id);
+    try {
+      return await super.clear(reason: reason);
+    } finally {
+      // After the SDK dropped the access token: a sync callback still running
+      // cannot write the entry back (it reads the token from the client).
+      if (id != null) await KeychainSharingManager.deleteHttpSession(id);
     }
-    return super.clear(reason: reason);
   }
 
   @override

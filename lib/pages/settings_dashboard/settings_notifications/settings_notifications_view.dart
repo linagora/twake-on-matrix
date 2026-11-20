@@ -94,7 +94,7 @@ class SettingsNotificationsView extends StatelessWidget {
                   SwitchListTile.adaptive(
                     value: controller.encryptedPreviewsActive ?? false,
                     title: Text(
-                      L10n.of(context)!.encryptedNotificationPreviews,
+                      L10n.of(context)!.dedicatedNotificationSignIn,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
@@ -104,7 +104,7 @@ class SettingsNotificationsView extends StatelessWidget {
                           ? L10n.of(
                               context,
                             )!.encryptedNotificationPreviewsLocked
-                          : L10n.of(context)!.encryptedNotificationPreviewsHint,
+                          : L10n.of(context)!.dedicatedNotificationSignInHint,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     onChanged:

@@ -116,9 +116,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   /// Encrypted rooms never show content in notifications anymore: the tile
   /// only lets users who already have a dedicated device remove it.
   bool get showEncryptedPreviewsTile =>
-      PlatformInfos.isIOS &&
-      _ssoProviderId != null &&
-      encryptedPreviewsActive == true;
+      PlatformInfos.isIOS && encryptedPreviewsActive == true;
 
   @override
   void initState() {
@@ -145,10 +143,10 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
 
   Future<void> toggleEncryptedPreviews(bool enabled) async {
     final client = _client;
-    final providerId = _ssoProviderId;
-    final homeserver = client.homeserver;
-    if (providerId == null || homeserver == null) return;
     if (enabled) {
+      final providerId = _ssoProviderId;
+      final homeserver = client.homeserver;
+      if (providerId == null || homeserver == null) return;
       final String callback;
       try {
         callback = await ConnectPageMixin.webAuthenticate(
