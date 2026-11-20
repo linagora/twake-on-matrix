@@ -19,6 +19,7 @@ const _notificationsChannel = MethodChannel(
 
 const _unreadRoomId = '!unread:example.com';
 const _readRoomId = '!read:example.com';
+const _invitedRoomId = '!invited:example.com';
 
 class _SyncControlledApi extends FakeMatrixApi {
   bool failSync = false;
@@ -55,6 +56,9 @@ class _FakeMatrixState extends Fake implements MatrixState {
   String? get activeRoomId => null;
 
   @override
+  Client? get clientOrNull => null;
+
+  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       'MatrixState';
 }
@@ -82,7 +86,7 @@ void main() {
     // One instance for all tests: BackgroundPush keeps the first one.
     await (await SharedPreferences.getInstance()).setString(
       SettingKeys.notificationCurrentIds,
-      json.encode({_unreadRoomId: 1, _readRoomId: 2}),
+      json.encode({_unreadRoomId: 1, _readRoomId: 2, _invitedRoomId: 3}),
     );
     api = _SyncControlledApi();
     final database = await MatrixSdkDatabase.init(
@@ -95,15 +99,19 @@ void main() {
     );
     client = await getClient(database: database, httpClient: api)
       ..backgroundSync = false;
-    // The room was read on another device; the unread one was not.
+    // The room was read on another device; the unread one was not. An invite
+    // never gets a count.
     client.rooms.addAll([
       Room(id: _unreadRoomId, client: client, notificationCount: 1),
       Room(id: _readRoomId, client: client),
+      Room(id: _invitedRoomId, client: client, membership: Membership.invite),
     ]);
-    push = BackgroundPush.clientOnly(client)..rebind(client);
+    BackgroundPush.resetForTesting();
+    push = BackgroundPush.clientOnly(client);
   });
 
   tearDown(() {
+    BackgroundPush.resetForTesting();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_notificationsChannel, null);
   });
@@ -134,9 +142,17 @@ void main() {
       await settle();
 
       expect(cancelledIds, [2]);
-      expect((await storedIds()).keys, [_unreadRoomId]);
+      expect((await storedIds()).keys, [_unreadRoomId, _invitedRoomId]);
     },
   );
+
+  test('an invited room keeps its notification', () async {
+    clearingPush();
+    await settle();
+
+    expect(cancelledIds, isNot(contains(3)));
+    expect((await storedIds()).keys, contains(_invitedRoomId));
+  });
 
   test('a failed sync keeps the notifications', () async {
     api.failSync = true;
@@ -151,7 +167,11 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 200));
 
     expect(cancelledIds, isEmpty);
-    expect((await storedIds()).keys, [_unreadRoomId, _readRoomId]);
+    expect((await storedIds()).keys, [
+      _unreadRoomId,
+      _readRoomId,
+      _invitedRoomId,
+    ]);
   });
 
   test('a clearing push during a sweep gets its own sync', () async {
@@ -171,7 +191,6 @@ void main() {
     expect(cancelledIds, [2]);
   });
 
-  // Last: the service keeps the host they set for the tests that follow.
   test(
     'the account served logged out: the sweep clears for the one still logged in',
     () async {
@@ -187,14 +206,14 @@ void main() {
           sqfliteFactory: databaseFactoryFfi,
         ),
       );
-      push.rebind(departed);
-      BackgroundPush(_FakeMatrixState([departed, client]), departed);
+      BackgroundPush.resetForTesting();
+      push = BackgroundPush(_FakeMatrixState([departed, client]), departed);
 
       clearingPush();
       await settle();
 
       expect(cancelledIds, [2]);
-      expect((await storedIds()).keys, [_unreadRoomId]);
+      expect((await storedIds()).keys, [_unreadRoomId, _invitedRoomId]);
     },
   );
 
@@ -209,6 +228,39 @@ void main() {
         'unread': '1',
         'prio': 'high',
       });
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(api.heldSyncs, isEmpty);
+      expect(cancelledIds, isEmpty);
+    },
+  );
+
+  test('a push for an event starts no sweep', () async {
+    api.holdSync = true;
+
+    // Showing the event needs the platform plugin: only the sweep is checked.
+    await runZonedGuarded(() async {
+      push.onReceiveNotification({
+        'data': {
+          'event_id': r'$event:example.com',
+          'room_id': _readRoomId,
+          'unread': '1',
+          'prio': 'high',
+        },
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }, (_, _) {});
+
+    expect(api.heldSyncs, isEmpty);
+    expect(cancelledIds, isEmpty);
+  });
+
+  test(
+    'a local notification brought to the foreground starts no sweep',
+    () async {
+      api.holdSync = true;
+
+      push.onReceiveNotification({'NotificationId': 1, 'payload': '{}'});
       await Future<void>.delayed(const Duration(milliseconds: 200));
 
       expect(api.heldSyncs, isEmpty);

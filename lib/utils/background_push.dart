@@ -415,6 +415,12 @@ class BackgroundPush {
     return true;
   }
 
+  @visibleForTesting
+  static void resetForTesting() {
+    unawaited(_instance?.onRoomSync?.cancel());
+    _instance = null;
+  }
+
   factory BackgroundPush.clientOnly(Client client) {
     _instance ??= BackgroundPush._(client);
     return _instance!;
@@ -930,10 +936,19 @@ class BackgroundPush {
   // Sent when unread counts change, e.g. a room read on another device: the
   // push names no room, a sync tells which ones were read.
   void _clearReadRooms(PushNotification notification, Client receiving) {
-    if (notification.eventId == null) {
+    if (notification.eventId == null &&
+        notification.counts != null &&
+        !_syncLoopClears(receiving)) {
       unawaited(_onClearingPush(receiving: receiving));
     }
   }
+
+  /// In foreground the sync loop of the active account runs, and the room sync
+  /// listener clears what it syncs.
+  bool _syncLoopClears(Client receiving) =>
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
+      identical(receiving, _roomSyncClient) &&
+      identical(receiving, _matrixState?.clientOrNull);
 
   /// Rooms refreshed by a sync and not checked yet: only their unread
   /// counts are fresh enough to clear their notification.
@@ -1069,9 +1084,11 @@ class BackgroundPush {
   }
 
   /// A left room keeps the unread count it had when it was left (synced with
-  /// `includeLeave`), so it must not block clearing its notifications.
+  /// `includeLeave`), so it must not block clearing its notifications. An
+  /// invite never gets a count: its notification stays.
   bool _hasNoPendingNotification(Room room) =>
-      room.notificationCount == 0 || room.membership == Membership.leave;
+      room.membership != Membership.invite &&
+      (room.notificationCount == 0 || room.membership == Membership.leave);
 
   void _handleRedirectRoom(
     String roomId, {
