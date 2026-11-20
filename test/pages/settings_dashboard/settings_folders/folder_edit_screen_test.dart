@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
@@ -12,6 +12,7 @@ import 'package:twake_chat/domain/repository/folders/folders_repository.dart';
 import 'package:twake_chat/domain/spaces/folders.dart';
 import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_folders/folder_edit_screen.dart';
+import 'package:twake_chat/providers/emoji_data_provider.dart';
 import 'package:twake_chat/providers/room_list/room_list_entries_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
@@ -38,6 +39,21 @@ late MockFoldersRepository _repository;
 late StreamController<List<Folder>> _saved;
 late ProviderContainer _container;
 
+const _emojiData = EmojiData(
+  categories: [
+    Category(id: 'people', emojiIds: ['smile']),
+  ],
+  emojis: {
+    'smile': Emoji(
+      id: 'smile',
+      name: 'Smile',
+      keywords: {'smile'},
+      skins: [Skin(unified: '1f604', native: '😄')],
+      version: 1,
+    ),
+  },
+);
+
 Future<void> _pump(
   WidgetTester tester,
   Widget screen, {
@@ -59,6 +75,7 @@ Future<void> _pump(
     overrides: [
       ...activeAccountOverrides(null),
       foldersRepositoryProvider.overrideWithValue(_repository),
+      emojiDataProvider.overrideWith((ref) => _emojiData),
       roomListEntriesProvider.overrideWith(
         (ref) =>
             entries?.call() ??
@@ -93,8 +110,25 @@ void _folderEditScreenTests() {
       expect(find.text('Edit folder'), findsOneWidget);
       expect(find.widgetWithText(TextField, 'Work'), findsOneWidget);
       // The emoji comes from a picker: it is no text to type.
-      expect(find.widgetWithText(LinagoraButton, '💼'), findsOneWidget);
-      expect(find.widgetWithText(TextField, '💼'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('folder_emoji')),
+          matching: find.text('💼'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<EditableText>(
+              find.descendant(
+                of: find.byKey(const ValueKey('folder_name')),
+                matching: find.byType(EditableText),
+              ),
+            )
+            .controller
+            .text,
+        'Work',
+      );
     });
 
     testWidgets('whenNameIsTooLong_keepsTheFirstSixtyCharacters', (
@@ -182,7 +216,57 @@ void _folderEditScreenChatsTests() {
       await tester.pump();
       await _loadFolders(tester, const []);
 
-      expect(find.byType(LinagoraSettingItem).evaluate().length, lessThan(100));
+      final chatRows = find.byWidgetPredicate(
+        (widget) => '${widget.key}'.contains('folder_chat_!r'),
+      );
+      expect(find.byKey(const ValueKey('folder_chat_!r0')), findsOneWidget);
+      expect(chatRows.evaluate().length, lessThan(100));
+    });
+
+    testWidgets('whenTheKeyboardIsOpen_keepsSaveAboveIt', (tester) async {
+      await _pump(tester, const FolderEditScreen());
+      await tester.pump();
+      await _loadFolders(tester, const []);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 600);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pump();
+
+      expect(
+        tester.getBottomLeft(find.byKey(const ValueKey('folder_save'))).dy,
+        lessThanOrEqualTo(1400 - 600),
+      );
+    });
+
+    testWidgets('whenNoColourIsSelected_keepsItsCross', (tester) async {
+      await _pump(tester, const FolderEditScreen());
+      await tester.pump();
+      await _loadFolders(tester, const []);
+
+      expect(
+        find.descendant(
+          of: find.byTooltip('No colour'),
+          matching: find.byIcon(Icons.format_color_reset_outlined),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('whenThereAreManyChats_keepsSaveOnScreen', (tester) async {
+      await _pump(
+        tester,
+        const FolderEditScreen(),
+        entries: () => [
+          for (var i = 0; i < 500; i++)
+            RoomListEntry(id: '!r$i', name: 'Room $i'),
+        ],
+      );
+      await tester.pump();
+      await _loadFolders(tester, const []);
+
+      expect(
+        find.byKey(const ValueKey('folder_save')).hitTestable(),
+        findsOneWidget,
+      );
     });
 
     testWidgets('always_namesEachColourForAScreenReader', (tester) async {
@@ -198,6 +282,33 @@ void _folderEditScreenChatsTests() {
 
 void _folderEditScreenSaveTests() {
   group('FolderEditScreen', () {
+    testWidgets('whenEmojiIsCleared_savesTheFolderWithoutEmoji', (
+      tester,
+    ) async {
+      await _pump(tester, const FolderEditScreen(name: 'Work'));
+      await tester.pump();
+      await _loadFolders(tester, const [Folder.user('Work', emoji: '💼')]);
+
+      await tester.tap(find.byKey(const ValueKey('folder_emoji')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('folder_emoji_clear')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('folder_save')));
+      await tester.pump();
+
+      final saved =
+          verify(
+                _repository.saveFolders(
+                  captureAny,
+                  changes: anyNamed('changes'),
+                ),
+              ).captured.single
+              as List<Folder>;
+      expect(saved.whereType<UserFolder>().single.emoji, isNull);
+      // The picker's visibility detector settles after half a second.
+      await tester.pump(const Duration(seconds: 1));
+    });
+
     testWidgets('whenNew_tagsWhatIsTickedAndListsNoSpace', (tester) async {
       await _pump(tester, const FolderEditScreen());
       await tester.pump();
@@ -268,8 +379,11 @@ void _folderEditScreenLiveTests() {
 
       expect(
         tester
-            .widget<LinagoraSettingItem>(
-              find.byKey(const ValueKey('folder_chat_!dm')),
+            .widget<Checkbox>(
+              find.descendant(
+                of: find.byKey(const ValueKey('folder_chat_!dm')),
+                matching: find.byType(Checkbox),
+              ),
             )
             .value,
         isTrue,

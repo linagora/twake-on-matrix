@@ -39,15 +39,24 @@ class FoldersScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: SettingsFoldersStyle.padding,
-              child: Text(l10n.foldersIntro),
+              padding: SettingsFoldersStyle.introPadding,
+              child: Text(
+                l10n.foldersIntro,
+                style: SettingsFoldersStyle.helpText,
+              ),
             ),
             LinagoraSettingItem(
               key: const ValueKey('folder_new'),
               leadingIcon: Icons.create_new_folder_outlined,
+              iconColor: LinagoraSysColors.material().primary,
+              titleColor: LinagoraSysColors.material().primary,
               title: l10n.folderNew,
+              padding: SettingsFoldersStyle.rowPadding,
+              trailing: const SizedBox.shrink(),
               onTap: () => const FolderEditRoute().push<void>(context),
             ),
+            if (folders.isNotEmpty)
+              LinagoraSectionHeader(label: l10n.foldersYours.toUpperCase()),
           ],
         ),
         footer: const _RecommendedFolders(),
@@ -57,25 +66,9 @@ class FoldersScreen extends ConsumerWidget {
         ),
         children: [
           for (final folder in folders)
-            LinagoraSettingItem(
+            _FolderRow(
               key: ValueKey(RoomListFilter.of(folder)),
-              leading: Text(
-                folder.emoji ?? SettingsFoldersStyle.defaultFolderEmoji,
-              ),
-              title: folder.label(l10n),
-              subtitle: switch (folder) {
-                BuiltinFolderEntry(:final kind) => kind.rule(l10n),
-                UserFolder() => null,
-              },
-              onTap: () => folder.pushEdit(context),
-              trailing: Padding(
-                padding: SettingsFoldersStyle.trailingPadding,
-                child: LinagoraIconButton(
-                  icon: Icons.delete_outline,
-                  tooltip: l10n.folderDelete,
-                  onPressed: () => confirmAndRemoveFolder(context, ref, folder),
-                ),
-              ),
+              folder: folder,
             ),
         ],
       ),
@@ -99,9 +92,10 @@ class _RecommendedFolders extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LinagoraSectionHeader(label: l10n.foldersRecommended),
+        LinagoraSectionHeader(label: l10n.foldersRecommended.toUpperCase()),
         for (final kind in hidden)
           LinagoraSettingItem(
+            padding: SettingsFoldersStyle.rowPadding,
             title: kind.label(l10n),
             subtitle: kind.rule(l10n),
             trailing: LinagoraButton(
@@ -117,6 +111,105 @@ class _RecommendedFolders extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// A folder, its badge and rule centred on its delete button.
+class _FolderRow extends ConsumerWidget {
+  const _FolderRow({super.key, required this.folder});
+
+  final Folder folder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = L10n.of(context)!;
+    final colors = LinagoraSysColors.material();
+    final subtitle = switch (folder) {
+      BuiltinFolderEntry(:final kind) => kind.rule(l10n),
+      UserFolder() => null,
+    };
+    return InkWell(
+      onTap: () => folder.pushEdit(context),
+      child: Padding(
+        padding: SettingsFoldersStyle.folderRowPadding,
+        child: Row(
+          spacing: SettingsFoldersStyle.rowGap,
+          children: [
+            FolderBadge(folder: folder),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    folder.label(l10n),
+                    style: LinagoraTextStyle.material().bodyMedium2.copyWith(
+                      color: colors.onSurface,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle,
+                      style: LinagoraTextStyle.material().bodyMedium.copyWith(
+                        color: LinagoraRefColors.material().tertiary[30],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+            LinagoraIconButton(
+              key: const ValueKey('folder_delete'),
+              icon: Icons.delete_outline,
+              iconSize: SettingsFoldersStyle.deleteIconSize,
+              color: colors.tertiary,
+              padding: SettingsFoldersStyle.deletePadding,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.standard,
+              tooltip: l10n.folderDelete,
+              onPressed: () => confirmAndRemoveFolder(context, ref, folder),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The emoji of the folder on its colour, or on grey without one.
+class FolderBadge extends StatelessWidget {
+  const FolderBadge({super.key, required this.folder});
+
+  final Folder folder;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = folder.color;
+    final tint = color == null
+        ? LinagoraSysColors.material().tertiary
+        : Color(color.argb);
+    return Container(
+      width: SettingsFoldersStyle.badgeSize,
+      height: SettingsFoldersStyle.badgeSize,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: tint.withValues(alpha: SettingsFoldersStyle.tintAlpha),
+      ),
+      child: Text(
+        folder.emoji ?? SettingsFoldersStyle.defaultFolderEmoji,
+        textAlign: TextAlign.center,
+        // A line box as tall as the glyph, so the emoji centres on the badge.
+        style: LinagoraTextStyle.material().titleLarge.copyWith(height: 1),
+        textHeightBehavior: const TextHeightBehavior(
+          applyHeightToFirstAscent: false,
+          applyHeightToLastDescent: false,
+        ),
+      ),
     );
   }
 }
