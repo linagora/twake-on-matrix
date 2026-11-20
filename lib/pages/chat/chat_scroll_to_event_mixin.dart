@@ -601,6 +601,9 @@ extension ChatScrollToEventMixin on ChatController {
   /// Must not hold `_isProgrammaticScrolling` or run a multi-page seek: that
   /// races "scroll to live bottom → mark read" (Patrol
   /// `UnreadBadgeClearsScenario`).
+  bool _isRowMounted(String eventId) =>
+      _rowKey(_albumRowEventId(eventId)).currentContext != null;
+
   void _scrollToEventInLiveTimeline(ChatJumpRequest request) {
     final jumped = jumpToRowTop(
       scrollController,
