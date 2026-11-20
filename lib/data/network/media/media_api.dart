@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:twake_chat/data/model/media/download_file_response.dart';
@@ -21,6 +23,19 @@ class MediaAPI {
 
   MediaAPI();
 
+  static const _uploadChunkSize = 64 * 1024;
+
+  // Dio reports send progress per chunk: one chunk jumps straight to 100%.
+  static Stream<List<int>> _chunked(Uint8List bytes) async* {
+    for (var start = 0; start < bytes.length; start += _uploadChunkSize) {
+      yield Uint8List.sublistView(
+        bytes,
+        start,
+        min(start + _uploadChunkSize, bytes.length),
+      );
+    }
+  }
+
   Future<UploadFileResponse> uploadFileMobile({
     required FileInfo fileInfo,
     CancelToken? cancelToken,
@@ -31,7 +46,7 @@ class MediaAPI {
     dioHeaders[HttpHeaders.contentTypeHeader] = fileInfo.mimeType;
     Stream<List<int>>? readStream;
     if (fileInfo.bytes != null) {
-      readStream = Stream.value(fileInfo.bytes!);
+      readStream = _chunked(fileInfo.bytes!);
     } else if (fileInfo.filePath != null) {
       final file = File(fileInfo.filePath!);
       final exist = await file.exists();

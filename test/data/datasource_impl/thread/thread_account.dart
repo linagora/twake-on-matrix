@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
@@ -62,6 +63,7 @@ class ServerCall {
 }
 
 /// A method and the start of a path.
+@immutable
 class ServerRoute {
   const ServerRoute.get(this.path) : method = 'GET';
 

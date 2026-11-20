@@ -92,6 +92,7 @@ import 'package:twake_chat/utils/extension/event_status_custom_extension.dart';
 import 'package:twake_chat/utils/extension/global_key_extension.dart';
 import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/join_invitation_error_extension.dart';
 import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
@@ -122,6 +123,7 @@ import 'package:twake_chat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' as emoji_mart;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -130,6 +132,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/providers/emoji_data_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/dialog/options_dialog.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
@@ -199,6 +202,9 @@ class ChatController extends ConsumerState<Chat>
         RetryTextMessageMixin,
         AudioMixin,
         AutoMarkAsReadMixin {
+  emoji_mart.EmojiData get emojiData =>
+      ref.read(emojiDataProvider).requireValue;
+
   final NetworkConnectionService networkConnectionService = getIt
       .get<NetworkConnectionService>();
 
@@ -1326,7 +1332,17 @@ class ChatController extends ConsumerState<Chat>
     await context.copyMessageLink(link);
   }
 
-  void reportEventAction(Event event) async {
+  /// Copies the caption of an album as text, never one of its images.
+  void copyAlbumCaptionAction(Event caption) async {
+    await caption.copyTextEvent(context, timeline!);
+    if (!mounted) return;
+
+    showEmojiPickerNotifier.value = false;
+    _clearSelectEvent();
+  }
+
+  /// Reports [event], or every image of an album when [albumEvents] is set.
+  void reportEventAction(Event event, {List<Event>? albumEvents}) async {
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
@@ -1371,7 +1387,7 @@ class ChatController extends ConsumerState<Chat>
         },
       );
       if (isBacked) {
-        reportEventAction(event);
+        reportEventAction(event, albumEvents: albumEvents);
         return;
       }
       if (comment == null) return;
@@ -1379,23 +1395,28 @@ class ChatController extends ConsumerState<Chat>
     }
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        final state = await getIt
-            .get<ReportContentInteractor>()
-            .execute(
-              client: client,
-              roomId: event.roomId!,
-              eventId: event.eventId,
-              reason: selectedOption.value == MessageReportReason.other
-                  ? '${selectedOption.value.getReason(l10n)}: $additionalReason'
-                  : selectedOption.value.getReason(l10n),
-            )
-            .last;
-        return state.fold((failure) {
-          if (failure is ReportContentFailure) {
-            throw failure.exception;
-          }
-          return failure;
-        }, (success) => success);
+        final reason = selectedOption.value == MessageReportReason.other
+            ? '${selectedOption.value.getReason(l10n)}: $additionalReason'
+            : selectedOption.value.getReason(l10n);
+        Object? result;
+        for (final reported in albumEvents ?? [event]) {
+          final state = await getIt
+              .get<ReportContentInteractor>()
+              .execute(
+                client: client,
+                roomId: reported.roomId!,
+                eventId: reported.eventId,
+                reason: reason,
+              )
+              .last;
+          result = state.fold((failure) {
+            if (failure is ReportContentFailure) {
+              throw failure.exception;
+            }
+            return failure;
+          }, (success) => success);
+        }
+        return result;
       },
     );
     showEmojiPickerNotifier.value = false;
@@ -1474,7 +1495,9 @@ class ChatController extends ConsumerState<Chat>
     );
   }
 
-  void forwardEventsAction({Event? event}) async {
+  /// Forwards the selected events, else [albumEvents] (every image of an
+  /// album), else [event].
+  void forwardEventsAction({Event? event, List<Event>? albumEvents}) async {
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
@@ -1482,9 +1505,9 @@ class ChatController extends ConsumerState<Chat>
     if (event != null && !event.status.isAvailable) {
       return;
     }
-    final events = selectedEvents.isEmpty && event != null
-        ? [event]
-        : selectedEvents;
+    final events = selectedEvents.isNotEmpty
+        ? selectedEvents
+        : albumEvents ?? [?event];
     final messages = const MediaBatchStamp().restampForwarded(
       events
           .map(
@@ -1774,8 +1797,7 @@ class ChatController extends ConsumerState<Chat>
           .read(storeRecentReactionsUseCaseProvider)
           .executeOrLog(emojiId: emojiId ?? _recentReactionId(emoji));
 
-  String _recentReactionId(String emoji) =>
-      Matrix.of(context).emojiData.getIdByEmoji(emoji);
+  String _recentReactionId(String emoji) => emojiData.getIdByEmoji(emoji);
 
   Future<bool> _sendEmojiAction({
     required String emoji,
@@ -1789,22 +1811,18 @@ class ChatController extends ConsumerState<Chat>
     return await sendingRoom.sendReaction(event.eventId, emoji) != null;
   }
 
+  /// [albumEvents] are every image of an album: the user's reactions are
+  /// looked up on all of them, a new one goes to [event] (the first image).
   Future<void> toggleReactionAction({
     required String emoji,
     String? emojiId,
     required Event event,
+    List<Event>? albumEvents,
   }) async {
     final timeline = this.timeline;
     final myReactions = timeline == null
         ? <Event>[]
-        : event
-              .aggregatedEvents(timeline, RelationshipTypes.reaction)
-              .where(
-                (e) =>
-                    e.senderId == e.room.client.userID &&
-                    e.type == EventTypes.Reaction,
-              )
-              .toList();
+        : (albumEvents ?? [event]).myReactionsIn(timeline);
     try {
       await toggleReaction(
         emoji: emoji,
@@ -1901,6 +1919,20 @@ class ChatController extends ConsumerState<Chat>
         (a, b) => a.originServerTs.compareTo(b.originServerTs),
       );
     }
+  }
+
+  /// Adds [events] to the selection at once: one recording check and one
+  /// rebuild, not one per event.
+  void selectEvents(List<Event> events) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
+    _addSelectEvent([
+      for (final event in events)
+        if (!event.redacted && !selectedEvents.contains(event)) event,
+    ]);
+    selectedEvents.sort((a, b) => a.originServerTs.compareTo(b.originServerTs));
   }
 
   int? findChildIndexCallback(Key key, Map<String, int> thisEventsKeyMap) {
@@ -2584,7 +2616,7 @@ class ChatController extends ConsumerState<Chat>
                                   ],
                                 ),
                                 child: emoji_mart.EmojiPicker(
-                                  emojiData: Matrix.of(context).emojiData,
+                                  emojiData: emojiData,
                                   recentEmoji: getRecentEmoji(),
                                   configuration:
                                       emoji_mart.EmojiPickerConfiguration(
@@ -2705,13 +2737,18 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void onAcceptInvitation() async {
+    final l10n = L10n.of(context)!;
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final waitForRoom = room?.client.waitForRoomInSync(
           room!.id,
           join: true,
         );
-        await room?.join();
+        try {
+          await room?.join();
+        } on MatrixException catch (e, s) {
+          Error.throwWithStackTrace(e.toJoinInvitationError(l10n), s);
+        }
         await waitForRoom;
       },
     ).then((_) => _tryLoadTimeline());
@@ -3084,8 +3121,11 @@ class ChatController extends ConsumerState<Chat>
           selectedEvents.first.isVideoOrImage &&
           !PlatformInfos.isWeb)
         ChatAppBarActions.saveToGallery,
-      ChatAppBarActions.info,
-      ChatAppBarActions.report,
+      // Both act on one message.
+      if (selectedEvents.length == 1) ...[
+        ChatAppBarActions.info,
+        ChatAppBarActions.report,
+      ],
     ];
   }
 
@@ -3274,7 +3314,7 @@ class ChatController extends ConsumerState<Chat>
                                       ],
                                     ),
                                     child: emoji_mart.EmojiPicker(
-                                      emojiData: Matrix.of(context).emojiData,
+                                      emojiData: emojiData,
                                       recentEmoji: getRecentEmoji(),
                                       configuration:
                                           emoji_mart.EmojiPickerConfiguration(

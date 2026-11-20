@@ -5,6 +5,24 @@ import 'package:matrix/src/utils/request_and_cache.dart';
 extension ClientWellKnownExtension on Client {
   static const _cacheKey = 'well_known';
 
+  /// The discovery information stored by the last fetch, read without network.
+  Future<DiscoveryInformation?> getCachedWellKnown() async {
+    if (!isLogged()) return null;
+    try {
+      final cached = await database.getCustomCacheObject(_cacheKey);
+      return cached == null
+          ? null
+          : DiscoveryInformation.fromJson(cached.content);
+    } catch (e) {
+      Logs().w(
+        'ClientWellKnownExtension::getCachedWellKnown: could not read the '
+        'cached well-known',
+        e,
+      );
+      return null;
+    }
+  }
+
   /// Fetches the discovery information (`/.well-known/matrix/client`) from
   /// the homeserver host, returning [fallback] when it cannot be fetched.
   /// A returned fallback is persisted so it survives the next restart.

@@ -23,14 +23,23 @@ class MessageReactions extends StatelessWidget {
   final Event event;
   final Timeline timeline;
 
-  const MessageReactions(this.event, this.timeline, {super.key});
+  /// Every image of an album, when [event] leads one: their reactions are
+  /// shown as one list, and a new reaction goes to [event].
+  final List<Event>? albumEvents;
+
+  const MessageReactions(
+    this.event,
+    this.timeline, {
+    this.albumEvents,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final allReactionEvents = event.aggregatedEvents(
-      timeline,
-      RelationshipTypes.reaction,
-    );
+    final allReactionEvents = {
+      for (final reacted in albumEvents ?? [event])
+        ...reacted.aggregatedEvents(timeline, RelationshipTypes.reaction),
+    };
     final client = Matrix.of(context).client;
     final reactionList = groupReactions(allReactionEvents, client.userID);
     return Material(
@@ -258,7 +267,6 @@ class ReactionsList extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: MessageReactionsBottomSheet(
-                          allReactionEvents: allReactionEvents,
                           reactionList: reactionList,
                           scrollController: ScrollController(),
                         ),
@@ -306,7 +314,6 @@ class ReactionsList extends StatelessWidget {
           expand: false,
           builder: (BuildContext context, ScrollController scrollController) {
             return MessageReactionsBottomSheet(
-              allReactionEvents: allReactionEvents,
               reactionList: reactionList,
               scrollController: scrollController,
             );

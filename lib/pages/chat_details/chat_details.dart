@@ -17,12 +17,13 @@ import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
 enum AliasActions { copy, delete, setCanonical }
 
-class ChatDetails extends StatefulWidget {
+class ChatDetails extends ConsumerStatefulWidget {
   final String roomId;
   final bool isInStack;
   final VoidCallback? closeRightColumn;
@@ -40,7 +41,7 @@ class ChatDetails extends StatefulWidget {
   ChatDetailsController createState() => ChatDetailsController();
 }
 
-class ChatDetailsController extends State<ChatDetails>
+class ChatDetailsController extends ConsumerState<ChatDetails>
     with
         HandleVideoDownloadMixin,
         PlayVideoActionMixin,

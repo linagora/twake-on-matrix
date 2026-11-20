@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show immutable;
+
 import 'package:twake_chat/domain/exception/thread/thread_change_exception.dart';
 import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
@@ -22,6 +24,7 @@ ThreadStatus withoutResolve(ThreadFollow follow) =>
     ThreadStatus(follow: follow, isResolved: false, canResolve: false);
 
 /// One change asked of the account.
+@immutable
 sealed class ThreadChange {
   const ThreadChange(this.thread);
 

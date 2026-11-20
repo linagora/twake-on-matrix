@@ -405,6 +405,31 @@ void main() {
     expect(encrypted, hasLength(1));
   });
 
+  test(
+    'watchRoomEncrypted_whenRemovedFromAnEncryptedRoom_emitsOnceThenFails',
+    () async {
+      // Arrange
+      final client = _FakeClient().._room.isEncrypted = true;
+      final encrypted = <void>[];
+      final errors = <Object>[];
+      MatrixRtcDatasourceImpl(
+        client,
+      ).watchRoomEncrypted(_room).listen(encrypted.add, onError: errors.add);
+      await pumpEventQueue();
+
+      // Act
+      client.onSync.add(SyncUpdate(nextBatch: 'still'));
+      await pumpEventQueue();
+      client._room.currentMembership = Membership.leave;
+      client.onSync.add(SyncUpdate(nextBatch: 'kicked'));
+      await pumpEventQueue();
+
+      // Assert
+      expect(encrypted, hasLength(1));
+      expect(errors.single, isA<CallRoomNotFoundException>());
+    },
+  );
+
   test('watchRoomEncrypted_whenTheRoomIsGone_failsAsRoomNotFound', () async {
     // Arrange
     final client = _FakeClient()..isRoomGone = true;

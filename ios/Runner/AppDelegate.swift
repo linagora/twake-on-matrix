@@ -24,6 +24,9 @@ let apnTokenKey = "apnToken"
     func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
         GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
         twakeApnChannel = createApnChannel(engineBridge.applicationRegistrar.messenger())
+        // Registering the plugins hands the notification center to fcm_shared_isolate:
+        // take it back so taps and foreground pushes reach this delegate again.
+        UNUserNotificationCenter.current().delegate = self
     }
     
     func createApnChannel(_ messenger: FlutterBinaryMessenger) -> FlutterMethodChannel {

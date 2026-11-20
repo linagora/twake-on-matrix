@@ -7,7 +7,7 @@ import 'package:twake_chat/pages/chat/events/message_content_style.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:twake_chat/widgets/blur_hash_background.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:matrix/matrix.dart';
@@ -102,7 +102,7 @@ class ImageBubble extends StatelessWidget {
                   SizedBox(
                     width: maxWidth,
                     height: bubbleHeight,
-                    child: BlurHash(
+                    child: BlurHashBackground(
                       hash:
                           event.blurHash ?? MessageContentStyle.defaultBlurHash,
                     ),
@@ -174,7 +174,7 @@ class PendingImageTileState extends ConsumerState<PendingImageTile> {
         fit: StackFit.expand,
         alignment: Alignment.center,
         children: [
-          BlurHash(
+          BlurHashBackground(
             hash: widget.event.blurHash ?? MessageContentStyle.defaultBlurHash,
           ),
           FutureBuilder<MatrixFile?>(

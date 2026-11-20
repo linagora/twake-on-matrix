@@ -367,6 +367,12 @@ void main() {
       expect(find(), '!dm:server');
     });
 
+    test('is null when the mapped room is not loaded', () {
+      client.directRoomId = '!dm:server';
+
+      expect(find(), isNull);
+    });
+
     test('is null for an abandoned room', () {
       client.directRoomId = '!dm:server';
       client.knownRooms['!dm:server'] = _FakeRoom(

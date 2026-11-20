@@ -11,7 +11,7 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/hero_page_route.dart';
 import 'package:twake_chat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:twake_chat/widgets/blur_hash_background.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
@@ -146,7 +146,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                   SizedBox(
                     width: bubbleWidth,
                     height: imageHeight,
-                    child: BlurHash(
+                    child: BlurHashBackground(
                       hash:
                           widget.event.blurHash ??
                           AppConfig.defaultImageBlurHash,

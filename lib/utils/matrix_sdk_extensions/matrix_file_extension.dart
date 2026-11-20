@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/size_string.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -69,13 +70,9 @@ extension MatrixFileExtension on MatrixFile {
   void share(BuildContext context) async {
     // Workaround for iPad from
     // https://github.com/fluttercommunity/plus_plugins/tree/main/packages/share_plus/share_plus#ipad
-    final box = context.findRenderObject() as RenderBox?;
-    await Share.shareXFiles(
-      [XFile.fromData(bytes, name: name, mimeType: mimeType)],
-      sharePositionOrigin: box == null
-          ? null
-          : box.localToGlobal(Offset.zero) & box.size,
-    );
+    await Share.shareXFiles([
+      XFile.fromData(bytes, name: name, mimeType: mimeType),
+    ], sharePositionOrigin: context.sharePositionOrigin);
     return;
   }
 
@@ -166,6 +163,7 @@ extension MatrixFileExtension on MatrixFile {
   }
 }
 
+@immutable
 class TwakeAudioFile extends MatrixFile {
   final int? duration;
 

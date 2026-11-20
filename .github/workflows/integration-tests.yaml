@@ -86,6 +86,26 @@ jobs:
         run: |
           yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper/dists
+            !~/.gradle/caches/modules-2/*.lock
+          key: gradle-debug-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('android/**/*.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: gradle-debug-${{ runner.os }}-${{ runner.arch }}-
+
+      # Not on the runner image: Gradle installs them during the build.
+      - name: Cache Android SDK packages installed by Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-31
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-33
+            ${{ env.ANDROID_SDK_ROOT }}/cmake/3.22.1
+          key: android-sdk-${{ runner.os }}-${{ runner.arch }}-platforms-31-33-cmake-3.22.1
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -301,6 +321,26 @@ jobs:
         run: |
           yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
 
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper/dists
+            !~/.gradle/caches/modules-2/*.lock
+          key: gradle-debug-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('android/**/*.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: gradle-debug-${{ runner.os }}-${{ runner.arch }}-
+
+      # Not on the runner image: Gradle installs them during the build.
+      - name: Cache Android SDK packages installed by Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-31
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-33
+            ${{ env.ANDROID_SDK_ROOT }}/cmake/3.22.1
+          key: android-sdk-${{ runner.os }}-${{ runner.arch }}-platforms-31-33-cmake-3.22.1
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
@@ -443,6 +483,26 @@ jobs:
       - name: Accept Android SDK licenses
         run: |
           yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper/dists
+            !~/.gradle/caches/modules-2/*.lock
+          key: gradle-profile-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('android/**/*.gradle', 'android/gradle.properties', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: gradle-profile-${{ runner.os }}-${{ runner.arch }}-
+
+      # Not on the runner image: Gradle installs them during the build.
+      - name: Cache Android SDK packages installed by Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-31
+            ${{ env.ANDROID_SDK_ROOT }}/platforms/android-33
+            ${{ env.ANDROID_SDK_ROOT }}/cmake/3.22.1
+          key: android-sdk-${{ runner.os }}-${{ runner.arch }}-platforms-31-33-cmake-3.22.1
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable

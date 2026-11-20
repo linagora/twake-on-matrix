@@ -2079,10 +2079,6 @@
   "storeSecurlyOnThisDevice": "Store securely on this device",
   "user": "User",
   "custom": "Custom",
-  "foregroundServiceRunning": "This notification appears when the foreground service is running.",
-  "screenSharingTitle": "screen sharing",
-  "screenSharingDetail": "You are sharing your screen in FuffyChat",
-  "appearOnTopDetails": "Allows the app to appear on top (not needed if you already have Fluffychat setup as a calling account)",
   "whyIsThisMessageEncrypted": "Why is this message unreadable?",
   "noKeyForThisMessage": "This can happen if the message was sent before you have signed in to your account at this device.\n\nIt is also possible that the sender has blocked your device or something went wrong with the internet connection.\n\nAre you able to read the message on another session? Then you can transfer the message from it! Go to Settings > Devices and make sure that your devices have verified each other. When you open the room the next time and both sessions are in the foreground, the keys will be transmitted automatically.\n\nDo you not want to loose the keys when logging out or switching devices? Make sure that you have enabled the chat backup in the settings.",
   "newGroup": "New chat",
@@ -2462,8 +2458,6 @@
       }
     }
   },
-  "enable_notifications": "Notifications disabled",
-  "disable_notifications": "Notifications enabled",
   "logoutDialogWarning": "You will lose access to encrypted messages. We recommend that you enable chat backups before logging out",
   "copyNumber": "Copy number",
   "callViaCarrier": "Call via Carrier",
@@ -2763,6 +2757,7 @@
   "couldNotLaunchUrl": "Could not launch URL",
   "deviceVerificationWaring": "Encrypted messages may be unavailable because some of your devices are out of sync",
   "deviceVerificationWarningOnSettingsScreen": "Some sessions are unverified. Encrypted messages may not decrypt correctly until all sessions are verified or removed.",
+  "deviceHasNoEncryptionKeys": "This device can't be verified because it has no encryption keys.",
   "verifyThisDevice": "Verify this device",
   "verifyThisDeviceDescription": "Confirm it's you to unlock your encrypted messages.",
   "useAnotherDevice": "Use another device",
@@ -3504,11 +3499,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "callErrorEncrypted": "Calls in encrypted chats are not available yet.",
-  "@callErrorEncrypted": {
-    "type": "text",
-    "placeholders": {}
-  },
   "callErrorNoPermission": "You may not join a call in this conversation.",
   "@callErrorNoPermission": {
     "type": "text",
@@ -3560,5 +3550,29 @@
     "placeholders": {
       "link": {}
     }
+  },
+  "callErrorEncryptionTurnedOn": "Encryption was turned on in this chat. Join again to encrypt the call.",
+  "@callErrorEncryptionTurnedOn": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "selectAllImages": "Select all images",
+  "@selectAllImages": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deleteAlbumConfirmationTitle": "{count, plural, =1{Delete this image?} other{Delete these {count} images?}}",
+  "@deleteAlbumConfirmationTitle": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cannotJoinRoomEveryoneLeft": "This chat can no longer be joined because everyone in it has left. The invitation was removed.",
+  "@cannotJoinRoomEveryoneLeft": {
+    "type": "text",
+    "placeholders": {}
   }
 }

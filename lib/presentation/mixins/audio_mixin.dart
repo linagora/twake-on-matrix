@@ -474,6 +474,8 @@ mixin AudioMixin {
       title: L10n.of(context)!.recordingInProgress,
       message: L10n.of(context)!.pleaseFinishOrStopTheRecording,
       isArrangeActionButtonsVertical: true,
+      // No button label is passed, so the close icon is the only control.
+      showCloseButton: true,
     );
   }
 }

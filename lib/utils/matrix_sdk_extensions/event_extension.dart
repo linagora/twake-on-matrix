@@ -313,11 +313,14 @@ extension LocalizedBody on Event {
     TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
   }
 
+  /// The text shown for this event, so an edited caption or reply copies its
+  /// latest text.
   String getSelectedEventString(BuildContext context, Timeline timeline) {
+    final display = getDisplayEventWithoutEditEvent(timeline);
     if (isCaptionModeOrReply()) {
-      return bodyWithoutReplyFallback;
+      return display.bodyWithoutReplyFallback;
     }
-    return getDisplayEventWithoutEditEvent(timeline).calcLocalizedBodyFallback(
+    return display.calcLocalizedBodyFallback(
       MatrixLocals(L10n.of(context)!),
       hideReply: true,
     );

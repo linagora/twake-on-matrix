@@ -49,10 +49,13 @@ class MultiPlatformSelectionMode extends StatelessWidget {
 
   final bool isClickable;
 
+  final HitTestBehavior? behavior;
+
   const MultiPlatformSelectionMode({
     super.key,
     this.onLongPress,
     this.isClickable = true,
+    this.behavior,
     required this.event,
     required this.child,
   });
@@ -64,6 +67,7 @@ class MultiPlatformSelectionMode extends StatelessWidget {
     }
 
     return GestureDetector(
+      behavior: behavior,
       onLongPress: () => onLongPress?.call(event),
       child: child,
     );
