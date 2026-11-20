@@ -304,6 +304,10 @@ extension DownloadFileExtension on Event {
     if (decryptedBytes == null) {
       throw Exception('decryptFile: Unable to decrypt file');
     }
+    // The last logout may have deleted the decrypted files meanwhile.
+    if (!room.client.isLogged()) {
+      throw StateError('decryptFile: the session ended during decryption');
+    }
 
     final decryptedFile = File(decryptedPath);
     await decryptedFile.create(recursive: true);

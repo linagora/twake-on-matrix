@@ -17,23 +17,27 @@ class StorageDirectoryManager {
 
   static const _decryptedFolder = 'decrypted';
 
-  Future<String> getFileStoreDirectory() async {
+  Future<String> getFileStoreDirectory() async =>
+      await _appFileStoreDirectory() ?? (await getDownloadsDirectory())!.path;
+
+  Future<String?> _appFileStoreDirectory() async {
     try {
-      try {
-        return (await getTemporaryDirectory()).path;
-      } catch (_) {
-        return (await getApplicationDocumentsDirectory()).path;
-      }
-    } catch (_) {
-      return (await getDownloadsDirectory())!.path;
-    }
+      return (await getTemporaryDirectory()).path;
+    } catch (_) {}
+    try {
+      return (await getApplicationDocumentsDirectory()).path;
+    } catch (_) {}
+    return null;
   }
 
-  /// Only what [getFilePathInAppDownloads] and [getDecryptedFilePath] write.
+  /// Only the manager's own folders, never the public Downloads fallback.
   Future<void> deleteDownloadedFiles() async {
-    final directory = Directory(await getFileStoreDirectory());
+    final root = await _appFileStoreDirectory();
+    if (root == null) return;
+    final directory = Directory(root);
     if (!await directory.exists()) return;
-    await for (final entity in directory.list()) {
+    await for (final entity in directory.list(followLinks: false)) {
+      if (entity is! Directory) continue;
       final name = p.basename(entity.path);
       if (name != _decryptedFolder && !name.startsWith(r'$')) continue;
       try {

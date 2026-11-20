@@ -1852,7 +1852,9 @@ class MatrixState extends ConsumerState<Matrix>
     if (ref.read(accountsProvider) case LastLoggedOut() || NoAccount()) {
       // Files are kept by event id, which no account owns.
       await _deleteDownloadedFiles();
-      await _deleteAllTomConfigurations();
+      if (ref.read(accountsProvider) case LastLoggedOut() || NoAccount()) {
+        await _deleteAllTomConfigurations();
+      }
     }
   }
 
