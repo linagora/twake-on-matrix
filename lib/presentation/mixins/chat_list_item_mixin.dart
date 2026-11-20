@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_image_preview_style.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 mixin ChatListItemMixin {
   Widget textContentWidget(
@@ -182,7 +184,8 @@ mixin ChatListItemMixin {
     required Room room,
   }) {
     /// highlightCount or Invitation
-    if (room.highlightCount > 0 || room.membership == Membership.invite) {
+    if (room.highlightCountWithThreads > 0 ||
+        room.membership == Membership.invite) {
       return Theme.of(context).colorScheme.primary;
     }
 
@@ -198,14 +201,14 @@ mixin ChatListItemMixin {
 
   bool hasNewMessage(Room room) {
     // If there's a notification count, definitely has new messages
-    if (room.notificationCount > 0) {
+    if (room.unreadBadgeCount > 0) {
       return true;
     }
 
     // For mentions-only rooms, check hasNewMessages
     // This is important because they won't increment notificationCount for regular messages
     if (room.pushRuleState == PushRuleState.mentionsOnly &&
-        room.hasNewMessages) {
+        room.hasNewMessagesWithThreads) {
       return true;
     }
 
