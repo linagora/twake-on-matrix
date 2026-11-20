@@ -316,15 +316,16 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     );
   }
 
-  /// A direct chat rings the other user. A group, or any room that is not a
-  /// direct chat of two, only notifies: nobody is rung by `room: true`.
+  /// A direct chat rings its partner, even before they join. A group, or a
+  /// direct chat with 3+ joined members, only notifies: nobody is rung by
+  /// `room: true`.
   @override
   Future<void> sendRing(
     CallJoin join, {
     required String membershipEventId,
   }) async {
     final room = _room(join.room);
-    final callee = _isDirectOfTwo(room) ? room.directChatMatrixID : null;
+    final callee = _ringee(room);
     // The slot of the room, as the web client sends it (matrix-js-sdk 43).
     return _logged(
       'ring not sent',
@@ -346,11 +347,15 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   /// `m.direct` alone does not tell a third member in. An unknown count of
-  /// members is not held against the room.
-  static bool _isDirectOfTwo(Room room) {
-    if (!room.isDirectChat) return false;
-    final joined = room.summary.mJoinedMemberCount;
-    return joined == null || joined == 2;
+  /// members is not held against the room; a lone member (partner invited or
+  /// gone) still rings the partner.
+  String? _ringee(Room room) {
+    if (!room.isDirectChat) return null;
+    final joined = room.summary.mJoinedMemberCount ?? 0;
+    if (joined > 2) return null;
+    final partner = room.directChatMatrixID;
+    if (partner == null || partner.isEmpty) return null;
+    return partner == _client.userID ? null : partner;
   }
 
   Future<void> _logged(String what, Future<void> Function() action) async {
