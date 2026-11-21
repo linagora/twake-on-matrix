@@ -18,7 +18,6 @@ import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/message_link/policy/message_link_policy.provider.dart';
 import 'package:twake_chat/domain/model/public_rooms/room_address.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/widgets/profile_bottom_sheet.dart';
@@ -50,14 +49,11 @@ class UrlLauncher with GoToDraftChatMixin {
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
       return;
     }
-    final container = ProviderScope.containerOf(context, listen: false);
-    final policy = container.read(messageLinkPolicyProvider);
-    final webAppMatrixTo = policy.matrixToForRoomsLink(
-      url!,
-      isKnownRoom: (roomId) => _isOpenableRoom(
-        container.read(activeMatrixClientProvider)?.getRoomById(roomId),
-      ),
-    );
+    final policy = ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(messageLinkPolicyProvider);
+    final webAppMatrixTo = policy.matrixToForRoomsLink(url!);
     if (webAppMatrixTo != null) {
       return openMatrixToUrl(
         customUrl: webAppMatrixTo,
@@ -158,12 +154,6 @@ class UrlLauncher with GoToDraftChatMixin {
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
     }
   }
-
-  /// A room the user has joined or is invited to, as [openMatrixToUrl]
-  /// opens directly.
-  bool _isOpenableRoom(Room? room) =>
-      room?.membership == Membership.join ||
-      room?.membership == Membership.invite;
 
   void openMatrixToUrl({
     String? customUrl,
