@@ -79,7 +79,7 @@ mixin MessageContentBuilderMixin {
     double maxWidth,
   ) {
     return TextPainter(
-      textScaler: MediaQuery.of(context).textScaler,
+      textScaler: MediaQuery.textScalerOf(context),
       text: TextSpan(
         text: event.isCaptionModeOrReply()
             ? event.body
@@ -110,7 +110,7 @@ mixin MessageContentBuilderMixin {
         ? event.getDisplayEventWithoutEditEvent(timeline)
         : event;
     return TextPainter(
-      textScaler: MediaQuery.of(context).textScaler,
+      textScaler: MediaQuery.textScalerOf(context),
       text: TextSpan(
         text: displayEvent.isCaptionModeOrReply()
             ? displayEvent.body
@@ -131,7 +131,7 @@ mixin MessageContentBuilderMixin {
     double maxWidth,
   ) {
     final painTimeText = TextPainter(
-      textScaler: MediaQuery.of(context).textScaler,
+      textScaler: MediaQuery.textScalerOf(context),
       text: TextSpan(
         text: DateFormat("HH:mm").format(event.originServerTs),
         style: Theme.of(context).textTheme.bodySmall?.merge(

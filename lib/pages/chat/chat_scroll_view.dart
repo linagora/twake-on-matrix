@@ -37,6 +37,9 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   List<Event> _visibleEvents = const [];
   AlbumTimelineIndex _albums = AlbumTimelineIndex(const []);
   String? _albumBreak;
+  // Reused while the items are unchanged, so a height-only relayout (the
+  // keyboard opening) does not rebuild every visible message on each frame.
+  SliverChildBuilderDelegate? _bottomDelegate, _topDelegate;
 
   @override
   void initState() {
@@ -61,6 +64,10 @@ class _ChatScrollViewState extends State<ChatScrollView> {
       // The first unread can be found after the events: regroup at it.
       if (_albumBreak != controller.unreadReceivedMessageLocation) {
         _indexEvents();
+        _dropItemDelegates();
+      } else if (widget.constraints.maxWidth !=
+          oldWidget.constraints.maxWidth) {
+        _dropItemDelegates();
       }
       return;
     }
@@ -88,6 +95,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     _bottom
       ..clear()
       ..addAll(result.bottom);
+    _dropItemDelegates();
 
     // Scroll to bottom if needed
     if (result.shouldScrollToBottom) {
@@ -130,6 +138,11 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     });
   }
 
+  void _dropItemDelegates() {
+    _bottomDelegate = null;
+    _topDelegate = null;
+  }
+
   void _indexEvents() {
     _eventIndexMap = {
       for (var i = 0; i < _currentEvents.length; i++)
@@ -166,7 +179,10 @@ class _ChatScrollViewState extends State<ChatScrollView> {
         SliverPadding(
           padding: horizontalPaddingInsets,
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
+            delegate: _bottomDelegate ??= SliverChildBuilderDelegate((
+              context,
+              index,
+            ) {
               if (index == _bottom.length) {
                 if (controller.timeline!.isRequestingHistory) {
                   return const Center(child: CupertinoActivityIndicator());
@@ -209,7 +225,10 @@ class _ChatScrollViewState extends State<ChatScrollView> {
           key: centerKey,
           padding: horizontalPaddingInsets,
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
+            delegate: _topDelegate ??= SliverChildBuilderDelegate((
+              context,
+              index,
+            ) {
               if (index == _top.length) {
                 if (controller.timeline!.isRequestingFuture) {
                   return const Center(child: CupertinoActivityIndicator());

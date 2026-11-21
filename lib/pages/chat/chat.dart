@@ -1313,7 +1313,7 @@ class ChatController extends ConsumerState<Chat>
   void requestFuture() async {
     final timeline = this.timeline;
     if (timeline == null) return;
-    if (!timeline.canRequestFuture) return;
+    if (!timeline.canRequestFuture || timeline.isRequestingFuture) return;
     Logs().v('Chat::requestFuture(): Requesting future...');
     try {
       await timeline.requestFuture(historyCount: _loadHistoryCount);
@@ -1322,6 +1322,10 @@ class ChatController extends ConsumerState<Chat>
         context,
       ).showSnackBar(SnackBar(content: Text((err).toLocalizedString(context))));
       rethrow;
+    } finally {
+      // The SDK clears isRequestingFuture after its last onUpdate, so nothing
+      // else rebuilds the list to hide the top loader.
+      if (mounted) setState(() {});
     }
   }
 
