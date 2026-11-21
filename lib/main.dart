@@ -188,11 +188,16 @@ class AppStarter with WidgetsBindingObserver {
     );
     // MatrixState sets the sync only on the lifecycle changes it sees once it
     // exists, so it misses this one: turn the sync back on here, by its rule.
-    if (state != AppLifecycleState.paused) {
+    // From detached the binding replays every step (resumed first) up to the
+    // new state, so read the state it settles on.
+    scheduleMicrotask(() {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
+        return;
+      }
       for (final client in clients) {
         client.backgroundSync = true;
       }
-    }
+    });
     unawaited(startGui());
     // We must make sure that the GUI is only started once.
     guiStarted = true;

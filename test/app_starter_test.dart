@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -54,7 +55,17 @@ Future<int> _syncCallsDuring(Duration window) async {
   return _syncCalls() - before;
 }
 
+/// Sends [state] as the engine does: from the current state, the binding
+/// replays every step to it before observers can read the settled state.
+Future<void> _sendLifecycle(AppLifecycleState state) =>
+    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/lifecycle',
+      const StringCodec().encodeMessage(state.toString()),
+      (_) {},
+    );
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   const window = Duration(milliseconds: 600);
   late Client client;
   late int guiStarts;
@@ -64,9 +75,14 @@ void main() {
     client = await _syncingClient();
     guiStarts = 0;
     starter = AppStarter([client], () async => guiStarts++);
+    await _sendLifecycle(AppLifecycleState.detached);
+    WidgetsBinding.instance.addObserver(starter);
   });
 
-  tearDown(() => client.dispose());
+  tearDown(() {
+    WidgetsBinding.instance.removeObserver(starter);
+    return client.dispose();
+  });
 
   test('the client keeps syncing until the sync is stopped', () async {
     expect(await _syncCallsDuring(window), isPositive);
@@ -81,7 +97,7 @@ void main() {
 
   test('a detached lifecycle change keeps the sync stopped', () async {
     starter.stopBackgroundSync();
-    starter.didChangeAppLifecycleState(AppLifecycleState.detached);
+    await _sendLifecycle(AppLifecycleState.detached);
 
     expect(await _syncCallsDuring(window), 0);
     expect(guiStarts, 0);
@@ -91,8 +107,8 @@ void main() {
     starter.stopBackgroundSync();
     await _syncCallsDuring(window);
 
-    starter.didChangeAppLifecycleState(AppLifecycleState.resumed);
-    starter.didChangeAppLifecycleState(AppLifecycleState.inactive);
+    await _sendLifecycle(AppLifecycleState.resumed);
+    await _sendLifecycle(AppLifecycleState.inactive);
 
     expect(await _syncCallsDuring(window), isPositive);
     expect(guiStarts, 1);
@@ -102,7 +118,7 @@ void main() {
     starter.stopBackgroundSync();
     await _syncCallsDuring(window);
 
-    starter.didChangeAppLifecycleState(AppLifecycleState.paused);
+    await _sendLifecycle(AppLifecycleState.paused);
 
     expect(await _syncCallsDuring(window), 0);
     expect(guiStarts, 1);
