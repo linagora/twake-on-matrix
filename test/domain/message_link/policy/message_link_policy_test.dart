@@ -206,6 +206,42 @@ void main() {
         expect(policy.matrixToForRoomsLink(link), isNull, reason: link);
       }
     });
+
+    test('ignores a rooms link the Matrix SDK would not read back', () {
+      // UrlLauncher.openMatrixToUrl returns silently on a link
+      // parseIdentifierIntoParts cannot read: a dead tap. Null keeps the tap
+      // opening the browser.
+      const host = 'https://chat.other.org/rooms';
+      const server = '%3Aexample.org'; // 12 characters once decoded
+      // The SDK reads an identifier of 255 characters at most.
+      final roomOf255 = '!${'a' * 242}$server';
+      final eventOf255 = '%24${'a' * 254}';
+
+      for (final link in [
+        // The sigil alone is no room id.
+        '$host/!',
+        // ?event= is not an event id.
+        '$host/!abc$server?event=notanevent',
+        '$host/%23general$server?event=notanevent',
+        // One character over the longest identifier.
+        '$host/!${'a' * 243}$server',
+        '$host/%23${'a' * 243}$server',
+        '$host/!abc$server?event=${eventOf255}a',
+      ]) {
+        expect(policy.matrixToForRoomsLink(link), isNull, reason: link);
+      }
+
+      // The boundary: the longest identifiers still open in the app.
+      for (final link in [
+        '$host/$roomOf255',
+        '$host/!abc$server?event=$eventOf255',
+      ]) {
+        final parts = policy
+            .matrixToForRoomsLink(link)
+            ?.parseIdentifierIntoParts();
+        expect(parts, isNotNull, reason: link);
+      }
+    });
   });
 
   group('MessageLinkPolicy with malformed percent-encoding', () {

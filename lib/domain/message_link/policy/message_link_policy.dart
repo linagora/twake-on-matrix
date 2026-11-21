@@ -1,3 +1,5 @@
+import 'package:matrix/matrix.dart';
+
 /// Builds the link the user copies to point at one message, and reads the
 /// message links of the Twake Chat web app.
 class MessageLinkPolicy {
@@ -43,7 +45,9 @@ class MessageLinkPolicy {
   String? matrixToForRoomsLink(String link) {
     final uri = Uri.tryParse(link);
     if (uri == null || uri.scheme != 'https') return null;
-    return _matrixToForRoomsPath(uri);
+    final matrixTo = _matrixToForRoomsPath(uri);
+    // A link the Matrix SDK would not read back would be a dead tap.
+    return matrixTo?.parseIdentifierIntoParts() == null ? null : matrixTo;
   }
 
   /// Null when the path or query is not valid percent-encoded UTF-8: such a
@@ -55,7 +59,8 @@ class MessageLinkPolicy {
       final id = segments.last;
       final colon = id.indexOf(':');
       final isAlias = id.startsWith('#') && colon > 1 && colon < id.length - 1;
-      if (!id.startsWith('!') && !isAlias) return null;
+      final isRoomId = id.startsWith('!') && id.length > 1;
+      if (!isRoomId && !isAlias) return null;
       final eventId = uri.queryParameters['event'];
       final via = uri.queryParametersAll['via'] ?? const [];
       return '$_matrixToPrefix${Uri.encodeComponent(id)}'
