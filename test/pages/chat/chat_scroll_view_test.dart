@@ -152,6 +152,18 @@ void main() {
     expect(_builtItem(tester).constraints.maxWidth, 300);
   });
 
+  testWidgets('A moved unread marker rebuilds the items', (tester) async {
+    final controller = _FakeChatController(_FakeTimeline());
+    final events = [hiddenEvent];
+    await _pumpScrollView(tester, controller, events, _initialSize);
+    final before = _builtItem(tester);
+
+    controller.unreadReceivedMessageLocation = hiddenEvent.eventId;
+    await _pumpScrollView(tester, controller, events, _initialSize);
+
+    expect(identical(_builtItem(tester), before), isFalse);
+  });
+
   testWidgets('A controller rebuild shows the history loader', (tester) async {
     final timeline = _FakeTimeline();
     final controller = _FakeChatController(timeline);
