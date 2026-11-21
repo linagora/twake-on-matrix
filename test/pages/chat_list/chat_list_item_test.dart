@@ -139,6 +139,21 @@ void main() {
     verify(room.loadHeroUsers()).called(2);
   });
 
+  testWidgets('loads hero users again when the membership changes', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    when(room.membership).thenReturn(Membership.invite);
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    when(room.membership).thenReturn(Membership.join);
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
+  });
+
   testWidgets('loads the peer when the display name adds it to empty heroes', (
     tester,
   ) async {
