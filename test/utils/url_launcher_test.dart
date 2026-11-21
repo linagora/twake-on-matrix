@@ -1,4 +1,7 @@
 import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/data/repository/public_rooms/public_rooms_repository.provider.dart';
+import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
+import 'package:twake_chat/domain/model/public_rooms/public_room_preview.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
@@ -15,6 +18,8 @@ import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+import '../domain/public_rooms/fake_public_rooms_repository.dart';
 
 class _FakeClient extends Fake implements Client {
   final joined = <String, Room>{};
@@ -222,8 +227,19 @@ void main() {
     const invitedRoomId = '!invited:example.org';
     const eventId = r'$event';
     late _FakeClient client;
+    late FakePublicRoomsRepository publicRooms;
 
     setUp(() {
+      publicRooms = FakePublicRoomsRepository()
+        ..preview = const PublicRoomPreview.found(
+          PublicRoom(
+            roomId: '!general:example.org',
+            name: 'General',
+            memberCount: 3,
+            access: PublicRoomAccess.open,
+            kind: PublicRoomKind.group,
+          ),
+        );
       client = _FakeClient();
       client.joined[roomId] = Room(
         id: roomId,
@@ -260,7 +276,11 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [activeMatrixClientProvider.overrideWithValue(client)],
+          retry: (_, _) => null,
+          overrides: [
+            activeMatrixClientProvider.overrideWithValue(client),
+            publicRoomsRepositoryProvider.overrideWithValue(publicRooms),
+          ],
           child: provider.Provider<MatrixState>.value(
             value: _FakeMatrixState(client),
             child: MaterialApp.router(
@@ -291,15 +311,44 @@ void main() {
       });
     }
 
-    testWidgets('WHEN the user does not know the room\n'
-        'THEN it is opened in an external app', (tester) async {
-      const unknown = '$webUrl/rooms/!unknown:example.org?event=$eventId';
+    testWidgets('WHEN the user is not in the room\n'
+        'THEN its preview is shown in the app, never the browser', (
+      tester,
+    ) async {
+      await launchInApp(
+        tester,
+        '$webUrl/rooms/!unknown%3Aexample.org?event=$eventId',
+      );
 
-      await launchInApp(tester, unknown);
+      expect(platform.launches, isEmpty);
+      expect(find.text('General'), findsOneWidget);
+      expect(find.text('Join · 3 members'), findsOneWidget);
+      expect(publicRooms.previewQueries, ['!unknown:example.org']);
+    });
 
-      expect(platform.launches, [
-        (unknown, PreferredLaunchMode.externalApplication),
-      ]);
+    testWidgets('WHEN it is the share link of a room, on its alias\n'
+        'THEN its preview is shown in the app, never the browser', (
+      tester,
+    ) async {
+      await launchInApp(tester, '$webUrl/rooms/%23general%3Aexample.org');
+
+      expect(platform.launches, isEmpty);
+      expect(find.text('General'), findsOneWidget);
+      expect(find.text('Join · 3 members'), findsOneWidget);
+      expect(publicRooms.previewQueries, ['#general:example.org']);
+    });
+
+    testWidgets('WHEN the link names via servers\n'
+        'THEN the room is looked up through them', (tester) async {
+      await launchInApp(
+        tester,
+        '$webUrl/rooms/!opaque?via=example.org&via=other.org',
+      );
+
+      expect(platform.launches, isEmpty);
+      expect(find.text('General'), findsOneWidget);
+      expect(publicRooms.previewQueries, ['!opaque']);
+      expect(publicRooms.previewVia.single, ['example.org', 'other.org']);
     });
   });
 }

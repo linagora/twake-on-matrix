@@ -68,51 +68,178 @@ void main() {
   });
 
   group('MessageLinkPolicy.matrixToForRoomsLink', () {
-    bool known(String id) => id == roomId;
-
-    test('turns a rooms link of a known room into its matrix.to link', () {
-      // The link the Twake Chat web app copies, from any host: messageLink()
-      // in twake-space-chat src/domain/permalink.ts.
+    // The links the Twake Chat web app copies, from any host: messageLink()
+    // and roomLink() in twake-space-chat src/domain/permalink.ts.
+    test('turns a rooms link of a room id into its matrix.to link', () {
       expect(
         policy.matrixToForRoomsLink(
           'https://chat.other.org/rooms/!abc%3Aexample.org'
           '?event=%24evt_1%3Aexample.org',
-          isKnownRoom: known,
         ),
         'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org',
       );
       expect(
         policy.matrixToForRoomsLink(
           'https://chat.other.org/rooms/!abc%3Aexample.org',
-          isKnownRoom: known,
         ),
         'https://matrix.to/#/!abc%3Aexample.org',
       );
     });
 
-    test('ignores a room the user does not know', () {
+    test('turns the share link of a room, on its alias, into its matrix.to '
+        'link', () {
+      final link = policy.matrixToForRoomsLink(
+        'https://chat.other.org/rooms/%23general%3Aexample.org',
+      );
+
+      expect(link, 'https://matrix.to/#/%23general%3Aexample.org');
+      final parts = link?.parseIdentifierIntoParts();
+      expect(parts?.primaryIdentifier, '#general:example.org');
+      expect(parts?.secondaryIdentifier, isNull);
+    });
+
+    test('turns a link to a message of an alias into its matrix.to link', () {
+      final link = policy.matrixToForRoomsLink(
+        'https://chat.other.org/rooms/%23general%3Aexample.org'
+        '?event=%24evt_1%3Aexample.org',
+      );
+
+      expect(
+        link,
+        'https://matrix.to/#/%23general%3Aexample.org/%24evt_1%3Aexample.org',
+      );
+      final parts = link?.parseIdentifierIntoParts();
+      expect(parts?.primaryIdentifier, '#general:example.org');
+      expect(parts?.secondaryIdentifier, eventId);
+    });
+
+    test('needs no knowledge of the room: one the user is not in gets its '
+        'matrix.to link too', () {
+      // The app then previews the room instead of opening the browser.
       expect(
         policy.matrixToForRoomsLink(
           'https://chat.other.org/rooms/!unknown%3Aexample.org',
-          isKnownRoom: known,
         ),
-        isNull,
+        'https://matrix.to/#/!unknown%3Aexample.org',
       );
+      final link = policy.matrixToForRoomsLink(
+        'https://chat.other.org/rooms/!unknown%3Aexample.org'
+        '?event=%24evt_1%3Aexample.org',
+      );
+      expect(
+        link,
+        'https://matrix.to/#/!unknown%3Aexample.org/%24evt_1%3Aexample.org',
+      );
+      final parts = link?.parseIdentifierIntoParts();
+      expect(parts?.primaryIdentifier, '!unknown:example.org');
+      expect(parts?.secondaryIdentifier, eventId);
     });
 
-    test('ignores links that are not an https rooms link of a room id', () {
+    test('keeps the via servers of a room link', () {
+      // A room version 12 id names no server: via is all that routes to it.
+      final link = policy.matrixToForRoomsLink(
+        'https://chat.other.org/rooms/!abc?via=example.org&via=other.org',
+      );
+
+      expect(link, 'https://matrix.to/#/!abc?via=example.org&via=other.org');
+      final parts = link?.parseIdentifierIntoParts();
+      expect(parts?.primaryIdentifier, '!abc');
+      expect(parts?.secondaryIdentifier, isNull);
+      expect(parts?.via, {'example.org', 'other.org'});
+    });
+
+    test('keeps the via servers of a message link', () {
+      final link = policy.matrixToForRoomsLink(
+        'https://chat.other.org/rooms/!abc'
+        '?event=%24evt_1%3Aexample.org&via=example.org&via=other.org',
+      );
+
+      expect(
+        link,
+        'https://matrix.to/#/!abc/%24evt_1%3Aexample.org'
+        '?via=example.org&via=other.org',
+      );
+      final parts = link?.parseIdentifierIntoParts();
+      expect(parts?.primaryIdentifier, '!abc');
+      expect(parts?.secondaryIdentifier, eventId);
+      expect(parts?.via, {'example.org', 'other.org'});
+    });
+
+    test('keeps the via servers of an alias link', () {
+      final link = policy.matrixToForRoomsLink(
+        'https://chat.other.org/rooms/%23general%3Aexample.org?via=other.org',
+      );
+
+      expect(
+        link,
+        'https://matrix.to/#/%23general%3Aexample.org?via=other.org',
+      );
+      final parts = link?.parseIdentifierIntoParts();
+      expect(parts?.primaryIdentifier, '#general:example.org');
+      expect(parts?.via, {'other.org'});
+    });
+
+    test('ignores links that are not an https rooms link of a room', () {
       for (final link in [
         'http://chat.other.org/rooms/!abc%3Aexample.org',
+        'http://chat.other.org/rooms/%23general%3Aexample.org',
         'https://chat.other.org/rooms/!abc%3Aexample.org/details',
+        'https://chat.other.org/rooms/%23general%3Aexample.org/details',
+        'https://chat.other.org/embed/rooms/!abc%3Aexample.org',
         'https://chat.other.org/room/!abc%3Aexample.org',
+        'https://chat.other.org/room/%23general%3Aexample.org',
         'https://chat.other.org/rooms/abc',
+        'https://chat.other.org/rooms/%40someone%3Aexample.org',
         'https://chat.other.org/rooms/',
+        'https://chat.other.org/rooms',
       ]) {
-        expect(
-          policy.matrixToForRoomsLink(link, isKnownRoom: (_) => true),
-          isNull,
-          reason: link,
-        );
+        expect(policy.matrixToForRoomsLink(link), isNull, reason: link);
+      }
+    });
+
+    test('ignores an alias that names no server', () {
+      for (final link in [
+        'https://chat.other.org/rooms/%23general',
+        'https://chat.other.org/rooms/%23general%3A',
+        'https://chat.other.org/rooms/%23',
+      ]) {
+        expect(policy.matrixToForRoomsLink(link), isNull, reason: link);
+      }
+    });
+
+    test('ignores a rooms link the Matrix SDK would not read back', () {
+      // UrlLauncher.openMatrixToUrl returns silently on a link
+      // parseIdentifierIntoParts cannot read: a dead tap. Null keeps the tap
+      // opening the browser.
+      const host = 'https://chat.other.org/rooms';
+      const server = '%3Aexample.org'; // 12 characters once decoded
+      // The SDK reads an identifier of 255 characters at most.
+      final roomOf255 = '!${'a' * 242}$server';
+      final eventOf255 = '%24${'a' * 254}';
+
+      for (final link in [
+        // The sigil alone is no room id.
+        '$host/!',
+        // ?event= is not an event id.
+        '$host/!abc$server?event=notanevent',
+        '$host/%23general$server?event=notanevent',
+        // One character over the longest identifier.
+        '$host/!${'a' * 243}$server',
+        '$host/%23${'a' * 243}$server',
+        '$host/!abc$server?event=${eventOf255}a',
+      ]) {
+        expect(policy.matrixToForRoomsLink(link), isNull, reason: link);
+      }
+
+      // The boundary: the longest identifiers still open in the app.
+      for (final link in [
+        '$host/$roomOf255',
+        '$host/!abc$server?event=$eventOf255',
+      ]) {
+        final parts = policy
+            .matrixToForRoomsLink(link)
+            ?.parseIdentifierIntoParts();
+        expect(parts, isNotNull, reason: link);
       }
     });
   });
@@ -123,12 +250,9 @@ void main() {
         'https://example.org/%FF',
         'https://example.org/rooms/%FF',
         'https://example.org/rooms/!abc%3Aexample.org?event=%FF',
+        'https://example.org/rooms/!abc%3Aexample.org?via=%FF',
       ]) {
-        expect(
-          policy.matrixToForRoomsLink(link, isKnownRoom: (_) => true),
-          isNull,
-          reason: link,
-        );
+        expect(policy.matrixToForRoomsLink(link), isNull, reason: link);
       }
     });
   });
