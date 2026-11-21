@@ -4,6 +4,7 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/chat_search/chat_search_view.dart';
 import 'package:twake_chat/pages/search/server_search_controller.dart';
 import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_controller.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/shared_timeline_loader.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/search/keyword_matcher_cache.dart';
 import 'package:twake_chat/utils/search/search_options.dart';
@@ -33,14 +34,11 @@ class ChatSearch extends StatefulWidget {
 
 class ChatSearchController extends State<ChatSearch> {
   static const _pageLimit = 20;
-  Timeline? _timeline;
+  late final _timelineLoader = SharedTimelineLoader(() => room!.getTimeline());
 
   Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
 
-  Future<Timeline> getTimeline() async {
-    _timeline ??= await room?.getTimeline();
-    return _timeline!;
-  }
+  Future<Timeline> getTimeline() => _timelineLoader.get();
 
   final textEditingController = TextEditingController();
 
@@ -125,7 +123,9 @@ class ChatSearchController extends State<ChatSearch> {
 
   @override
   void dispose() {
+    _timelineLoader.dispose();
     textEditingController.dispose();
+    inputFocus.dispose();
     scrollController.dispose();
     sameTypeEventsBuilderController?.dispose();
     serverSearchController.dispose();

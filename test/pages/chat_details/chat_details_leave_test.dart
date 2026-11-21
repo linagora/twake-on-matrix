@@ -34,6 +34,7 @@ class _FakeMatrixState extends Fake implements MatrixState {
 @GenerateNiceMocks([
   MockSpec<Client>(),
   MockSpec<Room>(),
+  MockSpec<Timeline>(),
   MockSpec<BanUserInteractor>(),
   MockSpec<TimelineSearchEventInteractor>(),
 ])
@@ -42,6 +43,7 @@ void main() {
 
   late MockClient client;
   late MockRoom room;
+  late MockTimeline timeline;
 
   setUp(() {
     GetIt.instance
@@ -73,6 +75,8 @@ void main() {
     when(room.summary).thenReturn(RoomSummary.fromJson({}));
     when(room.getLocalizedDisplayname(any)).thenReturn('Group');
     when(room.leave()).thenAnswer((_) async {});
+    timeline = MockTimeline();
+    when(room.getTimeline()).thenAnswer((_) async => timeline);
   });
 
   tearDown(() => GetIt.instance.reset());
@@ -163,5 +167,18 @@ void main() {
     // Assert
     verify(room.leave()).called(1);
     expect(find.text('rooms'), findsOneWidget);
+  });
+
+  testWidgets('close_cancelsTheLoadedTimeline', (tester) async {
+    // Arrange
+    await pumpDetails(tester);
+    verifyNever(timeline.cancelSubscriptions());
+
+    // Act
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+
+    // Assert
+    verify(timeline.cancelSubscriptions()).called(1);
   });
 }
