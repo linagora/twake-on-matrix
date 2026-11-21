@@ -45,6 +45,7 @@ MockRoom buildRoom({required String name, String id = '!room:server.tld'}) {
   when(
     room.getLocalizedDisplayname(any),
   ).thenReturn(name.isEmpty ? 'Resolved Hero Name' : name);
+  when(room.summary).thenReturn(RoomSummary.fromJson({}));
   when(room.loadHeroUsers()).thenAnswer((_) async => <User>[]);
   return room;
 }
@@ -99,6 +100,79 @@ void main() {
     await tester.pump();
 
     verifyNever(room.loadHeroUsers());
+  });
+
+  testWidgets('loads hero users once when the same row rebuilds', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(1);
+  });
+
+  testWidgets('loads hero users again when the heroes of the room change', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    when(room.summary).thenReturn(
+      RoomSummary.fromJson({
+        'm.heroes': ['@alice:server.tld'],
+      }),
+    );
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    // A sync replaces the summary of the room with a new one.
+    when(room.summary).thenReturn(
+      RoomSummary.fromJson({
+        'm.heroes': ['@bob:server.tld'],
+      }),
+    );
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
+  });
+
+  testWidgets('loads hero users again when the membership changes', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    when(room.membership).thenReturn(Membership.invite);
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    when(room.membership).thenReturn(Membership.join);
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
+  });
+
+  testWidgets('loads the peer when the display name adds it to empty heroes', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    final summary = RoomSummary.fromJson({'m.heroes': <String>[]});
+    when(room.summary).thenReturn(summary);
+    // As the SDK does: an empty hero list gets the DM peer added in place.
+    when(room.getLocalizedDisplayname(any)).thenAnswer((_) {
+      final heroes = summary.mHeroes!;
+      if (heroes.isEmpty) heroes.add('@peer:server.tld');
+      return 'Peer';
+    });
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
   });
 
   SpaceRowData spaceData({int mentionCount = 0}) => SpaceRowData(
