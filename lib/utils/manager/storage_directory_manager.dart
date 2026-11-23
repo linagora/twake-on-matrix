@@ -108,6 +108,17 @@ class StorageDirectoryManager {
     return '$fileStoreDirectory/$_decryptedFolder/$eventId/${fileName.safeFileName}';
   }
 
+  Future<File> writeDecryptedFile({
+    required String eventId,
+    required MatrixFile file,
+  }) async {
+    final decryptedFile = File(
+      await getDecryptedFilePath(eventId: eventId, fileName: file.name),
+    );
+    await decryptedFile.parent.create(recursive: true);
+    return decryptedFile.writeAsBytes(file.bytes);
+  }
+
   String convertFileExtension(String filename, String newExtension) {
     final lastDotIndex = filename.lastIndexOf('.');
 

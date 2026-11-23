@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
 import 'package:path/path.dart' as p;
 import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 
@@ -84,6 +85,33 @@ void main() {
           decryptedPath,
           p.join(tempDir.path, 'decrypted', eventId, 'file'),
         );
+      },
+    );
+  });
+
+  group('writeDecryptedFile', () {
+    test(
+      'writeDecryptedFile_always_writesTheBytesInTheDecryptedFolderOfTheEvent',
+      () async {
+        // Arrange
+        final matrixFile = MatrixFile(
+          bytes: Uint8List.fromList([1, 2, 3]),
+          name: 'voice.ogg',
+        );
+
+        // Act
+        final file = await StorageDirectoryManager.instance.writeDecryptedFile(
+          eventId: eventId,
+          file: matrixFile,
+        );
+
+        // Assert
+        expect(
+          file.path,
+          p.join(tempDir.path, 'decrypted', eventId, 'voice.ogg'),
+        );
+        expect(file.readAsBytesSync(), [1, 2, 3]);
+        expect(tempDir.listSync().whereType<File>(), isEmpty);
       },
     );
   });
