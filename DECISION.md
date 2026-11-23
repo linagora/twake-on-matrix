@@ -378,3 +378,16 @@ Not checked on a device: the snap gesture, the real iOS rendering, and the
 audio player appearing while the block is hidden. The layout was checked with
 widget renders at 390 x 844 and a 47 px status bar inset, compared with the
 fixed app bar of before.
+
+## D22. Threads are on for everyone on mobile (decided by Clément, 2026-11-20)
+
+The threads of Twake Space Chat (#993, P1) ship on, for every user, when
+#3606 reaches main: `threadsEnabled` is `true`. They cover sending to a
+thread, the thread screen and its card in the chat, Start a thread, thread
+counts in the badges, the chat list and the room list, threads opened from
+notifications, links and search, per-thread unread and threaded read
+receipts, the Activity tab (unread rooms and followed threads), and the iOS
+icon badge.
+
+Known limit, still open: while the app is killed, the iOS icon badge counts
+the replies of threads the user does not follow (#3635).
