@@ -26,6 +26,10 @@
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Twake Chat needs the microphone for calls and voice messages.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Twake Chat needs the camera for video calls and photos.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

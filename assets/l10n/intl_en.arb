@@ -3247,8 +3247,196 @@
     "type": "text",
     "placeholders": {}
   },
+  "thread": "Thread",
+  "@thread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startThread": "Start a thread",
+  "@startThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "replyInThread": "Reply in thread",
+  "@replyInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadMessagesCount": "{n, plural, =1{1 message} other{{n} messages}}",
+  "@threadMessagesCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "threadUnreadMessagesCount": "{n, plural, =1{1 unread message} other{{n} unread messages}}",
+  "@threadUnreadMessagesCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "newRepliesInThread": "New replies in a thread",
+  "@newRepliesInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openThread": "Open",
+  "@openThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "ageSecondsAgo": "{n, plural, =1{1 second ago} other{{n} seconds ago}}",
+  "@ageSecondsAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageMinutesAgo": "{n, plural, =1{1 minute ago} other{{n} minutes ago}}",
+  "@ageMinutesAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageHoursAgo": "{n, plural, =1{1 hour ago} other{{n} hours ago}}",
+  "@ageHoursAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageDaysAgo": "{n, plural, =1{1 day ago} other{{n} days ago}}",
+  "@ageDaysAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "publicGroupsYouCanJoin": "Groups you can join",
   "@publicGroupsYouCanJoin": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadFollow": "Follow the thread",
+  "@threadFollow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadUnfollow": "Unfollow the thread",
+  "@threadUnfollow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadMute": "Mute the thread",
+  "@threadMute": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadUnmute": "Unmute the thread",
+  "@threadUnmute": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadMarkResolved": "Mark as resolved",
+  "@threadMarkResolved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadReopen": "Reopen the thread",
+  "@threadReopen": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadResolved": "Resolved",
+  "@threadResolved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadChangeFailed": "The thread could not be changed.",
+  "@threadChangeFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activity": "Activity",
+  "@activity": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMentions": "Mentions",
+  "@activityMentions": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityReplies": "Replies",
+  "@activityReplies": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMarkAllRead": "Mark all read",
+  "@activityMarkAllRead": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityUnread": "Unread",
+  "@activityUnread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityNoThreadFollowed": "No thread followed yet.",
+  "@activityNoThreadFollowed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityNothingToShow": "Nothing to show.",
+  "@activityNothingToShow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activitySentMessage": "sent a message",
+  "@activitySentMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityRepliedInThread": "replied in a thread",
+  "@activityRepliedInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMentionedYou": "mentioned you",
+  "@activityMentionedYou": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityReacted": "reacted {emoji} to your message",
+  "@activityReacted": {
+    "type": "text",
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      }
+    }
+  },
+  "activityMentionsLoadFailed": "The mentions could not be loaded.",
+  "@activityMentionsLoadFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityTryAgain": "Try again",
+  "@activityTryAgain": {
     "type": "text",
     "placeholders": {}
   },

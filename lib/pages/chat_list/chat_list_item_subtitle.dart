@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
 import 'package:twake_chat/config/app_config.dart';
@@ -10,11 +11,11 @@ import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_preview_text.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
 import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
   final Room room;
@@ -26,15 +27,22 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     this.previewResult,
   });
 
+  /// Every row listens to the whole store: a change of one room's thread
+  /// counters rebuilds every visible row, not only that room's.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([?room.client.threadUnread]),
+    builder: (context, _) => _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final L10n l10n = L10n.of(context)!;
     final String typingText = room.getLocalizedTypingText(l10n);
     final bool isGroup = !room.isDirectChat;
     final double unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
-      room.isUnreadOrInvited,
-      room.hasNewMessages,
-      room.notificationCount > 0,
+      room.isUnreadOrInvitedWithThreads,
+      room.hasNewMessagesWithThreads,
+      room.unreadBadgeCount > 0,
     );
     final (Event? lastEvent, List<User> seenByUsers) = switch (previewResult) {
       RoomPreviewFound(:final event, :final seenByUsers) => (
@@ -82,7 +90,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 lastEvent == null) {
               return const SizedBox.shrink();
             }
-            final isMentioned = lastEvent.isMention == true;
+            final isMentioned = room.highlightCount > 0;
             return lastEvent.senderId == room.client.userID
                 ? SeenByRow(
                     eventStatus: lastEvent.status,
@@ -95,21 +103,19 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                     curve: TwakeThemes.animationCurve,
                     padding: const .only(bottom: 4),
                     height: ChatListItemStyle.mentionIconWidth,
-                    width: isMentioned && room.isUnreadOrInvited
+                    width: isMentioned && room.isUnreadOrInvitedWithThreads
                         ? ChatListItemStyle.mentionIconWidth
                         : 0,
                     decoration: BoxDecoration(
-                      color: colorScheme.primary,
+                      color: notificationColor(context: context, room: room),
                       borderRadius: .circular(AppConfig.borderRadius),
                     ),
                     child: Center(
-                      child: isMentioned && room.isUnreadOrInvited
+                      child: isMentioned && room.isUnreadOrInvitedWithThreads
                           ? Text(
                               '@',
                               style: TextStyle(
-                                color: isMentioned
-                                    ? colorScheme.onPrimary
-                                    : colorScheme.onPrimaryContainer,
+                                color: colorScheme.onPrimary,
                                 fontSize: textScheme.labelMedium?.fontSize,
                               ),
                             )
@@ -125,18 +131,18 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
           padding: const .symmetric(horizontal: 7),
           height: unreadBadgeSize,
           width: ChatListItemStyle.notificationBadgeSize(
-            room.isUnreadOrInvited,
-            room.hasNewMessages,
-            room.notificationCount,
+            room.isUnreadOrInvitedWithThreads,
+            room.hasNewMessagesWithThreads,
+            room.unreadBadgeCount,
           ),
           decoration: BoxDecoration(
             color: notificationColor(context: context, room: room),
             borderRadius: .circular(AppConfig.borderRadius),
           ),
           child: Center(
-            child: room.notificationCount > 0
+            child: room.unreadBadgeCount > 0
                 ? Text(
-                    room.notificationCount.toString(),
+                    room.unreadBadgeCount.toString(),
                     style: textScheme.labelMedium?.copyWith(
                       letterSpacing: -0.5,
                       color: colorScheme.onPrimary,
@@ -186,7 +192,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
               lastEvent,
               context,
               isGroup,
-              room.isUnreadOrInvited,
+              room.isUnreadOrInvitedWithThreads,
             ),
     );
   }

@@ -5,6 +5,11 @@ import 'package:twake_chat/pages/chat/chat_invitation_body.dart';
 import 'package:twake_chat/pages/chat/chat_video_call_button.dart';
 import 'package:twake_chat/pages/chat/chat_view_body.dart';
 import 'package:twake_chat/pages/chat/chat_view_style.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
+import 'package:twake_chat/pages/chat/thread/thread_app_bar_title.dart';
+import 'package:twake_chat/pages/chat/thread/thread_menu_button.dart';
+import 'package:twake_chat/pages/chat/thread/thread_menu_controller.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
@@ -115,78 +120,9 @@ class ChatView extends StatelessWidget with MessageContentMixin {
               backgroundColor: controller.responsive.isMobile(context)
                   ? LinagoraSysColors.material().background
                   : LinagoraSysColors.material().onPrimary,
-              appBar: AppBar(
-                backgroundColor: controller.responsive.isMobile(context)
-                    ? LinagoraSysColors.material().surface
-                    : LinagoraSysColors.material().onPrimary,
-                automaticallyImplyLeading: false,
-                toolbarHeight: ChatViewStyle.appBarHeight(context),
-                title: Padding(
-                  padding: ChatViewStyle.paddingLeading(context),
-                  child: Row(
-                    children: [
-                      _buildLeading(context),
-                      Expanded(
-                        child: ChatAppBarTitle(
-                          selectedEvents: controller.selectedEvents,
-                          room: controller.room,
-                          isArchived: controller.isArchived,
-                          sendController: controller.sendController,
-                          connectivityResultStream:
-                              controller.connectivityResultStream,
-                          actions: _appBarActions(context),
-                          onPushDetails: controller.onPushDetails,
-                          roomName: controller.roomName,
-                          cachedPresenceNotifier:
-                              controller.cachedPresenceNotifier,
-                          cachedPresenceStreamController:
-                              controller.cachedPresenceStreamController,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                actions: [
-                  if (!controller.selectMode)
-                    Padding(
-                      padding: ChatViewStyle.paddingTrailing(context),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            hoverColor: Colors.transparent,
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onPressed: controller.toggleSearch,
-                            icon: const Icon(Icons.search),
-                          ),
-                          ChatVideoCallButton(controller),
-                          if (controller.hasActionAppBarMenu)
-                            Builder(
-                              builder: (context) => TwakeIconButton(
-                                icon: Icons.more_vert,
-                                tooltip: L10n.of(context)!.more,
-                                onTapDown: (tapDownDetails) =>
-                                    controller.handleAppbarMenuAction(
-                                      context,
-                                      tapDownDetails,
-                                    ),
-                                preferBelow: false,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                ],
-                bottom: PreferredSize(
-                  preferredSize: const Size(double.infinity, 1),
-                  child: Container(
-                    color: LinagoraStateLayer(
-                      LinagoraSysColors.material().surfaceTint,
-                    ).opacityLayer1,
-                    height: 1,
-                  ),
-                ),
-              ),
+              appBar: controller.isThread && !controller.selectMode
+                  ? _threadAppBar(context)
+                  : _roomAppBar(context),
               floatingActionButton: ValueListenableBuilder(
                 valueListenable: controller.showScrollDownButtonNotifier,
                 builder: (context, showScrollDownButton, _) {
@@ -202,8 +138,10 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             if (audioRecordState != AudioRecordState.initial) {
                               return const SizedBox.shrink();
                             }
-                            final unreadCount =
-                                controller.room?.notificationCount ?? 0;
+                            // The room's count is the main timeline's, not the thread's.
+                            final unreadCount = controller.isThread
+                                ? 0
+                                : controller.room?.notificationCount ?? 0;
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 56.0),
                               child: Stack(
@@ -247,6 +185,103 @@ class ChatView extends StatelessWidget with MessageContentMixin {
       ),
     );
   }
+
+  PreferredSizeWidget _roomAppBar(BuildContext context) => AppBar(
+    backgroundColor: controller.responsive.isMobile(context)
+        ? LinagoraSysColors.material().surface
+        : LinagoraSysColors.material().onPrimary,
+    automaticallyImplyLeading: false,
+    toolbarHeight: ChatViewStyle.appBarHeight(context),
+    title: Padding(
+      padding: ChatViewStyle.paddingLeading(context),
+      child: Row(
+        children: [
+          _buildLeading(context),
+          Expanded(
+            child: ChatAppBarTitle(
+              selectedEvents: controller.selectedEvents,
+              room: controller.room,
+              isArchived: controller.isArchived,
+              sendController: controller.sendController,
+              connectivityResultStream: controller.connectivityResultStream,
+              actions: _appBarActions(context),
+              onPushDetails: controller.onPushDetails,
+              roomName: controller.roomName,
+              cachedPresenceNotifier: controller.cachedPresenceNotifier,
+              cachedPresenceStreamController:
+                  controller.cachedPresenceStreamController,
+            ),
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      if (!controller.selectMode)
+        Padding(
+          padding: ChatViewStyle.paddingTrailing(context),
+          child: Row(
+            children: [
+              IconButton(
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onPressed: controller.toggleSearch,
+                icon: const Icon(Icons.search),
+              ),
+              ChatVideoCallButton(controller),
+              if (controller.hasActionAppBarMenu)
+                Builder(
+                  builder: (context) => TwakeIconButton(
+                    icon: Icons.more_vert,
+                    tooltip: L10n.of(context)!.more,
+                    onTapDown: (tapDownDetails) => controller
+                        .handleAppbarMenuAction(context, tapDownDetails),
+                    preferBelow: false,
+                  ),
+                ),
+            ],
+          ),
+        ),
+    ],
+    bottom: _appBarBottomSeparator(),
+  );
+
+  PreferredSizeWidget _threadAppBar(BuildContext context) {
+    final thread = ThreadRef(controller.roomId!, controller.threadRootId!);
+    return AppBar(
+      backgroundColor: controller.responsive.isMobile(context)
+          ? LinagoraSysColors.material().surface
+          : LinagoraSysColors.material().onPrimary,
+      automaticallyImplyLeading: false,
+      toolbarHeight: ChatViewStyle.appBarHeight(context),
+      leading: _buildBackButton(context),
+      title: Consumer(
+        builder: (context, ref, _) {
+          final isResolved = ref.watch(
+            threadMenuControllerProvider(
+              thread,
+            ).select((s) => s.status?.isResolved),
+          );
+          return ThreadAppBarTitle(
+            rootText: controller.threadRootText,
+            isResolved: isResolved ?? false,
+          );
+        },
+      ),
+      actions: [ThreadMenuButton(thread: thread)],
+      bottom: _appBarBottomSeparator(),
+    );
+  }
+
+  PreferredSizeWidget _appBarBottomSeparator() => PreferredSize(
+    preferredSize: const Size(double.infinity, 1),
+    child: Container(
+      color: LinagoraStateLayer(
+        LinagoraSysColors.material().surfaceTint,
+      ).opacityLayer1,
+      height: 1,
+    ),
+  );
 
   Widget _buildBody() {
     if (controller.room == null) {

@@ -17,7 +17,7 @@ import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
-    show TwakeListItem;
+    show LinagoraRefColors, TwakeListItem;
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -45,6 +45,7 @@ MockRoom buildRoom({required String name, String id = '!room:server.tld'}) {
   when(
     room.getLocalizedDisplayname(any),
   ).thenReturn(name.isEmpty ? 'Resolved Hero Name' : name);
+  when(room.summary).thenReturn(RoomSummary.fromJson({}));
   when(room.loadHeroUsers()).thenAnswer((_) async => <User>[]);
   return room;
 }
@@ -99,6 +100,79 @@ void main() {
     await tester.pump();
 
     verifyNever(room.loadHeroUsers());
+  });
+
+  testWidgets('loads hero users once when the same row rebuilds', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(1);
+  });
+
+  testWidgets('loads hero users again when the heroes of the room change', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    when(room.summary).thenReturn(
+      RoomSummary.fromJson({
+        'm.heroes': ['@alice:server.tld'],
+      }),
+    );
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    // A sync replaces the summary of the room with a new one.
+    when(room.summary).thenReturn(
+      RoomSummary.fromJson({
+        'm.heroes': ['@bob:server.tld'],
+      }),
+    );
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
+  });
+
+  testWidgets('loads hero users again when the membership changes', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    when(room.membership).thenReturn(Membership.invite);
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    when(room.membership).thenReturn(Membership.join);
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
+  });
+
+  testWidgets('loads the peer when the display name adds it to empty heroes', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    final summary = RoomSummary.fromJson({'m.heroes': <String>[]});
+    when(room.summary).thenReturn(summary);
+    // As the SDK does: an empty hero list gets the DM peer added in place.
+    when(room.getLocalizedDisplayname(any)).thenAnswer((_) {
+      final heroes = summary.mHeroes!;
+      if (heroes.isEmpty) heroes.add('@peer:server.tld');
+      return 'Peer';
+    });
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
   });
 
   SpaceRowData spaceData({int mentionCount = 0}) => SpaceRowData(
@@ -177,6 +251,87 @@ void main() {
       find.descendant(of: find.byType(SeenByRow), matching: find.byType(Icon)),
     );
     expect(icon.color, MessageTimeStyle.seenByRowIconPrimaryColor(false));
+  });
+
+  group('mention badge', () {
+    MockRoom unreadRoomWithMention({
+      PushRuleState pushRuleState = PushRuleState.notify,
+    }) {
+      final room = buildRoom(name: 'Project Apollo');
+      when(room.isDirectChat).thenReturn(false);
+      when(room.receiptState).thenReturn(LatestReceiptState.empty());
+      when(room.typingUsers).thenReturn([]);
+      when(room.pushRuleState).thenReturn(pushRuleState);
+      when(room.isUnreadOrInvited).thenReturn(true);
+      when(room.hasNewMessages).thenReturn(true);
+      when(room.highlightCount).thenReturn(1);
+      when(room.notificationCount).thenReturn(3);
+      return room;
+    }
+
+    Event plainMessageFromOther(Room room) => Event(
+      eventId: r'$other',
+      senderId: '@bob:server.tld',
+      type: EventTypes.Message,
+      content: {'msgtype': 'm.text', 'body': 'not a mention'},
+      originServerTs: DateTime(2020, 1, 1),
+      status: EventStatus.synced,
+      room: room,
+    );
+
+    Color? badgeColor(WidgetTester tester, Finder child) {
+      final box = tester.widget<DecoratedBox>(
+        find.ancestor(of: child, matching: find.byType(DecoratedBox)).first,
+      );
+      return (box.decoration as BoxDecoration).color;
+    }
+
+    testWidgets('build_whenMentionIsNotTheLastMessage_showsTheAt', (
+      tester,
+    ) async {
+      // Arrange
+      final room = unreadRoomWithMention();
+
+      // Act
+      await tester.pumpWidget(
+        wrap(
+          ChatListItem(
+            room,
+            previewResult: RoomPreviewFound(plainMessageFromOther(room)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(find.text('@'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+    });
+
+    testWidgets('build_whenMutedWithMention_greysTheAtAndTheCounter', (
+      tester,
+    ) async {
+      // Arrange
+      final room = unreadRoomWithMention(
+        pushRuleState: PushRuleState.mentionsOnly,
+      );
+
+      // Act
+      await tester.pumpWidget(
+        wrap(
+          ChatListItem(
+            room,
+            previewResult: RoomPreviewFound(plainMessageFromOther(room)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Assert
+      final grey = LinagoraRefColors.material().tertiary[30];
+      expect(badgeColor(tester, find.text('@')), grey);
+      expect(badgeColor(tester, find.text('3')), grey);
+    });
   });
 
   group('kind badge', () {

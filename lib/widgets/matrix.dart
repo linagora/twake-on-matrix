@@ -1,5 +1,7 @@
+import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:async';
 import 'dart:io';
+import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
@@ -90,7 +92,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'
         ProviderScope;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/providers/emoji_data_provider.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
@@ -481,11 +482,10 @@ class MatrixState extends ConsumerState<Matrix>
 
   bool webHasFocus = true;
 
-  String? get activeRoomId {
-    final path = TwakeApp.router.routeInformationProvider.value.uri.path;
-    if (!path.startsWith('/rooms/')) return null;
-    return path.split('/')[2];
-  }
+  String? get activeRoomId => TwakeApp.router.activeRoomId;
+
+  ({String roomId, String threadRootId})? get activeThread =>
+      TwakeApp.router.activeThread;
 
   final linuxNotifications = PlatformInfos.isLinux
       ? NotificationsClient()
@@ -1099,9 +1099,7 @@ class MatrixState extends ConsumerState<Matrix>
                 ? SharedPreferences.getInstance().then(
                     (prefs) => prefs.getString(SettingKeys.appLockKey),
                   )
-                : const FlutterSecureStorage().read(
-                    key: SettingKeys.appLockKey,
-                  ))
+                : secureStorage.read(key: SettingKeys.appLockKey))
             .then((lock) {
               if (lock?.isNotEmpty ?? false) {
                 AppLock.of(context)!.enable();
@@ -1977,7 +1975,7 @@ class MatrixState extends ConsumerState<Matrix>
   Future<void> initSettings() async {
     try {
       await Future.wait([
-        store.getItem(SettingKeys.wallpaper).then((final path) async {
+        store.getItem(SettingKeys.wallpaper).then((path) async {
           if (path == null) return;
           final file = File(path);
           if (await file.exists()) {

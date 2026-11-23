@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/pages/search/public_groups_search_section.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/pages/search/server_search_view_style.dart';
@@ -10,11 +11,11 @@ import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/highlight_text.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
 import 'package:twake_chat/widgets/search/empty_search_widget.dart';
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ServerSearchMessagesList extends StatelessWidget {
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   const ServerSearchMessagesList({super.key, required this.searchController});
 
@@ -54,8 +55,11 @@ class ServerSearchMessagesList extends StatelessWidget {
                 final originServerTs = result.result?.originServerTs;
 
                 return TwakeInkWell(
-                  onTap: () =>
-                      context.goToRoomWithEvent(event.room.id, event.eventId),
+                  onTap: () => context.goToRoomWithEvent(
+                    event.room.id,
+                    event.eventId,
+                    threadRootId: ThreadRules.threadRootOf(event),
+                  ),
                   child: TwakeListItem(
                     child: Padding(
                       padding: ServerSearchViewStyle.paddingInsideListItem,

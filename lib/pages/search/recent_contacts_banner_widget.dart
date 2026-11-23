@@ -3,13 +3,13 @@ import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/utils/display_name_widget.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class PreSearchRecentContactsContainer extends StatelessWidget {
-  final SearchController searchController;
+  final SearchScreenState searchController;
   final List<Room> recentRooms;
   const PreSearchRecentContactsContainer({
     super.key,

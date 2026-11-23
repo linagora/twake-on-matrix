@@ -1,8 +1,8 @@
+import 'package:twake_chat/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -74,9 +74,7 @@ class LockScreenState extends State<LockScreen> {
                         ? SharedPreferences.getInstance().then(
                             (prefs) => prefs.getString(SettingKeys.appLockKey),
                           )
-                        : const FlutterSecureStorage().read(
-                            key: SettingKeys.appLockKey,
-                          ))) {
+                        : secureStorage.read(key: SettingKeys.appLockKey))) {
                   AppLock.of(context)!.didUnlock();
                 } else {
                   _textEditingController.clear();

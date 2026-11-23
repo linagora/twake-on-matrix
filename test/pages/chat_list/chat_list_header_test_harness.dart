@@ -295,8 +295,6 @@ class FakeChatListController extends Mock implements ChatListController {
   @override
   bool isTorBrowser = false;
   @override
-  bool scrolledToTop = true;
-  @override
   final activeRoomIdNotifier = ValueNotifier<String?>(null);
   @override
   late final ChatList widget = ChatList(

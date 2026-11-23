@@ -1,7 +1,7 @@
 name: twake_chat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.27.1+2330
+version: 2.28.0+2330
 
 environment:
   sdk: ">=3.11.0 <4.0.0"
@@ -234,6 +234,7 @@ dev_dependencies:
   json_serializable: ^6.15.2
   mockito: 5.8.1
   msix: ^3.6.2
+  path_provider_platform_interface: ^2.1.2
   patrol: ^4.5.0
   patrol_cli: ^4.3.1
   riverpod_generator: 4.0.9

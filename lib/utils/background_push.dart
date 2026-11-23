@@ -17,6 +17,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -26,13 +27,16 @@ import 'package:twake_chat/data/model/push/twake_local_notification_payload.dart
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/domain/model/extensions/push/push_notification_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:twake_chat/utils/client_logout.dart';
+import 'package:twake_chat/utils/icon_badge/icon_badge_updater.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
+import 'package:twake_chat/utils/notification_location.dart';
 import 'package:twake_chat/utils/push_helper.dart';
 import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
@@ -42,7 +46,6 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
@@ -129,11 +132,36 @@ class BackgroundPush {
       final roomIds = [...?sync.rooms?.join?.keys, ...?sync.rooms?.leave?.keys];
       if (roomIds.isEmpty) return;
       _syncedRoomIds.addAll(roomIds);
-      _onClearingPush(getFromServer: false);
+      _onClearingPush();
     });
   }
 
+  IconBadgeUpdater? _iconBadge;
+  IconBadge _badge = const DeviceIconBadge();
+  bool _badgeOnIos = PlatformInfos.isIOS;
+
+  /// Replaces the icon badge and whether the platform is iOS.
+  @visibleForTesting
+  void useIconBadge(IconBadge badge, {required bool onIos}) {
+    _badge = badge;
+    _badgeOnIos = onIos;
+    _bindIconBadge();
+  }
+
+  /// The updater follows the syncs of [client]; made after the client, it
+  /// listens after the thread store (TwakeClient constructor), so the
+  /// counters are up to date when it counts.
+  void _bindIconBadge() {
+    _iconBadge?.dispose();
+    _iconBadge = IconBadgeUpdater(
+      client: client,
+      badge: _badge,
+      onIos: _badgeOnIos,
+    );
+  }
+
   BackgroundPush._(this.client) {
+    _bindIconBadge();
     // Clear only after a sync: unread counts are stale while sync is paused
     // in background, and a timer would cancel notifications just shown.
     _listenToRoomSync();
@@ -399,6 +427,7 @@ class BackgroundPush {
   /// nobody, and sets push up for it.
   void rebind(Client newClient) {
     client = newClient;
+    _bindIconBadge();
     _listenToRoomSync();
     _forgetSetup();
     if (PlatformInfos.isIOS) _setupKeychainSyncForClient(newClient);
@@ -415,6 +444,12 @@ class BackgroundPush {
     return true;
   }
 
+  @visibleForTesting
+  static void resetForTesting() {
+    unawaited(_instance?.onRoomSync?.cancel());
+    _instance = null;
+  }
+
   factory BackgroundPush.clientOnly(Client client) {
     _instance ??= BackgroundPush._(client);
     return _instance!;
@@ -423,7 +458,7 @@ class BackgroundPush {
   factory BackgroundPush(
     MatrixState matrixState,
     Client client, {
-    final void Function(String errorMsg, {Uri? link})? onFcmError,
+    void Function(String errorMsg, {Uri? link})? onFcmError,
   }) {
     final instance = BackgroundPush.clientOnly(client);
     instance._matrixState = matrixState;
@@ -443,17 +478,7 @@ class BackgroundPush {
     if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
 
     // Workaround for app icon badge not updating
-    if (Platform.isIOS) {
-      final unreadCount = client.joinedOrInvitedRooms
-          .where((room) => room.isUnreadOrInvited && room.id != roomId)
-          .length;
-      if (unreadCount == 0) {
-        FlutterAppBadger.removeBadge();
-      } else {
-        FlutterAppBadger.updateBadgeCount(unreadCount);
-      }
-      return;
-    }
+    _iconBadge?.roomOpened(RoomId(roomId));
   }
 
   Future<void> setupPusher({
@@ -694,7 +719,8 @@ class BackgroundPush {
   Future<void> iOSUserSelectedNoti(dynamic noti) async {
     // roomId is payload if noti is local
     String? roomId = noti['room_id'];
-    final eventId = noti['event_id'];
+    var eventId = noti['event_id'] as String?;
+    String? threadRootId;
     String? receiverId = noti['receiver_id'] as String?;
 
     // Remote APN notifications nest the routing data inside 'payload'.
@@ -705,6 +731,8 @@ class BackgroundPush {
           final parsed = TwakeLocalNotificationPayload.fromJson(rawPayload);
           if (parsed.roomId != null) roomId = parsed.roomId;
           if (parsed.receiverId != null) receiverId = parsed.receiverId;
+          eventId ??= parsed.eventId;
+          threadRootId = parsed.threadRootId;
         }
       } catch (e) {
         Logs().w('[Push] iOSUserSelectedNoti: failed to parse payload', e);
@@ -716,6 +744,7 @@ class BackgroundPush {
     await goToRoom(
       roomId,
       eventId: eventId,
+      threadRootId: threadRootId,
       switchedClient: outcome is NotificationAccountSwitched
           ? outcome.client
           : null,
@@ -759,11 +788,13 @@ class BackgroundPush {
       Logs().w('[Push] Push for an account not signed in here: not shown');
       return;
     }
+    _clearReadRooms(notification, receiving);
     pushHelper(
       notification,
       client: receiving,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
+      activeThread: _matrixState?.activeThread,
       onSelectNotification: (data) =>
           onSelectNotification(data, eventId: notification.eventId),
     );
@@ -789,7 +820,10 @@ class BackgroundPush {
     if (outcome is NotificationAccountFailed) return;
     await goToRoom(
       payload.roomId,
-      eventId: eventId,
+      eventId: eventId ?? payload.eventId,
+      threadRootId: payload.threadRootId,
+      // Our payload says whether it is a thread reply: no event fetch.
+      threadRootKnown: payload.eventId != null,
       switchedClient: outcome is NotificationAccountSwitched
           ? outcome.client
           : null,
@@ -799,6 +833,8 @@ class BackgroundPush {
   Future<void> goToRoom(
     String? roomId, {
     String? eventId,
+    String? threadRootId,
+    bool threadRootKnown = false,
     Client? switchedClient,
   }) async {
     try {
@@ -823,9 +859,12 @@ class BackgroundPush {
         Logs().v('[Push] Room $roomId not found, syncing...');
         await activeClient.waitForRoomInSync(roomId);
       }
-      _handleRedirectRoom(
+      await _handleRedirectRoom(
+        activeClient,
         roomId,
         eventId: eventId,
+        threadRootId: threadRootId,
+        threadRootKnown: threadRootKnown,
         switchedClient: switchedClient,
       );
     } catch (e, s) {
@@ -901,11 +940,14 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
+    final notification = PushNotification.fromJson(data);
+    _clearReadRooms(notification, _pushClient);
     await pushHelper(
-      PushNotification.fromJson(data),
+      notification,
       client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
+      activeThread: _matrixState?.activeThread,
     );
   }
 
@@ -924,69 +966,74 @@ class BackgroundPush {
 
   bool _clearingPushLock = false;
 
+  // Sent when unread counts change, e.g. a room read on another device: the
+  // push names no room, a sync tells which ones were read.
+  void _clearReadRooms(PushNotification notification, Client receiving) {
+    if (notification.eventId == null &&
+        notification.counts != null &&
+        !_syncLoopClears(receiving)) {
+      unawaited(_onClearingPush(receiving: receiving));
+    }
+  }
+
+  /// In foreground the sync loop of the active account runs, and the room sync
+  /// listener clears what it syncs.
+  bool _syncLoopClears(Client receiving) =>
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
+      identical(receiving, _roomSyncClient) &&
+      identical(receiving, _matrixState?.clientOrNull);
+
   /// Rooms refreshed by a sync and not checked yet: only their unread
   /// counts are fresh enough to clear their notification.
   final Set<String> _syncedRoomIds = {};
 
-  Future<void> _onClearingPush({bool getFromServer = true}) async {
+  /// Accounts whose clearing push arrived during a sweep: their counts need
+  /// another sync.
+  final Set<Client> _pendingServerSweeps = {};
+
+  /// oneShotSync() completes normally on a failed sync: only its status tells.
+  Future<bool> _syncSucceeded(Client pushClient) async {
+    try {
+      Logs().v('[Push] single oneShotSync');
+      await pushClient.oneShotSync();
+    } catch (e) {
+      Logs().v('[Push] Error one-shot syncing', e);
+      return false;
+    }
+    return pushClient.onSyncStatus.value?.status != SyncStatus.error;
+  }
+
+  /// Syncs [receiving] when a clearing push names it, else checks the rooms
+  /// the push client synced.
+  Future<void> _onClearingPush({Client? receiving}) async {
     if (_clearingPushLock) {
+      if (receiving != null) _pendingServerSweeps.add(receiving);
       return;
     }
+    final getFromServer = receiving != null;
+    final pushClient = receiving ?? _pushClient;
+    if (!pushClient.isLogged()) return;
     try {
       _clearingPushLock = true;
       late Iterable<String> emptyRooms;
       if (getFromServer) {
         Logs().v('[Push] Got new clearing push');
-        var syncErrored = false;
-        if (client.syncPending) {
+        if (pushClient.syncPending) {
           Logs().v('[Push] waiting for existing sync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
-            syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
+          await pushClient.oneShotSync().catchError((_) {});
         }
-        if (!syncErrored) {
-          Logs().v('[Push] single oneShotSync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
-            syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
-          if (!syncErrored) {
-            emptyRooms = client.rooms
-                .where(_hasNoPendingNotification)
-                .map((r) => r.id);
-          }
-        }
-        if (syncErrored) {
-          try {
-            Logs().v(
-              '[Push] failed to sync for fallback push, fetching notifications endpoint...',
-            );
-            final notifications = await client.getNotifications(limit: 20);
-            final notificationRooms = notifications.notifications
-                .map((n) => n.roomId)
-                .toSet();
-            emptyRooms = client.rooms
-                .where((r) => !notificationRooms.contains(r.id))
-                .map((r) => r.id);
-          } catch (e) {
-            Logs().v(
-              '[Push] failed to fetch pending notifications for clearing push, falling back...',
-              e,
-            );
-            emptyRooms = client.rooms
-                .where(_hasNoPendingNotification)
-                .map((r) => r.id);
-          }
-        }
+        // Without a fresh sync, the counts are stale: keep the notifications.
+        emptyRooms = await _syncSucceeded(pushClient)
+            ? pushClient.rooms
+                  .where((r) => r.hasNoPendingNotification)
+                  .map((r) => r.id)
+            : const [];
       } else {
         final syncedRoomIds = {..._syncedRoomIds};
         _syncedRoomIds.clear();
-        emptyRooms = client.rooms
+        emptyRooms = pushClient.rooms
             .where((r) => syncedRoomIds.contains(r.id))
-            .where(_hasNoPendingNotification)
+            .where((r) => r.hasNoPendingNotification)
             .map((r) => r.id);
       }
       await _loadIdMap();
@@ -1010,8 +1057,13 @@ class BackgroundPush {
     } finally {
       _clearingPushLock = false;
     }
+    while (_pendingServerSweeps.isNotEmpty) {
+      final next = _pendingServerSweeps.first;
+      _pendingServerSweeps.remove(next);
+      if (next.isLogged()) return _onClearingPush(receiving: next);
+    }
     // Rooms synced while this sweep ran.
-    if (_syncedRoomIds.isNotEmpty) await _onClearingPush(getFromServer: false);
+    if (_syncedRoomIds.isNotEmpty) await _onClearingPush();
   }
 
   PushNotification _parseMessagePayload(dynamic message) {
@@ -1066,23 +1118,24 @@ class BackgroundPush {
     await _handleInnerNavigation();
   }
 
-  /// A left room keeps the unread count it had when it was left (synced with
-  /// `includeLeave`), so it must not block clearing its notifications.
-  bool _hasNoPendingNotification(Room room) =>
-      room.notificationCount == 0 || room.membership == Membership.leave;
-
-  void _handleRedirectRoom(
+  Future<void> _handleRedirectRoom(
+    Client client,
     String roomId, {
     String? eventId,
+    String? threadRootId,
+    bool threadRootKnown = false,
     Client? switchedClient,
-  }) {
+  }) async {
     final extra = switchedClient != null
         ? SwitchActiveAccountBodyArgs(newActiveClient: switchedClient)
         : null;
-    if (eventId != null) {
-      TwakeApp.router.go('/rooms/$roomId?event=$eventId', extra: extra);
-      return;
-    }
-    TwakeApp.router.go('/rooms/$roomId', extra: extra);
+    final location = threadRootId != null || threadRootKnown
+        ? notificationLocation(
+            roomId: roomId,
+            eventId: eventId,
+            threadRootId: threadRootId,
+          )
+        : await resolveNotificationLocation(client, roomId, eventId: eventId);
+    TwakeApp.router.go(location, extra: extra);
   }
 }

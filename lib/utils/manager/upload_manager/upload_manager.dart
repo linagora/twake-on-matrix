@@ -1,5 +1,6 @@
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
+import 'dart:io';
 import 'package:dartz/dartz.dart' hide Task;
 import 'package:dio/dio.dart';
 import 'package:twake_chat/app_state/failure.dart';
@@ -59,7 +60,11 @@ class UploadManager {
       final uploadInfoMap = event.unsigned?['upload_info'];
       if (uploadInfoMap is Map<String, dynamic>) {
         try {
-          final info = UploadFileInfo.fromJson(uploadInfoMap);
+          // Nothing uploads it since the app restarted: it can only be retried.
+          final info = UploadFileInfo.fromJson(uploadInfoMap)..isFailed = true;
+          // Only the base FileInfo is serialized: HEIC conversion and
+          // thumbnails need the image or video type back.
+          info.fileInfo = info.fileInfo?.withTypeFromMime;
           if (info.fileInfo != null || info.matrixFile != null) {
             _eventIdMapUploadFileInfo[eventId] = info;
           }
@@ -75,6 +80,48 @@ class UploadManager {
 
     return null;
   }
+
+  // The SDK only fails a stale "sending" event after a minute; a restart cut these.
+  Future<void> failInterruptedUploads(Iterable<Event> events) async {
+    // The SDK changes the timeline's list in place while we await below.
+    final interrupted = events.where(_isInterruptedUpload).toList();
+    for (final event in interrupted) {
+      Logs().i(
+        'UploadManager::failInterruptedUploads(): ${event.eventId} was cut '
+        'by a restart',
+      );
+      final json = event.toJson();
+      (json['unsigned'] as Map<String, dynamic>)[messageSendingStatusKey] =
+          EventStatus.error.intValue;
+      try {
+        await event.room.client.handleSync(
+          SyncUpdate(
+            nextBatch: '',
+            rooms: RoomsUpdate(
+              join: {
+                event.room.id: JoinedRoomUpdate(
+                  timeline: TimelineUpdate(
+                    events: [MatrixEvent.fromJson(json)],
+                  ),
+                ),
+              },
+            ),
+          ),
+        );
+      } on Exception catch (e, s) {
+        Logs().w(
+          'UploadManager::failInterruptedUploads(): ${event.eventId}',
+          e,
+          s,
+        );
+      }
+    }
+  }
+
+  bool _isInterruptedUpload(Event event) =>
+      event.status.isSending &&
+      event.unsigned?['upload_info'] is Map &&
+      _eventIdMapUploadFileInfo[event.eventId]?.isFailed != false;
 
   Future<void> cancelUpload(Event event) async {
     final cancelToken = _eventIdMapUploadFileInfo[event.eventId]?.cancelToken;
@@ -130,9 +177,11 @@ class UploadManager {
       final fileInfo = uploadInfo.fileInfo;
       final matrixFile = uploadInfo.matrixFile;
 
-      // File bytes lost (e.g. web page refresh): keep the event in the timeline
-      // and let the caller tell the user, rather than silently dropping it.
-      if (fileInfo == null && matrixFile == null) {
+      // File bytes lost (web page refresh, cache cleared by the OS): keep the
+      // event in the timeline and let the caller tell the user.
+      final filePath = fileInfo?.filePath;
+      if ((fileInfo == null && matrixFile == null) ||
+          (filePath != null && !File(filePath).existsSync())) {
         Logs().w(
           'UploadManager::retryUpload(): no file data for $txid, '
           'the message cannot be resent',
@@ -264,6 +313,7 @@ class UploadManager {
     Event? inReplyTo,
     String? batchId,
     ThreadSendTarget? thread,
+    FileInfo? fileInfo,
   }) {
     final uploadController = BehaviorSubject<Either<Failure, Success>>();
 
@@ -282,6 +332,9 @@ class UploadManager {
       batchId: batchId,
       threadRootEventId: thread?.rootEventId,
       threadLastEventId: thread?.lastEventId,
+      fileInfo: fileInfo is PendingFileInfo || fileInfo?.filePath == null
+          ? null
+          : fileInfo,
     );
   }
 
@@ -328,6 +381,7 @@ class UploadManager {
         inReplyTo: isFirstFile ? inReplyTo : null,
         batchId: batchId,
         thread: thread,
+        fileInfo: fakeSendingFileInfo.fileInfo,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
@@ -515,6 +569,7 @@ class UploadManager {
         inReplyTo: isFirstFile ? inReplyTo : null,
         batchId: batchId,
         thread: thread,
+        fileInfo: fileValue,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;

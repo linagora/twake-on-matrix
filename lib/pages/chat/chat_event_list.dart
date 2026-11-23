@@ -17,7 +17,7 @@ class ChatEventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final events = List<Event>.from(controller.timeline!.events);
+    final events = List<Event>.from(controller.eventsToDisplay);
 
     if (controller.isEmptySupportChat) {
       return const EmptySupportChatView();
@@ -45,14 +45,14 @@ class ChatEventList extends StatelessWidget {
       builder: (context, constraints) {
         return NotificationListener<ScrollNotification>(
           onNotification: (notification) {
-            switch (notification.runtimeType) {
-              case const (ScrollStartNotification):
+            switch (notification) {
+              case ScrollStartNotification():
                 controller.handleScrollStartNotification();
                 break;
-              case const (ScrollEndNotification):
+              case ScrollEndNotification():
                 controller.handleScrollEndNotification();
                 break;
-              case const (ScrollUpdateNotification):
+              case ScrollUpdateNotification():
                 controller.handleScrollUpdateNotification();
                 break;
               default:

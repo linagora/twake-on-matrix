@@ -1,11 +1,18 @@
 import 'dart:async';
 
+import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_resolved.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -38,7 +45,7 @@ class ChatEventListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!event.isVisibleInGui) return const SizedBox();
+    if (!controller.isEventVisible(event)) return const SizedBox();
     if (hiddenAlbumMember && !controller.selectMode) {
       return SizedBox(key: GlobalObjectKey(event.eventId));
     }
@@ -53,13 +60,34 @@ class ChatEventListItem extends StatelessWidget {
   }
 
   Widget _buildMessage(BuildContext context) {
+    final threadSummary = controller.threadSummaryOf(event);
+    final canStartThread = ThreadRules.canStartThread(
+      event,
+      hasThread: threadSummary != null,
+      inThreadScreen: controller.isThread,
+    );
+
     return Message(
-      key: GlobalObjectKey(event.eventId),
+      // The room's Chat stays mounted under the thread screen and can show
+      // the same event: a second GlobalObjectKey for it would throw.
+      key: controller.isThread
+          ? ValueKey(event.eventId)
+          : GlobalObjectKey(event.eventId),
       event,
       autoScrollController: controller.scrollController,
       scrollIndex: index,
       matrixState: controller.matrix!,
-      onSwipe: (direction) => controller.replyAction(replyTo: event),
+      inThread: controller.isThread,
+      threadCard: threadSummary == null
+          ? null
+          : _summaryCard(context, threadSummary),
+      onStartThread: canStartThread
+          ? (event) => _openThread(context, start: true)
+          : null,
+      // No reply to quote in a thread: replyAction does nothing there.
+      onSwipe: controller.isThread
+          ? null
+          : (direction) => controller.replyAction(replyTo: event),
       onAvatarTap: (Event event) => controller.onContactTap(
         contactPresentationSearch: event.senderFromMemoryOrFallback
             .toContactPresentationSearch(),
@@ -69,8 +97,10 @@ class ChatEventListItem extends StatelessWidget {
       onSelect: controller.onSelectMessage,
       selectMode: controller.selectMode,
       maxWidth: constraints.maxWidth,
-      scrollToEventId: (String eventId) =>
-          controller.scrollToEventId(eventId, highlight: true),
+      // The thread list has no GlobalObjectKey rows: scroll by index there.
+      scrollToEventId: (String eventId) => controller.isThread
+          ? controller.scrollToThreadEvent(eventId)
+          : controller.scrollToEventId(eventId, highlight: true),
       selected: controller.selectedEvents.any(
         (e) => e.eventId == event.eventId,
       ),
@@ -144,4 +174,45 @@ class ChatEventListItem extends StatelessWidget {
       onRetryTextMessage: controller.retryTextMessage,
     );
   }
+
+  void _openThread(BuildContext context, {bool start = false}) => ThreadRoute(
+    roomid: event.room.id,
+    rootid: event.eventId,
+    start: start,
+  ).push<void>(context);
+
+  /// The edited body of a text reply, else the localized label of the
+  /// reply (a file, a voice message, an undecryptable event).
+  String? _lastReplyText(BuildContext context, ThreadSummary summary) {
+    final reply = summary.lastReply;
+    if (reply == null) return null;
+    if (reply.type == EventTypes.Message &&
+        reply.messageType == MessageTypes.Text) {
+      return summary.lastReplyText;
+    }
+    return reply.calcLocalizedBodyFallback(
+      MatrixLocals(L10n.of(context)!),
+      withSenderNamePrefix: false,
+      hideReply: true,
+    );
+  }
+
+  Widget _summaryCard(BuildContext context, ThreadSummary summary) =>
+      ListenableBuilder(
+        listenable: Listenable.merge([
+          controller.threadUnreadStore,
+          controller.threadUnreadStore?.resolvedChanges,
+        ]),
+        builder: (context, _) => ThreadSummaryCard(
+          replyCount: summary.replyCount,
+          lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
+              .calcDisplayname(),
+          lastReplyText: _lastReplyText(context, summary),
+          lastReplyTime: summary.lastReply?.originServerTs,
+          unreadCount: controller.threadUnreadCount(event.eventId),
+          isResolved: event.room.isThreadResolved(event.eventId),
+          onOwnBubble: event.isOwnMessage,
+          onTap: () => _openThread(context),
+        ),
+      );
 }

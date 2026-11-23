@@ -378,3 +378,58 @@ Not checked on a device: the snap gesture, the real iOS rendering, and the
 audio player appearing while the block is hidden. The layout was checked with
 widget renders at 390 x 844 and a 47 px status bar inset, compared with the
 fixed app bar of before.
+
+## D21. Who a call rings (proposed by Clément, 2026-11-23)
+
+When someone joins a call that nobody else is in, Twake Chat sends a MatrixRTC
+ring (MSC4075) in the room. Another device of the same account in the call
+counts as someone: only the first to join rings.
+
+- A direct chat rings the partner, even before they join, while at most two
+  members have joined.
+- A group, or a direct chat with three or more joined members, gets a
+  `notification` with no mention: nobody is rung.
+- The ring is sent in the clear, also in an encrypted room: the push gateway
+  and the other devices read it without the keys of the room. It holds no
+  message content.
+- The ring sound comes from two underride push rules of the account, one for
+  the ring and one for the legacy `call.notify`, added only when absent. An
+  override would sound over the mute of a room. Trade-off: the mentioned
+  partner of a direct chat gets the mention sound, not the ring.
+
+Open with the product owner: Twake Space Chat rings the whole room in direct
+chats and groups alike. A group call started from Twake Space Chat rings the
+mobile users, and one started from mobile rings no Twake Space Chat user.
+Should both clients do the same?
+
+Completes D12, which left the ring push rules for later.
+
+## D22. Threads are on for everyone on mobile (decided by Clément, 2026-11-20)
+
+The threads of Twake Space Chat (#993, P1) ship on, for every user, when
+#3606 reaches main: `threadsEnabled` is `true`. They cover sending to a
+thread, the thread screen and its card in the chat, Start a thread, thread
+counts in the badges, the chat list and the room list, threads opened from
+notifications, links and search, per-thread unread and threaded read
+receipts, the Activity tab (unread rooms and followed threads), and the iOS
+icon badge.
+
+Known limit, still open: while the app is killed, the iOS icon badge counts
+the replies of threads the user does not follow (#3635).
+
+## D23. A chat with unread messages opens on the first unread one, without scrolling (proposed by Johann, 2026-11-19)
+
+Opening a chat with unread messages shows the "Unread messages" divider at the
+top of the screen, with the first unread message right under it, from the first
+frame: no scroll animation (#2720, as the designer asked in
+https://github.com/linagora/twake-on-matrix/issues/2720#issuecomment-3579815019).
+When all the unread messages fit on the screen, the chat opens at the bottom,
+as before.
+
+When the read marker is older than the loaded messages, the chat loads more
+history first (up to three pages of 100 events), behind the loading skeleton.
+If the marker is still not found, the chat opens at the bottom.
+
+Opening the chat only marks as read the messages shown on the screen. The
+unread count drops to the messages below, and the room is read once the user
+reaches the bottom, as before.

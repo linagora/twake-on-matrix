@@ -8,6 +8,8 @@ void main() {
       CallEventTypes.callMember,
       RtcNotificationContent.eventType,
       CallEventTypes.callNotify,
+      CallEventTypes.callDecline,
+      CallEventTypes.callDeclineStable,
       EventTypes.CallInvite,
       EventTypes.CallAnswer,
       EventTypes.CallHangup,
