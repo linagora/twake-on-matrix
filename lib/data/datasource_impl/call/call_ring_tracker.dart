@@ -23,6 +23,7 @@ class CallRingTracker {
   final _timers = <String, Timer>{};
   final _pending = <String, MissedCall>{};
   final _seenLive = <String>{};
+  final _memberships = <String, String>{};
   final _changes = StreamController<List<CallRing>>.broadcast();
   final _missed = StreamController<MissedCall>.broadcast();
 
@@ -74,7 +75,9 @@ class CallRingTracker {
   /// A join can come with a limited sync only as room state. A call that had
   /// a member and has none left rings no more: the caller hung up, a missed
   /// call. Before a member was seen the ring runs to its end: the membership
-  /// may not have come yet, or not as a state event.
+  /// may not have come yet, or not as a state event. Unless the membership
+  /// the ring relates to was replaced: the caller left before this device
+  /// saw them.
   void _onSync() => _rings.keys.toList().forEach(_checkCall);
 
   Future<void> _checkCall(String ringId) async {
@@ -86,9 +89,23 @@ class CallRingTracker {
       _remove(ringId);
     } else if (live.isNotEmpty) {
       _seenLive.add(ringId);
-    } else if (_seenLive.contains(ringId)) {
+    } else if (_seenLive.contains(ringId) || _callerLeft(room, ringId)) {
       _lapse(ringId);
     }
+  }
+
+  /// With no live member, any membership of the caller is a leave.
+  bool _callerLeft(Room room, String ringId) {
+    final membership = _memberships[ringId];
+    if (membership == null) return false;
+    final caller = _rings[ringId]?.senderId;
+    return room.states[CallEventTypes.callMember]?.values.any(
+          (member) =>
+              member.senderId == caller &&
+              member is Event &&
+              member.eventId != membership,
+        ) ??
+        false;
   }
 
   /// A partial room keeps no call member in its states: no member is not
@@ -126,6 +143,11 @@ class CallRingTracker {
     final left = ring.expiresAt.difference(DateTime.now());
     if (left <= Duration.zero) return;
     _rings[ring.eventId] = ring;
+    if (event.content['m.relates_to'] case {
+      'event_id': final String membership,
+    }) {
+      _memberships[ring.eventId] = membership;
+    }
     _pending[ring.eventId] = MissedCall(
       ringEventId: ring.eventId,
       room: ring.room,
@@ -204,6 +226,7 @@ class CallRingTracker {
     _rings.remove(ringId);
     _pending.remove(ringId);
     _seenLive.remove(ringId);
+    _memberships.remove(ringId);
     _timers.remove(ringId)?.cancel();
     _emit();
   }

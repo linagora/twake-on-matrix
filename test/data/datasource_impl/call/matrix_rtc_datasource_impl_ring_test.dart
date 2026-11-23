@@ -268,10 +268,11 @@ Event _memberEvent(
   _Who who, {
   required DateTime at,
   Map<String, Object?>? content,
+  String id = r'$state',
 }) => Event(
   content: content ?? {'application': 'm.call', 'device_id': who.device},
   type: _memberType,
-  eventId: r'$state',
+  eventId: id,
   senderId: who.user,
   originServerTs: at,
   stateKey: '_${who.user}_${who.device}_m.call',
@@ -1016,13 +1017,13 @@ void main() {
     late List<List<CallRing>> lists;
     late List<MissedCall> missed;
 
-    void ring(FakeAsync async) {
+    void ring(FakeAsync async, [_Ring? call]) {
       lists = [];
       missed = [];
       datasource.watchRings().listen(lists.add);
       datasource.watchMissedCalls().listen(missed.add);
       async.flushMicrotasks();
-      client.ring();
+      client.ring(call);
       async.flushMicrotasks();
     }
 
@@ -1174,6 +1175,83 @@ void main() {
           }, (error, _) => errors.add(error));
         });
         expect(errors, isEmpty);
+      });
+    });
+
+    // The ring relates to the membership the caller joined with. A device
+    // that syncs after the caller hung up (join, ring and leave in one batch,
+    // as when the app opens from the push) never sees the caller live.
+    group('the membership the ring relates to', () {
+      const charlie = (user: '@charlie:hs.test', device: 'DEV');
+
+      _Ring relatedRing(String type) => _Ring()
+        ..type = type
+        ..extra = {
+          'm.relates_to': {'rel_type': 'm.reference', 'event_id': r'$join'},
+        };
+
+      Event aliceJoin() =>
+          _memberEvent(_alice, at: DateTime.now(), id: r'$join');
+
+      Event leave(_Who who) =>
+          _memberEvent(who, at: DateTime.now(), content: {}, id: r'$leave');
+
+      for (final type in [_ringType, _legacyRingType]) {
+        test(
+          'replaced by a leave of the caller: the ring stops at once, missed '
+          '($type)',
+          () {
+            fakeAsync((async) {
+              ring(async, relatedRing(type));
+              expect(lists.last, hasLength(1));
+
+              syncWith(async, [leave(_alice)]);
+
+              expect(lists.last, isEmpty);
+              expect(missedRings(), [r'$ring']);
+              // Missed once, not again at the end of its lifetime.
+              async.elapse(const Duration(seconds: 61));
+              expect(missedRings(), [r'$ring']);
+            });
+          },
+        );
+      }
+
+      test('a leave known only once the room is loaded stops the ring', () {
+        fakeAsync((async) {
+          ring(async, relatedRing(_ringType));
+          client.room.notLoaded = _callMembers([leave(_alice)]);
+
+          sync(async);
+
+          expect(lists.last, isEmpty);
+          expect(missedRings(), [r'$ring']);
+        });
+      });
+
+      final ringsOn = <String, List<StrippedStateEvent>>{
+        'still the current state of the caller: it rings on': [aliceJoin()],
+        'no membership of the caller yet: it rings on': [],
+        'replaced by a new live membership of the caller: it rings on': [
+          _memberEvent(_alice, at: DateTime.now(), id: r'$rejoin'),
+        ],
+        'the leave of someone else: it rings on': [leave(charlie)],
+      };
+
+      ringsOn.forEach((name, members) {
+        test(name, () {
+          fakeAsync((async) {
+            ring(async, relatedRing(_ringType));
+
+            syncWith(async, members);
+
+            expect(lists.last, hasLength(1));
+            expect(missedRings(), isEmpty);
+            async.elapse(const Duration(seconds: 61));
+            expect(lists.last, isEmpty);
+            expect(missedRings(), [r'$ring']);
+          });
+        });
       });
     });
   });
