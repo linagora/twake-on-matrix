@@ -212,8 +212,8 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   Future<void> _loadBackupState() async {
     // Read once: the screen can close while the check runs, and `context` is
     // gone by then.
-    final client = this.client;
-    if (!client.encryptionEnabled) return;
+    final client = ref.read(activeMatrixClientProvider);
+    if (client == null || !client.encryptionEnabled) return;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;
     if (client.prevBatch == null) {
@@ -385,7 +385,8 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
 
   @override
   void didUpdateWidget(Settings oldWidget) {
-    if (oldWidget != widget) {
+    final client = ref.read(activeMatrixClientProvider);
+    if (oldWidget != widget && client != null) {
       _getCurrentProfile(client);
     }
     super.didUpdateWidget(oldWidget);

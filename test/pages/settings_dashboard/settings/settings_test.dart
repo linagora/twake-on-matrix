@@ -78,21 +78,27 @@ class _SettingsScreen {
   final WidgetTester tester;
 
   Client? _active;
+  late MatrixState _matrix;
 
   Future<void> pump(Client client) async {
     _active = client;
+    _matrix = _FakeMatrix(client);
+    await pumpScreen(const Settings());
+  }
+
+  Future<void> pumpScreen(Settings settings) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [activeMatrixClientProvider.overrideWith((ref) => _active)],
         child: Provider<MatrixState>.value(
-          value: _FakeMatrix(client),
+          value: _matrix,
           child: MaterialApp(
             theme: ThemeData(
               extensions: [LinagoraTextThemeExtension.material()],
             ),
             localizationsDelegates: L10n.localizationsDelegates,
             supportedLocales: L10n.supportedLocales,
-            home: const Settings(),
+            home: settings,
           ),
         ),
       ),
@@ -356,6 +362,37 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(SwitchListTile), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('the client dropped while mounted: a check does nothing', (
+    tester,
+  ) async {
+    final screen = _SettingsScreen(tester);
+    await screen.pump(_FakeClient());
+    await tester.pump();
+    await screen.dropClient();
+
+    final errors = <Object>[];
+    runZonedGuarded(
+      tester.state<SettingsController>(find.byType(Settings)).checkBootstrap,
+      (e, _) => errors.add(e),
+    );
+    await tester.pump();
+
+    expect(errors, isEmpty);
+  });
+
+  testWidgets('the client dropped while mounted: a widget update is safe', (
+    tester,
+  ) async {
+    final screen = _SettingsScreen(tester);
+    await screen.pump(_FakeClient());
+    await tester.pump();
+    await screen.dropClient();
+
+    await screen.pumpScreen(Settings(bottomNavigationBar: Container()));
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a check started after dispose does nothing', (tester) async {
