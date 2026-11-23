@@ -106,12 +106,13 @@ class DeviceSettingsRobot extends HomeRobot {
     await _closeActions();
   }
 
-  Future<void> expectOtherSessionCanBeVerifiedAndRemoved(
+  // API sessions never upload device keys, so they cannot be verified.
+  Future<void> expectKeylessSessionCanOnlyBeRemoved(
     PrimaryExtraSession session,
   ) async {
     await _openActions(_session(session));
-    await $.waitUntilVisible(_actionsSheet().$(_l10n.startVerification));
     await $.waitUntilVisible(_actionsSheet().$(_l10n.removeDevice));
+    expect(_actionsSheet().$(_l10n.startVerification), findsNothing);
     await _closeActions();
   }
 

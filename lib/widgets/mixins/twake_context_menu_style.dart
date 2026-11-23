@@ -16,6 +16,7 @@ class TwakeContextMenuStyle {
   static const double menuBorderRadius = 20.0;
   static const double menuMinWidth = 196.0;
   static const double menuMaxWidth = 306.0;
+  static const double menuScreenMargin = 8.0;
   static const double defaultItemIconSize = 24.0;
   static const EdgeInsets defaultItemPadding = EdgeInsets.symmetric(
     vertical: 11.0,

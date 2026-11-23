@@ -35,6 +35,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Require Sentry DSN
+        # An empty DSN disables Sentry silently: fail the release instead.
+        run: test -n "$SENTRY_DSN" || { echo "::error::SENTRY_DSN is empty"; exit 1; }
+
       - name: Free up disk space
         if: matrix.os == 'android'
         run: |

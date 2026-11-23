@@ -6,7 +6,6 @@ import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/search/empty_search_widget.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -131,11 +130,11 @@ class SettingsBlockedUsersView extends StatelessWidget {
   }) {
     return TwakeInkWell(
       onTap: () {
-        final roomId = Matrix.of(
-          context,
-        ).client.getDirectChatFromUserId(profile.userId);
+        final roomId = controller.client.getDirectChatFromUserId(
+          profile.userId,
+        );
         if (roomId == null) {
-          if (profile.userId != Matrix.of(context).client.userID) {
+          if (profile.userId != controller.client.userID) {
             Router.neglect(
               context,
               () => context.go(

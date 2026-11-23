@@ -45,6 +45,7 @@ mixin PlayVideoActionMixin {
     final pageRoute = HeroPageRoute(
       builder: (context) {
         return DismissibleMediaView(
+          dismissOverChildDrags: true,
           itemBuilder: PlatformInfos.isMobile
               ? VideoViewerMobileTheme(bytes: bytes, url: url, event: event)
               : VideoViewerDesktopTheme(bytes: bytes, url: url, event: event),

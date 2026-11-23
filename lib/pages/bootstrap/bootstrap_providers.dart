@@ -1,4 +1,4 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:twake_chat/utils/secure_storage.dart';
 import 'package:twake_chat/data/repository/recovery_key_storage_repository_impl.dart';
 import 'package:twake_chat/domain/repository/recovery_key_storage_repository.dart';
 import 'package:twake_chat/domain/usecase/recovery/read_cached_recovery_key_interactor.dart';
@@ -11,7 +11,7 @@ part 'bootstrap_providers.g.dart';
 
 @riverpod
 RecoveryKeyStorageRepository recoveryKeyStorageRepository(Ref ref) =>
-    const RecoveryKeyStorageRepositoryImpl(FlutterSecureStorage());
+    const RecoveryKeyStorageRepositoryImpl(secureStorage);
 
 @riverpod
 UnlockSsssWithRecoveryKeyInteractor unlockSsssWithRecoveryKeyInteractor(

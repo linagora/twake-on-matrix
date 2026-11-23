@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +13,7 @@ import 'package:twake_chat/domain/usecase/room/ban_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/timeline_search_event_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_details/chat_details.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
@@ -98,15 +100,18 @@ void main() {
     );
     addTearDown(router.dispose);
     await tester.pumpWidget(
-      Provider<MatrixState>.value(
-        value: _FakeMatrixState(client),
-        child: Builder(
-          builder: (context) => MaterialApp.router(
-            routerConfig: router,
-            locale: const Locale('en'),
-            localizationsDelegates: L10n.localizationsDelegates,
-            supportedLocales: L10n.supportedLocales,
-            theme: TwakeThemes.buildTheme(context, Brightness.light, null),
+      ProviderScope(
+        overrides: [matrixClientProvider.overrideWithValue(client)],
+        child: Provider<MatrixState>.value(
+          value: _FakeMatrixState(client),
+          child: Builder(
+            builder: (context) => MaterialApp.router(
+              routerConfig: router,
+              locale: const Locale('en'),
+              localizationsDelegates: L10n.localizationsDelegates,
+              supportedLocales: L10n.supportedLocales,
+              theme: TwakeThemes.buildTheme(context, Brightness.light, null),
+            ),
           ),
         ),
       ),

@@ -38,14 +38,16 @@ import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/scroll_controller_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
 
-mixin ChatDetailsTabMixin<T extends StatefulWidget>
+mixin ChatDetailsTabMixin<T extends ConsumerStatefulWidget>
     on
+        ConsumerState<T>,
         TickerProviderStateMixin<T>,
         HandleVideoDownloadMixin,
         PlayVideoActionMixin {
@@ -129,7 +131,10 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   }
 
   void _listenForRoomMembersChanged() {
-    _onRoomEventChangedSubscription = Matrix.of(context).client.onEvent.stream
+    _onRoomEventChangedSubscription = ref
+        .read(matrixClientProvider)
+        .onEvent
+        .stream
         .listen((event) {
           if (event.isMemberChangedEvent && room?.id == event.roomID) {
             _membersNotifier.value = room?.getParticipants().toList()

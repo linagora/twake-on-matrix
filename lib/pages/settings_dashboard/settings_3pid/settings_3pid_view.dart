@@ -1,22 +1,24 @@
 import 'package:twake_chat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class Settings3PidView extends StatelessWidget {
+class Settings3PidView extends ConsumerWidget {
   final Settings3PidController controller;
 
   const Settings3PidView(this.controller, {super.key});
 
   @override
-  Widget build(BuildContext context) {
-    controller.request ??= Matrix.of(context).client.getAccount3PIDs();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(matrixClientProvider);
+    controller.request ??= client.getAccount3PIDs();
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: TwakeAppBar(

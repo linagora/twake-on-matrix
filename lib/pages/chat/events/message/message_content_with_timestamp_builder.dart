@@ -274,12 +274,38 @@ class _MessageContentWithTimestampBuilderState
         }.contains(widget.event.messageType) ||
         context.albumHasCaptionOrReply(widget.event);
 
-    return Align(
-      alignment: MessageStyle.messageAlignmentGeometry(widget.event, context),
-      child: _messageContentWithTimestampBuilder(
-        context: context,
-        displayTime: displayTime,
-        timelineText: timelineText,
+    return _trackAlbumPress(
+      MultiPlatformSelectionMode(
+        event: widget.event,
+        isClickable: _responsiveUtils.isMobile(context),
+        // In select mode, a long press beside the bubble toggles the selection.
+        behavior: widget.selectMode ? null : HitTestBehavior.opaque,
+        onLongPress: widget.event.redacted
+            ? null
+            : widget.event.status.isError
+            ? (event) => _handleErrorMessageLongPress(
+                context,
+                _pressedOr(event),
+                timelineText: timelineText,
+              )
+            : !widget.event.status.isError && !widget.event.status.isSending
+            ? (event) => _handleAvailableMessageLongPress(
+                context,
+                _pressedOr(event),
+                timelineText: timelineText,
+              )
+            : null,
+        child: Align(
+          alignment: MessageStyle.messageAlignmentGeometry(
+            widget.event,
+            context,
+          ),
+          child: _messageContentWithTimestampBuilder(
+            context: context,
+            displayTime: displayTime,
+            timelineText: timelineText,
+          ),
+        ),
       ),
     );
   }
@@ -314,31 +340,9 @@ class _MessageContentWithTimestampBuilderState
               widget.event,
               widget.selected,
             ),
-            child: _trackAlbumPress(
-              MultiPlatformSelectionMode(
-                event: widget.event,
-                isClickable: _responsiveUtils.isMobile(context),
-                onLongPress: widget.event.redacted
-                    ? null
-                    : widget.event.status.isError
-                    ? (event) => _handleErrorMessageLongPress(
-                        context,
-                        _pressedOr(event),
-                        timelineText: timelineText,
-                      )
-                    : !widget.event.status.isError &&
-                          !widget.event.status.isSending
-                    ? (event) => _handleAvailableMessageLongPress(
-                        context,
-                        _pressedOr(event),
-                        timelineText: timelineText,
-                      )
-                    : null,
-                child: _messageBuilder(
-                  context: context,
-                  timelineText: timelineText,
-                ),
-              ),
+            child: _messageBuilder(
+              context: context,
+              timelineText: timelineText,
             ),
           ),
         ),

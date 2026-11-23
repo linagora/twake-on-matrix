@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:dartz/dartz.dart' hide State, OpenFile;
+import 'package:dartz/dartz.dart' hide OpenFile, State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/network/media/file_not_exist_exception.dart';

@@ -3,8 +3,9 @@ import 'package:twake_chat/presentation/model/contact/presentation_contact_const
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -36,12 +37,14 @@ mixin GoToDraftChatMixin {
     required ContactPresentationSearch contactPresentationSearch,
     bool isInvitationLink = false,
   }) {
-    final roomId = Matrix.of(
+    final client = ProviderScope.containerOf(
       context,
-    ).client.getDirectChatFromUserId(contactPresentationSearch.matrixId!);
-    final room = roomId != null
-        ? Matrix.of(context).client.getRoomById(roomId)
-        : null;
+      listen: false,
+    ).read(matrixClientProvider);
+    final roomId = client.getDirectChatFromUserId(
+      contactPresentationSearch.matrixId!,
+    );
+    final room = roomId != null ? client.getRoomById(roomId) : null;
     if (roomId == null || room?.isAbandonedDMRoom == true) {
       goToDraftChat(
         context: context,
@@ -84,7 +87,10 @@ mixin GoToDraftChatMixin {
     bool isInvitationLink = false,
   }) {
     if (contactPresentationSearch.matrixId ==
-        Matrix.of(context).client.userID) {
+        ProviderScope.containerOf(
+          context,
+          listen: false,
+        ).read(matrixClientProvider).userID) {
       TwakeSnackBar.show(context, L10n.of(context)!.cannotCreateChatWithSelf);
       if (isInvitationLink) {
         context.go('/rooms');

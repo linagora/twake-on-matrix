@@ -3,22 +3,24 @@ import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
 import 'settings_notifications.dart';
 
-class SettingsNotificationsView extends StatelessWidget {
+class SettingsNotificationsView extends ConsumerWidget {
   final SettingsNotificationsController controller;
   final responsive = getIt.get<ResponsiveUtils>();
 
   SettingsNotificationsView(this.controller, {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(matrixClientProvider);
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: TwakeAppBar(
@@ -41,14 +43,14 @@ class SettingsNotificationsView extends StatelessWidget {
       body: MaxWidthBody(
         withScrolling: true,
         child: StreamBuilder(
-          stream: Matrix.of(context).client.onAccountData.stream.where(
+          stream: client.onAccountData.stream.where(
             (event) => event.type == 'm.push_rules',
           ),
           builder: (BuildContext context, _) {
             return Column(
               children: [
                 SwitchListTile.adaptive(
-                  value: !Matrix.of(context).client.allPushNotificationsMuted,
+                  value: !client.allPushNotificationsMuted,
                   title: Text(
                     L10n.of(context)!.notifications,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -57,12 +59,12 @@ class SettingsNotificationsView extends StatelessWidget {
                   ),
                   onChanged: (_) =>
                       TwakeDialog.showFutureLoadingDialogFullScreen(
-                        future: () => Matrix.of(context).client
-                            .setMuteAllPushNotifications(
-                              !Matrix.of(
-                                context,
-                              ).client.allPushNotificationsMuted,
-                            ),
+                        future: () {
+                          final activeClient = ref.read(matrixClientProvider);
+                          return activeClient.setMuteAllPushNotifications(
+                            !activeClient.allPushNotificationsMuted,
+                          );
+                        },
                       ),
                 ),
                 if (controller.showWebPushTile) ...{
@@ -114,7 +116,7 @@ class SettingsNotificationsView extends StatelessWidget {
                         : controller.toggleEncryptedPreviews,
                   ),
                 },
-                if (!Matrix.of(context).client.allPushNotificationsMuted) ...{
+                if (!client.allPushNotificationsMuted) ...{
                   const Divider(thickness: 1),
                   ListTile(
                     title: Text(

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart' hide State;
+import 'package:flutter/foundation.dart' show SynchronousFuture;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override, ProviderException;
@@ -31,8 +32,11 @@ import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:twake_chat/di/global/network_di.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/domain/model/rtc_focus.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/domain/model/tom_configurations.dart';
 import 'package:twake_chat/domain/model/tom_server_information.dart';
@@ -48,6 +52,8 @@ import 'package:twake_chat/data/account/repositories/account_repository_impl.pro
 import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
@@ -75,6 +81,16 @@ class _WatchedController<T> extends CachedStreamController<T> {
   }
 }
 
+class _CountingToMDatabase implements HiveCollectionToMDatabase {
+  int clears = 0;
+
+  @override
+  Future<void> clear() async => clears++;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 /// A client with the streams and the http client `MatrixState` opens at boot.
 class _BootClient extends FakeAccountClient {
   _BootClient(super.clientName, {super.userID});
@@ -87,6 +103,12 @@ class _BootClient extends FakeAccountClient {
   final _onToDeviceEvent = CachedStreamController<ToDeviceEvent>();
   final _onSync = CachedStreamController<SyncUpdate>();
   final _httpClient = http.Client();
+
+  @override
+  set backgroundSync(bool _) {}
+
+  @override
+  set syncPresence(PresenceType? _) {}
 
   @override
   CachedStreamController<SyncUpdate> get onSync => _onSync;
@@ -255,6 +277,11 @@ class _ToMOnlyEffects implements AccountSwitchEffects {
 
   final MatrixState matrix;
 
+  // Sync: an extra await would reorder the switches these effects overtake.
+  @override
+  Future<void> loadCachedHomeserverInfo(Client client, SwitchToken token) =>
+      SynchronousFuture(null);
+
   @override
   Future<void> setUpToM(Client client, SwitchToken token) =>
       matrix.setUpToM(client, token);
@@ -294,6 +321,51 @@ class _UserInfoOnlyEffects extends _ToMOnlyEffects {
   @override
   Future<void> loadUserInfo(Client client, SwitchToken token) =>
       matrix.loadUserInfo(client, token);
+}
+
+/// The switch effects that note the video call url the app holds when the
+/// user info, the first network step, starts.
+class _DiscoveryEffects extends _ToMOnlyEffects {
+  _DiscoveryEffects(super.matrix);
+
+  String? videoCallUrlAtUserInfo;
+
+  @override
+  Future<void> loadCachedHomeserverInfo(Client client, SwitchToken token) =>
+      matrix.loadCachedHomeserverInfo(client, token);
+
+  @override
+  Future<void> setUpToM(Client client, SwitchToken token) async {}
+
+  @override
+  Future<void> loadUserInfo(Client client, SwitchToken token) async =>
+      videoCallUrlAtUserInfo = matrix.loginHomeserverSummary?.videoCallBaseUrl;
+}
+
+/// A database that holds the well-known [cached] on a previous run.
+class _WellKnownDatabase extends Fake implements DatabaseApi {
+  _WellKnownDatabase(this.cached);
+
+  final Map<String, Object?> cached;
+
+  @override
+  Future<({Map<String, Object?> content, DateTime savedAt})?>
+  getCustomCacheObject(String cacheKey) async => cacheKey == 'well_known'
+      ? (content: cached, savedAt: DateTime.now())
+      : null;
+}
+
+/// A client whose database holds the well-known it cached on a previous run.
+class _CachedDiscoveryClient extends _ToMClient {
+  _CachedDiscoveryClient(
+    super.clientName, {
+    super.userID,
+    super.server,
+    required Map<String, Object?> wellKnown,
+  }) : database = _WellKnownDatabase(wellKnown);
+
+  @override
+  final DatabaseApi database;
 }
 
 /// The switch effects with no step of `MatrixState`: records the accounts
@@ -448,8 +520,21 @@ Future<void> _logoutAndWait(
   bool Function() complete,
 ) async {
   loggedOut.onLoginStateChanged.add(LoginState.loggedOut);
-  await harness.settle();
-  await harness.tester.runAsync(() => _until(complete));
+  await _pumpUntil(harness, complete);
+}
+
+/// The last logout waits for frames.
+Future<void> _pumpUntil(
+  _Harness harness,
+  bool Function() done, {
+  Duration frame = Duration.zero,
+}) async {
+  for (var i = 0; i < 100 && !done(); i++) {
+    await harness.tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await harness.tester.pump(frame);
+  }
 }
 
 /// The active account `a` and the one that replaces it, with the contacts
@@ -468,14 +553,18 @@ Future<void> _logoutAndWait(
 
 /// Accounts with the contacts lookup stopped, the way a logout and a
 /// rolled-back login both hand the active account over.
-_Harness _handoverHarness(WidgetTester tester, List<Client> clients) =>
-    _Harness(
-      tester,
-      clients,
-      overrides: [
-        phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
-      ],
-    );
+_Harness _handoverHarness(
+  WidgetTester tester,
+  List<Client> clients, {
+  ReportFailure? report,
+}) => _Harness(
+  tester,
+  clients,
+  overrides: [
+    phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+    if (report != null) reportFailureProvider.overrideWithValue(report),
+  ],
+);
 
 Future<({AccountSwitchCoordinator coordinator, _RecordingEffects effects})>
 _recordedSwitch(_Harness harness) async {
@@ -496,6 +585,30 @@ void _expectActive(
   expect(harness.container.read(activeMatrixClientProvider), same(next));
   expect(harness.container.read(accountClientsProvider), [next]);
   expect(effects.applied, [name]);
+}
+
+/// A screen behind login: it watches the active client.
+class _ClientReader extends ConsumerStatefulWidget {
+  const _ClientReader({required this.onDispose});
+
+  final VoidCallback onDispose;
+
+  @override
+  ConsumerState<_ClientReader> createState() => _ClientReaderState();
+}
+
+class _ClientReaderState extends ConsumerState<_ClientReader> {
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(matrixClientProvider);
+    return const SizedBox();
+  }
+
+  @override
+  void dispose() {
+    widget.onDispose();
+    super.dispose();
+  }
 }
 
 /// `setActiveClient` stops the contacts lookup of the account being left.
@@ -1150,6 +1263,44 @@ void main() {
       expect(harness.matrix.loginHomeserverSummary, isNull);
     });
 
+    testWidgets('publishes the cached discovery before the user info', (
+      tester,
+    ) async {
+      final harness = _Harness(
+        tester,
+        [
+          _ToMClient('a', userID: '@a:s', server: serverA),
+          _CachedDiscoveryClient(
+            'b',
+            userID: '@b:s',
+            server: serverB,
+            wellKnown: {
+              'm.homeserver': {'base_url': serverB.toString()},
+              RtcFocus.rtcFociKey: [
+                {'type': 'livekit', 'livekit_base_url': 'https://meet.b'},
+              ],
+            },
+          ),
+        ],
+        overrides: [
+          federationConfigurationsRepositoryProvider.overrideWithValue(
+            _RecordingFederation(),
+          ),
+          phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+        ],
+      );
+      late _DiscoveryEffects effects;
+
+      await harness.run(() async {
+        final coordinator = await harness.switchingWith(
+          (matrix) => effects = _DiscoveryEffects(matrix),
+        );
+        await tester.runAsync(() => coordinator.apply(harness.clients[1]));
+      });
+
+      expect(effects.videoCallUrlAtUserInfo, 'https://meet.b');
+    });
+
     testWidgets('keeps the summary held for its own homeserver', (
       tester,
     ) async {
@@ -1538,6 +1689,176 @@ void main() {
       expect(coordinator.isAppliedTo(last), isFalse);
       expect(effects.applied, isEmpty);
     });
+    testWidgets('the last logout unmounts the screens reading the client '
+        'before the accounts drop it', (tester) async {
+      final last = _BootClient('a', userID: '@a:s');
+      final tom = _CountingToMDatabase();
+      getIt.registerSingleton<HiveCollectionToMDatabase>(tom);
+      final harness = _handoverHarness(tester, [last]);
+      final events = <String>[];
+      final locationsWhenDropped = <String>[];
+      final entering = MaterialPageRoute<void>(
+        builder: (_) => const SizedBox(),
+      );
+      late AccountsState whileEntering;
+
+      await harness.run(() async {
+        await _recordedSwitch(harness);
+        harness.container.listen(accountsProvider, (_, next) {
+          if (next is! Active) {
+            events.add('client dropped');
+            locationsWhenDropped.add(
+              TwakeApp.router.routeInformationProvider.value.uri.path,
+            );
+          }
+        });
+        final navigator = TwakeApp.routerKey.currentState!;
+        unawaited(
+          navigator.push(
+            MaterialPageRoute<void>(
+              builder: (_) =>
+                  _ClientReader(onDispose: () => events.add('reader disposed')),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        // The harness does not render `TwakeApp.router`: replace the screens
+        // the way its navigation would.
+        final location = TwakeApp.router.routeInformationProvider;
+        void replaceScreens() {
+          if (location.value.uri.path.startsWith('/home')) {
+            unawaited(navigator.pushAndRemoveUntil(entering, (r) => r.isFirst));
+          }
+        }
+
+        location.addListener(replaceScreens);
+        addTearDown(() => location.removeListener(replaceScreens));
+
+        last.onLoginStateChanged.add(LoginState.loggedOut);
+        await _pumpUntil(
+          harness,
+          () => TwakeApp.router.routeInformationProvider.value.uri.path
+              .startsWith('/home'),
+        );
+        for (var i = 0; i < 5; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+          await tester.pump();
+        }
+        whileEntering = harness.container.read(accountsProvider);
+        await _pumpUntil(
+          harness,
+          () => harness.container.read(accountsProvider) is! Active,
+          frame: const Duration(milliseconds: 100),
+        );
+        await _pumpUntil(harness, () => tom.clears > 0);
+        await _pumpUntil(harness, () => false);
+      });
+
+      expect(tom.clears, 1);
+      expect(whileEntering, isA<Active>());
+      expect(entering.animation!.isCompleted, isTrue);
+      expect(events, ['reader disposed', 'client dropped']);
+      expect(locationsWhenDropped, [startsWith('/home')]);
+      expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
+    });
+
+    for (final (lifecycle, reported) in [
+      (AppLifecycleState.resumed, true),
+      (AppLifecycleState.paused, false),
+    ]) {
+      testWidgets('the last logout stops waiting for the screens behind login '
+          'after a while (${lifecycle.name})', (tester) async {
+        final last = _BootClient('a', userID: '@a:s');
+        final reports = <String>[];
+        final harness = _handoverHarness(tester, [
+          last,
+        ], report: (error, stackTrace, what) => reports.add(what));
+        final endless = PageRouteBuilder<void>(
+          transitionDuration: const Duration(hours: 1),
+          pageBuilder: (_, _, _) => const SizedBox(),
+        );
+
+        await harness.run(() async {
+          await _recordedSwitch(harness);
+          unawaited(TwakeApp.routerKey.currentState!.push(endless));
+          tester.binding.handleAppLifecycleStateChanged(lifecycle);
+          addTearDown(
+            () => tester.binding.handleAppLifecycleStateChanged(
+              AppLifecycleState.resumed,
+            ),
+          );
+
+          last.onLoginStateChanged.add(LoginState.loggedOut);
+          await _pumpUntil(
+            harness,
+            () => TwakeApp.router.routeInformationProvider.value.uri.path
+                .startsWith('/home'),
+          );
+          await tester.pump(const Duration(milliseconds: 1900));
+          expect(harness.container.read(accountsProvider), isA<Active>());
+          await tester.pump(const Duration(milliseconds: 200));
+          await _pumpUntil(
+            harness,
+            () => harness.container.read(accountsProvider) is! Active,
+          );
+        });
+
+        expect(endless.animation!.isCompleted, isFalse);
+        expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
+        expect(
+          reports.contains(
+            'MatrixState: screens behind login still mounted at the last '
+            'logout',
+          ),
+          reported,
+        );
+      });
+    }
+  });
+
+  testWidgets('a login during the wait of the last logout removes the account '
+      'that logged out and keeps the ToM data', (tester) async {
+    final last = _BootClient('a', userID: '@a:s');
+    final tom = _CountingToMDatabase();
+    getIt.registerSingleton<HiveCollectionToMDatabase>(tom);
+    final harness = _handoverHarness(tester, [last]);
+    final endless = PageRouteBuilder<void>(
+      transitionDuration: const Duration(hours: 1),
+      pageBuilder: (_, _, _) => const SizedBox(),
+    );
+
+    await harness.run(() async {
+      await _recordedSwitch(harness);
+      unawaited(TwakeApp.routerKey.currentState!.push(endless));
+
+      last.onLoginStateChanged.add(LoginState.loggedOut);
+      await _pumpUntil(
+        harness,
+        () => TwakeApp.router.routeInformationProvider.value.uri.path
+            .startsWith('/home'),
+      );
+      harness.container
+          .read(accountClientRegistryProvider)
+          .add(_BootClient('b', userID: '@b:s'));
+      await harness.tester.runAsync(
+        () => harness.container
+            .read(accountsProvider.notifier)
+            .addAccount(const AccountId('b')),
+      );
+      await _pumpUntil(
+        harness,
+        () => false,
+        frame: const Duration(milliseconds: 500),
+      );
+    });
+
+    final accounts = harness.container.read(accountsProvider);
+    expect(accounts, isA<Active>());
+    expect(accounts.accounts.map((a) => a.id), ['b']);
+    expect((accounts as Active).activeId, 'b');
+    expect(tom.clears, 0);
   });
 
   group('the login host of MatrixState', () {

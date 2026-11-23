@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -5,6 +6,7 @@ import 'package:twake_chat/domain/recovery/exceptions/recovery_words_exception.d
 import 'package:twake_chat/domain/recovery/usecases/get_recovery_words_usecase.provider.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/beautify_string_extension.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -17,7 +19,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
@@ -39,7 +40,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
   ValueNotifier<List<String>> ignoredUsersNotifier =
       ValueNotifier<List<String>>([]);
 
-  Client get client => Matrix.read(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   /// Future that fetches the recovery key, created once in [initState]
   /// and consumed by a [FutureBuilder] in the view.
@@ -71,8 +72,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
     try {
       final words = await getRecoveryWords.execute();
       if (!mounted) return null;
-      _recoveryKey = words.words;
-      return _recoveryKey;
+      return _recoveryKey = words.words;
     } on GetRecoveryWordsException {
       return null;
     }
@@ -125,9 +125,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
     );
     if (!mounted || input == null) return;
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(
-        context,
-      ).client.changePassword(input.last, oldPassword: input.first),
+      future: () => client.changePassword(input.last, oldPassword: input.first),
     );
     if (!mounted) return;
     if (success.error == null) {
@@ -137,9 +135,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
 
   void setAppLockAction() async {
     final l10n = L10n.of(context)!;
-    final currentLock = await const FlutterSecureStorage().read(
-      key: SettingKeys.appLockKey,
-    );
+    final currentLock = await secureStorage.read(key: SettingKeys.appLockKey);
     if (!mounted) return;
     if (currentLock?.isNotEmpty ?? false) {
       await AppLock.of(context)!.showLockScreen();
@@ -168,7 +164,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
       ],
     );
     if (!mounted || newLock == null) return;
-    await const FlutterSecureStorage().write(
+    await secureStorage.write(
       key: SettingKeys.appLockKey,
       value: newLock.single,
     );
@@ -181,7 +177,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
   }
 
   void showBootstrapDialog(BuildContext context) async {
-    await BootstrapDialog(client: Matrix.of(context).client).show();
+    await BootstrapDialog(client: client).show();
   }
 
   Future<void> dehydrateAction() => dehydrateDevice(context);
@@ -216,9 +212,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
   }
 
   Future<void> copyPublicKey() async {
-    TwakeClipboard.instance.copyText(
-      Matrix.of(context).client.fingerprintKey.beautified,
-    );
+    TwakeClipboard.instance.copyText(client.fingerprintKey.beautified);
     TwakeSnackBar.show(context, L10n.of(context)!.copiedPublicKeyToClipboard);
   }
 
