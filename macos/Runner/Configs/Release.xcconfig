@@ -1,2 +1,5 @@
 #include "../../Flutter/Flutter-Release.xcconfig"
 #include "Warnings.xcconfig"
+
+// Apple silicon only: webcrypto (BoringSSL via CMake) does not link for x86_64.
+ARCHS = arm64

@@ -31,13 +31,21 @@ Sync development signing certificates
 
 Sync developer ID signing certificates
 
-### mac notarization
+### mac build
 
 ```sh
-[bundle exec] fastlane mac notarization
+[bundle exec] fastlane mac build
 ```
 
-Notarizing the app
+Build the signed Mac App Store package with the certificates already installed
+
+### mac beta
+
+```sh
+[bundle exec] fastlane mac beta
+```
+
+Push a new macOS build to TestFlight
 
 ----
 
