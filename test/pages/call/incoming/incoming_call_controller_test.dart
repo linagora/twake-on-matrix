@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/repository/call/call_repository.provider.dart';
@@ -185,6 +187,33 @@ void main() {
       repository.calls,
       containsAllInOrder(['leave !room', 'join !dm video=false']),
     );
+    expect(
+      container.read(callControllerProvider),
+      isA<CallConnected>().having((call) => call.roomId, 'roomId', '!dm'),
+    );
+  });
+
+  test('answer_whileAnotherCallConnects_joinsOnceItIsCancelled', () async {
+    // Arrange
+    final connecting = Completer<void>();
+    repository.connectGate = connecting;
+    final first = container
+        .read(callControllerProvider.notifier)
+        .join('!room', isVideo: false);
+    await pumpEventQueue();
+    await ring([_ring(r'$ring')]);
+
+    // Act
+    controller().answer();
+    await pumpEventQueue();
+    repository.connectGate = null;
+    connecting.complete();
+    await first;
+    await pumpEventQueue();
+
+    // Assert
+    expect(repository.calls, contains('join !dm video=false'));
+    expect(repository.calls, isNot(contains('join !room video=false')));
     expect(
       container.read(callControllerProvider),
       isA<CallConnected>().having((call) => call.roomId, 'roomId', '!dm'),

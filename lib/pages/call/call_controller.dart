@@ -35,6 +35,7 @@ class CallController extends _$CallController {
   // Read at join: after an account switch it still holds the joining client.
   LeaveCallUseCase? _leaveCall;
   Future<void>? _cleanup;
+  Future<void>? _joining;
   var _cancellation = CallCancellation();
 
   bool get _isLeaveRequested => _cancellation.isCancelled;
@@ -51,11 +52,32 @@ class CallController extends _$CallController {
     return const CallState.idle();
   }
 
-  Future<void> join(String roomId, {required bool isVideo}) async {
-    if (state is CallConnecting || state is CallConnected) return;
+  Future<void> join(String roomId, {required bool isVideo}) {
+    if (state is CallConnecting || state is CallConnected) {
+      return Future.value();
+    }
+    final joining = _join(roomId, isVideo: isVideo);
+    _joining = joining;
+    return joining.whenComplete(() {
+      if (identical(_joining, joining)) _joining = null;
+    });
+  }
+
+  /// Leaves the call of this device, waits for a connecting one to be
+  /// cancelled, then joins [roomId].
+  Future<void> switchTo(String roomId, {required bool isVideo}) async {
+    final joining = _joining;
+    // The leave is immediate for the state; its membership ends behind it.
+    unawaited(leave());
+    await joining;
+    if (!ref.mounted) return;
+    await join(roomId, isVideo: isVideo);
+  }
+
+  Future<void> _join(String roomId, {required bool isVideo}) async {
     _start(roomId);
     try {
-      final room = await _join(roomId, isVideo: isVideo);
+      final room = await _execute(roomId, isVideo: isVideo);
       if (ref.mounted) await _onJoined(roomId, room, isVideo: isVideo);
     } catch (error, stackTrace) {
       _onJoinFailed(roomId, error, stackTrace);
@@ -70,7 +92,7 @@ class CallController extends _$CallController {
     _leaveCall = ref.read(leaveCallUseCaseProvider);
   }
 
-  Future<CallRoomInfo?> _join(String roomId, {required bool isVideo}) async {
+  Future<CallRoomInfo?> _execute(String roomId, {required bool isVideo}) async {
     final joinCall = ref.read(joinCallUseCaseProvider);
     final serviceUrl = ref
         .read(loginHomeserverSummaryProvider)

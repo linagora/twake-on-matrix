@@ -236,9 +236,18 @@ class _FakeClient extends Fake implements Client {
     Map<String, Object?> body,
   ) async {
     if (failure case final error?) throw error;
+    final id = sendIds.isEmpty ? r'$sent' : sendIds.removeAt(0);
+    final gate = sendGates.isEmpty ? null : sendGates.removeAt(0);
+    await gate?.future;
     sent.add((roomId: roomId, type: eventType, content: body));
-    return r'$sent';
+    return id;
   }
+
+  /// The ids the next sends get, in order; `$sent` once empty.
+  final sendIds = <String>[];
+
+  /// The next sends answer only once these complete, in order.
+  final sendGates = <Completer<void>?>[];
 
   @override
   PushRuleSet? get globalPushRules => rules;
@@ -440,6 +449,35 @@ void main() {
         expect(declines, isEmpty);
       });
     });
+
+    test(
+      'a ring sent across a leave is not the ring of the next call',
+      () async {
+        final firstSend = Completer<void>();
+        client
+          ..sendIds.addAll([r'$old', r'$new'])
+          ..sendGates.add(firstSend);
+        final old = datasource.sendRing(_join, membershipEventId: r'$m1');
+        datasource.leaveMembership(_room).ignore();
+        await datasource.sendRing(_join, membershipEventId: r'$m2');
+        firstSend.complete();
+        await old;
+
+        final declines = <void>[];
+        final subscription = datasource
+            .watchRingDeclined(_room)
+            .listen(declines.add);
+        client.decline(
+          _Decline()
+            ..ringId = r'$new'
+            ..sender = _alice.user,
+        );
+        await pumpEventQueue();
+        await subscription.cancel();
+
+        expect(declines, hasLength(1));
+      },
+    );
 
     test('a decline of the user, on another device, is not one', () async {
       final declines = await declinesAfter(
@@ -1416,6 +1454,32 @@ void main() {
         'app.twake.chat.call_ring',
         'app.twake.chat.call_ring_legacy',
       ]);
+    });
+
+    test('push rules synced late: set all the same, however late', () {
+      fakeAsync((async) {
+        client = _FakeClient()..rules = null;
+        datasource = MatrixRtcDatasourceImpl(client);
+        Object? failure;
+        var isDone = false;
+        datasource.ensureCallRingPushRules().then<void>(
+          (_) => isDone = true,
+          onError: (Object error) {
+            failure = error;
+          },
+        );
+        async.elapse(const Duration(minutes: 5));
+        client.rules = PushRuleSet(underride: []);
+        client.onSync.add(SyncUpdate(nextBatch: 'next'));
+        async.elapse(const Duration(seconds: 1));
+
+        expect(failure, isNull);
+        expect(isDone, isTrue);
+        expect(client.pushRules.map((r) => r.id), [
+          'app.twake.chat.call_ring',
+          'app.twake.chat.call_ring_legacy',
+        ]);
+      });
     });
 
     const otherActions = (

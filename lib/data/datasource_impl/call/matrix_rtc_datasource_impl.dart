@@ -60,7 +60,6 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   static const memberEventType = CallEventTypes.callMember;
   static const _delayedLeave = Duration(seconds: 8);
   static const _delayedLeaveRestart = Duration(seconds: 5);
-  static const _pushRulesWait = Duration(minutes: 2);
   static final _unprefixedRoomVersion = RegExp(
     r'^org\.matrix\.msc(3757|3779)\b',
   );
@@ -324,8 +323,9 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   @override
   Future<void> sendRing(CallJoin join, {required String membershipEventId}) =>
       _logged('ring not sent', () async {
+        final session = _session;
         // The slot of the room, as the web client sends it.
-        _sentRings[join.room.id] = await _send(
+        final ringId = await _send(
           join.room,
           RtcNotificationContent.eventType,
           {
@@ -341,6 +341,8 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
             'm.call.intent': join.isVideo ? 'video' : 'audio',
           },
         );
+        // Left during the send: the ring belongs to an ended call.
+        if (session == _session) _sentRings[join.room.id] = ringId;
       });
 
   @override
@@ -423,14 +425,15 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   Future<void> ensureCallRingPushRules() =>
       _logged('push rules not set', () async {
         final client = _client;
-        // Unknown before the first sync: a rule of its owner would be
-        // written over.
+        // Unknown before the first sync, however late: a rule of its owner
+        // would be written over.
         if (client.globalPushRules == null) {
-          await client.onSync.stream
-              .firstWhere((_) => client.globalPushRules != null)
-              .timeout(_pushRulesWait);
+          await client.onSync.stream.any((_) => client.globalPushRules != null);
         }
-        final underride = client.globalPushRules?.underride ?? const [];
+        // Logged out before any sync.
+        final rules = client.globalPushRules;
+        if (rules == null) return;
+        final underride = rules.underride ?? const [];
         for (final rule in _ringPushRules) {
           // Only when absent: a rule that differs is left to its owner.
           if (underride.any((r) => r.ruleId == rule.id)) continue;

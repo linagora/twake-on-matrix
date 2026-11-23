@@ -66,10 +66,11 @@ class IncomingCallController extends _$IncomingCallController {
   CallRing? answer() {
     final ring = _take();
     if (ring == null) return null;
-    final calls = ref.read(callControllerProvider.notifier);
-    // The leave is immediate for the state; its membership ends behind it.
-    unawaited(calls.leave());
-    unawaited(calls.join(ring.room.id, isVideo: false));
+    unawaited(
+      ref
+          .read(callControllerProvider.notifier)
+          .switchTo(ring.room.id, isVideo: false),
+    );
     return ring;
   }
 
