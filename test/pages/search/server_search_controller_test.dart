@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -13,12 +15,23 @@ import 'package:twake_chat/presentation/model/search/presentation_server_side_em
 class _FakeServerSearchInteractor implements ServerSearchInteractor {
   Either<Failure, Success> response = Right(ServerSearchInitial());
 
+  final pendingSearches =
+      <String, StreamController<Either<Failure, Success>>>{};
+
+  bool holdResponses = false;
+
   @override
   Stream<Either<Failure, Success>> execute({
     required ServerSideSearchCategories searchCategories,
     String? nextBatch,
   }) async* {
     yield Right(ServerSearchInitial());
+    if (holdResponses) {
+      final pending = StreamController<Either<Failure, Success>>();
+      pendingSearches[searchCategories.searchTerm] = pending;
+      yield* pending.stream;
+      return;
+    }
     yield response;
   }
 }
@@ -84,6 +97,25 @@ void main() {
       expect(
         controller.searchResultsNotifier.value,
         isA<PresentationServerSideEmptySearch>(),
+      );
+    },
+  );
+
+  test(
+    'ignores a failure of a previous search term after a new search started',
+    () async {
+      interactor.holdResponses = true;
+      await search('late');
+      await search('morning');
+
+      interactor.pendingSearches['late']!.add(
+        Left(ServerSearchChatFailed(exception: Exception('timeout'))),
+      );
+      await pumpEventQueue();
+
+      expect(
+        controller.searchResultsNotifier.value,
+        isNot(isA<PresentationServerSideEmptySearch>()),
       );
     },
   );

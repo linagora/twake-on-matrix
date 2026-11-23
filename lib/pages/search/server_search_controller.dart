@@ -158,6 +158,8 @@ class ServerSearchController with SearchDebouncerMixin {
   }
 
   void searchUnencryptedMessages() {
+    _searchSubscription?.cancel();
+    isLoadingMoreNotifier.value = false;
     _searchSubscription = _serverSearchInteractor
         .execute(searchCategories: _searchCategories!)
         .listen((searchResult) => _handleListenServerSearch(searchResult));
