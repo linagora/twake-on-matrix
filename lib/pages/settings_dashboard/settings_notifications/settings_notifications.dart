@@ -1,6 +1,3 @@
-import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:flutter/material.dart';
@@ -96,73 +93,6 @@ class SettingsNotifications extends ConsumerStatefulWidget {
 class SettingsNotificationsController
     extends ConsumerState<SettingsNotifications> {
   Client get _client => ref.read(matrixClientProvider);
-
-  /// Encrypted previews on iOS: the notification extension gets its own
-  /// device through a second SSO login. null while loading or unsupported.
-  bool? encryptedPreviewsActive;
-  String? _ssoProviderId;
-
-  /// The app cross-signs the extension's device, so it needs the
-  /// self-signing key in cache.
-  bool encryptedPreviewsLocked = false;
-
-  bool get showEncryptedPreviewsTile =>
-      PlatformInfos.isIOS && _ssoProviderId != null;
-
-  @override
-  void initState() {
-    super.initState();
-    if (PlatformInfos.isIOS) _loadEncryptedPreviewsStatus();
-  }
-
-  Future<void> _loadEncryptedPreviewsStatus() async {
-    final client = _client;
-    _ssoProviderId = await KeychainSharingManager.notificationSsoProviderId(
-      client,
-    );
-    final active = await KeychainSharingManager.hasNotificationSession(client);
-    final locked = await KeychainSharingManager.notificationPreviewsLocked(
-      client,
-    );
-    if (!mounted) return;
-    setState(() {
-      encryptedPreviewsActive = active;
-      encryptedPreviewsLocked = locked;
-    });
-  }
-
-  Future<void> toggleEncryptedPreviews(bool enabled) async {
-    final client = _client;
-    final providerId = _ssoProviderId;
-    final homeserver = client.homeserver;
-    if (providerId == null || homeserver == null) return;
-    if (enabled) {
-      final String callback;
-      try {
-        callback = await ConnectPageMixin.webAuthenticate(
-          homeserver: homeserver.toString(),
-          id: providerId,
-        );
-      } catch (e) {
-        Logs().w('SSO for encrypted previews cancelled', e);
-        return;
-      }
-      final loginToken = Uri.parse(callback).queryParameters['loginToken'];
-      if (loginToken == null || loginToken.isEmpty || !mounted) return;
-      await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => KeychainSharingManager.createNotificationSession(
-          client,
-          loginToken,
-        ),
-      );
-    } else {
-      await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () => KeychainSharingManager.logoutNotificationSession(client),
-      );
-    }
-    if (!mounted) return;
-    await _loadEncryptedPreviewsStatus();
-  }
 
   bool? getNotificationSetting(NotificationSettingsItem item) {
     final pushRules = _client.globalPushRules;

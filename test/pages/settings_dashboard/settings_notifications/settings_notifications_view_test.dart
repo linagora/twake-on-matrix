@@ -31,7 +31,6 @@ class _FakeClient extends Fake implements Client {
 
 class _FakeController extends Fake implements SettingsNotificationsController {
   @override
-  bool get showEncryptedPreviewsTile => false;
 
   @override
   bool? getNotificationSetting(NotificationSettingsItem item) => true;

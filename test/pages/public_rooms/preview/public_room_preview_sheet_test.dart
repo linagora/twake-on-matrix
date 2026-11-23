@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -14,11 +15,36 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
 import '../../../domain/public_rooms/fake_public_rooms_repository.dart';
 
 const _alias = '#general:hs';
 
+const _webLink = 'https://other.example.com/rooms/!x?event=%24e';
+
 late FakePublicRoomsRepository _repository;
+late _FakeUrlLauncherPlatform _launcher;
+
+class _FakeUrlLauncherPlatform extends UrlLauncherPlatform {
+  final launches = <(String, PreferredLaunchMode)>[];
+  bool launchResult = true;
+  Object? launchError;
+
+  /// When set, the launch answers only once this completes.
+  Completer<bool>? pendingLaunch;
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    launches.add((url, options.mode));
+    if (launchError != null) throw launchError!;
+    return pendingLaunch?.future ?? launchResult;
+  }
+}
 
 void main() {
   setUpAll(() {
@@ -27,34 +53,52 @@ void main() {
     }
   });
 
-  setUp(() => _repository = FakePublicRoomsRepository());
+  setUp(() {
+    _repository = FakePublicRoomsRepository();
+    _launcher = _FakeUrlLauncherPlatform();
+    UrlLauncherPlatform.instance = _launcher;
+  });
 
   _shownStateTests();
   _unavailableTests();
+  _openInBrowserTests();
   _navigationTests();
 }
 
 /// The sheet opened from a home route, in a router that knows the room.
-Future<void> _pumpSheet(WidgetTester tester) async {
-  final router = GoRouter(
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, _) => Scaffold(
-          body: TextButton(
-            onPressed: () => unawaited(
-              showModalBottomSheet<void>(
-                context: context,
-                builder: (_) => const PublicRoomPreviewSheet(
-                  address: RoomAddress(_alias),
-                  eventId: r'$event',
-                ),
-              ),
-            ),
-            child: const Text('open'),
+/// With [overAPage], the home route first pushes a page that opens it.
+Future<void> _pumpSheet(
+  WidgetTester tester, {
+  String? webLink,
+  bool overAPage = false,
+}) async {
+  Widget opener(BuildContext context) => Scaffold(
+    body: TextButton(
+      onPressed: () => unawaited(
+        showModalBottomSheet<void>(
+          context: context,
+          builder: (_) => PublicRoomPreviewSheet(
+            address: const RoomAddress(_alias),
+            eventId: r'$event',
+            webLink: webLink,
           ),
         ),
       ),
+      child: const Text('open'),
+    ),
+  );
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/page',
+        builder: (context, _) => Column(
+          children: [
+            const Text('the page'),
+            Expanded(child: opener(context)),
+          ],
+        ),
+      ),
+      GoRoute(path: '/', builder: (context, _) => opener(context)),
       GoRoute(
         path: '/rooms/:roomid',
         builder: (_, state) => Text(
@@ -77,6 +121,10 @@ Future<void> _pumpSheet(WidgetTester tester) async {
       ),
     ),
   );
+  if (overAPage) {
+    unawaited(router.push('/page'));
+    await tester.pumpAndSettle();
+  }
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
 }
@@ -159,6 +207,170 @@ void _unavailableTests() {
 
     // Assert
     expect(find.text('This group is unavailable.'), findsOneWidget);
+  });
+}
+
+void _openInBrowserTests() {
+  testWidgets('sheet_whenUnavailableFromAWebLink_offersToOpenItInTheBrowser', (
+    tester,
+  ) async {
+    // Arrange
+    _repository.preview = const PublicRoomPreview.unavailable();
+
+    // Act
+    await _pumpSheet(tester, webLink: _webLink);
+
+    // Assert
+    expect(find.text('This group is unavailable.'), findsOneWidget);
+    expect(find.text('Try to join'), findsOneWidget);
+    expect(find.text('Open in browser'), findsOneWidget);
+  });
+
+  testWidgets('sheet_whenOpenInBrowserIsTapped_opensTheLinkOutsideAndCloses', (
+    tester,
+  ) async {
+    // Arrange
+    _repository.preview = const PublicRoomPreview.unavailable();
+    await _pumpSheet(tester, webLink: _webLink);
+
+    // Act
+    await tester.tap(find.text('Open in browser'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(_launcher.launches, [
+      (_webLink, PreferredLaunchMode.externalApplication),
+    ]);
+    expect(find.text('This group is unavailable.'), findsNothing);
+    expect(find.text('open'), findsOneWidget);
+    expect(_repository.joinedIds, isEmpty);
+  });
+
+  testWidgets(
+    'sheet_whenDismissedBeforeTheBrowserOpens_leavesThePageBelowShown',
+    (tester) async {
+      // Arrange
+      _repository.preview = const PublicRoomPreview.unavailable();
+      _launcher.pendingLaunch = Completer<bool>();
+      await _pumpSheet(tester, webLink: _webLink, overAPage: true);
+      await tester.tap(find.text('Open in browser'));
+      await tester.pump();
+
+      // Act: the user dismisses the sheet, then the browser opens.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pump();
+      _launcher.pendingLaunch!.complete(true);
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(find.text('This group is unavailable.'), findsNothing);
+      expect(find.text('the page'), findsOneWidget);
+    },
+  );
+
+  // No browser opened: the user is told, and can still try to join.
+  for (final (failure, fail) in <(String, void Function())>[
+    ('NoAppOpensIt', () => _launcher.launchResult = false),
+    (
+      'ThePlatformThrows',
+      () =>
+          _launcher.launchError = PlatformException(code: 'ACTIVITY_NOT_FOUND'),
+    ),
+  ]) {
+    testWidgets(
+      'sheet_whenOpenInBrowserFailsBecause${failure}_staysOpenAndSaysSo',
+      (tester) async {
+        // Arrange
+        _repository.preview = const PublicRoomPreview.unavailable();
+        fail();
+        await _pumpSheet(tester, webLink: _webLink);
+
+        // Act
+        await tester.tap(find.text('Open in browser'));
+        await tester.pumpAndSettle();
+
+        // Assert
+        expect(_launcher.launches, [
+          (_webLink, PreferredLaunchMode.externalApplication),
+        ]);
+        expect(find.text("Can't open the URI $_webLink"), findsOneWidget);
+        expect(find.text('This group is unavailable.'), findsOneWidget);
+        expect(find.text('Try to join'), findsOneWidget);
+        expect(find.text('Open in browser'), findsOneWidget);
+      },
+    );
+  }
+
+  testWidgets('sheet_whenTheLookupFailsFromAWebLink_offersTheBrowser', (
+    tester,
+  ) async {
+    // Arrange
+    _repository.previewError = const PublicRoomsNoClientException();
+
+    // Act
+    await _pumpSheet(tester, webLink: _webLink);
+
+    // Assert
+    expect(find.text('This group is unavailable.'), findsOneWidget);
+    expect(find.text('Open in browser'), findsOneWidget);
+  });
+
+  testWidgets('sheet_whenUnavailableWithoutAWebLink_hasNoBrowserButton', (
+    tester,
+  ) async {
+    // Arrange
+    _repository.preview = const PublicRoomPreview.unavailable();
+
+    // Act
+    await _pumpSheet(tester);
+
+    // Assert
+    expect(find.text('Try to join'), findsOneWidget);
+    expect(find.text('Open in browser'), findsNothing);
+  });
+
+  testWidgets('sheet_whenTheRoomIsFoundFromAWebLink_hasNoBrowserButton', (
+    tester,
+  ) async {
+    // Arrange
+    _repository.preview = PublicRoomPreview.found(_general());
+
+    // Act
+    await _pumpSheet(tester, webLink: _webLink);
+
+    // Assert
+    expect(find.text('Join · 3 members'), findsOneWidget);
+    expect(find.text('Open in browser'), findsNothing);
+  });
+
+  testWidgets('sheet_whenBannedFromAWebLink_hasNoBrowserButton', (
+    tester,
+  ) async {
+    // Arrange
+    _repository.preview = const PublicRoomPreview.banned();
+
+    // Act
+    await _pumpSheet(tester, webLink: _webLink);
+
+    // Assert
+    expect(find.text('You have been banned from this chat'), findsOneWidget);
+    expect(find.text('Open in browser'), findsNothing);
+  });
+
+  testWidgets('sheet_whenAlreadyRequestedFromAWebLink_hasNoBrowserButton', (
+    tester,
+  ) async {
+    // Arrange
+    _repository.preview = PublicRoomPreview.found(
+      _general(access: PublicRoomAccess.approval),
+      isRequested: true,
+    );
+
+    // Act
+    await _pumpSheet(tester, webLink: _webLink);
+
+    // Assert
+    expect(find.text('Open in browser'), findsNothing);
   });
 }
 

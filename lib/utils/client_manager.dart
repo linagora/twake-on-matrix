@@ -194,8 +194,10 @@ abstract class ClientManager {
     await Store().setItem(clientNamespace, jsonEncode(clientNamesList));
   }
 
-  static Future<void> _syncKeychainForClient(Client client) =>
-      KeychainSharingManager.removeAppSession(client);
+  static Future<void> _syncKeychainForClient(Client client) async {
+    await KeychainSharingManager.removeAppSession(client);
+    await KeychainSharingManager.saveHttpSession(client);
+  }
 
   static NativeImplementations get nativeImplementations =>
       NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());

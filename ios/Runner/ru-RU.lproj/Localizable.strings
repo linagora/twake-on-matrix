@@ -1,4 +1,5 @@
-"newMessageInTwake" = "У вас одно зашифрованное сообщение";
+"newMessageInTwake" = "У вас новое сообщение";
+"newEncryptedMessageInTwake" = "У вас новое зашифрованное сообщение";
 "Notification" = "Уведомление";
 "a11y_delete" = "Удалить";
 "a11y_hide_password" = "Скрыть пароль";

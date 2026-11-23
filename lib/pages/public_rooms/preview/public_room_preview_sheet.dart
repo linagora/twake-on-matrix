@@ -13,6 +13,7 @@ import 'package:twake_chat/pages/public_rooms/public_rooms_state.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 /// The preview of a room the user is not in, opened from its address.
 class PublicRoomPreviewSheet extends ConsumerStatefulWidget {
@@ -20,10 +21,15 @@ class PublicRoomPreviewSheet extends ConsumerStatefulWidget {
     super.key,
     required this.address,
     this.eventId,
+    this.webLink,
   });
 
   final RoomAddress address;
   final String? eventId;
+
+  /// The web link the user tapped, offered when the room cannot be
+  /// previewed: it may be a page of another site.
+  final String? webLink;
 
   @override
   ConsumerState<PublicRoomPreviewSheet> createState() =>
@@ -35,6 +41,21 @@ class _PublicRoomPreviewSheetState
   void _openRoom(String roomId) {
     context.pop();
     RoomRoute(roomid: roomId, event: widget.eventId).go(context);
+  }
+
+  /// Closes the sheet only once the browser opened, else says so.
+  Future<void> _openInBrowser(String link) async {
+    final launched = await launchUrlString(
+      link,
+      mode: LaunchMode.externalApplication,
+    ).catchError((_) => false);
+    if (!mounted) return;
+    if (launched) {
+      // Dismissed while the browser opened: pop nothing else.
+      if (ModalRoute.of(context)?.isCurrent ?? false) context.pop();
+    } else {
+      TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(link));
+    }
   }
 
   Future<void> _open() async {
@@ -82,6 +103,10 @@ class _PublicRoomPreviewSheetState
               preview: preview,
               state: state.value,
               onOpen: _open,
+              onOpenInBrowser: switch (widget.webLink) {
+                final link? => () => _openInBrowser(link),
+                null => null,
+              },
             ),
           },
         ),
@@ -95,11 +120,13 @@ class _PublicRoomPreviewBody extends StatelessWidget {
     required this.preview,
     required this.state,
     required this.onOpen,
+    this.onOpenInBrowser,
   });
 
   final PublicRoomPreview preview;
   final PublicRoomPreviewState? state;
   final VoidCallback onOpen;
+  final VoidCallback? onOpenInBrowser;
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +174,8 @@ class _PublicRoomPreviewBody extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             FilledButton(onPressed: onPressed, child: Text(l10n.tryToJoin)),
+            if (onOpenInBrowser case final open?)
+              OutlinedButton(onPressed: open, child: Text(l10n.openInBrowser)),
           ],
         },
         if (state?.hasFailed ?? false)

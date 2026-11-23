@@ -22,10 +22,19 @@ struct KeychainCredentials {
     let restorationToken: RestorationToken
 }
 
+/// Written by the app under `http_<userId>`, with no `session` field so that the Rust path never reads it.
+struct HTTPCredentials: Codable {
+    let accessToken: String
+    let userId: String
+    let homeserverUrl: String
+    let pusherNotificationClientIdentifier: String
+}
+
 protocol KeychainControllerProtocol: ClientSessionDelegate {
     func setRestorationToken(_ restorationToken: RestorationToken, forUsername: String)
     func restorationTokenForUsername(_ username: String) -> RestorationToken?
     func restorationTokens() -> [KeychainCredentials]
+    func httpCredentials(forClientID clientID: String) -> HTTPCredentials?
     func removeRestorationTokenForUsername(_ username: String)
     func removeAllRestorationTokens()
 }

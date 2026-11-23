@@ -26,30 +26,28 @@ class MessageLinkPolicy {
       if (userId != null) ?_serverOf(userId),
       ?_serverOf(roomId),
     };
-    if (servers.isEmpty) return '';
-    return '?${servers.map((s) => 'via=${Uri.encodeComponent(s)}').join('&')}';
+    return _via(servers);
   }
+
+  /// `?via=a&via=b`, or nothing without a server.
+  String _via(Iterable<String> servers) => servers.isEmpty
+      ? ''
+      : '?${servers.map((s) => 'via=${Uri.encodeComponent(s)}').join('&')}';
 
   String? _serverOf(String id) {
     final colon = id.indexOf(':');
     return colon == -1 ? null : id.substring(colon + 1);
   }
 
-  /// Returns the matrix.to link of an `https://<any host>/rooms/<roomId>`
-  /// link (optionally `?event=<event>`), the link the Twake Chat web app
-  /// copies, when [isKnownRoom] knows its room id. Otherwise null, so links
-  /// of other sites keep opening in the browser.
-  String? matrixToForRoomsLink(
-    String link, {
-    required bool Function(String roomId) isKnownRoom,
-  }) {
+  /// Returns the matrix.to link of an `https://<any host>/rooms/<room id or
+  /// alias>` link (optionally `?event=<event>` and `via=`), the link the
+  /// Twake Chat web app copies. A room the user is not in opens the preview
+  /// sheet. Otherwise null, so links of other sites keep opening in the
+  /// browser.
+  String? matrixToForRoomsLink(String link) {
     final uri = Uri.tryParse(link);
     if (uri == null || uri.scheme != 'https') return null;
-    final matrixTo = _matrixToForRoomsPath(uri);
-    if (matrixTo == null) return null;
-    final roomId = uri.pathSegments.last;
-    if (!roomId.startsWith('!') || !isKnownRoom(roomId)) return null;
-    return matrixTo;
+    return _matrixToForRoomsPath(uri);
   }
 
   /// Null when the path or query is not valid percent-encoded UTF-8: such a
@@ -58,11 +56,21 @@ class MessageLinkPolicy {
     try {
       final segments = uri.pathSegments;
       if (segments.length != 2 || segments.first != 'rooms') return null;
-      if (segments.last.isEmpty) return null;
-      final room = Uri.encodeComponent(segments.last);
+      final id = segments.last;
+      final colon = id.indexOf(':');
+      final isAlias = id.startsWith('#') && colon > 1 && colon < id.length - 1;
+      final isRoomId = id.startsWith('!') && id.length > 1;
+      if (!isRoomId && !isAlias) return null;
       final eventId = uri.queryParameters['event'];
-      if (eventId == null || eventId.isEmpty) return '$_matrixToPrefix$room';
-      return '$_matrixToPrefix$room/${Uri.encodeComponent(eventId)}';
+      // The SDK also reads a user, room or alias id as the second part.
+      if (eventId != null && eventId.isNotEmpty && !eventId.startsWith(r'$')) {
+        return null;
+      }
+      final event = eventId == null || eventId.isEmpty
+          ? ''
+          : '/${Uri.encodeComponent(eventId)}';
+      final via = _via(uri.queryParametersAll['via'] ?? const []);
+      return '$_matrixToPrefix${Uri.encodeComponent(id)}$event$via';
     } on FormatException {
       return null;
     }
