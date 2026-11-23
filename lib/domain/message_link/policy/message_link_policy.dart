@@ -1,5 +1,3 @@
-import 'package:matrix/matrix.dart';
-
 /// Builds the link the user copies to point at one message, and reads the
 /// message links of the Twake Chat web app.
 class MessageLinkPolicy {
@@ -28,9 +26,13 @@ class MessageLinkPolicy {
       if (userId != null) ?_serverOf(userId),
       ?_serverOf(roomId),
     };
-    if (servers.isEmpty) return '';
-    return '?${servers.map((s) => 'via=${Uri.encodeComponent(s)}').join('&')}';
+    return _via(servers);
   }
+
+  /// `?via=a&via=b`, or nothing without a server.
+  String _via(Iterable<String> servers) => servers.isEmpty
+      ? ''
+      : '?${servers.map((s) => 'via=${Uri.encodeComponent(s)}').join('&')}';
 
   String? _serverOf(String id) {
     final colon = id.indexOf(':');
@@ -45,9 +47,7 @@ class MessageLinkPolicy {
   String? matrixToForRoomsLink(String link) {
     final uri = Uri.tryParse(link);
     if (uri == null || uri.scheme != 'https') return null;
-    final matrixTo = _matrixToForRoomsPath(uri);
-    // A link the Matrix SDK would not read back would be a dead tap.
-    return matrixTo?.parseIdentifierIntoParts() == null ? null : matrixTo;
+    return _matrixToForRoomsPath(uri);
   }
 
   /// Null when the path or query is not valid percent-encoded UTF-8: such a
@@ -66,10 +66,11 @@ class MessageLinkPolicy {
       if (eventId != null && eventId.isNotEmpty && !eventId.startsWith(r'$')) {
         return null;
       }
-      final via = uri.queryParametersAll['via'] ?? const [];
-      return '$_matrixToPrefix${Uri.encodeComponent(id)}'
-          '${eventId == null || eventId.isEmpty ? '' : '/${Uri.encodeComponent(eventId)}'}'
-          '${via.isEmpty ? '' : '?${via.map((s) => 'via=${Uri.encodeComponent(s)}').join('&')}'}';
+      final event = eventId == null || eventId.isEmpty
+          ? ''
+          : '/${Uri.encodeComponent(eventId)}';
+      final via = _via(uri.queryParametersAll['via'] ?? const []);
+      return '$_matrixToPrefix${Uri.encodeComponent(id)}$event$via';
     } on FormatException {
       return null;
     }

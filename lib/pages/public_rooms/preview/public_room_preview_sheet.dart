@@ -43,12 +43,18 @@ class _PublicRoomPreviewSheetState
     RoomRoute(roomid: roomId, event: widget.eventId).go(context);
   }
 
-  void _openInBrowser(String link) {
-    context.pop();
-    launchUrlString(
+  /// Closes the sheet only once the browser opened, else says so.
+  Future<void> _openInBrowser(String link) async {
+    final launched = await launchUrlString(
       link,
       mode: LaunchMode.externalApplication,
     ).catchError((_) => false);
+    if (!mounted) return;
+    if (launched) {
+      context.pop();
+    } else {
+      TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(link));
+    }
   }
 
   Future<void> _open() async {

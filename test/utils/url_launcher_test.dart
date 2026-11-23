@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/data/repository/public_rooms/public_rooms_repository.provider.dart';
+import 'package:twake_chat/domain/message_link/policy/message_link_policy.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room_preview.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -379,5 +380,72 @@ void main() {
       expect(find.text('This group is unavailable.'), findsOneWidget);
       expect(find.text('Open in browser'), findsNothing);
     });
+
+    testWidgets('WHEN the user opens the link copied from a message\n'
+        'THEN it opens the room at that message', (tester) async {
+      final copied = const MessageLinkPolicy().build(
+        roomId: roomId,
+        eventId: eventId,
+        userId: '@me:other.org',
+      );
+
+      await launchInApp(tester, copied);
+
+      expect(find.text('room $roomId event $eventId'), findsOneWidget);
+      expect(platform.launches, isEmpty);
+    });
+
+    // The Matrix SDK reads an identifier of 255 characters at most; the
+    // server part below is 12 characters once decoded.
+    const server = '%3Aexample.org';
+    final roomOf255 = '!${'a' * 242}$server';
+    final eventOf255 = '%24${'a' * 254}';
+
+    for (final (label, link) in [
+      // The policy rejects it.
+      (
+        'an ?event= that is no event id',
+        '$webUrl/rooms/!abc$server?event=notanevent',
+      ),
+      // The SDK cannot read it: one character over the longest identifier.
+      ('a room id of 256 characters', '$webUrl/rooms/!${'a' * 243}$server'),
+      ('an alias of 256 characters', '$webUrl/rooms/%23${'a' * 243}$server'),
+      (
+        'an event id of 256 characters',
+        '$webUrl/rooms/!abc$server?event=${eventOf255}a',
+      ),
+    ]) {
+      testWidgets('WHEN the link has $label\n'
+          'THEN it opens in the browser', (tester) async {
+        await launchInApp(tester, link);
+
+        expect(platform.launches, [
+          (link, PreferredLaunchMode.externalApplication),
+        ]);
+        expect(find.text('Join · 3 members'), findsNothing);
+      });
+    }
+
+    for (final (label, link, address) in [
+      (
+        'a room id of 255 characters',
+        '$webUrl/rooms/$roomOf255',
+        Uri.decodeComponent(roomOf255),
+      ),
+      (
+        'an event id of 255 characters',
+        '$webUrl/rooms/!abc$server?event=$eventOf255',
+        '!abc:example.org',
+      ),
+    ]) {
+      testWidgets('WHEN the link has $label\n'
+          'THEN it still opens in the app', (tester) async {
+        await launchInApp(tester, link);
+
+        expect(platform.launches, isEmpty);
+        expect(find.text('Join · 3 members'), findsOneWidget);
+        expect(publicRooms.previewQueries, [address]);
+      });
+    }
   });
 }

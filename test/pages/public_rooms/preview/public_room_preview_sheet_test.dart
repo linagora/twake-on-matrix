@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -28,6 +29,8 @@ late _FakeUrlLauncherPlatform _launcher;
 
 class _FakeUrlLauncherPlatform extends UrlLauncherPlatform {
   final launches = <(String, PreferredLaunchMode)>[];
+  bool launchResult = true;
+  Object? launchError;
 
   @override
   LinkDelegate? get linkDelegate => null;
@@ -35,7 +38,8 @@ class _FakeUrlLauncherPlatform extends UrlLauncherPlatform {
   @override
   Future<bool> launchUrl(String url, LaunchOptions options) async {
     launches.add((url, options.mode));
-    return true;
+    if (launchError != null) throw launchError!;
+    return launchResult;
   }
 }
 
@@ -222,6 +226,39 @@ void _openInBrowserTests() {
     expect(find.text('open'), findsOneWidget);
     expect(_repository.joinedIds, isEmpty);
   });
+
+  // No browser opened: the user is told, and can still try to join.
+  for (final (failure, fail) in <(String, void Function())>[
+    ('NoAppOpensIt', () => _launcher.launchResult = false),
+    (
+      'ThePlatformThrows',
+      () =>
+          _launcher.launchError = PlatformException(code: 'ACTIVITY_NOT_FOUND'),
+    ),
+  ]) {
+    testWidgets(
+      'sheet_whenOpenInBrowserFailsBecause${failure}_staysOpenAndSaysSo',
+      (tester) async {
+        // Arrange
+        _repository.preview = const PublicRoomPreview.unavailable();
+        fail();
+        await _pumpSheet(tester, webLink: _webLink);
+
+        // Act
+        await tester.tap(find.text('Open in browser'));
+        await tester.pumpAndSettle();
+
+        // Assert
+        expect(_launcher.launches, [
+          (_webLink, PreferredLaunchMode.externalApplication),
+        ]);
+        expect(find.text("Can't open the URI $_webLink"), findsOneWidget);
+        expect(find.text('This group is unavailable.'), findsOneWidget);
+        expect(find.text('Try to join'), findsOneWidget);
+        expect(find.text('Open in browser'), findsOneWidget);
+      },
+    );
+  }
 
   testWidgets('sheet_whenTheLookupFailsFromAWebLink_offersTheBrowser', (
     tester,

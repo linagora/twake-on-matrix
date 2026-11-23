@@ -54,9 +54,10 @@ class UrlLauncher with GoToDraftChatMixin {
       listen: false,
     ).read(messageLinkPolicyProvider);
     final webAppMatrixTo = policy.matrixToForRoomsLink(url!);
-    if (webAppMatrixTo != null) {
+    // A link the Matrix SDK would not read back would be a dead tap.
+    if (webAppMatrixTo?.parseIdentifierIntoParts() != null) {
       return openMatrixToUrl(
-        customUrl: webAppMatrixTo,
+        customUrl: webAppMatrixTo!,
         isInvitationLink: isInvitationLink,
         webLink: url,
       );
