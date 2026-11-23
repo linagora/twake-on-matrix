@@ -1984,14 +1984,18 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     final deletionStarted = Completer<void>();
     final release = Completer<void>();
-    addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+    final tempDir = Directory.systemTemp.createTempSync('logout_tom');
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(channel, null);
+      if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
+    });
 
     await harness.run(() async {
       await _recordedSwitch(harness);
       messenger.setMockMethodCallHandler(channel, (_) async {
         if (!deletionStarted.isCompleted) deletionStarted.complete();
         await release.future;
-        return Directory.systemTemp.path;
+        return tempDir.path;
       });
       await _logoutAndWait(harness, last, () => deletionStarted.isCompleted);
       harness.container
