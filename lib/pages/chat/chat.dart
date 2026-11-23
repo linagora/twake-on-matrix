@@ -1396,6 +1396,11 @@ class ChatController extends ConsumerState<Chat>
       }
     }
 
+    if (!mounted) {
+      loaded?.cancelSubscriptions();
+      return;
+    }
+
     if (commitOnlyIfJumpGeneration != null &&
         commitOnlyIfJumpGeneration != _scrollGeneration) {
       // A newer jump superseded this load — discard without touching the
