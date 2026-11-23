@@ -509,7 +509,12 @@ class MatrixState extends ConsumerState<Matrix>
     unawaited(
       _dockBadge.update([
         for (final c in clients)
-          for (final r in c.rooms)
+          // A left or banned room keeps its counts (includeLeave sync).
+          for (final r in c.rooms.where(
+            (r) =>
+                r.membership == Membership.join ||
+                r.membership == Membership.invite,
+          ))
             // switch to unreadBadgeCount once threads land
             DockBadgeRoom(
               notificationCount: r.notificationCount,
