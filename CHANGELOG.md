@@ -1,3 +1,45 @@
+## [2.28.0] - 2026-11-23
+### Added
+- #3680: Tap a broken image to retry its download
+
+### Changed
+- #3657: New chat pen in the app bar instead of the floating button
+- #3656, #3724, #3722: Read the Matrix client from Riverpod in more screens
+- #3705, #3706, #3707, #3708, #3709: Enable five more lint rules
+- #3713: Open the SQLite database and run on macOS
+- #3714, #3690, #3748: Build macOS on PRs, Sentry on iOS, retry SDK downloads
+- #3701, #3694: Cache Gradle in the nightly, Alpine updates in the web image
+- #3703, #3749: Add the mobile release skill
+
+### Fixed
+- #3735: Keep the file of an upload so it can be retried after a kill
+- #3721: Clear the notification of a room read on another device (Android)
+- #3683: Open a notification on the account it was sent to
+- #3745: Keep the mention badge until read and grey it in muted rooms
+- #3720, #3687: Keep left rooms and logged-out accounts out of the room list
+- #3737: Open the message menu on a long press anywhere on the row
+- #3738: Close the playing video viewer on vertical drag
+- #3736: Wait for layout before checking a jumped-to row is on screen
+- #3734: Stop sharing one blurhash image between image cache entries
+- #3715: Show the call button from the cached well-known at startup
+- #3710: Keep Arrow Up in the composer when no suggestion is shown
+- #3695: Keep the context menu inside the screen edges
+- #3697: Keep the access token and SSO login token out of the logs
+- #3674: Leave the screens behind login before the last logout
+- #3676: Report progress while encrypted media uploads
+- #3661: Explain why an invitation can't be accepted once everyone left
+- #3677: Do not crash when verifying a device without keys
+- #3681: Show loading, not empty defaults, after an account switch
+- #3679: Anchor the invite share sheet on iPad and iOS 26
+- #3678: Show the confirm dialog close icon only when asked
+- #3682: Bring Android Back to Chats after a dialog on another tab closes
+- #3692, #3711: Keep the space unread badge at its height, above the divider
+- #3696: Show the filter bar arrows only where the chips can scroll
+
+### Tests
+- #3723: Expect no Start verification for a keyless session
+- #3673: Drop excluded metrics missing from some physical perf runs
+
 ## [2.27.1] - 2026-11-17
 ### Added
 - #3620: In-app MatrixRTC calls in encrypted rooms
