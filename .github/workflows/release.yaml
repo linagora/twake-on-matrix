@@ -140,8 +140,11 @@ jobs:
 
   # Not part of release_mobile: until the macOS profile is seeded in the match
   # repository this job fails, and it must not block the GitHub release.
+  # Skipped until the repository variable MACOS_TESTFLIGHT_ENABLED is 'true'
+  # (Settings > Secrets and variables > Actions > Variables), once match is seeded.
   release_macos:
     name: Release on macOS
+    if: vars.MACOS_TESTFLIGHT_ENABLED == 'true'
     runs-on: macos-26
     environment: prod
 
