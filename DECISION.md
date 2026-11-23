@@ -378,3 +378,27 @@ Not checked on a device: the snap gesture, the real iOS rendering, and the
 audio player appearing while the block is hidden. The layout was checked with
 widget renders at 390 x 844 and a 47 px status bar inset, compared with the
 fixed app bar of before.
+
+## D20. iOS notifications: a preview for clear rooms, a label for encrypted ones (decided by Clément, 2026-11-20)
+
+On iOS the notification of a message shows what the room allows:
+
+- a clear room: the sender, the room, the text and the avatar;
+- an encrypted room: always « You have a new encrypted message », never the
+  content, even when the device could decrypt it. A clear event sent into an
+  encrypted room (a bot, a bridge) counts as encrypted;
+- a room whose encryption cannot be read, or a push the notification
+  extension cannot handle (phone locked since a reboot, offline, app not
+  reopened after an update): the neutral « You have a new message ». This
+  trade-off is accepted.
+
+A room set to notify without sound stays silent; a mention of the user
+always rings.
+
+The dedicated notification device, the second SSO sign-in that gave the
+decrypted previews, is removed by the app on its own at startup, and its
+setting is gone.
+
+This replaces the generic text by default (2026-10-29) for clear rooms, and
+the decrypted preview of encrypted rooms (2026-10-24), both decided before
+this file. Android is unchanged.
