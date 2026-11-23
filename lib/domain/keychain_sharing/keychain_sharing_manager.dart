@@ -70,7 +70,7 @@ class KeychainSharingManager {
           'pusherNotificationClientIdentifier': userId.sha256Hash,
         }),
       );
-    } catch (e, s) {
+    } on Exception catch (e, s) {
       Logs().wtf('[KeychainSharing] Unable to save HTTP session', e, s);
     }
   }
@@ -79,7 +79,7 @@ class KeychainSharingManager {
     if (!PlatformInfos.isIOS) return;
     try {
       await _secureStorage.delete(key: '$_httpSessionPrefix$userId');
-    } catch (e, s) {
+    } on Exception catch (e, s) {
       Logs().wtf('[KeychainSharing] Unable to delete HTTP session', e, s);
     }
   }
@@ -163,8 +163,8 @@ class KeychainSharingManager {
         }
       }
       await delete(userId: userId);
-      Logs().i('[KeychainSharing] Removed the notification device of $userId');
-    } catch (e, s) {
+      Logs().i('[KeychainSharing] Removed the notification device');
+    } on Exception catch (e, s) {
       Logs().w('[KeychainSharing] Unable to remove notification device', e, s);
     }
   }

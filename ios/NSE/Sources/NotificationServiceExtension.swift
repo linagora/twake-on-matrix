@@ -141,7 +141,7 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
                          roomId: String,
                          eventId: String,
                          unreadCount: Int?) async -> Bool {
-        MXLog.info("\(tag) runHTTP with roomId: \(roomId), eventId: \(eventId)")
+        MXLog.info("\(tag) runHTTP start")
 
         let session = NSEHTTPSession(credentials: credentials)
         guard let item = await session.notificationItem(roomID: roomId, eventID: eventId) else {
