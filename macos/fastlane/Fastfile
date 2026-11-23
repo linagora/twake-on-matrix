@@ -93,8 +93,13 @@ platform :mac do
     profile = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING][BUNDLE_ID]
     build_number = latest_testflight_build_number(app_identifier: BUNDLE_ID, platform: "osx", initial_build_number: 0) + 1
     version_name = last_git_tag.gsub("v", "")
-    # Flutter writes the version into Generated.xcconfig; xcodebuild below reads it.
-    sh("cd ../.. && flutter build macos --config-only --release --build-name=#{version_name} --build-number=#{build_number}")
+    # Flutter writes the version, the Sentry dart-defines and the obfuscation flags into
+    # Generated.xcconfig; xcodebuild below reads them. Same flags as the Android release;
+    # the symbols are uploaded to Sentry by scripts/run-sentry.sh after this lane.
+    sh("cd ../.. && flutter build macos --config-only --release --build-name=#{version_name} --build-number=#{build_number} " \
+       "--dart-define=SENTRY_DSN=\"${SENTRY_DSN:-}\" --dart-define=SENTRY_ENVIRONMENT=\"${SENTRY_ENVIRONMENT:-}\" " \
+       "--obfuscate --split-debug-info=build/app/outputs/symbols " \
+       "--extra-gen-snapshot-options=--save-obfuscation-map=build/app/obfuscation.map.json")
     build(profile: profile)
     upload_to_testflight(app_identifier: BUNDLE_ID, pkg: lane_context[SharedValues::PKG_OUTPUT_PATH])
   end
