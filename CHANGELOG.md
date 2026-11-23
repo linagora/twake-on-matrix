@@ -5,7 +5,7 @@
 ### Changed
 - #3657: New chat pen in the app bar instead of the floating button
 - #3656, #3724, #3722: Read the Matrix client from Riverpod in more screens
-- #3705, #3706, #3707, #3708, #3709: Enable five more lint rules
+- #3708: Enable avoid_equals_and_hash_code_on_mutable_classes
 - #3713: Open the SQLite database and run on macOS
 - #3714, #3690, #3748: Build macOS on PRs, Sentry on iOS, retry SDK downloads
 - #3701, #3694: Cache Gradle in the nightly, Alpine updates in the web image
