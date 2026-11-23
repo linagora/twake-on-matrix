@@ -173,6 +173,23 @@ class DraftChatController extends ConsumerState<DraftChat>
     );
   }
 
+  Future<void> onPasteImages(List<MatrixFile> images) async {
+    final result = await previewPastedImages(
+      context,
+      images: images,
+      caption: sendController.text.isNotEmpty ? sendController.text : null,
+    );
+    if (!mounted || result == null) return;
+    sendController.clear();
+    await _createRoom(
+      onRoomCreatedSuccess: (room) => uploadManager.uploadFileMobile(
+        room: room,
+        fileInfos: result.files,
+        caption: result.caption,
+      ),
+    );
+  }
+
   void handleDragDone(DropDoneDetails details) async {
     draggingNotifier.value = false;
     final matrixFilesList = await super.onDragDone(details);
