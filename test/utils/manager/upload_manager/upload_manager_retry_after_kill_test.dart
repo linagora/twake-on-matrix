@@ -237,15 +237,63 @@ void main() {
         'restarted-${entry.name}',
         status: EventStatus.sending,
       );
+      final sent = eventAfterRestart(
+        'sent-${entry.name}',
+        status: EventStatus.sent,
+      );
+      final sendingText = Event(
+        senderId: room.client.userID!,
+        type: EventTypes.Message,
+        room: room,
+        eventId: 'text-${entry.name}',
+        content: {'msgtype': MessageTypes.Text, 'body': 'hello'},
+        status: EventStatus.sending,
+        originServerTs: DateTime.now(),
+      );
       statusUpdates.clear();
 
-      await manager.failInterruptedUploads([liveEvent, interrupted]);
+      await manager.failInterruptedUploads([
+        liveEvent,
+        interrupted,
+        sent,
+        sendingText,
+      ]);
       await pumpEventQueue();
 
       expect(statusUpdates[interrupted.eventId], EventStatus.error.intValue);
       expect(statusUpdates, isNot(contains(live.eventId)));
+      expect(statusUpdates, isNot(contains(sent.eventId)));
+      expect(statusUpdates, isNot(contains(sendingText.eventId)));
     });
   }
+
+  test('interrupted uploads all fail even when the timeline grows while they '
+      'are marked', () async {
+    await manager.uploadFileMobile(
+      room: room,
+      fileInfos: [FileInfo('notes.txt', filePath: pickedFile.path)],
+    );
+    await pumpEventQueue();
+    final timeline = [
+      eventAfterRestart('restarted-first', status: EventStatus.sending),
+      eventAfterRestart('restarted-second', status: EventStatus.sending),
+    ];
+    final growTimeline = room.client.onSync.stream.listen((_) {
+      if (timeline.length == 2) {
+        timeline.add(
+          eventAfterRestart('restarted-third', status: EventStatus.sent),
+        );
+      }
+    });
+    addTearDown(growTimeline.cancel);
+    statusUpdates.clear();
+
+    await manager.failInterruptedUploads(timeline);
+    await pumpEventQueue();
+
+    expect(statusUpdates['restarted-first'], EventStatus.error.intValue);
+    expect(statusUpdates['restarted-second'], EventStatus.error.intValue);
+  });
 
   test('a file the OS removed before the retry cannot be resent', () async {
     final removedFile = File('${tempDir.path}/removed.txt')
