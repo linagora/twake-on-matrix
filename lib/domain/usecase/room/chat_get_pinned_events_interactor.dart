@@ -5,12 +5,14 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/room/chat_get_pinned_events_state.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
 class ChatGetPinnedEventsInteractor {
   Stream<Either<Failure, Success>> execute({
     required String roomId,
     required Client client,
     bool isInitial = false,
+    String? threadRootId,
   }) async* {
     Logs().d("ChatGetPinnedEventsInteractor()::execute()::roomId: $roomId");
     if (isInitial) {
@@ -31,9 +33,10 @@ class ChatGetPinnedEventsInteractor {
       Logs().d(
         "ChatGetPinnedEventsInteractor()::execute()::pinnedEvents: $pinnedEvents",
       );
-      final result = (await Future.wait(
-        pinnedEvents.map(room.getEventById),
-      )).nonNulls.toList();
+      final result = (await Future.wait(pinnedEvents.map(room.getEventById)))
+          .nonNulls
+          .where((e) => threadRootId == null || e.isInThread(threadRootId))
+          .toList();
 
       if (result.isEmpty) {
         yield Left(ChatGetPinnedEventsNoResult());

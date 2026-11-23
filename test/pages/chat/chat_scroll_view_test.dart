@@ -50,6 +50,16 @@ class _FakeChatController extends Fake implements ChatController {
     double viewPortDimension,
   ) => false;
 
+  // Main timeline, not a thread: same rules as ChatController outside a thread.
+  @override
+  bool isEventVisible(Event event) => event.isVisibleInGui;
+
+  @override
+  bool get isRequestingHistory => timeline.isRequestingHistory;
+
+  @override
+  bool get canRequestHistory => timeline.canRequestHistory;
+
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       '_FakeChatController';

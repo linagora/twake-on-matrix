@@ -91,7 +91,10 @@ class _GatedRepository implements DirectChatRepository {
 
 class _FakeUnblock extends Fake implements UnblockUserInteractor {}
 
-class _FakeUpload extends Fake implements UploadManager {}
+class _FakeUpload extends Fake implements UploadManager {
+  @override
+  Future<void> failInterruptedUploads(Iterable<Event> events) async {}
+}
 
 class _TestDraft extends DraftChat {
   const _TestDraft({required super.contact});

@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
@@ -10,7 +11,7 @@ extension IosBadgeClientExtension on Client {
     if (PlatformInfos.isIOS) {
       // Workaround for iOS not clearing notifications with fcm_shared_isolate
       if (!joinedOrInvitedRooms.any(
-        (r) => r.membership == Membership.invite || (r.notificationCount > 0),
+        (r) => r.membership == Membership.invite || !r.hasNoPendingNotification,
       )) {
         // ignore: unawaited_futures
         FlutterLocalNotificationsPlugin().cancelAll();

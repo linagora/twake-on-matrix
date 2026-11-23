@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -61,8 +62,8 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
     if (a.isFavourite != b.isFavourite) {
       return a.isFavourite ? -1 : 1;
     }
-    if (client.pinUnreadRooms && a.notificationCount != b.notificationCount) {
-      return b.notificationCount.compareTo(a.notificationCount);
+    if (client.pinUnreadRooms && a.unreadBadgeCount != b.unreadBadgeCount) {
+      return b.unreadBadgeCount.compareTo(a.unreadBadgeCount);
     }
     return _effectiveSortTs(
       b.id,
