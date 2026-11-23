@@ -86,7 +86,7 @@ jobs:
             "$sdkmanager" "platforms;android-31" "platforms;android-33" "cmake;3.22.1" \
               && [ -x "$sdk/cmake/3.22.1/bin/cmake" ] && exit 0
             echo "sdkmanager attempt $attempt failed, retrying"
-            sleep 10
+            [ "$attempt" -lt 3 ] && sleep 10
           done
           exit 1
 
