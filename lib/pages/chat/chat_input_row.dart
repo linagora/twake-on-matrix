@@ -328,7 +328,7 @@ class ChatInputRow extends StatelessWidget {
             const SizedBox(width: 8),
             AnimatedOpacity(
               duration: const Duration(seconds: 1),
-              opacity: (duration % 60) % 2 == 0 ? 1 : 0,
+              opacity: (duration % 60).isEven ? 1 : 0,
               child: Container(
                 width: 12,
                 height: 12,

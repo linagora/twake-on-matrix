@@ -51,8 +51,7 @@ class EmotesSettingsController extends ConsumerState<EmotesSettings> {
     if (_pack != null) {
       return _pack;
     }
-    _pack = _getPack();
-    return _pack;
+    return _pack = _getPack();
   }
 
   Future<void> _save(BuildContext context) async {
