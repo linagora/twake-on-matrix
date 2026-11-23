@@ -155,13 +155,15 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   }
 
   Future<void> _logoutActions() async {
+    // Settings is gone once the logout lands on the welcome page.
+    final ssoLogoutUrl = this.ssoLogoutUrl(context);
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () => _logoutClientAndLocalData('_logoutActions'),
     );
     // The browser sign-out waits for the user: it must not keep the loading
     // dialog open over the welcome page.
     try {
-      await tryLogoutSso(context);
+      await tryLogoutSso(ssoLogoutUrl);
     } catch (e) {
       Logs().e('SettingsController()::_logoutActions - error: $e');
     }

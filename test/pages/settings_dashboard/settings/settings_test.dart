@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
@@ -11,8 +13,10 @@ import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
+import 'package:twake_chat/providers/report_failure_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 
 /// A client with no user: the profile lookup is skipped, only the backup check
 /// runs. Without [accountDataLoading] encryption is off and the check ends
@@ -47,10 +51,16 @@ class _FakeClient extends Fake implements Client {
 }
 
 class _FakeMatrix extends Fake implements MatrixState {
-  _FakeMatrix(this.client);
+  _FakeMatrix(this.client, {this.loginType, this.authUrl});
 
   @override
   final Client client;
+
+  @override
+  String? loginType;
+
+  @override
+  final String? authUrl;
 
   @override
   bool get twakeSupported => false;
@@ -140,6 +150,133 @@ class _SettingsScreen {
   }
 }
 
+/// The last account: its logout lands the app on the welcome page, so the
+/// Settings page is gone before the logout flow ends.
+class _LastAccountClient extends _FakeClient {
+  _LastAccountClient(this.onLogout);
+
+  final void Function() onLogout;
+
+  @override
+  String get clientName => 'last-account';
+
+  // The race of the review: the app goes to the welcome page on the logged
+  // out state, while the rest of the cleanup still runs, and ends once the
+  // welcome page covers Settings and Settings is unmounted.
+  @override
+  Future<void> logout() async {
+    onLogout();
+    await Future<void>.delayed(const Duration(seconds: 1));
+  }
+}
+
+/// The app with its router: Settings on top of a welcome page. Logging out
+/// the last account goes to the welcome page, as `MatrixState` does, which
+/// removes Settings and the dialogs shown above it.
+class _LogoutFlow {
+  _LogoutFlow(this.tester);
+
+  final WidgetTester tester;
+
+  /// The URLs the SSO sign-out opened in the browser.
+  final opened = <String>[];
+
+  /// The failures the logout reported.
+  final failures = <Object>[];
+
+  /// What the logout threw outside the flow. The router removes the loading
+  /// dialog with Settings, and `future_loading_dialog` then reads its own
+  /// unmounted context: a separate defect of the same race, kept here so it
+  /// does not decide the specs of the SSO sign-out.
+  final uncaught = <Object>[];
+
+  Future<void> logOut({String? loginType, String? authUrl}) async {
+    tester.view.physicalSize = const Size(1200, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    const webAuth = MethodChannel('flutter_web_auth_2');
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(webAuth, (call) async {
+      if (call.method == 'authenticate') {
+        opened.add((call.arguments as Map)['url'] as String);
+        return 'twake://redirect';
+      }
+      return null;
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(webAuth, null));
+
+    // As in the app: Settings lives under the rooms, the welcome page under
+    // home, two separate trees with the desktop fade page.
+    Page<void> page(Widget child) => CustomTransitionPage(
+      child: child,
+      transitionsBuilder: (_, animation, _, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
+    final router = GoRouter(
+      navigatorKey: TwakeApp.routerKey,
+      initialLocation: '/rooms/settings',
+      routes: [
+        GoRoute(
+          path: '/rooms',
+          pageBuilder: (_, _) => page(const Scaffold(body: Text('rooms'))),
+          routes: [
+            GoRoute(
+              path: 'settings',
+              pageBuilder: (_, _) => page(const Settings()),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: '/home/twakeWelcome',
+          pageBuilder: (_, _) => page(const Scaffold(body: Text('welcome'))),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    final client = _LastAccountClient(() => router.go('/home/twakeWelcome'));
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          reportFailureProvider.overrideWithValue(
+            (error, _, _) => failures.add(error),
+          ),
+        ],
+        child: Provider<MatrixState>.value(
+          value: _FakeMatrix(client, loginType: loginType, authUrl: authUrl),
+          child: MaterialApp.router(
+            routerConfig: router,
+            theme: ThemeData(
+              extensions: [LinagoraTextThemeExtension.material()],
+            ),
+            localizationsDelegates: L10n.localizationsDelegates,
+            supportedLocales: L10n.supportedLocales,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final l10n = L10n.of(tester.element(find.byType(Settings)))!;
+    // The logout is an `async void` started by the tap, and the loading
+    // dialog starts its own work while a frame builds: their errors reach
+    // the zone of the taps and pumps below.
+    await runZonedGuarded(() async {
+      await tester.tap(find.text(l10n.logout));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      // The confirmation dialog: its button carries the same label.
+      await tester.tap(find.text(l10n.logout).last);
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+    }, (error, _) => uncaught.add(error));
+  }
+}
+
 void main() {
   setUp(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
 
@@ -195,5 +332,31 @@ void main() {
 
   testWidgets('a check started after dispose does nothing', (tester) async {
     expect(await _SettingsScreen(tester).checkAfterClose(), isEmpty);
+  });
+
+  group('logout from Settings with an SSO login', () {
+    const authUrl = 'https://sso.example.com/oauth2/authorize';
+
+    testWidgets('signs out at the SSO although Settings is already gone', (
+      tester,
+    ) async {
+      final flow = _LogoutFlow(tester);
+
+      await flow.logOut(loginType: LoginType.mLoginToken, authUrl: authUrl);
+
+      expect(find.byType(Settings), findsNothing);
+      expect(find.text('welcome'), findsOneWidget);
+      expect(flow.opened, ['$authUrl?logout=1']);
+      expect(flow.failures, isEmpty);
+    });
+
+    testWidgets('a login without SSO opens no browser', (tester) async {
+      final flow = _LogoutFlow(tester);
+
+      await flow.logOut(authUrl: authUrl);
+
+      expect(find.text('welcome'), findsOneWidget);
+      expect(flow.opened, isEmpty);
+    });
   });
 }

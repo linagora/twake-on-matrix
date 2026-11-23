@@ -240,13 +240,16 @@ mixin ConnectPageMixin {
     return 0;
   }
 
-  Future<void> tryLogoutSso(BuildContext context) async {
-    if (Matrix.of(context).loginType != LoginType.mLoginToken) return;
-    final redirectUrl = _generatePostLogoutRedirectUrl();
-    final url = _getLogoutUrl(context);
-    if (url == null) return Future.value();
+  /// The SSO sign-out link of the current login, or null without SSO. Read
+  /// it while the screen is mounted: the logout unmounts it.
+  String? ssoLogoutUrl(BuildContext context) {
+    if (Matrix.of(context).loginType != LoginType.mLoginToken) return null;
+    return _getLogoutUrl(context);
+  }
 
-    final urlScheme = _getRedirectUrlScheme(redirectUrl);
+  Future<void> tryLogoutSso(String? url) async {
+    if (url == null) return;
+    final urlScheme = _getRedirectUrlScheme(_generatePostLogoutRedirectUrl());
     try {
       final result = await FlutterWebAuth2.authenticate(
         url: url,
