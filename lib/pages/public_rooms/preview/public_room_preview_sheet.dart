@@ -51,7 +51,8 @@ class _PublicRoomPreviewSheetState
     ).catchError((_) => false);
     if (!mounted) return;
     if (launched) {
-      context.pop();
+      // Dismissed while the browser opened: pop nothing else.
+      if (ModalRoute.of(context)?.isCurrent ?? false) context.pop();
     } else {
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(link));
     }

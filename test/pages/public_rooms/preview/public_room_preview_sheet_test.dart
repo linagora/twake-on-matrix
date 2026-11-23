@@ -32,6 +32,9 @@ class _FakeUrlLauncherPlatform extends UrlLauncherPlatform {
   bool launchResult = true;
   Object? launchError;
 
+  /// When set, the launch answers only once this completes.
+  Completer<bool>? pendingLaunch;
+
   @override
   LinkDelegate? get linkDelegate => null;
 
@@ -39,7 +42,7 @@ class _FakeUrlLauncherPlatform extends UrlLauncherPlatform {
   Future<bool> launchUrl(String url, LaunchOptions options) async {
     launches.add((url, options.mode));
     if (launchError != null) throw launchError!;
-    return launchResult;
+    return pendingLaunch?.future ?? launchResult;
   }
 }
 
@@ -63,27 +66,39 @@ void main() {
 }
 
 /// The sheet opened from a home route, in a router that knows the room.
-Future<void> _pumpSheet(WidgetTester tester, {String? webLink}) async {
-  final router = GoRouter(
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, _) => Scaffold(
-          body: TextButton(
-            onPressed: () => unawaited(
-              showModalBottomSheet<void>(
-                context: context,
-                builder: (_) => PublicRoomPreviewSheet(
-                  address: const RoomAddress(_alias),
-                  eventId: r'$event',
-                  webLink: webLink,
-                ),
-              ),
-            ),
-            child: const Text('open'),
+/// With [overAPage], the home route first pushes a page that opens it.
+Future<void> _pumpSheet(
+  WidgetTester tester, {
+  String? webLink,
+  bool overAPage = false,
+}) async {
+  Widget opener(BuildContext context) => Scaffold(
+    body: TextButton(
+      onPressed: () => unawaited(
+        showModalBottomSheet<void>(
+          context: context,
+          builder: (_) => PublicRoomPreviewSheet(
+            address: const RoomAddress(_alias),
+            eventId: r'$event',
+            webLink: webLink,
           ),
         ),
       ),
+      child: const Text('open'),
+    ),
+  );
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/page',
+        builder: (context, _) => Column(
+          children: [
+            const Text('the page'),
+            Expanded(child: opener(context)),
+          ],
+        ),
+      ),
+      GoRoute(path: '/', builder: (context, _) => opener(context)),
       GoRoute(
         path: '/rooms/:roomid',
         builder: (_, state) => Text(
@@ -106,6 +121,10 @@ Future<void> _pumpSheet(WidgetTester tester, {String? webLink}) async {
       ),
     ),
   );
+  if (overAPage) {
+    unawaited(router.push('/page'));
+    await tester.pumpAndSettle();
+  }
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
 }
@@ -226,6 +245,28 @@ void _openInBrowserTests() {
     expect(find.text('open'), findsOneWidget);
     expect(_repository.joinedIds, isEmpty);
   });
+
+  testWidgets(
+    'sheet_whenDismissedBeforeTheBrowserOpens_leavesThePageBelowShown',
+    (tester) async {
+      // Arrange
+      _repository.preview = const PublicRoomPreview.unavailable();
+      _launcher.pendingLaunch = Completer<bool>();
+      await _pumpSheet(tester, webLink: _webLink, overAPage: true);
+      await tester.tap(find.text('Open in browser'));
+      await tester.pump();
+
+      // Act: the user dismisses the sheet, then the browser opens.
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pump();
+      _launcher.pendingLaunch!.complete(true);
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(find.text('This group is unavailable.'), findsNothing);
+      expect(find.text('the page'), findsOneWidget);
+    },
+  );
 
   // No browser opened: the user is told, and can still try to join.
   for (final (failure, fail) in <(String, void Function())>[
