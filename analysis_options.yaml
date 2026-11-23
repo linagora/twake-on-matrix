@@ -22,6 +22,11 @@ linter:
     - sort_pub_dependencies
     - use_late_for_private_fields_and_variables
     - avoid_equals_and_hash_code_on_mutable_classes
+    - avoid_final_parameters
+    - combinators_ordering
+    - join_return_with_assignment
+    - use_is_even_rather_than_modulo
+    - switch_on_type
 
 analyzer:
   errors:

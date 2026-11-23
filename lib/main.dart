@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -12,7 +13,6 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/sentry_init.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
@@ -138,9 +138,7 @@ Future<void> startGui(ProviderContainer container) async {
   String? pin;
   if (PlatformInfos.isMobile) {
     try {
-      pin = await const FlutterSecureStorage().read(
-        key: SettingKeys.appLockKey,
-      );
+      pin = await secureStorage.read(key: SettingKeys.appLockKey);
     } catch (e, s) {
       Logs().d('Unable to read PIN from Secure storage', e, s);
     }

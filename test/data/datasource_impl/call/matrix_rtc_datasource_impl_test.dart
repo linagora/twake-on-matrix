@@ -333,6 +333,18 @@ void main() {
     });
   });
 
+  test('joinMembership_always_returnsTheEventIdOfTheMembership', () {
+    fakeAsync((async) {
+      String? eventId;
+      MatrixRtcDatasourceImpl(
+        _FakeClient(),
+      ).joinMembership(_join).then((id) => eventId = id);
+      async.flushMicrotasks();
+
+      expect(eventId, r'$event');
+    });
+  });
+
   test('getRoomInfo_withoutTheRightToTheCallEvent_cannotJoin', () {
     // Arrange
     final client = _FakeClient().._room.canJoin = false;

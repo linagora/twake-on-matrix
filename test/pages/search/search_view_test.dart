@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart' hide State;
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -22,14 +22,14 @@ import 'package:twake_chat/presentation/model/search/presentation_server_side_st
 import 'search_view_test.mocks.dart';
 
 @GenerateNiceMocks([
-  MockSpec<SearchController>(),
+  MockSpec<SearchScreenState>(),
   MockSpec<ServerSearchController>(),
   MockSpec<SearchContactsAndChatsController>(),
 ])
 void main() {
   testWidgets('build_always_putsPublicGroupsBeforeTheMessages', (tester) async {
     // Arrange
-    final searchController = MockSearchController();
+    final searchController = MockSearchScreenState();
     final serverSearchController = MockServerSearchController();
     final contactsController = MockSearchContactsAndChatsController();
     final textController = TextEditingController();

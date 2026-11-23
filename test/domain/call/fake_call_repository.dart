@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
+import 'package:twake_chat/domain/model/call/call_ring.dart';
 import 'package:twake_chat/domain/repository/call/call_repository.dart';
+
+const testMembershipEventId = r'$membership';
 
 const testServer = CallServer(url: 'wss://lk.test', token: 'jwt');
 
@@ -37,15 +40,29 @@ class FakeCallRepository implements CallRepository {
   CallException? joinError;
   CallException? leaveError;
   CallException? mediaError;
+  CallException? declineError;
   Object? staleError;
+  Object? ringError;
+  Object? pushRulesError;
+
+  /// What `hasOtherMembers` answers.
+  bool othersInCall = false;
+
+  /// What `hasOtherMembers` throws instead, when set.
+  Object? othersError;
   CallException? disconnectError;
   Completer<void>? connectGate;
   Completer<void>? leaveGate;
   Completer<void>? joinGate;
 
+  /// The ring is sent only once this completes.
+  Completer<void>? ringGate;
+
   final calls = <String>[];
   final participants = StreamController<List<CallParticipant>>.broadcast();
   final encryptions = StreamController<void>.broadcast();
+  final rings = StreamController<List<CallRing>>.broadcast();
+  final missedCalls = StreamController<MissedCall>.broadcast();
 
   @override
   Stream<void> watchRoomEncrypted(CallRoom room) => encryptions.stream;
@@ -67,10 +84,48 @@ class FakeCallRepository implements CallRepository {
   }
 
   @override
-  Future<void> joinMembership(CallJoin join) async {
+  Future<String> joinMembership(CallJoin join) async {
     calls.add('join ${join.room.id} video=${join.isVideo}');
     await joinGate?.future;
     if (joinError case final error?) throw error;
+    return testMembershipEventId;
+  }
+
+  @override
+  bool hasOtherMembers(CallRoom room) {
+    if (othersError case final error?) throw error;
+    return othersInCall;
+  }
+
+  @override
+  Future<void> sendRing(
+    CallJoin join, {
+    required String membershipEventId,
+  }) async {
+    calls.add(
+      'ring ${join.room.id} video=${join.isVideo} '
+      'membership=$membershipEventId',
+    );
+    await ringGate?.future;
+    if (ringError case final error?) throw error;
+  }
+
+  @override
+  Future<void> declineRing(CallRing ring) async {
+    calls.add('decline ${ring.eventId}');
+    if (declineError case final error?) throw error;
+  }
+
+  @override
+  Stream<List<CallRing>> watchRings() => rings.stream;
+
+  @override
+  Stream<MissedCall> watchMissedCalls() => missedCalls.stream;
+
+  @override
+  Future<void> ensureCallRingPushRules() async {
+    calls.add('ensureCallRingPushRules');
+    if (pushRulesError case final error?) throw error;
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:twake_chat/pages/chat_list/browse_public_groups_button.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_new_chat_button.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_bar.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -36,6 +37,12 @@ class ChatListHeader extends StatelessWidget {
               controller.conversationSelectionNotifier,
           onClickAvatar: controller.onClickAvatar,
           connectionStatusHeaderWidget: const ConnectionStatusHeader(),
+          actions: [
+            ChatListNewChatButton(
+              controller: controller,
+              isSingleColumn: ChatListHeaderStyle.responsive.isMobile(context),
+            ),
+          ],
         ),
         Container(
           color: ChatListHeaderStyle.responsive.isMobile(context)
