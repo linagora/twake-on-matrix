@@ -520,9 +520,6 @@
 					"@executable_path/../Frameworks",
 				);
 				OTHER_CODE_SIGN_FLAGS = "\"--timestamp\"";
-				PRODUCT_BUNDLE_IDENTIFIER = app.twake.macos.chat;
-				PRODUCT_COPYRIGHT = "Copyright © 2023 Linagora. All rights reserved.";
-				PRODUCT_NAME = Twake;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
@@ -661,9 +658,6 @@
 					"@executable_path/../Frameworks",
 				);
 				OTHER_CODE_SIGN_FLAGS = "\"--timestamp\"";
-				PRODUCT_BUNDLE_IDENTIFIER = app.twake.macos.chat;
-				PRODUCT_COPYRIGHT = "Copyright © 2023 Linagora. All rights reserved.";
-				PRODUCT_NAME = Twake;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -696,9 +690,6 @@
 					"@executable_path/../Frameworks",
 				);
 				OTHER_CODE_SIGN_FLAGS = "\"--timestamp\"";
-				PRODUCT_BUNDLE_IDENTIFIER = app.twake.macos.chat;
-				PRODUCT_COPYRIGHT = "Copyright © 2023 Linagora. All rights reserved.";
-				PRODUCT_NAME = Twake;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
