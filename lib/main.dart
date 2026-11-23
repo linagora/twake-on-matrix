@@ -27,13 +27,17 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:twake_chat/data/account/sources/account_boot_snapshot_source.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:twake_chat/providers/sso_token_vault_provider.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 import 'utils/background_push.dart';
 import 'widgets/twake_app.dart';
 
-void main() async {
+void main([List<String> args = const []]) async {
+  // The SSO webview of Windows and Linux draws its title bar with a second
+  // engine that runs this main(): it must show the title bar, not the app.
+  if (runWebViewTitleBarWidget(args)) return;
   await runZonedGuarded(
     initializeApp,
     (error, stackTrace) => Logs().wtf('Error in main', error, stackTrace),

@@ -1708,15 +1708,8 @@ class MatrixState extends ConsumerState<Matrix>
       }
     }
     Sentry.configureScope((scope) => scope.setUser(null));
-    if (PlatformInfos.isMobile) {
-      await _deletePersistActiveAccount();
-      await _leaveLoggedInScreens(const HomeTwakeWelcomeRoute().location);
-    } else {
-      await _leaveLoggedInScreens(
-        const HomeRoute($extra: true).location,
-        extra: true,
-      );
-    }
+    await _deletePersistActiveAccount();
+    await _leaveLoggedInScreens(const HomeTwakeWelcomeRoute().location);
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.accounts.length == 1) {
       // A switch or a removal can change the state between the check and the

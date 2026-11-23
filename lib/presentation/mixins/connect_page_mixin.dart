@@ -33,8 +33,6 @@ mixin ConnectPageMixin {
 
   static const windowNameValue = '_self';
 
-  static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
-
   LoginSessions _sessionsOf(BuildContext context) => ProviderScope.containerOf(
     context,
     listen: false,
@@ -50,7 +48,6 @@ mixin ConnectPageMixin {
       false;
 
   bool supportsSso(BuildContext context) =>
-      (PlatformInfos.isMobile || PlatformInfos.isMacOS) &&
       supportsFlow(context: context, flowType: 'm.login.sso');
 
   bool supportsLogin(BuildContext context) =>
@@ -74,15 +71,6 @@ mixin ConnectPageMixin {
         '$normalizedHomeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
     return '$ssoRedirectUri?redirectUrl=$redirectUrlEncode';
-  }
-
-  String generatePublicPlatformAuthenticationUrl({
-    required BuildContext context,
-    required String id,
-    required String redirectUrl,
-  }) {
-    final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
-    return '${AppConfig.registrationUrl}?$redirectPublicPlatformOnWeb=$redirectUrlEncode&app=${AppConfig.appParameter}';
   }
 
   String? _getLogoutUrl(BuildContext context) {
@@ -252,13 +240,16 @@ mixin ConnectPageMixin {
     return 0;
   }
 
-  Future<void> tryLogoutSso(BuildContext context) async {
-    if (Matrix.of(context).loginType != LoginType.mLoginToken) return;
-    final redirectUrl = _generatePostLogoutRedirectUrl();
-    final url = _getLogoutUrl(context);
-    if (url == null) return Future.value();
+  /// The SSO sign-out link of the current login, or null without SSO. Read
+  /// it while the screen is mounted: the logout unmounts it.
+  String? ssoLogoutUrl(BuildContext context) {
+    if (Matrix.of(context).loginType != LoginType.mLoginToken) return null;
+    return _getLogoutUrl(context);
+  }
 
-    final urlScheme = _getRedirectUrlScheme(redirectUrl);
+  Future<void> tryLogoutSso(String? url) async {
+    if (url == null) return;
+    final urlScheme = _getRedirectUrlScheme(_generatePostLogoutRedirectUrl());
     try {
       final result = await FlutterWebAuth2.authenticate(
         url: url,
@@ -270,29 +261,6 @@ mixin ConnectPageMixin {
       Logs().d('tryLogoutSso::error: $e');
       rethrow;
     }
-  }
-
-  Future<void> registerPublicPlatformAction({
-    required BuildContext context,
-    required String id,
-  }) async {
-    final redirectUrl = _generateRedirectUrl(
-      Matrix.of(context).client.homeserver.toString(),
-    );
-    final url = generatePublicPlatformAuthenticationUrl(
-      context: context,
-      id: id,
-      redirectUrl: redirectUrl,
-    );
-    final urlScheme = _getRedirectUrlScheme(redirectUrl);
-    await FlutterWebAuth2.authenticate(
-      url: url,
-      callbackUrlScheme: urlScheme,
-      options: const FlutterWebAuth2Options(
-        intentFlags: ephemeralIntentFlags,
-        windowName: windowNameValue,
-      ),
-    );
   }
 
   String _generatePostLogoutRedirectUrl() {

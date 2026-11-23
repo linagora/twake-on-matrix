@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome_view_style.dart';
@@ -16,6 +18,21 @@ class TwakeWelcomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TwakeWelcomeScreen sizes its buttons from MediaQuery.size.width, so a
+    // wide desktop window would stretch them across the whole window.
+    final media = MediaQuery.of(context);
+    return MediaQuery(
+      data: media.copyWith(
+        size: Size(
+          math.min(media.size.width, TwakeWelcomeViewStyle.maxContentWidth),
+          media.size.height,
+        ),
+      ),
+      child: _buildScreen(context),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context) {
     return TwakeWelcomeScreen(
       appBar: controller.widget.arg?.isAddAnotherAccount == true
           ? AppBar(

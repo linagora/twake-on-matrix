@@ -208,10 +208,11 @@ abstract class ClientManager {
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
       database: database,
       legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
+      // SSO opens a system web session on mobile and macOS, and a webview
+      // window on Windows and Linux (flutter_web_auth_2).
       supportedLoginTypes: {
         AuthenticationTypes.password,
-        if (PlatformInfos.isMobile || PlatformInfos.isMacOS)
-          AuthenticationTypes.sso,
+        AuthenticationTypes.sso,
       },
       nativeImplementations: nativeImplementations,
       customImageResizer: PlatformInfos.isMobile ? customImageResizer : null,
