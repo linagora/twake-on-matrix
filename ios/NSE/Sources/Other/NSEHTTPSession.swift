@@ -105,7 +105,9 @@ struct NSEHTTPSession: MediaProviderProtocol {
         }
 
         // Unknown room state: nothing else is read, the default text is shown.
+        // Silent, like a failed push rule lookup: the room may be muted.
         guard !neutral else {
+            noisy = false
             return item(sender: nil, senderAvatar: nil, roomName: nil, roomAvatar: nil, isDirect: false)
         }
 
