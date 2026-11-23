@@ -3,10 +3,11 @@ import 'package:collection/collection.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
-import 'matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class UnreadRoomsBadge extends StatelessWidget {
+class UnreadRoomsBadge extends ConsumerWidget {
   final bool Function(Room) filter;
   final bool isSelected;
   final Color? color;
@@ -19,8 +20,8 @@ class UnreadRoomsBadge extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(matrixClientProvider);
     return StreamBuilder(
       stream: client.onSync.stream.where(
         (syncUpdate) => syncUpdate.hasRoomUpdate,
