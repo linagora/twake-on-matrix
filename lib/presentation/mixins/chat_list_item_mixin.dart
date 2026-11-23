@@ -181,9 +181,12 @@ mixin ChatListItemMixin {
     required BuildContext context,
     required Room room,
   }) {
-    /// highlightCount or Invitation
-    if (room.highlightCount > 0 || room.membership == Membership.invite) {
+    if (room.membership == Membership.invite) {
       return Theme.of(context).colorScheme.primary;
+    }
+
+    if (room.highlightCount > 0) {
+      return _handleNotificationColorHasNewMessage(room, context);
     }
 
     if (hasNewMessage(room)) {
