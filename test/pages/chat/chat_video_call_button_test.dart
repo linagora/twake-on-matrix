@@ -82,7 +82,27 @@ void main() {
     ),
   );
 
-  Future<void> pumpButton(
+  Future<void> pumpTree(
+    WidgetTester tester,
+    ProviderContainer container, {
+    bool showButton = true,
+  }) => tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        home: Scaffold(
+          body: showButton
+              ? ChatVideoCallButton(_FakeChatController(mockRoom))
+              : const SizedBox.shrink(),
+        ),
+      ),
+    ),
+  );
+
+  Future<ProviderContainer> pumpButton(
     WidgetTester tester, {
     bool withVideoCall = true,
     bool withTokenService = false,
@@ -104,19 +124,8 @@ void main() {
           ),
         );
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp(
-          locale: const Locale('en'),
-          localizationsDelegates: L10n.localizationsDelegates,
-          supportedLocales: L10n.supportedLocales,
-          home: Scaffold(
-            body: ChatVideoCallButton(_FakeChatController(mockRoom)),
-          ),
-        ),
-      ),
-    );
+    await pumpTree(tester, container);
+    return container;
   }
 
   setUp(() {
@@ -283,6 +292,59 @@ void main() {
           startedTitle: anyNamed('startedTitle'),
         ),
       ).called(1);
+    });
+
+    testWidgets('onTap_afterTheButtonIsRebuiltMidStart_startsASingleCall', (
+      tester,
+    ) async {
+      // Arrange
+      final completer = Completer<void>();
+      whenExecute().thenAnswer((_) => completer.future);
+      final container = await pumpButton(tester);
+      await tester.tap(find.byType(TwakeIconButton));
+      await tester.pump();
+
+      // Act
+      await pumpTree(tester, container, showButton: false);
+      await pumpTree(tester, container);
+      await tester.tap(find.byType(ChatVideoCallButton));
+      await tester.pump();
+
+      // Assert
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      completer.complete();
+      await tester.pump();
+      expect(find.byType(TwakeIconButton), findsOneWidget);
+      verify(
+        mockUseCase.execute(
+          roomId: anyNamed('roomId'),
+          baseUrl: anyNamed('baseUrl'),
+          startedTitle: anyNamed('startedTitle'),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('build_whenTheCallEndsWhileTheButtonIsGone_offersItAgain', (
+      tester,
+    ) async {
+      // Arrange
+      final completer = Completer<void>();
+      whenExecute().thenAnswer((_) => completer.future);
+      final container = await pumpButton(tester);
+      await tester.tap(find.byType(TwakeIconButton));
+      await tester.pump();
+      await pumpTree(tester, container, showButton: false);
+
+      // Act
+      completer.completeError(
+        VideoCallRoomCreationFailedException(cause: Exception('502')),
+      );
+      await tester.pump();
+      await pumpTree(tester, container);
+
+      // Assert
+      expect(find.byType(TwakeIconButton), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('build_whenTheCallFailsToStart_showsASnackBar', (tester) async {

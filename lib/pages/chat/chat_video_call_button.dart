@@ -6,6 +6,8 @@ import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions
 import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
 import 'package:twake_chat/pages/call/call_screen.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/chat/chat_video_call_controller.dart';
+import 'package:twake_chat/pages/chat/chat_video_call_state.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -25,25 +27,20 @@ class ChatVideoCallButton extends ConsumerStatefulWidget {
 }
 
 class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
-  bool _isStarting = false;
-
   Future<void> _start(String baseUrl) async {
     final room = widget.controller.room;
-    if (_isStarting || room == null) return;
+    if (room == null) return;
     final l10n = L10n.of(context)!;
-    setState(() => _isStarting = true);
     try {
       await ref
-          .read(startVideoCallUseCaseProvider(room.client))
-          .execute(
-            roomId: room.id,
+          .read(chatVideoCallControllerProvider(room.id).notifier)
+          .start(
+            ref.read(startVideoCallUseCaseProvider(room.client)),
             baseUrl: baseUrl,
             startedTitle: l10n.videoCallStartedTitle,
           );
     } on VideoCallException {
       if (mounted) TwakeSnackBar.show(context, l10n.failedToStartVideoCall);
-    } finally {
-      if (mounted) setState(() => _isStarting = false);
     }
   }
 
@@ -82,7 +79,8 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
     }
     // D15: a member who may not write the call membership keeps the Meet link.
     if (meetUrl == null) return const SizedBox.shrink();
-    if (_isStarting) {
+    if (ref.watch(chatVideoCallControllerProvider(room.id))
+        is ChatVideoCallStarting) {
       return const Padding(
         padding: EdgeInsets.all(8),
         child: SizedBox.square(
