@@ -20,7 +20,6 @@ import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/message_link/policy/message_link_policy.provider.dart';
 import 'package:twake_chat/domain/model/public_rooms/room_address.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/widgets/profile_bottom_sheet.dart';
@@ -52,18 +51,17 @@ class UrlLauncher with GoToDraftChatMixin {
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
       return;
     }
-    final container = ProviderScope.containerOf(context, listen: false);
-    final policy = container.read(messageLinkPolicyProvider);
-    final webAppMatrixTo = policy.matrixToForRoomsLink(
-      url!,
-      isKnownRoom: (roomId) => _isOpenableRoom(
-        container.read(activeMatrixClientProvider)?.getRoomById(roomId),
-      ),
-    );
-    if (webAppMatrixTo != null) {
+    final policy = ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(messageLinkPolicyProvider);
+    final webAppMatrixTo = policy.matrixToForRoomsLink(url!);
+    // A link the Matrix SDK would not read back would be a dead tap.
+    if (webAppMatrixTo?.parseIdentifierIntoParts() != null) {
       return openMatrixToUrl(
-        customUrl: webAppMatrixTo,
+        customUrl: webAppMatrixTo!,
         isInvitationLink: isInvitationLink,
+        webLink: url,
       );
     }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
@@ -198,6 +196,7 @@ class UrlLauncher with GoToDraftChatMixin {
   void openMatrixToUrl({
     String? customUrl,
     bool isInvitationLink = false,
+    String? webLink,
   }) async {
     final matrix = Matrix.of(context);
     final url = (customUrl ?? this.url!).replaceFirst(
@@ -225,11 +224,7 @@ class UrlLauncher with GoToDraftChatMixin {
       final room =
           matrix.client.getRoomByAlias(roomIdOrAlias) ??
           matrix.client.getRoomById(roomIdOrAlias);
-      final canOpenDirectly =
-          room != null &&
-          (room.membership == Membership.join ||
-              room.membership == Membership.invite);
-      if (!canOpenDirectly) {
+      if (room == null || !_isOpenableRoom(room)) {
         await showAdaptiveBottomSheet(
           context: context,
           builder: (_) => PublicRoomPreviewSheet(
@@ -238,6 +233,7 @@ class UrlLauncher with GoToDraftChatMixin {
               via: identityParts.via.toList(),
             ),
             eventId: event,
+            webLink: webLink,
           ),
         );
         return;

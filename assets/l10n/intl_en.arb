@@ -3237,6 +3237,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "openInBrowser": "Open in browser",
+  "@openInBrowser": {
+    "type": "text",
+    "placeholders": {}
+  },
   "thread": "Thread",
   "@thread": {
     "type": "text",
