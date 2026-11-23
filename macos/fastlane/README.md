@@ -31,14 +31,6 @@ Sync development signing certificates
 
 Sync developer ID signing certificates
 
-### mac notarization
-
-```sh
-[bundle exec] fastlane mac notarization
-```
-
-Notarizing the app
-
 ### mac build
 
 ```sh
