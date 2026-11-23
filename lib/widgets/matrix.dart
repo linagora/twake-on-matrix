@@ -78,6 +78,7 @@ import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:twake_chat/widgets/set_active_client_state.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show
