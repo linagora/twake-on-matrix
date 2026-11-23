@@ -49,6 +49,24 @@ class _Client extends Client {
 
   @override
   Room? getRoomById(String id) => id == _roomId ? room : null;
+
+  /// Threads on: the main timeline is read with a `main` threaded receipt.
+  @override
+  Future<void> postReceipt(
+    String roomId,
+    ReceiptType receiptType,
+    String eventId, {
+    String? threadId,
+  }) => room.recordRead(eventId);
+
+  /// Threads on: `m.fully_read` follows the receipt; nothing to record.
+  @override
+  Future<void> setReadMarker(
+    String roomId, {
+    String? mFullyRead,
+    String? mRead,
+    String? mReadPrivate,
+  }) async {}
 }
 
 /// A joined room whose read markers are recorded instead of sent.
@@ -61,11 +79,10 @@ class _Room extends Room {
   /// Records the marker; after the round trip, the next sync brings the
   /// room back to no unread message, as the server would.
   @override
-  Future<void> setReadMarker(
-    String? eventId, {
-    String? mRead,
-    bool? public,
-  }) async {
+  Future<void> setReadMarker(String? eventId, {String? mRead, bool? public}) =>
+      recordRead(eventId);
+
+  Future<void> recordRead(String? eventId) async {
     readMarkers.add(eventId);
     await Future<void>.delayed(const Duration(milliseconds: 300));
     notificationCount = 0;
@@ -127,6 +144,9 @@ class _FakeMatrix extends Fake implements MatrixState {
 }
 
 class _NoUploads implements UploadManager {
+  @override
+  Future<void> failInterruptedUploads(Iterable<Event> events) async {}
+
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
