@@ -6,6 +6,8 @@ import 'package:twake_chat/utils/custom_image_resizer.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/twake_client.dart';
 import 'package:twake_chat/utils/open_sqflite_db.dart';
+import 'package:twake_chat/utils/sqlite_key_store.dart';
+import 'package:path/path.dart' show basenameWithoutExtension;
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/foundation.dart';
@@ -54,7 +56,20 @@ abstract class ClientManager {
       await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
       await Store().deleteItem(_legacyClientNamespace);
     }
-    final clients = await Future.wait(clientNames.map(createClient));
+    // One account whose database cannot be opened (key unavailable, locked)
+    // must not stop the others, nor the app.
+    final created = await Future.wait(
+      clientNames.map(
+        (name) => createClient(name).then<Client?>((c) => c).catchError((
+          Object e,
+          StackTrace s,
+        ) {
+          Logs().e('Unable to create client $name, skipping it', e, s);
+          return null;
+        }),
+      ),
+    );
+    final clients = created.whereType<Client>().toList();
     if (initialize) {
       await Future.wait(clients.map(initClient));
     }
@@ -140,7 +155,14 @@ abstract class ClientManager {
     await database.delete();
     if (database is MatrixSdkDatabase) {
       final path = database.database?.path;
-      if (path != null) await deleteSqfliteDb(path);
+      if (path != null) {
+        await deleteSqfliteDb(path);
+        await SqliteKeyStore()
+            .delete(basenameWithoutExtension(path))
+            .catchError((e) {
+              Logs().w('Cannot delete the database key of $path', e);
+            });
+      }
     }
   }
 

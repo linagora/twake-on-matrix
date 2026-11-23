@@ -17,6 +17,10 @@ setup_ci
 
 default_platform(:mac)
 
+# Mac App Store: same bundle id as iOS (one App Store record, universal purchase).
+BUNDLE_ID = "app.twake.ios.chat"
+INSTALLER_CERT = "3rd Party Mac Developer Installer: Linagora (KUT463DS29)"
+
 platform :mac do
   desc "Sync development signing certificates"
   lane :sync_dev do
@@ -36,18 +40,52 @@ platform :mac do
     )
   end
 
-  desc "Notarizing the app"
-  lane :notarization do
+  desc "Build the signed Mac App Store package with the certificates already installed"
+  lane :build do |options|
+    # CI passes the match profile; locally the one downloaded from the developer portal.
+    profile = options[:profile] || "Twake Chat macOS App Store"
+    build_mac_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      installer_cert_name: INSTALLER_CERT,
+      output_directory: "build",
+      export_options: { provisioningProfiles: { BUNDLE_ID => profile } },
+      xcargs: "PROVISIONING_PROFILE_SPECIFIER='#{profile}'",
+      xcodebuild_formatter: ENV["CI"] ? "xcbeautify" : "xcpretty"
+    )
+  end
+
+  desc "Push a new macOS build to TestFlight"
+  lane :beta do
     app_store_connect_api_key(
       key_id: ENV["APPLE_KEY_ID"],
       issuer_id: ENV["APPLE_ISSUER_ID"],
       key_content: ENV["APPLE_KEY_CONTENT"]
     )
-    notarize(
-      package: "../twake-#{last_git_tag}-macos-amd64.dmg",
-      bundle_id: "app.twake.macos.chat",
-      print_log: true,
-      verbose: true
+    # readonly: the certificates and the profile are created once by hand
+    # (`fastlane match appstore --platform macos --additional_cert_types mac_installer_distribution`);
+    # a release must never create new ones.
+    sync_code_signing(
+      type: "appstore",
+      app_identifier: [BUNDLE_ID],
+      platform: "macos",
+      readonly: true,
+      additional_cert_types: ["mac_installer_distribution"],
+      git_private_key: ENV["APPLE_CERTIFICATES_SSH_KEY"]
     )
+    profile = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING][BUNDLE_ID]
+    build_number = latest_testflight_build_number(app_identifier: BUNDLE_ID, platform: "osx", initial_build_number: 0) + 1
+    version_name = last_git_tag.gsub("v", "")
+    # Flutter writes the version, the Sentry dart-defines and the obfuscation flags into
+    # Generated.xcconfig; xcodebuild below reads them. Same flags as the Android release;
+    # the symbols are uploaded to Sentry by scripts/run-sentry.sh after this lane.
+    sh("cd ../.. && flutter build macos --config-only --release --build-name=#{version_name} --build-number=#{build_number} " \
+       "--dart-define=SENTRY_DSN=\"${SENTRY_DSN:-}\" --dart-define=SENTRY_ENVIRONMENT=\"${SENTRY_ENVIRONMENT:-}\" " \
+       "--obfuscate --split-debug-info=build/app/outputs/symbols " \
+       "--extra-gen-snapshot-options=--save-obfuscation-map=build/app/obfuscation.map.json")
+    build(profile: profile)
+    upload_to_testflight(app_identifier: BUNDLE_ID, pkg: lane_context[SharedValues::PKG_OUTPUT_PATH])
   end
 end

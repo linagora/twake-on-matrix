@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart' hide State;
-import 'package:flutter/foundation.dart' show SynchronousFuture;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override, ProviderException;
 import 'package:flutter_test/flutter_test.dart';
@@ -70,6 +73,14 @@ import 'package:twake_chat/widgets/set_active_client_state.dart';
 
 import '../data/account/fakes.dart';
 
+/// The channels `MatrixState` talks to on a macOS host: notifications, window
+/// lifecycle and Dock badge.
+const _macosChannels = [
+  'dexterous.com/flutter/local_notifications',
+  'app.twake/lifecycle',
+  'g123k/flutter_app_badger',
+];
+
 /// Remembers that something listened to its stream.
 class _WatchedController<T> extends CachedStreamController<T> {
   bool listened = false;
@@ -113,6 +124,10 @@ class _BootClient extends FakeAccountClient {
   @override
   CachedStreamController<SyncUpdate> get onSync => _onSync;
 
+  /// The Dock badge counts the rooms of every client.
+  @override
+  List<Room> get rooms => const [];
+
   @override
   CachedStreamController<RoomKeyRequest> get onRoomKeyRequest =>
       _onRoomKeyRequest;
@@ -142,6 +157,17 @@ class _BootClient extends FakeAccountClient {
   /// registration.
   @override
   String? get prevBatch => null;
+}
+
+/// A client with rooms in its list, all under the default push rules.
+class _RoomsBootClient extends _BootClient {
+  _RoomsBootClient(super.clientName, {super.userID});
+
+  @override
+  List<Room> rooms = const [];
+
+  @override
+  PushRuleSet? get globalPushRules => null;
 }
 
 /// A client whose subscriptions cannot be registered.
@@ -655,6 +681,17 @@ class _Harness {
   Future<void> run(Future<void> Function() body) async {
     final done = Completer<void>();
     final unexpected = <Object>[];
+    // On a macOS host `MatrixState` builds the macOS notifications port, and
+    // the plugin reads the target platform, which `flutter test` sets to
+    // Android: it is set to macOS, with the plugin channels answered.
+    final onMacOS = Platform.isMacOS;
+    if (onMacOS) {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      for (final name in _macosChannels) {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(MethodChannel(name), (_) async => true);
+      }
+    }
     runZonedGuarded(
       () async {
         try {
@@ -668,7 +705,17 @@ class _Harness {
         if (!_isMissingWiring(e)) unexpected.add(e);
       },
     );
-    await done.future;
+    try {
+      await done.future;
+    } finally {
+      if (onMacOS) {
+        debugDefaultTargetPlatformOverride = null;
+        for (final name in _macosChannels) {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(MethodChannel(name), null);
+        }
+      }
+    }
     expect(unexpected, isEmpty, reason: 'errors outside of the app wiring');
   }
 
@@ -2076,4 +2123,45 @@ void main() {
       );
     });
   });
+
+  // Review of #3732 (jbrnzl): the client keeps the rooms the user left
+  // (sync with includeLeave), with their unread counts; the room list hides
+  // them, so must the Dock.
+  testWidgets('the Dock badge leaves out the rooms the user is no longer in', (
+    tester,
+  ) async {
+    final client = _RoomsBootClient('a', userID: '@a:s');
+    client.rooms = [
+      Room(id: '!joined:s', client: client, notificationCount: 2),
+      Room(
+        id: '!left:s',
+        client: client,
+        membership: Membership.leave,
+        notificationCount: 3,
+      ),
+      Room(
+        id: '!banned:s',
+        client: client,
+        membership: Membership.ban,
+        notificationCount: 4,
+      ),
+    ];
+    final shown = <int>[];
+    FlutterAppBadger.setMocks(
+      updateBadgeCount: (count) async => shown.add(count),
+      removeBadge: () async => shown.add(0),
+    );
+    addTearDown(FlutterAppBadger.clearMocks);
+    final harness = _Harness(tester, [client]);
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+      client.onSync.add(SyncUpdate(nextBatch: 'next'));
+      await harness.settle();
+    });
+
+    expect(shown, isNotEmpty, reason: 'the Dock badge was never set');
+    expect(shown.last, 2);
+  }, skip: !Platform.isMacOS);
 }

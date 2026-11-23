@@ -1,5 +1,9 @@
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/utils/desktop_lifecycle.dart';
+import 'package:twake_chat/utils/dock_badge.dart';
 import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
@@ -104,6 +108,9 @@ import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/background_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:twake_chat/data/model/push/twake_local_notification_payload.dart';
+import 'package:twake_chat/utils/flutter_local_notifications_port.dart';
 
 class Matrix extends ConsumerStatefulWidget {
   final Widget? child;
@@ -479,6 +486,58 @@ class MatrixState extends ConsumerState<Matrix>
       ? NotificationsClient()
       : null;
   final Map<String, int> linuxNotificationIds = {};
+  final macosNotifications = PlatformInfos.isMacOS
+      ? FlutterLocalNotificationsPort()
+      : null;
+
+  final _desktopLifecycle = DesktopLifecycle(
+    MethodChannelDesktopLifecyclePort(),
+    isMacOS: PlatformInfos.isMacOS,
+  );
+  final _dockBadge = DockBadgeUpdater(FlutterAppBadgerDockPort());
+
+  /// macOS: keep the app alive in the Dock while an account is signed in, and
+  /// show the unread total of all accounts on the Dock icon.
+  void _updateMacosDock({Client? loggedOut}) {
+    if (!PlatformInfos.isMacOS) return;
+    final clients = accountClients.where((c) => c != loggedOut).toList();
+    unawaited(
+      _desktopLifecycle.onLoginStateChanged(
+        isLoggedIn: clients.any((c) => c.isLogged()),
+      ),
+    );
+    unawaited(
+      _dockBadge.update([
+        for (final c in clients)
+          // A left or banned room keeps its counts (includeLeave sync).
+          for (final r in c.rooms.where(
+            (r) =>
+                r.membership == Membership.join ||
+                r.membership == Membership.invite,
+          ))
+            // switch to unreadBadgeCount once threads land
+            DockBadgeRoom(
+              notificationCount: r.notificationCount,
+              highlightCount: r.highlightCount,
+              isInvite: r.membership == Membership.invite,
+              isMuted: r.isMuted,
+            ),
+      ]),
+    );
+  }
+
+  /// Rooms with a macOS notification on screen, with the account it is for.
+  final Map<String, String> macosNotifiedRooms = {};
+
+  static String? _payloadEventId(NotificationResponse? r) {
+    try {
+      return TwakeLocalNotificationPayload.fromJson(
+        jsonDecode(r?.payload ?? '{}') as Map<String, dynamic>,
+      ).eventId;
+    } catch (_) {
+      return null;
+    }
+  }
 
   late final _loginHost = _MatrixLoginHost(this);
   late final LoginSessions _loginSessions;
@@ -493,6 +552,20 @@ class MatrixState extends ConsumerState<Matrix>
     // The boot clients and the persisted state are overridden by `main` when
     // the container is made; the account state adopts them on its first read.
     _subscriptions = ref.read(clientSubscriptionsProvider);
+    // The macOS permission is asked after the first sync, not here. A tap
+    // reuses the mobile push routing (account switch, then the room).
+    unawaited(
+      macosNotifications
+          ?.init(
+            (r) => (backgroundPush ??= BackgroundPush(
+              this,
+              client,
+            )).onSelectNotification(r, eventId: _payloadEventId(r)),
+          )
+          .catchError(
+            (Object e, StackTrace s) => _report(e, s, 'notification init'),
+          ),
+    );
     _quietLogouts = ref.read(quietLogoutsProvider);
     _logoutRemovals = ref.read(logoutRemovalsProvider);
     _candidateRemovals = ref.read(candidateRemovalsProvider);
@@ -623,6 +696,15 @@ class MatrixState extends ConsumerState<Matrix>
           )
           .cancel,
     );
+    if (PlatformInfos.isMacOS) {
+      _subscriptions.keep(
+        name,
+        'dockBadge',
+        () => currentClient.onSync.stream
+            .listen((_) => _updateMacosDock())
+            .cancel,
+      );
+    }
     _subscriptions.keep(
       name,
       'uiaRequest',
@@ -655,11 +737,31 @@ class MatrixState extends ConsumerState<Matrix>
         }
       }).cancel,
     );
-    if (PlatformInfos.isLinux) {
-      Future<void> initLinuxNotifications() async {
+    if (PlatformInfos.isLinux || PlatformInfos.isMacOS) {
+      Future<void> initDesktopNotifications() async {
         // Cancelled (a rollback, a logout) before this ran: set nothing up.
         if (!_subscriptions.isOpen(name)) return;
         // `keep` starts nothing for a name that was closed meanwhile.
+        if (PlatformInfos.isMacOS) {
+          unawaited(
+            macosNotifications?.requestPermission().catchError(
+              (Object e, StackTrace s) =>
+                  _report(e, s, 'notification permission'),
+            ),
+          );
+          _subscriptions.keep(
+            name,
+            'notificationClear',
+            () => currentClient.onSync.stream
+                .listen(
+                  (_) => clearReadMacosNotifications(currentClient).catchError(
+                    (Object e, StackTrace s) =>
+                        _report(e, s, 'notification clear'),
+                  ),
+                )
+                .cancel,
+          );
+        }
         _subscriptions.keep(
           name,
           'notification',
@@ -672,7 +774,15 @@ class MatrixState extends ConsumerState<Matrix>
                     ) &&
                     e.content['sender'] != currentClient.userID,
               )
-              .listen(showLocalNotification)
+              .listen((e) {
+                if (!PlatformInfos.isMacOS) return showLocalNotification(e);
+                unawaited(
+                  showMacosNotification(currentClient, e).catchError(
+                    (Object err, StackTrace s) =>
+                        _report(err, s, 'notification of $name'),
+                  ),
+                );
+              })
               .cancel,
         );
       }
@@ -682,7 +792,7 @@ class MatrixState extends ConsumerState<Matrix>
       // notification setup would silently be skipped. Run immediately if
       // already synced.
       if (currentClient.prevBatch != null) {
-        await initLinuxNotifications();
+        await initDesktopNotifications();
       } else {
         // Waits for a sync that may never come: the wait is cancelled with the
         // other subscriptions of the client.
@@ -690,7 +800,7 @@ class MatrixState extends ConsumerState<Matrix>
           name,
           'firstSync',
           currentClient.onSync.stream,
-          () => initLinuxNotifications().catchError(
+          () => initDesktopNotifications().catchError(
             (Object e, StackTrace s) => _report(e, s, 'notifications of $name'),
           ),
         );
@@ -755,6 +865,7 @@ class MatrixState extends ConsumerState<Matrix>
   Future<void> _listenLoginStateChanged(LoginState state, Client client) async {
     if (state != LoginState.loggedIn) _homeserverCheckLog.forget(client);
     if (_quietLogouts.consume(client.clientName, state)) return;
+    _updateMacosDock(loggedOut: state == LoginState.loggedIn ? null : client);
     final loggedInWithMultipleClients = accountClients.length > 1;
     if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
       await _handleLogoutWithMultipleAccount(state, client);
