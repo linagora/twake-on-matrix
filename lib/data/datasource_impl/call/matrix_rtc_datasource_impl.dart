@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart' hide CallParticipant;
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/data/datasource_impl/call/call_membership_extender.dart';
+import 'package:twake_chat/data/datasource_impl/call/call_ring_tracker.dart';
 import 'package:twake_chat/data/datasource_impl/call/matrix_rtc_media_keys.dart';
 import 'package:twake_chat/data/model/call/call_member_content.dart';
 import 'package:twake_chat/data/model/call/sfu_token_request.dart';
@@ -12,9 +13,44 @@ import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/model/call/call_media_key.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
+import 'package:twake_chat/domain/model/call/call_ring.dart';
 
 /// The own membership event of a call: its room and its state key.
 typedef _Slot = ({String roomId, String stateKey});
+
+/// An underride push rule that rings for a call notification (MSC4075).
+class _RingPushRule {
+  _RingPushRule(this.id, String type, String typeKey)
+    : conditions = [
+        PushCondition(kind: 'event_match', key: 'type', pattern: type),
+        PushCondition(
+          kind: 'event_match',
+          key: 'content.$typeKey',
+          pattern: 'ring',
+        ),
+      ];
+
+  static const actions = [
+    'notify',
+    {'set_tweak': 'sound', 'value': 'ring'},
+  ];
+
+  final String id;
+  final List<PushCondition> conditions;
+}
+
+final _ringPushRules = [
+  _RingPushRule(
+    'app.twake.chat.call_ring',
+    RtcNotificationContent.eventType,
+    'notification_type',
+  ),
+  _RingPushRule(
+    'app.twake.chat.call_ring_legacy',
+    CallEventTypes.callNotify,
+    'notify_type',
+  ),
+];
 
 /// MatrixRTC (MSC4143) session memberships with a LiveKit focus: one
 /// `org.matrix.msc3401.call.member` state event per device (DECISION.md D14).
@@ -35,6 +71,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   var _session = 0;
   Timer? _restartTimer;
   CallMembershipExtender? _extender;
+  final _trackers = <CallRingTracker>{};
 
   Client get _client => _maybeClient ?? (throw const CallNoClientException());
 
@@ -122,7 +159,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
-  Future<void> joinMembership(CallJoin join) async {
+  Future<String> joinMembership(CallJoin join) async {
     final room = _room(join.room);
     if (!room.canChangeStateEvent(memberEventType)) {
       throw const CallNoPermissionException();
@@ -147,6 +184,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         (expiry) => CallMemberContent.forJoin(device, join, expiry).toJson(),
         createdTs: _serverTimeOf(slot.roomId, eventId),
       );
+    return eventId;
   }
 
   /// The others count the expiry from it, not from the clock of this device.
@@ -268,6 +306,135 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
+  bool hasOtherMembers(CallRoom call) {
+    final members = _room(call).states[memberEventType]?.values ?? const [];
+    return members.any(
+      (member) =>
+          !(member.senderId == _client.userID &&
+              member.content['device_id'] == _client.deviceID) &&
+          CallRingTracker.isLiveMembership(member),
+    );
+  }
+
+  /// A direct chat rings its partner, even before they join. A group, or a
+  /// direct chat with 3+ joined members, only notifies: nobody is rung by
+  /// `room: true`.
+  @override
+  Future<void> sendRing(
+    CallJoin join, {
+    required String membershipEventId,
+  }) async {
+    final room = _room(join.room);
+    final callee = _ringee(room);
+    // The slot of the room, as the web client sends it (matrix-js-sdk 43).
+    return _logged(
+      'ring not sent',
+      () => _send(join.room, RtcNotificationContent.eventType, {
+        'slot_id': 'm.call#ROOM',
+        'notification_type': callee != null ? 'ring' : 'notification',
+        'sender_ts': DateTime.now().millisecondsSinceEpoch,
+        'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
+        'm.mentions': {
+          'user_ids': <String>[?callee],
+        },
+        'm.relates_to': {
+          'rel_type': 'm.reference',
+          'event_id': membershipEventId,
+        },
+        'm.call.intent': join.isVideo ? 'video' : 'audio',
+      }),
+    );
+  }
+
+  /// `m.direct` alone does not tell a third member in. An unknown count of
+  /// members is not held against the room; a lone member (partner invited or
+  /// gone) still rings the partner.
+  String? _ringee(Room room) {
+    if (!room.isDirectChat) return null;
+    final joined = room.summary.mJoinedMemberCount ?? 0;
+    if (joined > 2) return null;
+    final partner = room.directChatMatrixID;
+    if (partner == null || partner.isEmpty) return null;
+    return partner == _client.userID ? null : partner;
+  }
+
+  Future<void> _logged(String what, Future<void> Function() action) async {
+    try {
+      await action();
+    } on Exception catch (error, stackTrace) {
+      Logs().w('MatrixRtcDatasource: $what', error, stackTrace);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> declineRing(CallRing ring) async {
+    await _send(ring.room, CallEventTypes.callDecline, {
+      'm.relates_to': {'rel_type': 'm.reference', 'event_id': ring.eventId},
+    });
+    for (final tracker in _trackers) {
+      tracker.dismiss(ring.eventId);
+    }
+  }
+
+  /// In the clear, as `Room.sendEvent` would encrypt it: the push gateway and
+  /// the other devices read a ring without the keys of the room.
+  Future<void> _send(
+    CallRoom call,
+    String type,
+    Map<String, Object?> content,
+  ) async {
+    final client = _client;
+    try {
+      await client.sendMessage(
+        _room(call).id,
+        type,
+        client.generateUniqueTransactionId(),
+        content,
+      );
+    } on Exception catch (error) {
+      throw CallMembershipFailedException(cause: error);
+    }
+  }
+
+  /// One tracker per listener, alive as long as it listens.
+  Stream<T> _watch<T>(Stream<T> Function(CallRingTracker tracker) of) async* {
+    final client = _maybeClient;
+    if (client == null) return;
+    final tracker = CallRingTracker(client);
+    _trackers.add(tracker);
+    try {
+      yield* of(tracker);
+    } finally {
+      _trackers.remove(tracker);
+      tracker.dispose();
+    }
+  }
+
+  @override
+  Stream<List<CallRing>> watchRings() => _watch((tracker) => tracker.rings);
+
+  @override
+  Stream<MissedCall> watchMissedCalls() =>
+      _watch((tracker) => tracker.missedCalls);
+
+  @override
+  Future<void> ensureCallRingPushRules() =>
+      _logged('push rules not set', () async {
+        final underride = _client.globalPushRules?.underride ?? const [];
+        for (final rule in _ringPushRules) {
+          // Only when absent: a rule that differs is left to its owner.
+          if (underride.any((r) => r.ruleId == rule.id)) continue;
+          await _client.setPushRule(
+            PushRuleKind.underride,
+            rule.id,
+            _RingPushRule.actions,
+            conditions: rule.conditions,
+          );
+        }
+      });
+
+  @override
   Stream<void> watchRoomEncrypted(CallRoom call) async* {
     final client = _maybeClient;
     if (client == null) return;
@@ -298,5 +465,8 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     return MatrixRtcMediaKeys(_client, call.id, memberEventType).run();
   }
 
-  void dispose() => _endSession().extended.ignore();
+  void dispose() {
+    _endSession().extended.ignore();
+    _trackers.toList().forEach((tracker) => tracker.dispose());
+  }
 }
