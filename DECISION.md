@@ -404,6 +404,19 @@ Should both clients do the same?
 
 Completes D12, which left the ring push rules for later.
 
+## D22. Threads are on for everyone on mobile (decided by Clément, 2026-11-20)
+
+The threads of Twake Space Chat (#993, P1) ship on, for every user, when
+#3606 reaches main: `threadsEnabled` is `true`. They cover sending to a
+thread, the thread screen and its card in the chat, Start a thread, thread
+counts in the badges, the chat list and the room list, threads opened from
+notifications, links and search, per-thread unread and threaded read
+receipts, the Activity tab (unread rooms and followed threads), and the iOS
+icon badge.
+
+Known limit, still open: while the app is killed, the iOS icon badge counts
+the replies of threads the user does not follow (#3635).
+
 ## D23. A chat with unread messages opens on the first unread one, without scrolling (proposed by Johann, 2026-11-19)
 
 Opening a chat with unread messages shows the "Unread messages" divider at the

@@ -56,6 +56,9 @@ class _FakeMatrixState extends Fake implements MatrixState {
   String? get activeRoomId => null;
 
   @override
+  ({String roomId, String threadRootId})? get activeThread => null;
+
+  @override
   Client? get clientOrNull => null;
 
   @override

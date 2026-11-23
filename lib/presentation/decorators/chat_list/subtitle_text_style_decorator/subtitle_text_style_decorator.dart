@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_component.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,7 @@ class UnreadChatListSubtitleTextStyleDecorator
 
   @override
   TextStyle textStyle(Room room, BuildContext context) {
-    if (room.isUnreadOrInvited) {
+    if (room.isUnreadOrInvitedWithThreads) {
       return _interfaceTextStyleComponent
           .textStyle(room, context)
           .merge(

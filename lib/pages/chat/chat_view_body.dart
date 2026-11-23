@@ -1,3 +1,6 @@
+import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread.dart';
+import 'package:twake_chat/pages/chat/thread/unread_thread_banner.dart';
 import 'dart:async';
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -45,7 +48,11 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     // (e.g. user opened draftChat). Only accept drops on the active room.
     final roomId = controller.room?.id;
     final routeSegments = GoRouterState.of(context).uri.pathSegments;
-    final acceptDrops = roomId != null && routeSegments.contains(roomId);
+    // A thread screen covers its room, which stays mounted: only the screen
+    // on top takes the drop.
+    final isOnTop = ModalRoute.of(context)?.isCurrent != false;
+    final isRoomRoute = roomId != null && routeSegments.contains(roomId);
+    final acceptDrops = isRoomRoute && isOnTop;
 
     return DropTarget(
       enable: acceptDrops,
@@ -77,10 +84,12 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                    _withPinnedBar(
+                      controller,
                       const SizedBox(
                         height: ChatViewStyle.pinnedMessageHintHeight,
                       ),
+                    ),
                     Expanded(
                       child: GestureDetector(
                         onTap: controller.clearSingleSelectedEvent,
@@ -229,6 +238,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         );
                       },
                     ),
+                    if (!controller.isThread) _unreadThreadBanner(context),
                     if (controller.room != null &&
                         controller.room?.encrypted == true)
                       ChatDeviceVerificationBanner(
@@ -238,12 +248,14 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                             ?.requestKeys(onlineKeyBackupOnly: false),
                       ),
                     PinnedEventsView(controller),
-                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                    _withPinnedBar(
+                      controller,
                       Divider(
                         height: ChatViewBodyStyle.dividerSize,
                         thickness: ChatViewBodyStyle.dividerSize,
                         color: Theme.of(context).dividerColor,
                       ),
+                    ),
                     ChatAudioPlayerWidget(matrix: controller.matrix),
                     SizedBox(
                       key: controller.stickyTimestampKey,
@@ -364,6 +376,43 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
           ],
         ),
       ),
+    );
+  }
+
+  /// [child] only while the pinned bar of this screen shows: the room's pins
+  /// in the room, the thread's own in a thread.
+  Widget _withPinnedBar(ChatController controller, Widget child) {
+    if (!controller.isThread) {
+      return controller.room!.pinnedEventIds.isNotEmpty
+          ? child
+          : const SizedBox.shrink();
+    }
+    return ValueListenableBuilder(
+      valueListenable:
+          controller.pinnedEventsController.getPinnedMessageNotifier,
+      builder: (_, _, _) => controller.pinnedEventsController.hasPins
+          ? child
+          : const SizedBox.shrink(),
+    );
+  }
+
+  Widget _unreadThreadBanner(BuildContext context) {
+    final store = controller.threadUnreadStore;
+    if (store == null) return const SizedBox.shrink();
+    final room = controller.room!;
+    return ListenableBuilder(
+      listenable: store,
+      builder: (context, _) {
+        final rootId = unreadThreadBannerTarget(
+          mainNotificationCount: room.notificationCount,
+          threads: store.threadsOf(room),
+        );
+        if (rootId == null) return const SizedBox.shrink();
+        return UnreadThreadBanner(
+          onOpen: () =>
+              ThreadRoute(roomid: room.id, rootid: rootId).push<void>(context),
+        );
+      },
     );
   }
 

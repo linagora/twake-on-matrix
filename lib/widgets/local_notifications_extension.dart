@@ -1,3 +1,7 @@
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
@@ -94,10 +98,27 @@ extension LocalNotificationsExtension on MatrixState {
       Logs().w('Can not display notification for unknown room $roomId');
       return;
     }
-    if (!shouldNotifyMessage(_notificationCandidate(eventUpdate, room))) {
+    final event = Event.fromJson(eventUpdate.content, room);
+    final threadRootId = ThreadRules.threadRootOf(event);
+    if (threadRootId != null) {
+      // Room counters leave thread messages out and the thread counters land
+      // after this event: decide from the reply and the follow state.
+      if (!await ThreadRules.shouldNotifyThreadReply(
+        event,
+        followed: client.threadUnread?.followOnceKnown(
+          ThreadRef(roomId, threadRootId),
+        ),
+        choice: client.threadUnread?.prefOf(ThreadRef(roomId, threadRootId)),
+        pushActions: client.pushruleEvaluator.match(event),
+        activeThread: activeThread,
+      )) {
+        return;
+      }
+    } else if (!shouldNotifyMessage(
+      _notificationCandidate(eventUpdate, room),
+    )) {
       return;
     }
-    final event = Event.fromJson(eventUpdate.content, room);
     final title = room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!));
     final body = await event.calcLocalizedBody(
       MatrixLocals(L10n.of(context)!),
@@ -152,7 +173,12 @@ extension LocalNotificationsExtension on MatrixState {
         );
         switch (action) {
           case DesktopNotificationActions.seen:
-            room.setReadMarker(event.eventId, mRead: event.eventId);
+            final threadRootId = ThreadRules.threadRootOf(event);
+            if (threadRootId == null) {
+              room.setMainTimelineReadMarker(event);
+            } else {
+              room.setThreadReadMarker(event, ThreadRef(room.id, threadRootId));
+            }
             break;
           case DesktopNotificationActions.openChat:
             RoomRoute(roomid: room.id).go(context);

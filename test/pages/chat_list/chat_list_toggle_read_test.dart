@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
@@ -17,8 +18,12 @@ import 'chat_list_toggle_read_test.mocks.dart';
 @GenerateNiceMocks([MockSpec<Room>(), MockSpec<Event>()])
 void main() {
   late MockRoom room;
+  late bool flagBefore;
 
+  // Threads off: toggleRead marks the room only, not its threads.
   setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = false;
     GetIt.instance.registerSingleton(ResponsiveUtils());
     room = MockRoom();
     when(room.isUnread).thenReturn(true);
@@ -29,7 +34,10 @@ void main() {
     ).thenAnswer((_) async {});
   });
 
-  tearDown(() => GetIt.instance.reset());
+  tearDown(() {
+    AppConfig.threadsEnabled = flagBefore;
+    return GetIt.instance.reset();
+  });
 
   Future<void> pumpApp(WidgetTester tester) async {
     await tester.pumpWidget(
