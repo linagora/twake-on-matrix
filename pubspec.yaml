@@ -181,7 +181,6 @@ dependencies:
       ref: twake_supported
   sqflite_common_ffi: ^2.3.6
   # https://github.com/tekartik/sqflite/blob/master/sqflite_common_ffi/doc/using_ffi_instead_of_sqflite.md#setup
-  sqlite3_flutter_libs: ^0.5.40
   storage_space: 1.3.0
   super_clipboard: 0.9.1
   twake_drive_picker:
@@ -360,3 +359,8 @@ sentry:
   ignore_missing: true
   release:
   dist:
+
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlcipher
