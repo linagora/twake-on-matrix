@@ -18,6 +18,7 @@ import 'package:twake_chat/pages/device_settings/device_settings_state.dart';
 import 'package:twake_chat/pages/device_settings/device_settings_view_model.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_dialog.dart';
 import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/device_extension.dart';
@@ -52,7 +53,8 @@ class _DevicesSettingsState extends ConsumerState<DevicesSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final client = ref.watch(matrixClientProvider);
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
     final notifier = ref.read(devicesSettingsViewModelProvider.notifier);
 
     return Scaffold(

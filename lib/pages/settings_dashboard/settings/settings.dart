@@ -18,6 +18,7 @@ import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
@@ -119,7 +120,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     return;
   }
 
-  Future<void> _removePushers() => ref
+  Future<void> _removePushers(Client client) => ref
       .read(pushRemovalsControllerProvider.notifier)
       .removeBeforeLogout(client);
 
@@ -132,11 +133,13 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   Future<void> _logoutClientAndLocalData(String action) async {
     // Read before the first await: the screen may be gone when a step fails.
     final report = ref.read(reportFailureProvider);
+    final client = this.client;
+    final twakeSupported = matrix.twakeSupported;
     try {
-      await _removePushers();
+      await _removePushers(client);
       // Clearing the client also removes the recovery key
       // (`TwakeClient.clear`).
-      await logoutAndCleanUp(client, twakeSupported: matrix.twakeSupported);
+      await logoutAndCleanUp(client, twakeSupported: twakeSupported);
     } catch (e, s) {
       report(
         e,
@@ -399,7 +402,9 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
 
   @override
   Widget build(BuildContext context) {
-    final mxid = ref.watch(matrixClientProvider).mxid(context);
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
+    final mxid = client.mxid(context);
     return SettingsView(
       this,
       mxid: mxid,
