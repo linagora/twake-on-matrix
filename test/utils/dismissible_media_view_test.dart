@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/utils/dismissible_media_view.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 
 const _viewerKey = Key('viewer');
 const _openButtonKey = Key('open');
+
+// Platform.isXxx cannot be faked, so the expected outcome follows the host:
+// a long drag closes the viewer on mobile, a mouse drag never does on desktop.
+final _viewerAfterLongDrag = PlatformInfos.isDesktop
+    ? findsOneWidget
+    : findsNothing;
 
 Widget _childClaimingVerticalDrags({VoidCallback? onTap}) {
   return GestureDetector(
@@ -71,7 +78,7 @@ void main() {
         await tester.drag(find.byKey(_viewerKey), const Offset(0, 400));
         await tester.pumpAndSettle();
 
-        expect(find.byKey(_viewerKey), findsNothing);
+        expect(find.byKey(_viewerKey), _viewerAfterLongDrag);
       },
     );
 
@@ -87,7 +94,7 @@ void main() {
       await tester.drag(find.byKey(_viewerKey), const Offset(0, -400));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(_viewerKey), findsNothing);
+      expect(find.byKey(_viewerKey), _viewerAfterLongDrag);
     });
 
     testWidgets('dismissOverChildDrags keeps the viewer open on a short drag', (
