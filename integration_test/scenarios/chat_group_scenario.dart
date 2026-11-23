@@ -52,7 +52,7 @@ Future<(String, String)> _prepareMessages(
   if (receiverFixtureMessage != null) {
     final fixture = await prepareMobileGroupFixture(scenario);
     await prepareMobileReceiverMessages(scenario, fixture);
-    await _waitShown(scenario, receiverMsg);
+    await _waitShown(scenario, receiverMsg, searchTimeline: true);
   }
 
   return (senderMsg, receiverMsg);
@@ -136,7 +136,7 @@ class ChatGroupReplyScenario extends BaseTestScenario {
     await _waitExists(this, replySender);
 
     final replyReceiver = 'reply receiver at ${_uid()}';
-    await _waitShown(this, receiverMsg);
+    await _waitShown(this, receiverMsg, searchTimeline: true);
     await robots.messageMenuRobot().openReply(receiverMsg);
     await robots.chatGroupDetailRobot().sendMessage(replyReceiver);
     await _waitExists(this, replyReceiver);
@@ -195,7 +195,7 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
     await robots.messageMenuRobot().openDelete(senderMsg);
     await _waitAbsent(this, senderMsg);
 
-    await _waitShown(this, receiverMsg);
+    await _waitShown(this, receiverMsg, searchTimeline: true);
     await robots.messageMenuRobot().openDelete(receiverMsg);
     await _waitAbsent(this, receiverMsg);
   }
