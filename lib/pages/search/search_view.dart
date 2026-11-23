@@ -11,12 +11,14 @@ import 'package:twake_chat/presentation/model/search/presentation_server_side_em
 import 'package:twake_chat/presentation/model/search/presentation_server_side_search.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Consumer;
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 class SearchView extends StatelessWidget {
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   const SearchView(this.searchController, {super.key});
 
@@ -37,9 +39,8 @@ class SearchView extends StatelessWidget {
             valueListenable: searchController.preSearchRecentContactsNotifier,
             builder: (context, value, emptyChild) =>
                 value.fold((failure) => emptyChild!, (success) {
-                  switch (success.runtimeType) {
-                    case const (PreSearchRecentContactsSuccess):
-                      final data = success as PreSearchRecentContactsSuccess;
+                  switch (success) {
+                    case final PreSearchRecentContactsSuccess data:
                       return ValueListenableBuilder(
                         valueListenable: searchController.textEditingController,
                         builder: (context, textEditingValue, child) {
@@ -144,20 +145,25 @@ class SearchView extends StatelessWidget {
                 return const SizedBox.shrink();
               }
 
-              return ListView.builder(
-                padding: SearchViewStyle.paddingRecentChats,
-                shrinkWrap: true,
-                physics: const ClampingScrollPhysics(),
-                itemCount: contacts.length,
-                itemBuilder: (context, index) {
-                  return RecentItemWidget(
-                    highlightKeyword:
-                        searchController.textEditingController.text,
-                    presentationSearch: contacts[index],
-                    client: searchController.client,
-                    key: Key('chat_recent_${contacts[index].id}'),
-                    onTap: () {
-                      searchController.onSearchItemTap(contacts[index]);
+              return Consumer(
+                builder: (context, ref, _) {
+                  final client = ref.watch(matrixClientProvider);
+                  return ListView.builder(
+                    padding: SearchViewStyle.paddingRecentChats,
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: contacts.length,
+                    itemBuilder: (context, index) {
+                      return RecentItemWidget(
+                        highlightKeyword:
+                            searchController.textEditingController.text,
+                        presentationSearch: contacts[index],
+                        client: client,
+                        key: Key('chat_recent_${contacts[index].id}'),
+                        onTap: () {
+                          searchController.onSearchItemTap(contacts[index]);
+                        },
+                      );
                     },
                   );
                 },
@@ -208,7 +214,7 @@ class SearchView extends StatelessWidget {
 class _RecentChatAndContactsHeader extends StatelessWidget {
   const _RecentChatAndContactsHeader({required this.searchController});
 
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +247,7 @@ class _RecentChatAndContactsHeader extends StatelessWidget {
 class _SearchHeader extends StatelessWidget {
   final String header;
 
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   final bool needShowMore;
 

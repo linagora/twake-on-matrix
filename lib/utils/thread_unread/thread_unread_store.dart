@@ -574,11 +574,13 @@ extension RoomPendingNotification on Room {
   /// Nothing of the room is waiting in a notification: safe to clear them.
   /// A left room keeps the unread count it had when it was left (synced with
   /// `includeLeave`), so it never blocks. A badge of 0 while a follow lookup
-  /// runs is unknown, not read.
+  /// runs is unknown, not read. An invite never gets a count: its
+  /// notification stays.
   bool get hasNoPendingNotification =>
-      membership == Membership.leave ||
-      (unreadBadgeCount == 0 &&
-          client.threadUnread?.hasPendingFollowLookup(this) != true);
+      membership != Membership.invite &&
+      (membership == Membership.leave ||
+          (unreadBadgeCount == 0 &&
+              client.threadUnread?.hasPendingFollowLookup(this) != true));
 }
 
 /// One decision for every consumer of the room counters: the server stops

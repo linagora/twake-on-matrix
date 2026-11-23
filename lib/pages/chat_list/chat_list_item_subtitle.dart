@@ -11,7 +11,6 @@ import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_preview_text.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
 import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +90,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                 lastEvent == null) {
               return const SizedBox.shrink();
             }
-            final isMentioned = lastEvent.isMention == true;
+            final isMentioned = room.highlightCount > 0;
             return lastEvent.senderId == room.client.userID
                 ? SeenByRow(
                     eventStatus: lastEvent.status,
@@ -108,7 +107,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                         ? ChatListItemStyle.mentionIconWidth
                         : 0,
                     decoration: BoxDecoration(
-                      color: colorScheme.primary,
+                      color: notificationColor(context: context, room: room),
                       borderRadius: .circular(AppConfig.borderRadius),
                     ),
                     child: Center(
@@ -116,9 +115,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                           ? Text(
                               '@',
                               style: TextStyle(
-                                color: isMentioned
-                                    ? colorScheme.onPrimary
-                                    : colorScheme.onPrimaryContainer,
+                                color: colorScheme.onPrimary,
                                 fontSize: textScheme.labelMedium?.fontSize,
                               ),
                             )

@@ -91,7 +91,7 @@ void main() {
           'AND highlight count is greater than zero\n'
           'AND pushRuleState is notify\n'
           'THEN color should be primary\n', (WidgetTester tester) async {
-        when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
+        when(room.pushRuleState).thenReturn(PushRuleState.notify);
         when(room.highlightCount).thenReturn(1);
 
         final color = chatListItemMixinTest.notificationColor(
@@ -100,6 +100,22 @@ void main() {
         );
 
         expect(color, Theme.of(context).colorScheme.primary);
+      });
+
+      testWidgets('WHEN has new message with mention\n'
+          'AND highlight count is greater than zero\n'
+          'AND pushRuleState is mentionsOnly\n'
+          'THEN color should be tertiary 30\n', (WidgetTester tester) async {
+        when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
+        when(room.highlightCount).thenReturn(1);
+        when(room.notificationCount).thenReturn(1);
+
+        final color = chatListItemMixinTest.notificationColor(
+          context: context,
+          room: room,
+        );
+
+        expect(color, LinagoraRefColors.material().tertiary[30]);
       });
     });
 

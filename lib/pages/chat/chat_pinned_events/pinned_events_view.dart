@@ -56,9 +56,8 @@ class PinnedEventsView extends StatelessWidget {
           controller.pinnedEventsController.getPinnedMessageNotifier,
       builder: (context, value, child) {
         return value.fold((failure) => child!, (success) {
-          switch (success.runtimeType) {
-            case const (ChatGetPinnedEventsSuccess):
-              final data = success as ChatGetPinnedEventsSuccess;
+          switch (success) {
+            case final ChatGetPinnedEventsSuccess data:
               return Material(
                 color: LinagoraSysColors.material().onPrimary,
                 child: InkWell(

@@ -180,9 +180,16 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
         }
 
         final sortedRooms = _sortCache.isEmpty ? widget.rooms : _sortCache;
+        // The last sort may still hold a room a sync took out of the list:
+        // it has no preview any more and would show as a blank tile.
+        final roomIds = {for (final room in widget.rooms) room.id};
         // A logout clears the client before the list moves to the next account.
         return widget.builder(
-          sortedRooms.where((room) => room.client.isLogged()).toList(),
+          sortedRooms
+              .where(
+                (room) => roomIds.contains(room.id) && room.client.isLogged(),
+              )
+              .toList(),
           _previewByRoomId,
         );
       },

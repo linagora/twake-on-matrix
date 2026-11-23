@@ -328,7 +328,7 @@ extension RoomExtension on Room {
   List<User> getAssignRolesMember() {
     final members = getParticipants();
     if (members.isEmpty) return [];
-    return members.where((final User member) {
+    return members.where((User member) {
       final powerLevel = member.powerLevel;
       return powerLevel >=
               PowerLevel(DefaultPowerLevelMember.moderator.powerLevel) &&
@@ -342,7 +342,7 @@ extension RoomExtension on Room {
   List<User> getExceptionsMember() {
     final members = getParticipants();
     if (members.isEmpty) return [];
-    return members.where((final User member) {
+    return members.where((User member) {
       final powerLevel = member.powerLevel;
       return powerLevel <
               PowerLevel(DefaultPowerLevelMember.member.powerLevel) &&

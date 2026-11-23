@@ -132,7 +132,7 @@ class BackgroundPush {
       final roomIds = [...?sync.rooms?.join?.keys, ...?sync.rooms?.leave?.keys];
       if (roomIds.isEmpty) return;
       _syncedRoomIds.addAll(roomIds);
-      _onClearingPush(getFromServer: false);
+      _onClearingPush();
     });
   }
 
@@ -444,6 +444,12 @@ class BackgroundPush {
     return true;
   }
 
+  @visibleForTesting
+  static void resetForTesting() {
+    unawaited(_instance?.onRoomSync?.cancel());
+    _instance = null;
+  }
+
   factory BackgroundPush.clientOnly(Client client) {
     _instance ??= BackgroundPush._(client);
     return _instance!;
@@ -452,7 +458,7 @@ class BackgroundPush {
   factory BackgroundPush(
     MatrixState matrixState,
     Client client, {
-    final void Function(String errorMsg, {Uri? link})? onFcmError,
+    void Function(String errorMsg, {Uri? link})? onFcmError,
   }) {
     final instance = BackgroundPush.clientOnly(client);
     instance._matrixState = matrixState;
@@ -766,12 +772,26 @@ class BackgroundPush {
     _matrixState?.currentClients.whereType<Client>() ?? const [],
   );
 
+  /// The client of the account the push names, or null when that account is
+  /// not signed in here; a push naming no account goes to [_pushClient].
+  Client? _receivingClient(dynamic message) => ClientManager.receivingFromPush(
+    _matrixState?.currentClients.whereType<Client>() ?? const [],
+    message,
+    fallback: _pushClient,
+  );
+
   void onReceiveNotification(dynamic message) {
     Logs().d('BackgroundPush::onReceiveNotification(): Message $message}');
     final notification = _parseMessagePayload(message);
+    final receiving = _receivingClient(message);
+    if (receiving == null) {
+      Logs().w('[Push] Push for an account not signed in here: not shown');
+      return;
+    }
+    _clearReadRooms(notification, receiving);
     pushHelper(
       notification,
-      client: _pushClient,
+      client: receiving,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
       activeThread: _matrixState?.activeThread,
@@ -920,8 +940,10 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
+    final notification = PushNotification.fromJson(data);
+    _clearReadRooms(notification, _pushClient);
     await pushHelper(
-      PushNotification.fromJson(data),
+      notification,
       client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
@@ -944,67 +966,72 @@ class BackgroundPush {
 
   bool _clearingPushLock = false;
 
+  // Sent when unread counts change, e.g. a room read on another device: the
+  // push names no room, a sync tells which ones were read.
+  void _clearReadRooms(PushNotification notification, Client receiving) {
+    if (notification.eventId == null &&
+        notification.counts != null &&
+        !_syncLoopClears(receiving)) {
+      unawaited(_onClearingPush(receiving: receiving));
+    }
+  }
+
+  /// In foreground the sync loop of the active account runs, and the room sync
+  /// listener clears what it syncs.
+  bool _syncLoopClears(Client receiving) =>
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
+      identical(receiving, _roomSyncClient) &&
+      identical(receiving, _matrixState?.clientOrNull);
+
   /// Rooms refreshed by a sync and not checked yet: only their unread
   /// counts are fresh enough to clear their notification.
   final Set<String> _syncedRoomIds = {};
 
-  Future<void> _onClearingPush({bool getFromServer = true}) async {
+  /// Accounts whose clearing push arrived during a sweep: their counts need
+  /// another sync.
+  final Set<Client> _pendingServerSweeps = {};
+
+  /// oneShotSync() completes normally on a failed sync: only its status tells.
+  Future<bool> _syncSucceeded(Client pushClient) async {
+    try {
+      Logs().v('[Push] single oneShotSync');
+      await pushClient.oneShotSync();
+    } catch (e) {
+      Logs().v('[Push] Error one-shot syncing', e);
+      return false;
+    }
+    return pushClient.onSyncStatus.value?.status != SyncStatus.error;
+  }
+
+  /// Syncs [receiving] when a clearing push names it, else checks the rooms
+  /// the push client synced.
+  Future<void> _onClearingPush({Client? receiving}) async {
     if (_clearingPushLock) {
+      if (receiving != null) _pendingServerSweeps.add(receiving);
       return;
     }
+    final getFromServer = receiving != null;
+    final pushClient = receiving ?? _pushClient;
+    if (!pushClient.isLogged()) return;
     try {
       _clearingPushLock = true;
       late Iterable<String> emptyRooms;
       if (getFromServer) {
         Logs().v('[Push] Got new clearing push');
-        var syncErrored = false;
-        if (client.syncPending) {
+        if (pushClient.syncPending) {
           Logs().v('[Push] waiting for existing sync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
-            syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
+          await pushClient.oneShotSync().catchError((_) {});
         }
-        if (!syncErrored) {
-          Logs().v('[Push] single oneShotSync');
-          // we need to catchError here as the Future might be in a different execution zone
-          await client.oneShotSync().catchError((e) {
-            syncErrored = true;
-            Logs().v('[Push] Error one-shot syncing', e);
-          });
-          if (!syncErrored) {
-            emptyRooms = client.rooms
-                .where((r) => r.hasNoPendingNotification)
-                .map((r) => r.id);
-          }
-        }
-        if (syncErrored) {
-          try {
-            Logs().v(
-              '[Push] failed to sync for fallback push, fetching notifications endpoint...',
-            );
-            final notifications = await client.getNotifications(limit: 20);
-            final notificationRooms = notifications.notifications
-                .map((n) => n.roomId)
-                .toSet();
-            emptyRooms = client.rooms
-                .where((r) => !notificationRooms.contains(r.id))
-                .map((r) => r.id);
-          } catch (e) {
-            Logs().v(
-              '[Push] failed to fetch pending notifications for clearing push, falling back...',
-              e,
-            );
-            emptyRooms = client.rooms
-                .where((r) => r.hasNoPendingNotification)
-                .map((r) => r.id);
-          }
-        }
+        // Without a fresh sync, the counts are stale: keep the notifications.
+        emptyRooms = await _syncSucceeded(pushClient)
+            ? pushClient.rooms
+                  .where((r) => r.hasNoPendingNotification)
+                  .map((r) => r.id)
+            : const [];
       } else {
         final syncedRoomIds = {..._syncedRoomIds};
         _syncedRoomIds.clear();
-        emptyRooms = client.rooms
+        emptyRooms = pushClient.rooms
             .where((r) => syncedRoomIds.contains(r.id))
             .where((r) => r.hasNoPendingNotification)
             .map((r) => r.id);
@@ -1030,8 +1057,13 @@ class BackgroundPush {
     } finally {
       _clearingPushLock = false;
     }
+    while (_pendingServerSweeps.isNotEmpty) {
+      final next = _pendingServerSweeps.first;
+      _pendingServerSweeps.remove(next);
+      if (next.isLogged()) return _onClearingPush(receiving: next);
+    }
     // Rooms synced while this sweep ran.
-    if (_syncedRoomIds.isNotEmpty) await _onClearingPush(getFromServer: false);
+    if (_syncedRoomIds.isNotEmpty) await _onClearingPush();
   }
 
   PushNotification _parseMessagePayload(dynamic message) {

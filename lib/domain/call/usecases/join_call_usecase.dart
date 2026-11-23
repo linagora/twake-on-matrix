@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_cancellation.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
@@ -10,7 +12,8 @@ class JoinCallUseCase {
 
   /// The membership is sent once the media is up, so that the others never
   /// see a device that could not connect. Null when [cancellation] is
-  /// cancelled before the membership is sent.
+  /// cancelled before the membership is sent. The others ring once it is
+  /// sent, unless someone is already in the call.
   Future<CallRoomInfo?> execute({
     required String roomId,
     required String? serviceUrl,
@@ -30,9 +33,18 @@ class JoinCallUseCase {
       isEncrypted: room.isEncrypted,
     );
     if (!await _connect(server, media, cancel)) return null;
+    final othersInCall = await _hasOthers(join.room);
     // Before the membership: the others send their keys once they see it.
     if (room.isEncrypted) _repository.startMediaKeys(join.room);
-    await _sendMembership(join, cancel, sharesKeys: room.isEncrypted);
+    final membershipEventId = await _sendMembership(
+      join,
+      cancel,
+      sharesKeys: room.isEncrypted,
+    );
+    if (membershipEventId != null && !othersInCall) {
+      // Not awaited: a slow ring must not hold the join, nor a hang-up.
+      unawaited(_ring(join, membershipEventId));
+    }
     return room;
   }
 
@@ -71,8 +83,8 @@ class JoinCallUseCase {
   }
 
   /// Left meanwhile: the microphone stops at once, the membership ends once
-  /// it has been sent.
-  Future<void> _sendMembership(
+  /// it has been sent. Gives the id of the membership event, null when left.
+  Future<String?> _sendMembership(
     CallJoin join,
     CallCancellation cancellation, {
     required bool sharesKeys,
@@ -80,9 +92,10 @@ class JoinCallUseCase {
     final sent = _repository.joinMembership(join);
     try {
       await Future.any([sent, cancellation.whenCancelled]);
-      if (!cancellation.isCancelled) return;
+      if (!cancellation.isCancelled) return await sent;
       await _stopMedia(sharesKeys: sharesKeys);
       await sent;
+      return null;
     } on CallException {
       await _stopMedia(sharesKeys: sharesKeys);
       rethrow;
@@ -92,5 +105,24 @@ class JoinCallUseCase {
   Future<void> _stopMedia({required bool sharesKeys}) async {
     await _repository.disconnectMedia();
     if (sharesKeys) await _repository.stopMediaKeys();
+  }
+
+  /// A room that cannot be read leaves no call to join: the media stops.
+  Future<bool> _hasOthers(CallRoom room) async {
+    try {
+      return _repository.hasOtherMembers(room);
+    } on CallException {
+      await _repository.disconnectMedia();
+      rethrow;
+    }
+  }
+
+  /// A ring that cannot be sent leaves the call going. The data layer logs it.
+  Future<void> _ring(CallJoin join, String membershipEventId) async {
+    try {
+      await _repository.sendRing(join, membershipEventId: membershipEventId);
+    } on Exception {
+      // Only the ring is lost.
+    }
   }
 }

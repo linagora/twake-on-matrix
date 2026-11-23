@@ -11,11 +11,11 @@ import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/highlight_text.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
 import 'package:twake_chat/widgets/search/empty_search_widget.dart';
-import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ServerSearchMessagesList extends StatelessWidget {
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   const ServerSearchMessagesList({super.key, required this.searchController});
 

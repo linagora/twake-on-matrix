@@ -1,6 +1,6 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:flutter/foundation.dart'
-    show kIsWeb, kDebugMode, visibleForTesting;
+    show kDebugMode, kIsWeb, visibleForTesting;
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:package_info_plus/package_info_plus.dart';
