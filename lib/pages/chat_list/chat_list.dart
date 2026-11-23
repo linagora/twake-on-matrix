@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -44,6 +45,7 @@ import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../../widgets/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 class ChatList extends StatefulWidget {
   final ValueNotifier<String?> activeRoomIdNotifier;
@@ -104,8 +106,6 @@ class ChatListController extends State<ChatList>
 
   bool isTorBrowser = false;
 
-  bool scrolledToTop = true;
-
   Client get activeClient => matrixState.client;
 
   MatrixState get matrixState => Matrix.of(context);
@@ -127,7 +127,8 @@ class ChatListController extends State<ChatList>
 
   bool _containUnreadMessage(ConversationSelectionPresentation conversation) {
     final room = Matrix.of(context).client.getRoomById(conversation.roomId);
-    return room != null && (room.isUnreadOrInvited || room.hasNewMessages);
+    return room != null &&
+        (room.isUnreadOrInvitedWithThreads || room.hasNewMessagesWithThreads);
   }
 
   bool get anySelectedRoomNotFavorite =>
@@ -153,15 +154,6 @@ class ChatListController extends State<ChatList>
       : PushRuleState.notify;
 
   void addAccountAction() => context.go('/settings/account');
-
-  void _onScroll() {
-    final newScrolledToTop = scrollController.position.pixels <= 0;
-    if (newScrolledToTop != scrolledToTop) {
-      setState(() {
-        scrolledToTop = newScrolledToTop;
-      });
-    }
-  }
 
   void editSpace(BuildContext context, String spaceId) async {
     await activeClient.getRoomById(spaceId)!.postLoad();
@@ -234,9 +226,8 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> _markAsRead(Room room) async {
-    final lastEventId = room.lastEvent?.eventId;
-    if (lastEventId != null && (room.isUnread || room.hasNewMessages)) {
-      await room.setReadMarker(lastEventId, mRead: lastEventId);
+    if (room.isUnreadWithThreads || room.hasNewMessagesWithThreads) {
+      await room.markRoomAndAllThreadsRead();
     }
   }
 
@@ -523,7 +514,7 @@ class ChatListController extends State<ChatList>
   Future<void> toggleRead(Room room) async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        if (room.isUnread) {
+        if (room.isUnreadWithThreads) {
           await _markAsRead(room);
           await room.markUnread(false);
         } else {
@@ -691,7 +682,6 @@ class ChatListController extends State<ChatList>
   @override
   void initState() {
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
-    scrollController.addListener(_onScroll);
     _listenToRoomUpdates();
     if (!matrixState.waitForFirstSync) {
       _trySync();
@@ -715,18 +705,20 @@ class ChatListController extends State<ChatList>
     return [
       if (!room.isInvitation)
         ChatCustomSlidableAction(
-          label: room.isUnread
+          label: room.isUnreadWithThreads
               ? L10n.of(context)!.read
               : L10n.of(context)!.unread,
           icon: Icon(
-            room.isUnread
+            room.isUnreadWithThreads
                 ? Icons.mark_chat_read_outlined
                 : Icons.mark_chat_unread_outlined,
             size: ChatListViewStyle.slidableIconSize,
           ),
           onPressed: (_) => toggleRead(room),
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          backgroundColor: ChatListViewStyle.readSlidableColor(room.isUnread)!,
+          backgroundColor: ChatListViewStyle.readSlidableColor(
+            room.isUnreadWithThreads,
+          )!,
         ),
       ChatCustomSlidableAction(
         label: room.isMuted ? L10n.of(context)!.unmute : L10n.of(context)!.mute,
@@ -780,7 +772,6 @@ class ChatListController extends State<ChatList>
 
   @override
   void dispose() {
-    scrollController.removeListener(_onScroll);
     _roomUpdateSubscription?.cancel();
     selectModeNotifier.dispose();
     conversationSelectionNotifier.dispose();

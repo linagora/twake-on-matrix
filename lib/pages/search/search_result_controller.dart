@@ -12,14 +12,16 @@ class SearchResultController extends _$SearchResultController {
   SearchResultState build() => const SearchResultState.idle();
 
   /// Ends in `ownProfile`, `room` or `draft`, which the screen navigates to;
-  /// ignored while a lookup is running.
+  /// ignored while a lookup is running or while no account is active.
   Future<void> openContact({
     required String matrixId,
     String? displayName,
   }) async {
     if (state is SearchResultOpening) return;
+    final activeUserId = ref.read(activeUserIdProvider);
+    if (activeUserId == null) return;
     state = const SearchResultState.opening();
-    if (matrixId == ref.read(activeUserIdProvider)) {
+    if (matrixId == activeUserId) {
       state = const SearchResultState.ownProfile();
       return;
     }

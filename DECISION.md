@@ -427,3 +427,33 @@ mobile users, and one started from mobile rings no Twake Space Chat user.
 Should both clients do the same?
 
 Completes D12, which left the ring push rules for later.
+
+## D22. Threads are on for everyone on mobile (decided by Clément, 2026-11-20)
+
+The threads of Twake Space Chat (#993, P1) ship on, for every user, when
+#3606 reaches main: `threadsEnabled` is `true`. They cover sending to a
+thread, the thread screen and its card in the chat, Start a thread, thread
+counts in the badges, the chat list and the room list, threads opened from
+notifications, links and search, per-thread unread and threaded read
+receipts, the Activity tab (unread rooms and followed threads), and the iOS
+icon badge.
+
+Known limit, still open: while the app is killed, the iOS icon badge counts
+the replies of threads the user does not follow (#3635).
+
+## D23. A chat with unread messages opens on the first unread one, without scrolling (proposed by Johann, 2026-11-19)
+
+Opening a chat with unread messages shows the "Unread messages" divider at the
+top of the screen, with the first unread message right under it, from the first
+frame: no scroll animation (#2720, as the designer asked in
+https://github.com/linagora/twake-on-matrix/issues/2720#issuecomment-3579815019).
+When all the unread messages fit on the screen, the chat opens at the bottom,
+as before.
+
+When the read marker is older than the loaded messages, the chat loads more
+history first (up to three pages of 100 events), behind the loading skeleton.
+If the marker is still not found, the chat opens at the bottom.
+
+Opening the chat only marks as read the messages shown on the screen. The
+unread count drops to the messages below, and the room is read once the user
+reaches the bottom, as before.

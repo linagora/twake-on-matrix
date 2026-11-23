@@ -107,6 +107,7 @@ void main() {
   late File pickedFile;
   late PathProviderPlatform originalPathProvider;
   final placeholders = <MatrixEvent>[];
+  final statusUpdates = <String, int?>{};
 
   setUpAll(() async {
     queue = _RecordingQueue();
@@ -131,6 +132,8 @@ void main() {
         if (event.unsigned?['transaction_id'] == event.eventId) {
           placeholders.add(event);
         }
+        statusUpdates[event.eventId] =
+            event.unsigned?[messageSendingStatusKey] as int?;
       }
     });
     manager = UploadManager();
@@ -145,6 +148,7 @@ void main() {
   setUp(() {
     queue.added.clear();
     placeholders.clear();
+    statusUpdates.clear();
     database.events.clear();
     FakeMatrixApi.calledEndpoints.clear();
   });
@@ -167,7 +171,10 @@ void main() {
 
   /// The local event as the app finds it in its database after a restart:
   /// the placeholder written before the upload began, which never finished.
-  Event eventAfterRestart(String eventId) {
+  Event eventAfterRestart(
+    String eventId, {
+    EventStatus status = EventStatus.error,
+  }) {
     final placeholder = placeholders.last;
     final event = Event(
       senderId: room.client.userID!,
@@ -176,7 +183,7 @@ void main() {
       eventId: eventId,
       content: placeholder.content,
       unsigned: {...?placeholder.unsigned, 'transaction_id': eventId},
-      status: EventStatus.error,
+      status: status,
       originServerTs: DateTime.now(),
     );
     database.events[eventId] = event;
@@ -219,7 +226,74 @@ void main() {
       await runQueuedSends();
       expect(sentMessages(), isNotEmpty);
     });
+
+    test('${entry.name}: an upload cut by a process kill shows as failed when '
+        'its chat opens again, while a live one keeps sending', () async {
+      await entry.upload();
+      await pumpEventQueue();
+      final live = placeholders.last;
+      final liveEvent = Event.fromMatrixEvent(live, room);
+      final interrupted = eventAfterRestart(
+        'restarted-${entry.name}',
+        status: EventStatus.sending,
+      );
+      final sent = eventAfterRestart(
+        'sent-${entry.name}',
+        status: EventStatus.sent,
+      );
+      final sendingText = Event(
+        senderId: room.client.userID!,
+        type: EventTypes.Message,
+        room: room,
+        eventId: 'text-${entry.name}',
+        content: {'msgtype': MessageTypes.Text, 'body': 'hello'},
+        status: EventStatus.sending,
+        originServerTs: DateTime.now(),
+      );
+      statusUpdates.clear();
+
+      await manager.failInterruptedUploads([
+        liveEvent,
+        interrupted,
+        sent,
+        sendingText,
+      ]);
+      await pumpEventQueue();
+
+      expect(statusUpdates[interrupted.eventId], EventStatus.error.intValue);
+      expect(statusUpdates, isNot(contains(live.eventId)));
+      expect(statusUpdates, isNot(contains(sent.eventId)));
+      expect(statusUpdates, isNot(contains(sendingText.eventId)));
+    });
   }
+
+  test('interrupted uploads all fail even when the timeline grows while they '
+      'are marked', () async {
+    await manager.uploadFileMobile(
+      room: room,
+      fileInfos: [FileInfo('notes.txt', filePath: pickedFile.path)],
+    );
+    await pumpEventQueue();
+    final timeline = [
+      eventAfterRestart('restarted-first', status: EventStatus.sending),
+      eventAfterRestart('restarted-second', status: EventStatus.sending),
+    ];
+    final growTimeline = room.client.onSync.stream.listen((_) {
+      if (timeline.length == 2) {
+        timeline.add(
+          eventAfterRestart('restarted-third', status: EventStatus.sent),
+        );
+      }
+    });
+    addTearDown(growTimeline.cancel);
+    statusUpdates.clear();
+
+    await manager.failInterruptedUploads(timeline);
+    await pumpEventQueue();
+
+    expect(statusUpdates['restarted-first'], EventStatus.error.intValue);
+    expect(statusUpdates['restarted-second'], EventStatus.error.intValue);
+  });
 
   test('a file the OS removed before the retry cannot be resent', () async {
     final removedFile = File('${tempDir.path}/removed.txt')

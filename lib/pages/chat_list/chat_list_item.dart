@@ -1,4 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:collection/collection.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
@@ -111,9 +112,9 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
         onSecondaryTapDown: onSecondaryTapDown,
         onLongPress: onLongPress,
         child: TwakeListItem(
-          child: FutureBuilder(
-            future: room.name.isEmpty ? room.loadHeroUsers() : null,
-            builder: (context, _) {
+          child: _HeroUsersLoader(
+            room: room,
+            builder: (context) {
               final displayName = room.getLocalizedDisplayname(
                 MatrixLocals(L10n.of(context)!),
               );
@@ -186,6 +187,69 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Loads the heroes of a nameless room so its display name resolves, then
+/// builds again. The load runs once per row and again only when the room,
+/// its name, its membership or its heroes change: the list rebuilds the row
+/// on every sync, and each load can read the database or the server.
+class _HeroUsersLoader extends StatefulWidget {
+  const _HeroUsersLoader({required this.room, required this.builder});
+
+  final Room room;
+  final Widget Function(BuildContext context) builder;
+
+  @override
+  State<_HeroUsersLoader> createState() => _HeroUsersLoaderState();
+}
+
+class _HeroUsersLoaderState extends State<_HeroUsersLoader> {
+  static const _heroesEquality = ListEquality<String>();
+
+  Future<List<User>>? _heroUsers;
+  String? _loadedRoomId;
+  bool? _loadedNameless;
+  Membership? _loadedMembership;
+  List<String>? _loadedHeroes;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HeroUsersLoader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final room = widget.room;
+    final nameless = room.name.isEmpty;
+    if (room.id != _loadedRoomId ||
+        nameless != _loadedNameless ||
+        room.membership != _loadedMembership ||
+        (nameless &&
+            !_heroesEquality.equals(room.summary.mHeroes, _loadedHeroes))) {
+      _load();
+    }
+  }
+
+  void _load() {
+    final room = widget.room;
+    final nameless = room.name.isEmpty;
+    _loadedRoomId = room.id;
+    _loadedNameless = nameless;
+    _loadedMembership = room.membership;
+    // A copy: the display name adds the DM peer to empty heroes in place.
+    _loadedHeroes = nameless ? room.summary.mHeroes?.toList() : null;
+    _heroUsers = nameless ? room.loadHeroUsers() : null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _heroUsers,
+      builder: (context, _) => widget.builder(context),
     );
   }
 }

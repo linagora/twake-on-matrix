@@ -99,7 +99,9 @@ Future<void> initializeApp() async {
       Logs().w('No logged-in client to serve push in background-fetch mode.');
     }
     // To start the flutter engine afterwards we add an custom observer.
-    WidgetsBinding.instance.addObserver(AppStarter(container));
+    WidgetsBinding.instance.addObserver(
+      AppStarter(clients, () => startGui(container))..stopBackgroundSync(),
+    );
     Logs().i(
       '${AppConfig.applicationName} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
     );
@@ -159,10 +161,20 @@ Future<void> startGui(ProviderContainer container) async {
 /// Watches the lifecycle changes to start the application when it
 /// is no longer detached.
 class AppStarter with WidgetsBindingObserver {
-  final ProviderContainer container;
+  final List<Client> clients;
+  final Future<void> Function() startGui;
   bool guiStarted = false;
 
-  AppStarter(this.container);
+  AppStarter(this.clients, this.startGui);
+
+  /// Stops the sync loop that `Client.init` started: without a GUI nothing
+  /// else stops it. A push still fetches its event by id and runs one sync for
+  /// a missing room key, as for a paused app.
+  void stopBackgroundSync() {
+    for (final client in clients) {
+      client.backgroundSync = false;
+    }
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -172,7 +184,19 @@ class AppStarter with WidgetsBindingObserver {
     Logs().i(
       '${AppConfig.applicationName} switches from the detached background-fetch mode to ${state.name} mode. Rendering GUI...',
     );
-    unawaited(startGui(container));
+    // MatrixState sets the sync only on the lifecycle changes it sees once it
+    // exists, so it misses this one: turn the sync back on here, by its rule.
+    // From detached the binding replays every step (resumed first) up to the
+    // new state, so read the state it settles on.
+    scheduleMicrotask(() {
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.paused) {
+        return;
+      }
+      for (final client in clients) {
+        client.backgroundSync = true;
+      }
+    });
+    unawaited(startGui());
     // We must make sure that the GUI is only started once.
     guiStarted = true;
   }
