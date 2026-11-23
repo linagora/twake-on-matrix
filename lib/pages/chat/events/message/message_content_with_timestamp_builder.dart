@@ -166,7 +166,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
       MessageContextMenuAction.select,
       MessageContextMenuAction.selectAll,
       MessageContextMenuAction.pin,
-      MessageContextMenuAction.saveToGallery,
+      if (PlatformInfos.isMobile) MessageContextMenuAction.saveToGallery,
       if (members.every((member) => member.canDelete))
         MessageContextMenuAction.delete,
     ];
