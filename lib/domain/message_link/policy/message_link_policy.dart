@@ -62,6 +62,10 @@ class MessageLinkPolicy {
       final isRoomId = id.startsWith('!') && id.length > 1;
       if (!isRoomId && !isAlias) return null;
       final eventId = uri.queryParameters['event'];
+      // The SDK also reads a user, room or alias id as the second part.
+      if (eventId != null && eventId.isNotEmpty && !eventId.startsWith(r'$')) {
+        return null;
+      }
       final via = uri.queryParametersAll['via'] ?? const [];
       return '$_matrixToPrefix${Uri.encodeComponent(id)}'
           '${eventId == null || eventId.isEmpty ? '' : '/${Uri.encodeComponent(eventId)}'}'

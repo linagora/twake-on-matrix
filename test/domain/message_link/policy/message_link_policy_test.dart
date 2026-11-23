@@ -242,6 +242,27 @@ void main() {
         expect(parts, isNotNull, reason: link);
       }
     });
+
+    test('ignores a rooms link whose event is not an event id', () {
+      // The Matrix SDK reads a user id, a room id or an alias as the second
+      // identifier too; only the $ sigil makes an event id.
+      for (final link in [
+        'https://chat.example.org/rooms/!room:example.org'
+            '?event=%40alice%3Aexample.org',
+        'https://chat.other.org/rooms/!abc%3Aexample.org'
+            '?event=%40alice%3Aexample.org',
+        'https://chat.other.org/rooms/!abc%3Aexample.org'
+            '?event=!other%3Aexample.org',
+        'https://chat.other.org/rooms/!abc%3Aexample.org'
+            '?event=%23general%3Aexample.org',
+        'https://chat.other.org/rooms/%23general%3Aexample.org'
+            '?event=%40alice%3Aexample.org',
+        'https://chat.other.org/rooms/!abc'
+            '?event=%40alice%3Aexample.org&via=example.org',
+      ]) {
+        expect(policy.matrixToForRoomsLink(link), isNull, reason: link);
+      }
+    });
   });
 
   group('MessageLinkPolicy with malformed percent-encoding', () {
