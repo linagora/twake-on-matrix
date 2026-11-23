@@ -58,6 +58,7 @@ class UrlLauncher with GoToDraftChatMixin {
       return openMatrixToUrl(
         customUrl: webAppMatrixTo,
         isInvitationLink: isInvitationLink,
+        webLink: url,
       );
     }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
@@ -158,6 +159,7 @@ class UrlLauncher with GoToDraftChatMixin {
   void openMatrixToUrl({
     String? customUrl,
     bool isInvitationLink = false,
+    String? webLink,
   }) async {
     final matrix = Matrix.of(context);
     final url = (customUrl ?? this.url!).replaceFirst(
@@ -198,6 +200,7 @@ class UrlLauncher with GoToDraftChatMixin {
               via: identityParts.via.toList(),
             ),
             eventId: event,
+            webLink: webLink,
           ),
         );
         return;

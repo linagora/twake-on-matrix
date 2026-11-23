@@ -350,5 +350,34 @@ void main() {
       expect(publicRooms.previewQueries, ['!opaque']);
       expect(publicRooms.previewVia.single, ['example.org', 'other.org']);
     });
+
+    testWidgets('WHEN the room cannot be previewed\n'
+        'THEN the sheet offers to open the original link in the browser', (
+      tester,
+    ) async {
+      const link = 'https://other.example.com/rooms/!opaque?event=%24event';
+      publicRooms.preview = const PublicRoomPreview.unavailable();
+      await launchInApp(tester, link);
+      expect(find.text('This group is unavailable.'), findsOneWidget);
+      expect(platform.launches, isEmpty);
+
+      await tester.tap(find.text('Open in browser'));
+      await tester.pumpAndSettle();
+
+      expect(platform.launches, [
+        (link, PreferredLaunchMode.externalApplication),
+      ]);
+      expect(find.text('This group is unavailable.'), findsNothing);
+    });
+
+    testWidgets('WHEN a matrix.to link names a room that cannot be previewed\n'
+        'THEN the sheet has no browser button', (tester) async {
+      publicRooms.preview = const PublicRoomPreview.unavailable();
+
+      await launchInApp(tester, 'https://matrix.to/#/%23general%3Aexample.org');
+
+      expect(find.text('This group is unavailable.'), findsOneWidget);
+      expect(find.text('Open in browser'), findsNothing);
+    });
   });
 }

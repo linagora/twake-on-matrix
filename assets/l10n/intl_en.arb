@@ -3242,6 +3242,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "openInBrowser": "Open in browser",
+  "@openInBrowser": {
+    "type": "text",
+    "placeholders": {}
+  },
   "publicGroupsYouCanJoin": "Groups you can join",
   "@publicGroupsYouCanJoin": {
     "type": "text",
