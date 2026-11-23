@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
@@ -12,8 +13,10 @@ import 'package:twake_chat/utils/extension/share_position_origin_extension.dart'
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/size_string.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:mime/mime.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:twake_chat/domain/model/extensions/string_extension.dart';
+import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 
 extension MatrixFileExtension on MatrixFile {
   bool isImage() {
@@ -76,29 +79,24 @@ extension MatrixFileExtension on MatrixFile {
     return;
   }
 
+  /// Writes the file into Downloads under the next free name, never over an
+  /// existing file, and says so. Returns the full path, or null on failure.
   Future<String?> downloadFileOnDesktop(BuildContext context) async {
-    Logs().d(
-      "MatrixFileExtension()::downloadFileOnDesktop()::download on Desktop",
-    );
     try {
+      final downloads = await getDownloadsDirectory();
+      if (downloads == null) return null;
       final fileExt = extensionFromMime(mimeType);
-      // Strip the dot + extension from `name` if already present to avoid
-      // duplicates (FileSaver appends `ext` to `name`).
-      final lowerName = name.toLowerCase();
-      final hasCanonicalExt =
-          fileExt.isNotEmpty && lowerName.endsWith('.$fileExt');
-      final baseName = hasCanonicalExt
-          ? name.substring(0, name.length - fileExt.length - 1)
-          : name;
-      final directory = await FileSaver.instance.saveFile(
-        name: baseName,
-        bytes: bytes,
-        ext: fileExt,
-        mimeType: MimeType.custom,
-        customMimeType: mimeType,
+      final hasExt =
+          fileExt.isEmpty || name.toLowerCase().endsWith('.$fileExt');
+      final fileName = hasExt ? name : '$name.$fileExt';
+      final path = await StorageDirectoryManager.instance.getAvailableFilePath(
+        '${downloads.path}/${fileName.safeFileName}',
       );
-      final savedName = fileExt.isNotEmpty ? '$baseName.$fileExt' : baseName;
-      return '$directory/$savedName';
+      await File(path).writeAsBytes(bytes);
+      if (context.mounted) {
+        TwakeSnackBar.show(context, L10n.of(context)!.fileSavedToDownloads);
+      }
+      return path;
     } catch (e) {
       Logs().e("MatrixFileExtension()::downloadFileOnDesktop()::Error: $e");
     }
