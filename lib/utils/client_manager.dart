@@ -56,7 +56,20 @@ abstract class ClientManager {
       await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
       await Store().deleteItem(_legacyClientNamespace);
     }
-    final clients = await Future.wait(clientNames.map(createClient));
+    // One account whose database cannot be opened (key unavailable, locked)
+    // must not stop the others, nor the app.
+    final created = await Future.wait(
+      clientNames.map(
+        (name) => createClient(name).then<Client?>((c) => c).catchError((
+          Object e,
+          StackTrace s,
+        ) {
+          Logs().e('Unable to create client $name, skipping it', e, s);
+          return null;
+        }),
+      ),
+    );
+    final clients = created.whereType<Client>().toList();
     if (initialize) {
       await Future.wait(clients.map(initClient));
     }
@@ -146,7 +159,9 @@ abstract class ClientManager {
         await deleteSqfliteDb(path);
         await SqliteKeyStore()
             .delete(basenameWithoutExtension(path))
-            .catchError((_) {});
+            .catchError((e) {
+              Logs().w('Cannot delete the database key of $path', e);
+            });
       }
     }
   }
