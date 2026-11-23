@@ -184,7 +184,10 @@ class _NoRecentReactions implements ReactionsRepository {
 }
 
 /// Text replies only: nothing is uploaded.
-class _NoUploads extends Fake implements UploadManager {}
+class _NoUploads extends Fake implements UploadManager {
+  @override
+  Future<void> failInterruptedUploads(Iterable<Event> events) async {}
+}
 
 class _FakeMatrixState extends Fake implements MatrixState {
   _FakeMatrixState(this.client);
