@@ -82,7 +82,6 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   }
 
   static Future<String> _findDatabasePath(Client client) async {
-    String path = client.clientName;
     Directory directory;
     try {
       if (Platform.isLinux) {
@@ -102,9 +101,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       directory.uri.resolve(kDebugMode ? 'hive_debug' : 'hive').toFilePath(),
     );
     directory.create(recursive: true);
-    path = directory.path;
-
-    return path;
+    return directory.path;
   }
 
   @override

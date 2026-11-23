@@ -105,7 +105,7 @@ class HiveCollectionToMDatabase {
     return db;
   }
 
-  static Future<String> _findDatabasePath({String? path = 'tom_db'}) async {
+  static Future<String> _findDatabasePath() async {
     Directory directory;
     try {
       if (Platform.isLinux) {
@@ -125,9 +125,7 @@ class HiveCollectionToMDatabase {
       directory.uri.resolve(kDebugMode ? 'hive_debug' : 'hive').toFilePath(),
     );
     directory.create(recursive: true);
-    path = directory.path;
-
-    return path;
+    return directory.path;
   }
 
   Future<void> open() async {
