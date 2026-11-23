@@ -589,7 +589,15 @@ class ChatController extends ConsumerState<Chat>
 
   bool _markingLatestRead = false;
 
+  /// Marks on return what arrived while the window was closed or in the
+  /// background.
+  AppLifecycleListener? _lifecycleListener;
+
   void _markLatestReadIfAtBottom() {
+    // A closed (macOS) or background window shows nothing: no read receipt.
+    if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      return;
+    }
     if (isOpeningOnUnread || !_isAtLiveBottom) return;
     if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
     if (_markingLatestRead) return;
@@ -3280,6 +3288,9 @@ class ChatController extends ConsumerState<Chat>
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
     initAutoMarkAsReadMixin();
+    _lifecycleListener = AppLifecycleListener(
+      onResume: _markLatestReadIfAtBottom,
+    );
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (room == null) {
@@ -3424,6 +3435,7 @@ class ChatController extends ConsumerState<Chat>
     _scrollGeneration++;
     unregisterPasteShortcutListeners();
     disposeAutoMarkAsReadMixin();
+    _lifecycleListener?.dispose();
     timeline?.cancelSubscriptions();
     timeline = null;
 
