@@ -1,10 +1,9 @@
-import 'package:collection/collection.dart';
 import 'dart:convert';
 
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
-import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_session.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 
@@ -46,101 +45,43 @@ class KeychainSharingManager {
     }
   }
 
-  static const String _notificationDeviceName = 'Twake Chat notifications';
+  static const String _httpSessionPrefix = 'http_';
 
-  /// Written by the NSE: the ed25519 key it generated for its device.
-  static const String _nseDeviceKeyPrefix = 'nse_ed25519_';
-
-  /// Gives the iOS notification extension its own device.
-  ///
-  /// The extension runs its own crypto engine. Sharing the app's device with
-  /// it makes it upload its own identity keys over the app's ones and consume
-  /// the app's to-device messages. The dedicated device comes from a second
-  /// SSO login: [loginToken] is the token returned by that SSO flow.
-  static Future<void> createNotificationSession(
-    Client client,
-    String loginToken,
-  ) => _pendingCreation = _createNotificationSession(client, loginToken);
-
-  /// Lets a logout wait for a session being created, which it must delete.
-  static Future<void>? _pendingCreation;
-
-  static Future<void> _createNotificationSession(
-    Client client,
-    String loginToken,
-  ) async {
+  /// The app's own token for a notification extension that only does HTTP.
+  /// It has no `session` field and its own key, so [read] never returns it
+  /// and [removeAppSession] never purges it.
+  static Future<void> saveHttpSession(Client client) async {
     final userId = client.userID;
+    final accessToken = client.accessToken;
     final homeserver = client.homeserver;
-    if (userId == null || homeserver == null) return;
-    await _logoutNotificationSession(client, userId);
-    final login =
-        await MatrixApi(
-          homeserver: homeserver,
-          httpClient: client.httpClient,
-        ).login(
-          LoginType.mLoginToken,
-          token: loginToken,
-          initialDeviceDisplayName: _notificationDeviceName,
-        );
-    if (login.userId != userId) {
-      // The SSO flow signed another account in: never hand it to the extension.
-      await MatrixApi(
-        homeserver: homeserver,
-        accessToken: login.accessToken,
-        httpClient: client.httpClient,
-      ).logout();
-      throw Exception('SSO login returned ${login.userId}, expected $userId');
+    if (!PlatformInfos.isIOS ||
+        userId == null ||
+        accessToken == null ||
+        homeserver == null) {
+      return;
     }
-    await save(
-      KeychainSharingRestoreToken(
-        session: KeychainSharingSession(
-          accessToken: login.accessToken,
-          userId: userId,
-          deviceId: login.deviceId,
-          homeserverUrl: homeserver.toString(),
-        ),
-        dedicated: true,
-      ),
-    );
-    Logs().i(
-      '[KeychainSharing] Notification device ${login.deviceId} for $userId',
-    );
-  }
-
-  /// The SSO provider that signs the extension in, or null without SSO.
-  static Future<String?> notificationSsoProviderId(Client client) async {
     try {
-      final flows = await client.getLoginFlows();
-      final sso = flows?.firstWhereOrNull(
-        (flow) => flow.type == AuthenticationTypes.sso,
+      await _secureStorage.write(
+        key: '$_httpSessionPrefix$userId',
+        value: jsonEncode({
+          'accessToken': accessToken,
+          'userId': userId,
+          'homeserverUrl': homeserver.toString(),
+          'pusherNotificationClientIdentifier': userId.sha256Hash,
+        }),
       );
-      final providers = sso?.additionalProperties['identity_providers'];
-      // ponytail: first provider; pick the app's own one if a server ever
-      // offers several.
-      return providers is List && providers.isNotEmpty
-          ? (providers.first as Map)['id'] as String?
-          : null;
-    } catch (e, s) {
-      Logs().w('Unable to read login flows', e, s);
-      return null;
+    } on Exception catch (e, s) {
+      Logs().wtf('[KeychainSharing] Unable to save HTTP session', e, s);
     }
   }
 
-  /// The app cross-signs the extension's device, so it needs the
-  /// self-signing key in cache. Without cross-signing, senders share keys with
-  /// every device anyway.
-  static Future<bool> notificationPreviewsLocked(Client client) async {
-    final cached = await client.encryption?.crossSigning.isCached() ?? false;
-    return client.userDeviceKeys[client.userID]?.masterKey != null && !cached;
-  }
-
-  /// Whether the extension has its own device for [client].
-  static Future<bool> hasNotificationSession(Client client) async {
-    final userId = client.userID;
-    if (!PlatformInfos.isIOS || userId == null) return false;
-    final token = await read(userId: userId);
-    return token?.dedicated == true &&
-        token?.session.deviceId != client.deviceID;
+  static Future<void> deleteHttpSession(String userId) async {
+    if (!PlatformInfos.isIOS) return;
+    try {
+      await _secureStorage.delete(key: '$_httpSessionPrefix$userId');
+    } on Exception catch (e, s) {
+      Logs().wtf('[KeychainSharing] Unable to delete HTTP session', e, s);
+    }
   }
 
   /// Removes a keychain session that is not a dedicated extension session.
@@ -155,67 +96,6 @@ class KeychainSharingManager {
     if (token.dedicated != true || token.session.deviceId == client.deviceID) {
       Logs().i('[KeychainSharing] Removing the app session of $userId');
       await delete(userId: userId);
-    }
-  }
-
-  /// Keeps the extension's device usable: forgets it once revoked, and
-  /// cross-signs it so senders that share keys only with cross-signed
-  /// devices (Dart SDK `crossVerifiedIfEnabled`) reach it.
-  ///
-  /// The device publishes its keys on its first push, so signing waits for
-  /// a later call (startup or own device list change).
-  static Future<void> checkNotificationDevice(Client client) async {
-    final userId = client.userID;
-    final homeserver = client.homeserver;
-    if (!PlatformInfos.isIOS || userId == null || homeserver == null) return;
-    final token = await read(userId: userId);
-    if (token?.dedicated != true) return;
-    final session = token!.session;
-    try {
-      await MatrixApi(
-        homeserver: homeserver,
-        accessToken: session.accessToken,
-        httpClient: client.httpClient,
-      ).getTokenOwner();
-    } on MatrixException catch (e) {
-      if (e.error == MatrixError.M_UNKNOWN_TOKEN) {
-        Logs().i('[KeychainSharing] Notification device revoked for $userId');
-        await delete(userId: userId);
-      }
-      return;
-    } catch (_) {
-      return; // offline: try again later
-    }
-    final encryption = client.encryption;
-    if (encryption == null || !await encryption.crossSigning.isCached()) {
-      return;
-    }
-    try {
-      await client.updateUserDeviceKeys();
-      final device =
-          client.userDeviceKeys[userId]?.deviceKeys[session.deviceId];
-      // Same check as a sender's `ShareKeysWith.crossVerifiedIfEnabled`.
-      if (device == null ||
-          device.hasValidSignatureChain(verifiedByTheirMasterKey: true)) {
-        return;
-      }
-      // Sign only the keys the extension generated, never keys the server
-      // published for that device id.
-      final nseKey = await _secureStorage.read(
-        key: '$_nseDeviceKeyPrefix${session.deviceId}',
-      );
-      if (nseKey == null || nseKey != device.ed25519Key) {
-        Logs().w(
-          '[KeychainSharing] Keys of ${device.deviceId} do not match the NSE',
-        );
-        return;
-      }
-      await encryption.crossSigning.sign([device]);
-      Logs().i(
-        '[KeychainSharing] Signed notification device ${device.deviceId}',
-      );
-    } catch (e, s) {
-      Logs().w('[KeychainSharing] Unable to sign notification device', e, s);
     }
   }
 
@@ -259,11 +139,40 @@ class KeychainSharingManager {
     return false;
   }
 
+  /// Logs out the dedicated notification device that older versions created
+  /// through a second login, then forgets its session. Unlike
+  /// [logoutNotificationSession], the entry stays when the request fails, so
+  /// the next launch tries again.
+  static Future<void> removeDedicatedNotificationDevice(Client client) async {
+    final userId = client.userID;
+    if (!PlatformInfos.isIOS || userId == null) return;
+    try {
+      final token = await read(userId: userId);
+      if (token?.dedicated != true) return;
+      final session = token!.session;
+      if (session.deviceId != client.deviceID) {
+        try {
+          await MatrixApi(
+            homeserver: Uri.parse(session.homeserverUrl),
+            accessToken: session.accessToken,
+            httpClient: client.httpClient,
+          ).logout();
+        } on MatrixException catch (e) {
+          // Already revoked: only the entry is left to remove.
+          if (e.error != MatrixError.M_UNKNOWN_TOKEN) rethrow;
+        }
+      }
+      await delete(userId: userId);
+      Logs().i('[KeychainSharing] Removed the notification device');
+    } on Exception catch (e, s) {
+      Logs().w('[KeychainSharing] Unable to remove notification device', e, s);
+    }
+  }
+
   /// Logs the notification device out and forgets its session.
   static Future<void> logoutNotificationSession(Client client) async {
     final userId = client.userID;
     if (!PlatformInfos.isIOS || userId == null) return;
-    await _pendingCreation?.catchError((_) {});
     // userId is kept: the client may have been cleared while waiting.
     await _logoutNotificationSession(client, userId);
   }

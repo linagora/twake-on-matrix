@@ -28,6 +28,8 @@ enum KeychainControllerService: String {
 }
 
 class KeychainController: KeychainControllerProtocol {
+    private static let httpKeyPrefix = "http_"
+
     private let keychain: Keychain
 
     init(service: KeychainControllerService,
@@ -60,12 +62,20 @@ class KeychainController: KeychainControllerProtocol {
 
     func restorationTokens() -> [KeychainCredentials] {
         keychain.allKeys().compactMap { username in
-            guard let restorationToken = restorationTokenForUsername(username) else {
+            guard !username.hasPrefix(Self.httpKeyPrefix),
+                   let restorationToken = restorationTokenForUsername(username) else {
                 return nil
             }
 
             return KeychainCredentials(userID: username, restorationToken: restorationToken)
         }
+    }
+
+    func httpCredentials(forClientID clientID: String) -> HTTPCredentials? {
+        keychain.allKeys()
+            .filter { $0.hasPrefix(Self.httpKeyPrefix) }
+            .compactMap { (try? keychain.getData($0)).flatMap { try? JSONDecoder().decode(HTTPCredentials.self, from: $0) } }
+            .first { $0.pusherNotificationClientIdentifier == clientID }
     }
 
     func removeRestorationTokenForUsername(_ username: String) {
