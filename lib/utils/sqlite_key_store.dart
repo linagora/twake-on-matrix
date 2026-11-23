@@ -22,6 +22,11 @@ class SqliteKeyStore {
       (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
     ).join();
     await _storage.write(key: _entry(dbName), value: key);
+    // A keychain can lose a write silently: a database encrypted with a key
+    // that was not stored could never be opened again.
+    if (await _storage.read(key: _entry(dbName)) != key) {
+      throw StateError('The secure storage did not keep the key of $dbName');
+    }
     return key;
   }
 

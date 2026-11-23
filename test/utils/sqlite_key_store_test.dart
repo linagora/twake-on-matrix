@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/utils/secure_storage.dart';
 import 'package:twake_chat/utils/sqlite_key_store.dart';
 
+import 'fake_keychain.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -82,5 +84,23 @@ void main() {
 
   test('delete on an unknown database does not throw', () async {
     await SqliteKeyStore().delete('never_created');
+  });
+
+  group('a key the secure storage did not keep', () {
+    late FakeKeychain keychain;
+
+    setUp(() => (keychain = FakeKeychain()).install());
+
+    test('is not handed out when its write is silently lost', () async {
+      keychain.loseWrites = true;
+
+      await expectLater(SqliteKeyStore().keyFor('client_a'), throwsA(anything));
+    });
+
+    test('is not handed out when the storage keeps another value', () async {
+      keychain.alterWrites = (value) => value.substring(1);
+
+      await expectLater(SqliteKeyStore().keyFor('client_a'), throwsA(anything));
+    });
   });
 }
