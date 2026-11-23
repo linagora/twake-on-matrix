@@ -458,6 +458,26 @@ Opening the chat only marks as read the messages shown on the screen. The
 unread count drops to the messages below, and the room is read once the user
 reaches the bottom, as before.
 
+## D25. A presence dot on people, and their presence under their name (decided by Johann, 2026-11-20, following Twake Space Chat D466 and D54)
+
+A person's avatar carries a dot at its bottom right: green when online, amber
+when away (Matrix presence `unavailable`), none when offline or unknown
+(`LinagoraPresenceBadge` of the design system: 10 up to a 40 avatar, 12
+above, a 2 ring in the colour behind the avatar). The dot sits on the circle
+at 45°, so it stays on the edge of large avatars; Twake Space Chat pins it to
+the corner of the avatar box, which only differs on large avatars.
+
+This change shows the dot in the header of a direct chat, on the avatar of
+its details and on a member's profile (on the round avatar, not on the
+enlarged picture). The text under the name is `status · presence`, the
+presence alone without a status: « Online », « online 5m ago » up to « a
+while ago », or « Offline » when no activity is known. Only the online state
+says « Online »; an away person shows when they were last active.
+
+The presence comes from the `/sync` the app already runs (no polling, unlike
+Twake Space Chat, whose sliding sync carries none). The chat list, members,
+contacts and the avatars of messages get the dot in the next changes.
+
 ## D26. Calls start audio-only; the camera and the speaker are buttons (decided by Johann, 2026-11-23)
 
 A call on mobile starts with the camera off, as D15 decided. Twake Space

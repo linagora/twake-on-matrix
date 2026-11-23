@@ -35,7 +35,6 @@ abstract class AccountSwitchEffects {
   Future<void> loadHomeserverInfo(Client client, SwitchToken token);
   void refreshContacts(Client client);
   void createSupportChat(Client client);
-  void listenPresence(Client client);
   void configureSentryUser(Client client);
 }
 
@@ -310,7 +309,6 @@ class AccountSwitchCoordinator {
       if (!token.isCurrent) return false;
       effects.refreshContacts(client);
       effects.createSupportChat(client);
-      effects.listenPresence(client);
       effects.configureSentryUser(client);
       _effects = _Applied(client);
       return true;

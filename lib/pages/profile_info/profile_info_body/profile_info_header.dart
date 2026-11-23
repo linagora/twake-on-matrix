@@ -5,8 +5,10 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
-import 'package:twake_chat/providers/matrix_client_provider.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/presence_extension.dart';
+import 'package:twake_chat/domain/presence/entities/person_presence.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/extensions/person_presence_extension.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:flutter/cupertino.dart';
@@ -47,8 +49,7 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
   }
 
   Widget _buildMobileHeader(BuildContext context) {
-    final client = ref.watch(matrixClientProvider);
-    final presence = client.presences[widget.user.id];
+    final presence = ref.watch(personPresenceProvider(widget.user.id)).value;
     final sysColors = LinagoraSysColors.material();
 
     return ValueListenableBuilder(
@@ -116,10 +117,13 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
                         end: Alignment.centerLeft,
                       ).transform(widget.animationController.value),
                       child: Text(
-                        presence.getLocalizedStatusMessage(context),
-                        style: presence
-                            .getPresenceTextStyle(context)
-                            ?.copyWith(
+                        presence.localizedSubtitle(L10n.of(context)!),
+                        style:
+                            ProfileInfoBodyViewStyle.presenceTextStyle(
+                              context,
+                              isOnline:
+                                  presence.status == PresenceStatus.online,
+                            )?.copyWith(
                               color: ColorTween(
                                 begin: sysColors.onSurface,
                                 end: sysColors.onPrimary,
@@ -139,8 +143,7 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
   }
 
   Widget _buildNonMobileHeader(BuildContext context) {
-    final client = ref.watch(matrixClientProvider);
-    final presence = client.presences[widget.user.id];
+    final presence = ref.watch(personPresenceProvider(widget.user.id)).value;
 
     return ValueListenableBuilder(
       valueListenable: widget.userInfoNotifier,
@@ -153,10 +156,14 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
           children: [
             Padding(
               padding: ProfileInfoBodyViewStyle.avatarPadding,
-              child: _buildAvatarWidget(
-                context: context,
-                userInfo: userInfo,
-                userInfoModel: userInfoModel,
+              child: LinagoraPresenceBadge(
+                presence: presence?.badge,
+                size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
+                child: _buildAvatarWidget(
+                  context: context,
+                  userInfo: userInfo,
+                  userInfoModel: userInfoModel,
+                ),
               ),
             ),
             Text(
@@ -171,8 +178,11 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
             if (presence != null) ...[
               const SizedBox(height: 8),
               Text(
-                presence.getLocalizedStatusMessage(context),
-                style: presence.getPresenceTextStyle(context),
+                presence.localizedSubtitle(L10n.of(context)!),
+                style: ProfileInfoBodyViewStyle.presenceTextStyle(
+                  context,
+                  isOnline: presence.status == PresenceStatus.online,
+                ),
               ),
             ],
           ],
@@ -191,14 +201,14 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
         return Avatar(
           mxContent: widget.user.avatarUrl,
           name: userInfoModel?.displayName ?? widget.user.calcDisplayname(),
-          size: 160,
+          size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
         );
       },
       (success) {
         if (success is GettingUserInfo) {
           return const SizedBox(
-            width: 160,
-            height: 160,
+            width: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
+            height: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
             child: Center(child: CupertinoActivityIndicator(animating: true)),
           );
         }
@@ -208,13 +218,13 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
                 ? Uri.tryParse(userInfoModel?.avatarUrl ?? '')
                 : widget.user.avatarUrl,
             name: userInfoModel?.displayName ?? widget.user.calcDisplayname(),
-            size: 160,
+            size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
           );
         }
         return Avatar(
           mxContent: widget.user.avatarUrl,
           name: userInfoModel?.displayName ?? widget.user.calcDisplayname(),
-          size: 160,
+          size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
         );
       },
     );

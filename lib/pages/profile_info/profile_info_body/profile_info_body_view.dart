@@ -6,6 +6,9 @@ import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_con
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_header.dart';
 import 'package:twake_chat/widgets/avatar/secondary_avatar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/presentation/extensions/person_presence_extension.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ProfileInfoBodyView extends StatelessWidget {
@@ -97,11 +100,17 @@ class ProfileInfoBodyView extends StatelessWidget {
         final avatarUrl = (rawAvatarUrl == null || rawAvatarUrl.isEmpty)
             ? controller.user?.avatarUrl
             : (Uri.tryParse(rawAvatarUrl) ?? controller.user?.avatarUrl);
-        return SecondaryAvatar(
-          animationController: controller.animationController,
-          mxContent: avatarUrl,
-          name: displayName,
-          fontSize: ProfileInfoBodyViewStyle.avatarFontSize,
+        final userId = controller.user?.id;
+        return Consumer(
+          builder: (context, ref, _) => SecondaryAvatar(
+            animationController: controller.animationController,
+            mxContent: avatarUrl,
+            name: displayName,
+            fontSize: ProfileInfoBodyViewStyle.avatarFontSize,
+            presence: userId == null
+                ? null
+                : ref.watch(personPresenceProvider(userId)).value?.badge,
+          ),
         );
       },
     );

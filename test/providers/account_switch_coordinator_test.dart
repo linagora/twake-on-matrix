@@ -108,10 +108,6 @@ class FakeSwitchEffects implements AccountSwitchEffects {
       log.add('support:${client.clientName}');
 
   @override
-  void listenPresence(Client client) =>
-      log.add('presence:${client.clientName}');
-
-  @override
   void configureSentryUser(Client client) =>
       log.add('sentry:${client.clientName}');
 }
@@ -137,7 +133,6 @@ void main() {
     'homeserver',
     'contacts',
     'support',
-    'presence',
     'sentry',
   ];
 
@@ -478,7 +473,6 @@ void main() {
         'homeserver:c',
         'contacts:c',
         'support:c',
-        'presence:c',
         'sentry:c',
       ]);
     });
