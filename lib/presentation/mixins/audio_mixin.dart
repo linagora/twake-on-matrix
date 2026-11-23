@@ -32,6 +32,14 @@ mixin AudioMixin {
 
   final List<double> _amplitudeTimelineWeb = [];
 
+  /// WAV of the current recording, kept until it is sent, discarded or the
+  /// chat closes, so that the 30-minute auto-stop does not lose it.
+  String? _recordedPath;
+
+  /// True once the 30-minute limit stopped the recorder: the UI keeps Send and
+  /// Delete, and the duration stays at the limit.
+  bool _autoStopped = false;
+
   final ValueNotifier<AudioRecordState> audioRecordStateNotifier =
       ValueNotifier<AudioRecordState>(AudioRecordState.initial);
 
@@ -49,12 +57,39 @@ mixin AudioMixin {
     _amplitudeSubWeb = null;
 
     final recorder = _audioRecorder;
+    final path = _recordedPath;
     _audioRecorder = null;
-    recorder?.dispose();
+    _recordedPath = null;
+    _autoStopped = false;
+    _stopAndDeleteOnDispose(recorder, path);
     _amplitudeTimelineWeb.clear();
 
     audioRecordStateNotifier.dispose();
     recordDurationWebNotifier.dispose();
+  }
+
+  Future<void> _stopAndDeleteOnDispose(
+    AudioRecorder? recorder,
+    String? path,
+  ) async {
+    try {
+      if (recorder != null && await recorder.isRecording()) {
+        await recorder.stop();
+      }
+    } catch (_) {
+      // Ignore: the recorder is going away anyway
+    }
+    await recorder?.dispose();
+    await _deleteQuietly(path);
+  }
+
+  Future<void> _deleteQuietly(String? path) async {
+    if (path == null) return;
+    try {
+      await File(path).delete();
+    } catch (_) {
+      // Ignore cleanup errors
+    }
   }
 
   void startRecording() {
@@ -105,6 +140,10 @@ mixin AudioMixin {
         startRecording();
         break;
       case RecordState.stop:
+        if (_autoStopped) {
+          _timerWeb?.cancel();
+          break;
+        }
         stopRecording();
         _timerWeb?.cancel();
         recordDurationWebNotifier.value = 0;
@@ -120,8 +159,9 @@ mixin AudioMixin {
 
       // Auto-stop recording when reaching max duration (30 minutes)
       if (recordDurationWebNotifier.value >= maxRecordDurationInSeconds) {
-        stopRecordWeb();
+        _autoStopped = true;
         t.cancel();
+        _audioRecorder?.stop();
       }
     });
   }
@@ -143,11 +183,13 @@ mixin AudioMixin {
         }
 
         const config = RecordConfig(encoder: encoder, numChannels: 1);
+        _autoStopped = false;
 
         // Record to a temporary file, read back by [createMatrixAudioFileFromPath]
         final directory = await getTemporaryDirectory();
         final path =
             '${directory.path}/voice_message_${DateTime.now().millisecondsSinceEpoch}.wav';
+        _recordedPath = path;
         await recordFile(recorder, config, path);
 
         recordDurationWebNotifier.value = 0;
@@ -206,7 +248,14 @@ mixin AudioMixin {
       final value = await recorder.isRecording();
 
       if (value == true) {
-        return await recorder.stop();
+        return await recorder.stop() ?? _recordedPath;
+      }
+      if (_autoStopped) {
+        // Stopped by the 30-minute limit: the file is still waiting.
+        _autoStopped = false;
+        stopRecording();
+        recordDurationWebNotifier.value = 0;
+        return _recordedPath;
       }
     } catch (e) {
       debugPrint('Error checking recording status: $e');
@@ -217,12 +266,8 @@ mixin AudioMixin {
   /// Stops the recorder and drops the recorded file.
   Future<void> discardRecordWeb() async {
     final path = await stopRecordWeb();
-    if (path == null) return;
-    try {
-      await File(path).delete();
-    } catch (_) {
-      // Ignore cleanup errors
-    }
+    _recordedPath = null;
+    await _deleteQuietly(path);
   }
 
   /// Reads the recorded file, deletes it, and wraps it as a voice message.
@@ -248,11 +293,8 @@ mixin AudioMixin {
       );
       return null;
     } finally {
-      try {
-        await file.delete();
-      } catch (_) {
-        // Ignore cleanup errors
-      }
+      if (_recordedPath == path) _recordedPath = null;
+      await _deleteQuietly(path);
     }
   }
 
