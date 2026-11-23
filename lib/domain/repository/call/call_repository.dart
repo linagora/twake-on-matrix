@@ -19,6 +19,10 @@ abstract class CallRepository {
 
   Future<void> sendRing(CallJoin join, {required String membershipEventId});
 
+  /// Emits when someone else declines the last ring this device sent in
+  /// [room].
+  Stream<void> watchRingDeclined(CallRoom room);
+
   Future<void> declineRing(CallRing ring);
 
   /// The rings that ring now, on each change.

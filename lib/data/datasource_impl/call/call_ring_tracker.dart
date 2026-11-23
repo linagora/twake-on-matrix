@@ -126,19 +126,35 @@ class CallRingTracker {
 
   void _onDecline(Event event) {
     if (event.senderId != _client.userID) return;
+    if (ringIdOf(event) case final ringId?) dismiss(ringId);
+  }
+
+  static bool isDecline(Event event) =>
+      event.type == CallEventTypes.callDecline ||
+      event.type == CallEventTypes.callDeclineStable;
+
+  /// The ring a decline relates to.
+  static String? ringIdOf(Event event) {
     final relates = event.content['m.relates_to'];
     final ringId = relates is Map ? relates['event_id'] : null;
-    if (ringId is String) dismiss(ringId);
+    return ringId is String ? ringId : null;
   }
 
   void _onRing(Event event) {
     if (!_isForUs(event)) return;
+    final room = event.room;
+    final caller = event.senderFromMemoryOrFallback;
     final ring = CallRing(
       eventId: event.eventId,
       room: CallRoom(event.roomId!),
       senderId: event.senderId,
       isVideo: event.content['m.call.intent'] == 'video',
       expiresAt: event.originServerTs.add(_lifetimeOf(event)),
+      callerName: caller.calcDisplayname(),
+      roomName: room.getLocalizedDisplayname(),
+      // A direct chat shows the other person, a group shows who calls.
+      avatarUrl: room.isDirectChat ? room.avatar : caller.avatarUrl,
+      isDirect: room.isDirectChat,
     );
     final left = ring.expiresAt.difference(DateTime.now());
     if (left <= Duration.zero) return;

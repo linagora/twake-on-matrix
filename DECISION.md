@@ -403,28 +403,38 @@ This replaces the generic text by default (2026-10-29) for clear rooms, and
 the decrypted preview of encrypted rooms (2026-10-24), both decided before
 this file. Android is unchanged.
 
-## D21. Who a call rings (proposed by Clément, 2026-11-23)
+## D21. Who a call rings, and how it rings in the app (proposed by Clément, 2026-11-23; who rings decided by Johann, 2026-11-23)
 
 When someone joins a call that nobody else is in, Twake Chat sends a MatrixRTC
 ring (MSC4075) in the room. Another device of the same account in the call
 counts as someone: only the first to join rings.
 
-- A direct chat rings the partner, even before they join, while at most two
-  members have joined.
-- A group, or a direct chat with three or more joined members, gets a
-  `notification` with no mention: nobody is rung.
+- The whole room rings, direct chats and groups alike, as Twake Space Chat
+  rings it (matrix-js-sdk 43): `notification_type: ring`, `m.mentions`
+  `room: true`, a lifetime of 60 s (decided by Johann, 2026-11-23: mobile
+  behaves as the web).
 - The ring is sent in the clear, also in an encrypted room: the push gateway
   and the other devices read it without the keys of the room. It holds no
   message content.
-- The ring sound comes from two underride push rules of the account, one for
-  the ring and one for the legacy `call.notify`, added only when absent. An
-  override would sound over the mute of a room. Trade-off: the mentioned
-  partner of a direct chat gets the mention sound, not the ring.
+- The ring sound of the push comes from two underride push rules of the
+  account, one for the ring and one for the legacy `call.notify`, added only
+  when absent, once the account has synced its push rules, at each start of
+  the app. An override would sound over the mute of a room.
+- With the app open, a ring shows over the app: « Pierre is calling you » for
+  a direct chat, « Clément · is calling you in General » for a group, with
+  « Decline » and « Answer » (the words of Twake Space Chat, its D134). It
+  rings, in a loop, two rising triplets every two seconds (the notes of Twake
+  Space Chat), until it is answered, declined, its ring lapses (60 s, at most
+  120 s for other clients) or another device of the account joins or
+  declines. During another call it shows without its sound; « Answer » leaves
+  that call.
+- « Answer » joins at once, audio only, and opens the call. « Decline » sends
+  the decline of MSC4310 in the clear; in a direct chat the caller leaves the
+  call and reads « Call declined ». A group call goes on.
+- Calls start audio only (decided by Johann, 2026-11-23).
 
-Open with the product owner: Twake Space Chat rings the whole room in direct
-chats and groups alike. A group call started from Twake Space Chat rings the
-mobile users, and one started from mobile rings no Twake Space Chat user.
-Should both clients do the same?
+Not yet: a ring with the app in the background or closed, the system call
+screen (CallKit), the missed calls and the call history.
 
 Completes D12, which left the ring push rules for later.
 

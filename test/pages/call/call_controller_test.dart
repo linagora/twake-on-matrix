@@ -212,6 +212,63 @@ void main() {
     expect(state(), isA<CallConnected>());
   });
 
+  group('declined', () {
+    const direct = CallRoomInfo(
+      isEncrypted: false,
+      isDirect: true,
+      canJoin: true,
+    );
+
+    test('aDirectCallStillAlone_endsAsDeclined', () async {
+      // Arrange
+      repository.roomInfo = direct;
+      await controller().join('!dm', isVideo: false);
+      repository.participants.add([
+        participant('@me:hs.test:DEV', isLocal: true),
+      ]);
+      await pumpEventQueue();
+
+      // Act
+      repository.declines.add(null);
+      await pumpEventQueue();
+
+      // Assert
+      expect((state() as CallFailed).error, isA<CallDeclinedException>());
+      expect(repository.calls, containsAllInOrder(['disconnect', 'leave !dm']));
+    });
+
+    test('aDirectCallTheOtherJoined_staysConnected', () async {
+      // Arrange
+      repository.roomInfo = direct;
+      await controller().join('!dm', isVideo: false);
+      repository.participants.add([
+        participant('@me:hs.test:DEV', isLocal: true),
+        participant('@bob:hs.test:BOB'),
+      ]);
+      await pumpEventQueue();
+
+      // Act
+      repository.declines.add(null);
+      await pumpEventQueue();
+
+      // Assert
+      expect(state(), isA<CallConnected>());
+    });
+
+    test('aGroupCall_staysConnected', () async {
+      // Arrange
+      await controller().join('!room', isVideo: false);
+      await pumpEventQueue();
+
+      // Act
+      repository.declines.add(null);
+      await pumpEventQueue();
+
+      // Assert
+      expect(state(), isA<CallConnected>());
+    });
+  });
+
   test('leave_whenTheMembershipCannotBeEnded_goesIdle', () async {
     // Arrange
     await controller().join('!room', isVideo: false);

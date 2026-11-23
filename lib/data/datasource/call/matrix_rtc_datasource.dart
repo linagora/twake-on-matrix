@@ -28,6 +28,10 @@ abstract class MatrixRtcDatasource {
   /// joined with the membership [membershipEventId].
   Future<void> sendRing(CallJoin join, {required String membershipEventId});
 
+  /// Emits when someone else declines the last ring this device sent in
+  /// [room] (MSC4310).
+  Stream<void> watchRingDeclined(CallRoom room);
+
   /// Tells the other devices of the account, and the caller, that the account
   /// does not take the call (MSC4310).
   Future<void> declineRing(CallRing ring);

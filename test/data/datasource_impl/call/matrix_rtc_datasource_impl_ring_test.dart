@@ -23,6 +23,23 @@ const _declineType = 'org.matrix.msc4310.rtc.decline';
 const _stableDeclineType = 'm.rtc.decline';
 const _memberType = 'org.matrix.msc3401.call.member';
 
+class _FakeUser extends Fake implements User {
+  _FakeUser(this.id);
+
+  @override
+  final String id;
+
+  @override
+  Uri? get avatarUrl => Uri.parse('mxc://hs.test/${id.localpart}');
+
+  @override
+  String calcDisplayname({
+    bool? formatLocalpart,
+    bool? mxidLocalPartFallback,
+    MatrixLocalizations i18n = const MatrixDefaultLocalizations(),
+  }) => 'Name of $id';
+}
+
 class _FakeRoom extends Fake implements Room {
   var isEncrypted = false;
 
@@ -52,6 +69,21 @@ class _FakeRoom extends Fake implements Room {
 
   @override
   Membership get membership => Membership.join;
+
+  var displayName = 'General';
+
+  Uri? avatarUri;
+
+  @override
+  String getLocalizedDisplayname([
+    MatrixLocalizations i18n = const MatrixDefaultLocalizations(),
+  ]) => displayName;
+
+  @override
+  Uri? get avatar => avatarUri;
+
+  @override
+  User unsafeGetUserFromMemoryOrFallback(String mxid) => _FakeUser(mxid);
 
   @override
   String? get roomVersion => '10';
@@ -289,104 +321,54 @@ void main() {
   });
 
   group('sendRing', () {
-    test(
-      'in a direct chat the ring names the other user, not the room',
-      () async {
-        client.room
-          ..dmUser = _alice.user
-          ..joinedCount = 2;
-        final before = DateTime.now().millisecondsSinceEpoch;
+    test('the ring mentions the room and holds what the web sends', () async {
+      client.room
+        ..dmUser = _alice.user
+        ..joinedCount = 2;
+      final before = DateTime.now().millisecondsSinceEpoch;
 
-        await datasource.sendRing(_videoJoin, membershipEventId: r'$member');
+      await datasource.sendRing(_videoJoin, membershipEventId: r'$member');
 
-        final after = DateTime.now().millisecondsSinceEpoch;
-        final sent = client.sent.single;
-        expect(sent.roomId, '!room:hs.test');
-        expect(sent.type, 'org.matrix.msc4075.rtc.notification');
-        final senderTs = sent.content['sender_ts'];
-        expect(senderTs, isA<int>());
-        expect(senderTs as int, inInclusiveRange(before, after));
-        final mentions = sent.content['m.mentions']! as Map;
-        expect(mentions['user_ids'], [_alice.user]);
-        expect(mentions['room'], isNot(true));
-        expect(
-          {...sent.content}
-            ..remove('sender_ts')
-            ..remove('m.mentions'),
-          {
-            'slot_id': 'm.call#ROOM',
-            'notification_type': 'ring',
-            'lifetime': 60000,
-            'm.relates_to': {'rel_type': 'm.reference', 'event_id': r'$member'},
-            'm.call.intent': 'video',
-          },
-        );
-      },
-    );
+      final after = DateTime.now().millisecondsSinceEpoch;
+      final sent = client.sent.single;
+      expect(sent.roomId, '!room:hs.test');
+      expect(sent.type, 'org.matrix.msc4075.rtc.notification');
+      final senderTs = sent.content['sender_ts'];
+      expect(senderTs, isA<int>());
+      expect(senderTs as int, inInclusiveRange(before, after));
+      expect({...sent.content}..remove('sender_ts'), {
+        'slot_id': 'm.call#ROOM',
+        'notification_type': 'ring',
+        'lifetime': 60000,
+        'm.mentions': {'user_ids': <String>[], 'room': true},
+        'm.relates_to': {'rel_type': 'm.reference', 'event_id': r'$member'},
+        'm.call.intent': 'video',
+      });
+    });
 
-    // `m.direct` alone does not say who is in the room: a third member may
-    // have joined it.
-    final callees = <String, ({String? dmUser, int? joined, String? callee})>{
-      'a direct chat of two rings the other user': (
-        dmUser: _alice.user,
-        joined: 2,
-        callee: _alice.user,
-      ),
-      'a direct chat whose members the server did not count rings the other '
-          'user': (
-        dmUser: _alice.user,
-        joined: null,
-        callee: _alice.user,
-      ),
-      // The partner may not have joined yet, or may have left.
-      'a direct chat with one member rings the partner': (
-        dmUser: _alice.user,
-        joined: 1,
-        callee: _alice.user,
-      ),
-      'a direct chat counted empty rings the partner': (
-        dmUser: _alice.user,
-        joined: 0,
-        callee: _alice.user,
-      ),
-      'a direct chat with the user as partner is notified, nobody rung': (
-        dmUser: _bobHere.user,
-        joined: 1,
-        callee: null,
-      ),
-      'a direct chat without a partner is notified, nobody rung': (
-        dmUser: '',
-        joined: 2,
-        callee: null,
-      ),
-      'a direct chat with a third member is notified, nobody rung': (
-        dmUser: _alice.user,
-        joined: 3,
-        callee: null,
-      ),
-      'a group of more than two is notified, nobody rung': (
+    // DECISION.md D21: the whole room rings, as Twake Space Chat rings it.
+    final rooms = <String, ({String? dmUser, int? joined})>{
+      'a direct chat of two': (dmUser: _alice.user, joined: 2),
+      'a direct chat with a third member': (dmUser: _alice.user, joined: 3),
+      'a direct chat without a partner': (dmUser: '', joined: 1),
+      'a group': (dmUser: null, joined: 3),
+      'a group whose members the server did not count': (
         dmUser: null,
-        joined: 3,
-        callee: null,
+        joined: null,
       ),
     };
 
-    callees.forEach((name, expected) {
-      test(name, () async {
+    rooms.forEach((name, room) {
+      test('$name rings the whole room', () async {
         client.room
-          ..dmUser = expected.dmUser
-          ..joinedCount = expected.joined;
+          ..dmUser = room.dmUser
+          ..joinedCount = room.joined;
 
         await datasource.sendRing(_join, membershipEventId: r'$member');
 
         final content = client.sent.single.content;
-        expect(
-          content['notification_type'],
-          expected.callee == null ? 'notification' : 'ring',
-        );
-        final mentions = content['m.mentions']! as Map;
-        expect(mentions['user_ids'], [?expected.callee]);
-        expect(mentions['room'], isNot(true));
+        expect(content['notification_type'], 'ring');
+        expect(content['m.mentions'], {'user_ids': <String>[], 'room': true});
       });
     });
 
@@ -404,6 +386,67 @@ void main() {
       // `Room.sendEvent` would encrypt it (and the fake room has no such
       // method): the ring is sent as it is.
       expect(client.sent.single.type, 'org.matrix.msc4075.rtc.notification');
+    });
+  });
+
+  group('watchRingDeclined', () {
+    Future<List<void>> declinesAfter(void Function() receive) async {
+      final declines = <void>[];
+      await datasource.sendRing(_join, membershipEventId: r'$member');
+      final subscription = datasource
+          .watchRingDeclined(_room)
+          .listen(declines.add);
+      receive();
+      await pumpEventQueue();
+      await subscription.cancel();
+      return declines;
+    }
+
+    test('the other person declines the ring sent here', () async {
+      final declines = await declinesAfter(
+        () => client.decline(
+          _Decline()
+            ..ringId = r'$sent'
+            ..sender = _alice.user,
+        ),
+      );
+
+      expect(declines, hasLength(1));
+    });
+
+    test('a decline of another ring is not one of this ring', () async {
+      final declines = await declinesAfter(
+        () => client.decline(
+          _Decline()
+            ..ringId = r'$other'
+            ..sender = _alice.user,
+        ),
+      );
+
+      expect(declines, isEmpty);
+    });
+
+    test('with no ring sent, a decline relating to nothing is not one', () {
+      fakeAsync((async) {
+        final declines = <void>[];
+        datasource.watchRingDeclined(_room).listen(declines.add);
+        client.receive(
+          _Incoming()
+            ..type = _declineType
+            ..content = {},
+        );
+        async.flushMicrotasks();
+
+        expect(declines, isEmpty);
+      });
+    });
+
+    test('a decline of the user, on another device, is not one', () async {
+      final declines = await declinesAfter(
+        () => client.decline(_Decline()..ringId = r'$sent'),
+      );
+
+      expect(declines, isEmpty);
     });
   });
 
@@ -574,6 +617,39 @@ void main() {
         async.elapse(const Duration(seconds: 61));
 
         expect(lists.last, isEmpty);
+      });
+    });
+
+    test('a ring of a group says who calls, where, with their avatar', () {
+      fakeAsync((async) {
+        listen(async);
+
+        client.ring();
+        async.flushMicrotasks();
+
+        final ring = lists.last.single;
+        expect(ring.callerName, 'Name of ${_alice.user}');
+        expect(ring.roomName, 'General');
+        expect(ring.isDirect, isFalse);
+        expect(ring.avatarUrl, Uri.parse('mxc://hs.test/alice'));
+      });
+    });
+
+    test('a ring of a direct chat shows the avatar of the chat', () {
+      fakeAsync((async) {
+        client.room
+          ..dmUser = _alice.user
+          ..displayName = 'Alice'
+          ..avatarUri = Uri.parse('mxc://hs.test/dm');
+        listen(async);
+
+        client.ring();
+        async.flushMicrotasks();
+
+        final ring = lists.last.single;
+        expect(ring.roomName, 'Alice');
+        expect(ring.isDirect, isTrue);
+        expect(ring.avatarUrl, Uri.parse('mxc://hs.test/dm'));
       });
     });
 
@@ -1326,10 +1402,15 @@ void main() {
       );
     });
 
-    test('push rules not synced yet: the rules are set all the same', () async {
+    test('push rules not synced yet: set once a sync brings them', () async {
       client.rules = null;
 
-      await datasource.ensureCallRingPushRules();
+      final ensuring = datasource.ensureCallRingPushRules();
+      await pumpEventQueue();
+      expect(client.pushRules, isEmpty);
+      client.rules = PushRuleSet(underride: []);
+      client.onSync.add(SyncUpdate(nextBatch: 'next'));
+      await ensuring;
 
       expect(client.pushRules.map((r) => r.id), [
         'app.twake.chat.call_ring',

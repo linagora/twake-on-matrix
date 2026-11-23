@@ -48,6 +48,9 @@ class CallRepositoryImpl implements CallRepository {
       _rtc.sendRing(join, membershipEventId: membershipEventId);
 
   @override
+  Stream<void> watchRingDeclined(CallRoom room) => _rtc.watchRingDeclined(room);
+
+  @override
   Future<void> declineRing(CallRing ring) => _rtc.declineRing(ring);
 
   @override

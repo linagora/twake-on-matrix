@@ -13,6 +13,10 @@ abstract class CallRing with _$CallRing {
     required String senderId,
     required bool isVideo,
     required DateTime expiresAt,
+    String? callerName,
+    String? roomName,
+    Uri? avatarUrl,
+    @Default(false) bool isDirect,
   }) = _CallRing;
 }
 

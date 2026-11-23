@@ -73,6 +73,7 @@ class FakeCallRepository implements CallRepository {
   final encryptions = StreamController<void>.broadcast();
   final rings = StreamController<List<CallRing>>.broadcast();
   final missedCalls = StreamController<MissedCall>.broadcast();
+  final declines = StreamController<void>.broadcast();
 
   @override
   Stream<void> watchRoomEncrypted(CallRoom room) => encryptions.stream;
@@ -119,6 +120,9 @@ class FakeCallRepository implements CallRepository {
     await ringGate?.future;
     if (ringError case final error?) throw error;
   }
+
+  @override
+  Stream<void> watchRingDeclined(CallRoom room) => declines.stream;
 
   @override
   Future<void> declineRing(CallRing ring) async {

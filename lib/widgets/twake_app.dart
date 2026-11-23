@@ -4,6 +4,7 @@ import 'package:twake_chat/config/go_routes/router_navigation_notification.dart'
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/call/incoming/incoming_call_host.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_drive_picker/ui.dart' show DrivePickerLocalizations;
 import 'package:twake_chat/utils/network_connection_service.dart';
@@ -117,15 +118,21 @@ class TwakeAppState extends State<TwakeApp> {
             },
             routerConfig: TwakeApp.router,
             onNavigationNotification: TwakeApp.router.onNavigationNotification,
-            builder: (context, child) => PlatformInfos.isMobile
-                ? TwakeAppLock(
-                    dispatcher: TwakeApp.router.backButtonDispatcher,
-                    initiallyEnabled: widget.appLockEnabled,
-                    child: Matrix(
-                      child: NavigationButtonsSafeArea(child: child),
-                    ),
-                  )
-                : Matrix(child: NavigationButtonsSafeArea(child: child)),
+            builder: (context, child) {
+              final app = Matrix(
+                child: IncomingCallHost(
+                  navigatorKey: TwakeApp.routerKey,
+                  child: NavigationButtonsSafeArea(child: child),
+                ),
+              );
+              return PlatformInfos.isMobile
+                  ? TwakeAppLock(
+                      dispatcher: TwakeApp.router.backButtonDispatcher,
+                      initiallyEnabled: widget.appLockEnabled,
+                      child: app,
+                    )
+                  : app;
+            },
           );
         },
       ),

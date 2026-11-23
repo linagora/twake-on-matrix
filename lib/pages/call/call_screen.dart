@@ -153,6 +153,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     CallConnectionFailedException() => l10n.callErrorConnectionFailed,
     CallMediaFailedException() => l10n.callErrorMediaFailed,
     CallEncryptionTurnedOnException() => l10n.callErrorEncryptionTurnedOn,
+    CallDeclinedException() => l10n.callDeclined,
   };
 }
 
