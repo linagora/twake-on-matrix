@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -18,7 +19,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
@@ -136,9 +136,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
 
   void setAppLockAction() async {
     final l10n = L10n.of(context)!;
-    final currentLock = await const FlutterSecureStorage().read(
-      key: SettingKeys.appLockKey,
-    );
+    final currentLock = await secureStorage.read(key: SettingKeys.appLockKey);
     if (!mounted) return;
     if (currentLock?.isNotEmpty ?? false) {
       await AppLock.of(context)!.showLockScreen();
@@ -167,7 +165,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
       ],
     );
     if (!mounted || newLock == null) return;
-    await const FlutterSecureStorage().write(
+    await secureStorage.write(
       key: SettingKeys.appLockKey,
       value: newLock.single,
     );

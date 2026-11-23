@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/secure_storage.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -75,7 +76,6 @@ abstract class LegacySettingsMigrationManager {
   }
 
   static Future<void> _migrateMobileAppLockKey() async {
-    const secureStorage = FlutterSecureStorage();
     try {
       final existing = await secureStorage.read(key: SettingKeys.appLockKey);
       if (existing != null) return;
