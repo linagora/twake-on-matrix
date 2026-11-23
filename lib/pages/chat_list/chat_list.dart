@@ -110,8 +110,6 @@ class ChatListController extends State<ChatList>
 
   bool isTorBrowser = false;
 
-  bool scrolledToTop = true;
-
   Client get activeClient => matrixState.client;
 
   MatrixState get matrixState => Matrix.of(context);
@@ -160,15 +158,6 @@ class ChatListController extends State<ChatList>
       : PushRuleState.notify;
 
   void addAccountAction() => context.go('/settings/account');
-
-  void _onScroll() {
-    final newScrolledToTop = scrollController.position.pixels <= 0;
-    if (newScrolledToTop != scrolledToTop) {
-      setState(() {
-        scrolledToTop = newScrolledToTop;
-      });
-    }
-  }
 
   void editSpace(BuildContext context, String spaceId) async {
     await activeClient.getRoomById(spaceId)!.postLoad();
@@ -730,7 +719,6 @@ class ChatListController extends State<ChatList>
   @override
   void initState() {
     activeRoomIdNotifier.value = widget.activeRoomIdNotifier.value;
-    scrollController.addListener(_onScroll);
     _listenToRoomUpdates();
     if (!matrixState.waitForFirstSync) {
       _trySync();
@@ -821,7 +809,6 @@ class ChatListController extends State<ChatList>
 
   @override
   void dispose() {
-    scrollController.removeListener(_onScroll);
     _roomUpdateSubscription?.cancel();
     selectModeNotifier.dispose();
     conversationSelectionNotifier.dispose();

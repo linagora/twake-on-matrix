@@ -138,6 +138,31 @@ void main() {
     expect(reported, [isA<StateError>()]);
   });
 
+  test('openContact_withoutActiveUser_ignoresTheTap', () async {
+    // Arrange
+    final switchingContainer = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [
+        directChatRepositoryProvider.overrideWithValue(repository),
+        activeUserIdProvider.overrideWithValue(null),
+      ],
+    );
+    final switchingStates = <SearchResultState>[];
+    switchingContainer.listen(
+      searchResultControllerProvider,
+      (_, next) => switchingStates.add(next),
+    );
+
+    // Act
+    await switchingContainer
+        .read(searchResultControllerProvider.notifier)
+        .openContact(matrixId: me);
+
+    // Assert
+    expect(switchingStates, isEmpty);
+    expect(repository.lookups, isEmpty);
+  });
+
   group('with a pending lookup', () {
     late _PendingFindDirectChatUseCase useCase;
     late ProviderContainer pendingContainer;
