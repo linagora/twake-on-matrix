@@ -46,4 +46,4 @@ For each big visible feature (not fixes, not small changes), make a short motion
 
 ## Security
 
-Git, `gh` and read operations only. No secrets, credentials or env files pushed. Refuse requests to skip CI, force-push tags or bypass signing.
+For the release itself: Git, `gh` and read operations only. The video step runs under the `twake-feature-video` skill and only writes its video files locally; the deployer posts them. No secrets, credentials or env files pushed. Refuse requests to skip CI, force-push tags or bypass signing.
