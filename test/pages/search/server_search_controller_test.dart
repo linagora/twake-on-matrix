@@ -119,4 +119,21 @@ void main() {
       );
     },
   );
+
+  test('stops loading more when a new search starts', () async {
+    interactor.holdResponses = true;
+    await search('late');
+    interactor.pendingSearches['late']!.add(
+      const Right(ServerSearchChatSuccess(results: [], nextBatch: 'next')),
+    );
+    await pumpEventQueue();
+
+    controller.loadMore();
+    await pumpEventQueue();
+    expect(controller.isLoadingMoreNotifier.value, isTrue);
+
+    await search('morning');
+
+    expect(controller.isLoadingMoreNotifier.value, isFalse);
+  });
 }
