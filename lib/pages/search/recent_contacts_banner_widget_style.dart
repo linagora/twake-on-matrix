@@ -6,6 +6,6 @@ class RecentContactsBannerWidgetStyle {
 
   static EdgeInsetsGeometry get chatRecentContactItemPadding =>
       const EdgeInsets.only(top: 8, right: 4, left: 4);
-  static EdgeInsetsDirectional get chatRecentContactHorizontalPadding =>
-      const EdgeInsetsDirectional.symmetric(horizontal: 8);
+  static EdgeInsetsDirectional get chatRecentContactListPadding =>
+      const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 12);
 }
