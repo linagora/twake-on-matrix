@@ -21,9 +21,13 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     Future<void> Function({required bool isOn, required bool isForced})
         setSpeakerOutput =
         _preferSpeaker,
+    @visibleForTesting
+    Future<lk.LocalVideoTrack> Function() createCameraTrack =
+        lk.LocalVideoTrack.createCameraTrack,
   }) : _createRoom = createRoom,
        _createKeyProvider = createKeyProvider,
-       _setSpeakerOutput = setSpeakerOutput;
+       _setSpeakerOutput = setSpeakerOutput,
+       _createCameraTrack = createCameraTrack;
 
   static Future<void> _preferSpeaker({
     required bool isOn,
@@ -43,6 +47,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   final Future<lk.BaseKeyProvider> Function() _createKeyProvider;
   final Future<void> Function({required bool isOn, required bool isForced})
   _setSpeakerOutput;
+  final Future<lk.LocalVideoTrack> Function() _createCameraTrack;
 
   /// The user of a LiveKit identity: the part before the device id.
   @visibleForTesting
@@ -111,7 +116,9 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       if (media.isMicrophoneOn) {
         await room.localParticipant?.setMicrophoneEnabled(true);
       }
-      if (media.isCameraOn) await room.localParticipant?.setCameraEnabled(true);
+      if (room.localParticipant case final local? when media.isCameraOn) {
+        await _turnCameraOn(local);
+      }
     } catch (error, stackTrace) {
       await disconnect();
       _rethrowErrors(error, stackTrace);
@@ -183,8 +190,25 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       _updateLocalParticipant((local) => local.setMicrophoneEnabled(isOn));
 
   @override
-  Future<void> setCamera({required bool isOn}) =>
-      _updateLocalParticipant((local) => local.setCameraEnabled(isOn));
+  Future<void> setCamera({required bool isOn}) => _updateLocalParticipant(
+    (local) => isOn ? _turnCameraOn(local) : local.setCameraEnabled(false),
+  );
+
+  /// livekit_client 2.13.2 leaves a new camera track running when its
+  /// publication fails: this one is stopped.
+  Future<void> _turnCameraOn(lk.LocalParticipant local) async {
+    if (local.getTrackPublicationBySource(lk.TrackSource.camera) != null) {
+      await local.setCameraEnabled(true);
+      return;
+    }
+    final track = await _createCameraTrack();
+    try {
+      await local.publishVideoTrack(track);
+    } catch (_) {
+      await track.stop();
+      rethrow;
+    }
+  }
 
   @override
   Future<void> setSpeaker({required bool isOn, required bool isForced}) async {

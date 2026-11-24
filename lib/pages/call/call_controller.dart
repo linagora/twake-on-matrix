@@ -233,16 +233,16 @@ class CallController extends _$CallController {
   /// False when the device refused the change.
   Future<bool> setCamera({required bool isOn}) async {
     if (state is! CallConnected) return false;
+    final call = _cancellation;
     try {
       await ref.read(setCallCameraUseCaseProvider).execute(isOn: isOn);
     } on CallException {
       return false;
     }
-    if (!ref.mounted) return true;
+    if (!ref.mounted || call != _cancellation) return true;
     final current = state;
     if (current is! CallConnected || current.isSpeakerChosen) return true;
-    await _setSpeaker(isOn: isOn, isForced: false);
-    return true;
+    return _setSpeaker(isOn: isOn, isForced: false);
   }
 
   /// False when the device refused the change.
@@ -251,6 +251,7 @@ class CallController extends _$CallController {
 
   Future<bool> _setSpeaker({required bool isOn, required bool isForced}) async {
     if (state is! CallConnected) return false;
+    final call = _cancellation;
     try {
       await ref
           .read(setCallSpeakerUseCaseProvider)
@@ -258,9 +259,11 @@ class CallController extends _$CallController {
     } on CallException {
       return false;
     }
-    if (!ref.mounted) return true;
+    if (!ref.mounted || call != _cancellation) return true;
     final current = state;
     if (current is! CallConnected) return true;
+    // An explicit choice made meanwhile wins over the camera's.
+    if (!isForced && current.isSpeakerChosen) return true;
     state = current.copyWith(
       isSpeakerOn: isOn,
       isSpeakerChosen: current.isSpeakerChosen || isForced,
