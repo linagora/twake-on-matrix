@@ -145,6 +145,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
 
 import 'events/audio_message/audio_player_widget.dart';
+import 'events/audio_message/voice_autoplay_controller.dart';
 import 'sticker_picker_dialog.dart';
 
 part 'chat_scroll_to_event_mixin.dart';
@@ -837,6 +838,8 @@ class ChatController extends ConsumerState<Chat>
   /// Marks on return what arrived while the window was closed or in the
   /// background.
   AppLifecycleListener? _lifecycleListener;
+
+  ProviderSubscription<VoiceAutoplayState>? _voiceAutoplaySubscription;
 
   void _markLatestReadIfAtBottom() {
     // A closed (macOS) or background window shows nothing: no read receipt.
@@ -3540,6 +3543,30 @@ class ChatController extends ConsumerState<Chat>
     matrix?.voiceMessageEvent.value = null;
   }
 
+  /// The room and thread screens share the autoplay of the room: each plays
+  /// the voice messages it shows.
+  Future<void> _playNextVoiceMessage(String eventId) async {
+    final autoplay = ref.read(
+      voiceAutoplayControllerProvider(widget.roomId).notifier,
+    );
+    final event = await room?.getEventById(eventId);
+    final matrix = this.matrix;
+    if (!mounted || event == null || matrix == null) return;
+    if (event.threadRootId != threadRootId) return;
+    // The user started another audio meanwhile.
+    if (matrix.voiceMessageEvent.value != null) return;
+    try {
+      await playVoiceMessage(
+        context,
+        matrix,
+        event,
+        onEnded: () => unawaited(autoplay.voiceMessageEnded(event.eventId)),
+      );
+    } catch (_) {
+      // playVoiceMessage already logged and shown the failure.
+    }
+  }
+
   /// Sync playback UI with [MatrixState.audioPlayer] after [matrix] is ready.
   ///
   /// On mobile, if a voice message is already playing (user left another chat
@@ -3622,6 +3649,14 @@ class ChatController extends ConsumerState<Chat>
       // A thread opened over the room must not stop its voice message.
       if (!isThread) initAudioPlayer();
     });
+    _voiceAutoplaySubscription = ref.listenManual(
+      voiceAutoplayControllerProvider(widget.roomId),
+      (_, next) {
+        if (next case VoiceAutoplayNext(:final eventId)) {
+          unawaited(_playNextVoiceMessage(eventId));
+        }
+      },
+    );
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
   }
 
@@ -3808,6 +3843,7 @@ class ChatController extends ConsumerState<Chat>
     _threadEvents = null;
     if (!_threadReady.isCompleted) _threadReady.complete();
     _lifecycleListener?.dispose();
+    _voiceAutoplaySubscription?.close();
     timeline?.cancelSubscriptions();
     timeline = null;
 
