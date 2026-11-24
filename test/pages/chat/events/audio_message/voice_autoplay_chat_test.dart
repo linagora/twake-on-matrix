@@ -1,6 +1,7 @@
 // #2796: when a voice message ends, the chat plays the next one if it is a
 // voice message too.
-import 'dart:io' show File;
+import 'dart:async';
+import 'dart:io' show Directory, File;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +10,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'
     show ProviderContainer, ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/models/timeline_chunk.dart';
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:provider/provider.dart' show Provider;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/themes.dart';
@@ -28,6 +31,7 @@ import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.d
 import 'package:twake_chat/pages/chat/events/audio_message/voice_autoplay_controller.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:twake_chat/widgets/file_widget/circular_loading_download_widget.dart';
@@ -38,18 +42,41 @@ import '../../../../fake_client.dart';
 
 const _roomId = '!room:example.org';
 
+/// Serves media downloads once [media] completes, the rest as [FakeMatrixApi].
+class _Api extends http.BaseClient {
+  final _api = FakeMatrixApi();
+  Completer<void>? media;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    if (!request.url.path.contains('/media/download/')) {
+      return _api.send(request);
+    }
+    await media?.future;
+    return http.StreamedResponse(Stream.value([1, 2, 3]), 200);
+  }
+}
+
+class _FakePathProvider extends PathProviderPlatform {
+  @override
+  Future<String?> getTemporaryPath() async => Directory.systemTemp.path;
+}
+
 class _Client extends Client {
-  _Client()
-    : super(
-        'voice-autoplay-test',
-        httpClient: FakeMatrixApi(),
-        database: MockDatabase(),
-      );
+  _Client(this.api)
+    : super('voice-autoplay-test', httpClient: api, database: MockDatabase()) {
+    homeserver = Uri.parse('https://fakeserver.notexisting');
+  }
+
+  final _Api api;
 
   late final _Room room = _Room(this);
 
   @override
   String? get userID => '@alice:example.org';
+
+  @override
+  bool isLogged() => true;
 
   @override
   Room? getRoomById(String id) => id == _roomId ? room : null;
@@ -60,9 +87,14 @@ class _Room extends Room {
 
   late final events = [_voice(this, 'v2'), _voice(this, 'v1')];
 
+  /// Holds the lookup of the next message, as a slow store would.
+  Completer<void>? lookup;
+
   @override
-  Future<Event?> getEventById(String eventID) async =>
-      events.where((e) => e.eventId == eventID).firstOrNull;
+  Future<Event?> getEventById(String eventID) async {
+    await lookup?.future;
+    return events.where((e) => e.eventId == eventID).firstOrNull;
+  }
 
   @override
   Future<Timeline> getTimeline({
@@ -84,11 +116,12 @@ class _Room extends Room {
   );
 }
 
-Event _voice(Room room, String id) => Event(
+Event _voice(Room room, String id, {String? url}) => Event(
   content: {
+    'url': ?url,
     'body': 'voice_message_$id.ogg',
     'msgtype': MessageTypes.Audio,
-    'info': {'mimetype': 'audio/ogg', 'size': 1000},
+    'info': {'mimetype': 'audio/ogg'},
     'org.matrix.msc1767.audio': {
       'duration': 3000,
       'waveform': [1, 512, 1024],
@@ -107,6 +140,7 @@ class _Repository implements VoiceMessageRepository {
   Future<String?> nextVoiceMessageId({
     required String roomId,
     required String eventId,
+    String? threadRootId,
   }) async => eventId == 'v1' ? 'v2' : null;
 }
 
@@ -208,21 +242,28 @@ void main() {
       ..registerFactory(UnblockUserInteractor.new)
       ..registerSingleton<UploadManager>(_NoUploads())
       ..registerSingleton(const SearchEngine());
-    client = _Client();
+    // The voice bubble shows on mobile and macOS only, not on the Linux CI.
+    PlatformInfos.isTestingForMacOS = true;
+    PathProviderPlatform.instance = _FakePathProvider();
+    client = _Client(_Api());
     matrix = _FakeMatrix(client);
   });
 
   tearDown(() async {
+    PlatformInfos.isTestingForMacOS = false;
     await getIt.reset();
   });
 
+  late GoRouter router;
+
   Future<ProviderContainer> openChat(WidgetTester tester) async {
-    final router = GoRouter(
+    router = GoRouter(
       routes: [
         GoRoute(
           path: '/',
           builder: (_, _) => const Chat(roomId: _roomId),
         ),
+        GoRoute(path: '/other', builder: (_, _) => const SizedBox()),
       ],
     );
     addTearDown(router.dispose);
@@ -265,7 +306,7 @@ void main() {
   ) async {
     await tester.runAsync(
       () => container
-          .read(voiceAutoplayControllerProvider(_roomId).notifier)
+          .read(voiceAutoplayControllerProvider(_roomId, null).notifier)
           .voiceMessageEnded(eventId),
     );
     // The download of the next one runs outside the fake clock.
@@ -320,6 +361,78 @@ void main() {
     await endVoiceMessage(tester, container, 'v1');
 
     expect(matrix.voiceMessageEvent.value, same(other));
+    await closeChat(tester);
+  });
+
+  testWidgets('nothing starts behind a screen opened over the chat', (
+    tester,
+  ) async {
+    final container = await openChat(tester);
+    unawaited(router.push('/other'));
+    await tester.pumpAndSettle();
+    expect(find.byType(Chat, skipOffstage: false), findsOneWidget);
+
+    await endVoiceMessage(tester, container, 'v1');
+
+    expect(matrix.voiceMessageEvent.value, isNull);
+    await closeChat(tester);
+  });
+
+  testWidgets('nothing starts once the chat is left during the lookup', (
+    tester,
+  ) async {
+    final container = await openChat(tester);
+    final keepAlive = container.listen(
+      voiceAutoplayControllerProvider(_roomId, null),
+      (_, _) {},
+    );
+    addTearDown(keepAlive.close);
+    client.room.lookup = Completer();
+    await endVoiceMessage(tester, container, 'v1');
+
+    router.go('/other');
+    await tester.pumpAndSettle();
+    expect(find.byType(Chat), findsNothing);
+    client.room.lookup!.complete();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump();
+
+    expect(matrix.voiceMessageEvent.value, isNull);
+    await closeChat(tester);
+  });
+
+  // Opening a screen keeps the chat mounted, as leaving it on mobile keeps the
+  // shared player as it is.
+  testWidgets('nothing starts once a screen opens over the chat during the '
+      'download', (tester) async {
+    final container = await openChat(tester);
+    final keepAlive = container.listen(
+      voiceAutoplayControllerProvider(_roomId, null),
+      (_, _) {},
+    );
+    addTearDown(keepAlive.close);
+    final player = matrix.audioPlayer;
+    client.room.events.first = _voice(
+      client.room,
+      'v2',
+      url: 'mxc://example.org/v2',
+    );
+    client.api.media = Completer();
+    await endVoiceMessage(tester, container, 'v1');
+    expect(matrix.voiceMessageEvent.value?.eventId, 'v2');
+
+    unawaited(router.push('/other'));
+    await tester.pumpAndSettle();
+    client.api.media!.complete();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await tester.pump();
+
+    expect(matrix.voiceMessageEvent.value, isNull);
+    expect(matrix.audioPlayer, same(player));
     await closeChat(tester);
   });
 }

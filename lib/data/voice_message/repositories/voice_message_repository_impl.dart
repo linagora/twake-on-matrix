@@ -10,5 +10,10 @@ class VoiceMessageRepositoryImpl implements VoiceMessageRepository {
   Future<String?> nextVoiceMessageId({
     required String roomId,
     required String eventId,
-  }) => _datasource.nextVoiceMessageId(roomId: roomId, eventId: eventId);
+    String? threadRootId,
+  }) => _datasource.nextVoiceMessageId(
+    roomId: roomId,
+    eventId: eventId,
+    threadRootId: threadRootId,
+  );
 }

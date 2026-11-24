@@ -513,9 +513,10 @@ once if it is a voice message too (#2796). The run stops:
   audio file that was not recorded as a voice message;
 - after the last message stored on the device;
 - when the user closes the player, or starts another audio;
-- when the user leaves the chat: the voice message that is playing goes on to
-  its end, as before, but the next one does not start.
+- when the user leaves the chat or opens a thread over it: the next one does
+  not start. On mobile the voice message that is playing goes on to its end,
+  as before; on desktop, leaving the chat stops it, as before.
 
 Events the chat does not show (reactions, edits) do not stop the run. On the
-thread screen, the run plays the replies of that thread only; in the chat, it
-skips the thread replies, as the chat does.
+thread screen, the run plays the replies of that thread only, from its root
+too; in the chat, it skips the thread replies, as the chat does.

@@ -5,6 +5,7 @@ import 'package:async/async.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_play_extension.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_style.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/voice_autoplay_controller.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
@@ -49,12 +50,14 @@ class AudioPlayerWidget extends ConsumerStatefulWidget {
 
 enum AudioPlayerStatus { notDownloaded, downloading, downloaded }
 
-/// Downloads [event] and plays it on the shared player of [matrix].
-/// [onEnded] runs if it plays to the end.
+/// Downloads [event] and plays it on the shared player of [matrix], unless
+/// [canStart] says no once it is downloaded. [onEnded] runs if it plays to the
+/// end.
 Future<void> playVoiceMessage(
   BuildContext context,
   MatrixState matrix,
   Event event, {
+  bool Function()? canStart,
   VoidCallback? onEnded,
 }) async {
   matrix.voiceMessageEvent.value = event;
@@ -88,6 +91,11 @@ Future<void> playVoiceMessage(
     rethrow;
   }
   if (matrix.voiceMessageEvent.value?.eventId != event.eventId) return;
+  if (canStart?.call() == false) {
+    matrix.voiceMessageEvent.value = null;
+    matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+    return;
+  }
   matrix.audioPlayer = AudioPlayer();
   matrix.voiceMessageEvent.value = event;
 
@@ -188,16 +196,24 @@ class AudioPlayerState extends ConsumerState<AudioPlayerWidget>
       return;
     }
 
+    final screen = context.findAncestorStateOfType<ChatController>();
     final autoplay = ref.read(
-      voiceAutoplayControllerProvider(widget.event.roomId!).notifier,
+      voiceAutoplayControllerProvider(
+        widget.event.roomId!,
+        screen?.threadRootId,
+      ).notifier,
     );
-    await playVoiceMessage(
-      context,
-      matrix,
-      widget.event,
-      onEnded: () =>
-          unawaited(autoplay.voiceMessageEnded(widget.event.eventId)),
-    );
+    try {
+      await playVoiceMessage(
+        context,
+        matrix,
+        widget.event,
+        onEnded: () =>
+            unawaited(autoplay.voiceMessageEnded(widget.event.eventId)),
+      );
+    } catch (_) {
+      // playVoiceMessage already logged and shown the failure.
+    }
   }
 
   @override

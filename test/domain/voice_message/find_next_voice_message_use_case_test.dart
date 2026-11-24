@@ -13,6 +13,7 @@ class _Repository implements VoiceMessageRepository {
   Future<String?> nextVoiceMessageId({
     required String roomId,
     required String eventId,
+    String? threadRootId,
   }) async {
     if (error != null) throw error!;
     return next;

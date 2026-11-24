@@ -10,11 +10,13 @@ final class FindNextVoiceMessageUseCase {
   Future<String?> execute({
     required String roomId,
     required String eventId,
+    String? threadRootId,
   }) async {
     try {
       return await _repository.nextVoiceMessageId(
         roomId: roomId,
         eventId: eventId,
+        threadRootId: threadRootId,
       );
     } catch (e, s) {
       Error.throwWithStackTrace(FindNextVoiceMessageException(e), s);

@@ -9,16 +9,16 @@ class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
   final Client _client;
 
   static const _firstPageSize = 50;
-  static const _maxEvents = 6400;
 
   @override
   Future<String?> nextVoiceMessageId({
     required String roomId,
     required String eventId,
+    String? threadRootId,
   }) async {
     final room = _client.getRoomById(roomId);
     if (room == null) return null;
-    for (var limit = _firstPageSize; limit <= _maxEvents; limit *= 2) {
+    for (var limit = _firstPageSize; ; limit *= 2) {
       final newestFirst = await _client.database.getEventList(
         room,
         limit: limit,
@@ -28,16 +28,21 @@ class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
         return _nextVoiceMessageId(
           newestFirst[index],
           newestFirst.take(index).toList().reversed,
+          threadRootId,
         );
       }
       if (newestFirst.length < limit) return null;
     }
-    return null;
   }
 
-  String? _nextVoiceMessageId(Event played, Iterable<Event> newer) {
+  /// [threadRootId] is the thread screen the message plays in, null in the
+  /// chat: the root of a thread plays in both.
+  String? _nextVoiceMessageId(
+    Event played,
+    Iterable<Event> newer,
+    String? threadRootId,
+  ) {
     if (!_isVoiceMessage(played)) return null;
-    final threadRootId = played.threadRootId;
     final inThread = threadRootId != null;
     for (final event in newer) {
       if (inThread && event.threadRootId != threadRootId) continue;

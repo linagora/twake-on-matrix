@@ -67,8 +67,12 @@ void main() {
   void store(List<Event> chronological) =>
       client.db.newestFirst = chronological.reversed.toList();
 
-  Future<String?> next(String eventId) =>
-      datasource.nextVoiceMessageId(roomId: _roomId, eventId: eventId);
+  Future<String?> next(String eventId, {String? threadRootId}) =>
+      datasource.nextVoiceMessageId(
+        roomId: _roomId,
+        eventId: eventId,
+        threadRootId: threadRootId,
+      );
 
   setUp(() {
     client = _Client(_Database());
@@ -135,7 +139,31 @@ void main() {
       event('r2', threadRootId: 'root'),
     ]);
 
-    expect(await next('r1'), 'r2');
+    expect(await next('r1', threadRootId: 'root'), 'r2');
+  });
+
+  test('plays the replies after a voice root on its thread screen', () async {
+    store([event('root'), event('main'), event('r1', threadRootId: 'root')]);
+
+    expect(await next('root', threadRootId: 'root'), 'r1');
+  });
+
+  test('plays the chat after a voice root in the chat', () async {
+    store([event('root'), event('r1', threadRootId: 'root'), event('main')]);
+
+    expect(await next('root'), 'main');
+  });
+
+  test('finds a message older than the first pages, however old', () async {
+    store([
+      event('v0'),
+      event('v1'),
+      for (var i = 0; i < 6500; i++)
+        event('t$i', msgtype: MessageTypes.Text, voice: false),
+    ]);
+
+    expect(await next('v0'), 'v1');
+    expect(client.db.limits.last, 6400 * 2);
   });
 
   test('reads older pages until it finds the event', () async {

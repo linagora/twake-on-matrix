@@ -3543,16 +3543,18 @@ class ChatController extends ConsumerState<Chat>
     matrix?.voiceMessageEvent.value = null;
   }
 
-  /// The room and thread screens share the autoplay of the room: each plays
-  /// the voice messages it shows.
+  /// A screen covered by another one (a thread over its room) or closed does
+  /// not go on with its run.
+  bool get _isFrontScreen =>
+      mounted && (ModalRoute.of(context)?.isCurrent ?? true);
+
   Future<void> _playNextVoiceMessage(String eventId) async {
     final autoplay = ref.read(
-      voiceAutoplayControllerProvider(widget.roomId).notifier,
+      voiceAutoplayControllerProvider(widget.roomId, threadRootId).notifier,
     );
     final event = await room?.getEventById(eventId);
     final matrix = this.matrix;
-    if (!mounted || event == null || matrix == null) return;
-    if (event.threadRootId != threadRootId) return;
+    if (!_isFrontScreen || event == null || matrix == null) return;
     // The user started another audio meanwhile.
     if (matrix.voiceMessageEvent.value != null) return;
     try {
@@ -3560,6 +3562,7 @@ class ChatController extends ConsumerState<Chat>
         context,
         matrix,
         event,
+        canStart: () => _isFrontScreen,
         onEnded: () => unawaited(autoplay.voiceMessageEnded(event.eventId)),
       );
     } catch (_) {
@@ -3650,7 +3653,7 @@ class ChatController extends ConsumerState<Chat>
       if (!isThread) initAudioPlayer();
     });
     _voiceAutoplaySubscription = ref.listenManual(
-      voiceAutoplayControllerProvider(widget.roomId),
+      voiceAutoplayControllerProvider(widget.roomId, threadRootId),
       (_, next) {
         if (next case VoiceAutoplayNext(:final eventId)) {
           unawaited(_playNextVoiceMessage(eventId));

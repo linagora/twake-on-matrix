@@ -15,21 +15,31 @@ sealed class VoiceAutoplayState with _$VoiceAutoplayState {
   const factory VoiceAutoplayState.next(String eventId) = VoiceAutoplayNext;
 }
 
-/// Chains the voice messages of a room: when one ends, the next message plays
-/// if it is a voice message too. Lives as long as the room's chat screen.
+/// Chains the voice messages of a chat screen, the room's or one of its
+/// threads ([threadRootId]): when one ends, the next message plays if it is a
+/// voice message too. Lives as long as that screen.
 @riverpod
 class VoiceAutoplayController extends _$VoiceAutoplayController {
+  var _run = 0;
+
   @override
-  VoiceAutoplayState build(String roomId) => const VoiceAutoplayState.idle();
+  VoiceAutoplayState build(String roomId, String? threadRootId) =>
+      const VoiceAutoplayState.idle();
 
   Future<void> voiceMessageEnded(String eventId) async {
     if (!ref.mounted) return;
+    final run = ++_run;
     state = const VoiceAutoplayState.idle();
     try {
       final next = await ref
           .read(findNextVoiceMessageUseCaseProvider)
-          .execute(roomId: roomId, eventId: eventId);
-      if (!ref.mounted || next == null) return;
+          .execute(
+            roomId: roomId,
+            eventId: eventId,
+            threadRootId: threadRootId,
+          );
+      // A message that ended since then starts its own run.
+      if (!ref.mounted || run != _run || next == null) return;
       state = VoiceAutoplayState.next(next);
     } on FindNextVoiceMessageException catch (error, stackTrace) {
       if (!ref.mounted) return;

@@ -13,6 +13,8 @@ const _roomId = '!room:example.org';
 class _Repository implements VoiceMessageRepository {
   final next = <String, String?>{};
   final asked = <String>[];
+  final threads = <String?>[];
+  final gates = <String, Completer<void>>{};
   Completer<void>? gate;
   Object? error;
 
@@ -20,9 +22,12 @@ class _Repository implements VoiceMessageRepository {
   Future<String?> nextVoiceMessageId({
     required String roomId,
     required String eventId,
+    String? threadRootId,
   }) async {
     asked.add(eventId);
+    threads.add(threadRootId);
     await gate?.future;
+    await gates[eventId]?.future;
     if (error != null) throw error!;
     return next[eventId];
   }
@@ -33,7 +38,7 @@ void main() {
   late ProviderContainer container;
   late List<Object> failures;
 
-  final provider = voiceAutoplayControllerProvider(_roomId);
+  final provider = voiceAutoplayControllerProvider(_roomId, null);
 
   setUp(() {
     repository = _Repository();
@@ -126,5 +131,34 @@ void main() {
 
     expect(failures.single, isA<FindNextVoiceMessageException>());
     expect(container.read(provider), const VoiceAutoplayState.idle());
+  });
+
+  test('looks up the next message in the thread of its screen', () async {
+    final thread = voiceAutoplayControllerProvider(_roomId, r'$root');
+    container.listen(thread, (_, _) {});
+
+    await container.read(thread.notifier).voiceMessageEnded(r'$root');
+
+    expect(repository.threads, [r'$root']);
+  });
+
+  test('drops the next message of a run that a newer one replaced', () async {
+    repository
+      ..next.addAll({'v1': 'v2', 'other': 'other-next'})
+      ..gates['v1'] = Completer();
+    final states = <VoiceAutoplayState>[];
+    container.listen(provider, (_, next) => states.add(next));
+    final controller = container.read(provider.notifier);
+
+    final stale = controller.voiceMessageEnded('v1');
+    await controller.voiceMessageEnded('other');
+    repository.gates['v1']!.complete();
+    await stale;
+
+    expect(
+      container.read(provider),
+      const VoiceAutoplayState.next('other-next'),
+    );
+    expect(states, isNot(contains(const VoiceAutoplayState.next('v2'))));
   });
 }
