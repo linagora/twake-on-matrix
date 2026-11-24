@@ -48,6 +48,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   final Future<void> Function({required bool isOn, required bool isForced})
   _setSpeakerOutput;
   final Future<lk.LocalVideoTrack> Function() _createCameraTrack;
+  Future<void> _cameraChanges = Future.value();
 
   /// The user of a LiveKit identity: the part before the device id.
   @visibleForTesting
@@ -190,9 +191,17 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       _updateLocalParticipant((local) => local.setMicrophoneEnabled(isOn));
 
   @override
-  Future<void> setCamera({required bool isOn}) => _updateLocalParticipant(
-    (local) => isOn ? _turnCameraOn(local) : local.setCameraEnabled(false),
-  );
+  Future<void> setCamera({required bool isOn}) {
+    // One change at a time: a second "on" must see the first publication,
+    // and an "off" must find it.
+    final change = _cameraChanges.then(
+      (_) => _updateLocalParticipant(
+        (local) => isOn ? _turnCameraOn(local) : local.setCameraEnabled(false),
+      ),
+    );
+    _cameraChanges = change.then((_) {}, onError: (_) {});
+    return change;
+  }
 
   /// livekit_client 2.13.2 leaves a new camera track running when its
   /// publication fails: this one is stopped.

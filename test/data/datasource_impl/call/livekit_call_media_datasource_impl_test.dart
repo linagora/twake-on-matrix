@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:typed_data';
 
@@ -20,7 +21,13 @@ class _FakeCameraTrack extends Fake implements lk.LocalVideoTrack {
 }
 
 class _FakeVideoPublication extends Fake
-    implements lk.LocalTrackPublication<lk.LocalVideoTrack> {}
+    implements lk.LocalTrackPublication<lk.LocalVideoTrack> {
+  @override
+  bool get muted => false;
+
+  @override
+  lk.LocalVideoTrack? get track => null;
+}
 
 class _FakeLocal extends Fake implements lk.LocalParticipant {
   _FakeLocal(this.failure);
@@ -44,13 +51,15 @@ class _FakeLocal extends Fake implements lk.LocalParticipant {
   }) async {
     if (publishFailure case final failure?) throw failure;
     publishedTracks.add(track);
-    return _FakeVideoPublication();
+    return camera = _FakeVideoPublication();
   }
+
+  _FakeVideoPublication? camera;
 
   @override
   lk.LocalTrackPublication? getTrackPublicationBySource(
     lk.TrackSource source,
-  ) => null;
+  ) => source == lk.TrackSource.camera ? camera : null;
 
   @override
   bool get isSpeaking => false;
@@ -68,6 +77,7 @@ class _FakeLocal extends Fake implements lk.LocalParticipant {
   }) async {
     cameraChanges.add(enabled);
     if (failure case final failure?) throw failure;
+    if (camera case final camera?) return camera;
     return null;
   }
 }
@@ -221,15 +231,23 @@ void main() {
     late _FakeRoom room;
     late LiveKitCallMediaDatasourceImpl datasource;
     late _FakeCameraTrack cameraTrack;
+    late int camerasCreated;
+    Completer<void>? captureGate;
     Object? speakerFailure;
 
     setUp(() {
       room = _FakeRoom();
       cameraTrack = _FakeCameraTrack();
+      camerasCreated = 0;
+      captureGate = null;
       speakerFailure = null;
       datasource = LiveKitCallMediaDatasourceImpl(
         createRoom: (_) => room,
-        createCameraTrack: () async => cameraTrack,
+        createCameraTrack: () async {
+          camerasCreated++;
+          await captureGate?.future;
+          return cameraTrack;
+        },
         setSpeakerOutput: ({required isOn, required isForced}) async {
           room.speakerChanges.add('$isOn forced=$isForced');
           if (speakerFailure case final failure?) throw failure;
@@ -303,6 +321,47 @@ void main() {
         throwsA(isA<CallMediaFailedException>()),
       );
       expect(cameraTrack.stopped, isTrue);
+    });
+
+    test('setCamera_onTwiceAtOnce_capturesOneCamera', () async {
+      // Arrange
+      await datasource.connect(
+        _server,
+        const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
+      );
+      captureGate = Completer<void>();
+
+      // Act
+      final first = datasource.setCamera(isOn: true);
+      final second = datasource.setCamera(isOn: true);
+      captureGate!.complete();
+      await Future.wait([first, second]);
+
+      // Assert
+      expect(camerasCreated, 1);
+      expect(room.localParticipant.publishedTracks, [cameraTrack]);
+    });
+
+    test('setCamera_offWhileTurningOn_turnsOffThePublishedCamera', () async {
+      // Arrange
+      await datasource.connect(
+        _server,
+        const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
+      );
+      captureGate = Completer<void>();
+      final on = datasource.setCamera(isOn: true);
+
+      // Act
+      final off = datasource.setCamera(isOn: false);
+      await pumpEventQueue();
+      final offBeforePublish = room.localParticipant.cameraChanges.toList();
+      captureGate!.complete();
+      await Future.wait([on, off]);
+
+      // Assert
+      expect(offBeforePublish, isEmpty);
+      expect(room.localParticipant.publishedTracks, [cameraTrack]);
+      expect(room.localParticipant.cameraChanges, [false]);
     });
 
     test('setCamera_off_turnsTheOwnCameraOff', () async {
