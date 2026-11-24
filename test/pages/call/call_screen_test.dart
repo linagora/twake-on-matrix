@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
+import 'package:twake_chat/data/datasource_impl/call/call_media_datasource.provider.dart';
 import 'package:twake_chat/data/repository/call/call_repository.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -18,6 +20,11 @@ import 'call_controller_test.dart' show summaryWithFoci;
 
 const _roomId = '!room:hs.test';
 
+class _FakeVideoViews implements CallVideoViews {
+  @override
+  Widget? videoOf(String participantId) => Text('video of $participantId');
+}
+
 void main() {
   late FakeCallRepository repository;
   late ProviderContainer container;
@@ -30,6 +37,7 @@ void main() {
       overrides: [
         callRepositoryProvider.overrideWithValue(repository),
         activeMatrixClientProvider.overrideWithValue(null),
+        callVideoViewsProvider.overrideWithValue(_FakeVideoViews()),
       ],
     );
     container
@@ -256,6 +264,69 @@ void main() {
     // Assert
     expect(
       find.text('The microphone could not be changed. Try again.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('camera_inTheCall_turnsTheOwnCameraOn', (tester) async {
+    // Arrange
+    await pumpScreen(tester);
+    await join(tester);
+
+    // Act
+    await tester.tap(find.byKey(const Key('call-camera')));
+    await tester.pump();
+
+    // Assert
+    expect(repository.calls, contains('camera true'));
+  });
+
+  testWidgets('build_whenAParticipantShowsTheCamera_showsTheVideo', (
+    tester,
+  ) async {
+    // Arrange
+    await pumpScreen(tester);
+    await join(tester);
+
+    // Act
+    repository.participants.add([
+      participant('@bob:hs.test:BOB', isLocal: true),
+      participant('@alice:hs.test:ALICE').copyWith(isCameraOn: true),
+    ]);
+    await settle(tester);
+
+    // Assert
+    expect(find.text('video of @alice:hs.test:ALICE'), findsOneWidget);
+    expect(find.text('video of @bob:hs.test:BOB'), findsNothing);
+  });
+
+  testWidgets('speaker_inTheCall_turnsTheSpeakerOn', (tester) async {
+    // Arrange
+    await pumpScreen(tester);
+    await join(tester);
+
+    // Act
+    await tester.tap(find.byKey(const Key('call-speaker')));
+    await tester.pump();
+
+    // Assert
+    expect(repository.calls, contains('speaker true forced=true'));
+  });
+
+  testWidgets('camera_whenTheDeviceRefuses_saysSo', (tester) async {
+    // Arrange
+    await pumpScreen(tester);
+    await join(tester);
+    repository.mediaError = const CallMediaFailedException();
+
+    // Act
+    await tester.tap(find.byKey(const Key('call-camera')));
+    await tester.pump();
+    await tester.pump();
+
+    // Assert
+    expect(
+      find.text('The camera could not be changed. Try again.'),
       findsOneWidget,
     );
   });

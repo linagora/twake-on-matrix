@@ -135,9 +135,8 @@ class _CallScreenState extends ConsumerState<CallScreen> {
                 child: Text(l10n.callRetry),
               ),
             ),
-            CallConnected(:final participants) => _CallStage(
-              participants: participants,
-            ),
+            CallConnected(:final participants, :final isSpeakerOn) =>
+              _CallStage(participants: participants, isSpeakerOn: isSpeakerOn),
           },
         ),
       ),
@@ -191,29 +190,28 @@ class _CallMessage extends StatelessWidget {
 }
 
 class _CallStage extends ConsumerWidget {
-  const _CallStage({required this.participants});
+  const _CallStage({required this.participants, required this.isSpeakerOn});
 
   final List<CallParticipant> participants;
+  final bool isSpeakerOn;
 
-  static Future<void> _setMicrophone(
+  static const _controlGap = 16.0;
+
+  static Future<void> _change(
     BuildContext context,
-    WidgetRef ref, {
-    required bool isOn,
+    Future<bool> Function() change, {
+    required String error,
   }) async {
-    final l10n = L10n.of(context)!;
-    final isChanged = await ref
-        .read(callControllerProvider.notifier)
-        .setMicrophone(isOn: isOn);
-    if (isChanged || !context.mounted) return;
-    TwakeSnackBar.show(context, l10n.callErrorMicrophoneChange);
+    if (await change() || !context.mounted) return;
+    TwakeSnackBar.show(context, error);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
-    final isMicrophoneOn = participants
-        .where((participant) => participant.isLocal)
-        .any((participant) => participant.isMicrophoneOn);
+    final local = participants.where((participant) => participant.isLocal);
+    final isMicrophoneOn = local.any((p) => p.isMicrophoneOn);
+    final isCameraOn = local.any((p) => p.isCameraOn);
     final danger = LinagoraSysColors.material().error;
     return Column(
       children: [
@@ -243,10 +241,51 @@ class _CallStage extends ConsumerWidget {
                 color: isMicrophoneOn ? null : danger,
                 isSelected: isMicrophoneOn,
                 onPressed: () => unawaited(
-                  _setMicrophone(context, ref, isOn: !isMicrophoneOn),
+                  _change(
+                    context,
+                    () => ref
+                        .read(callControllerProvider.notifier)
+                        .setMicrophone(isOn: !isMicrophoneOn),
+                    error: l10n.callErrorMicrophoneChange,
+                  ),
                 ),
               ),
-              const SizedBox(width: 24),
+              const SizedBox(width: _controlGap),
+              CallControl(
+                key: const Key('call-camera'),
+                label: l10n.callCamera,
+                icon: isCameraOn ? Icons.videocam : Icons.videocam_off,
+                isSelected: isCameraOn,
+                onPressed: () => unawaited(
+                  _change(
+                    context,
+                    () => ref
+                        .read(callControllerProvider.notifier)
+                        .setCamera(isOn: !isCameraOn),
+                    error: l10n.callErrorCameraChange,
+                  ),
+                ),
+              ),
+              const SizedBox(width: _controlGap),
+              CallControl(
+                key: const Key('call-speaker'),
+                label: l10n.callSpeaker,
+                icon: Icons.volume_up,
+                color: isSpeakerOn
+                    ? LinagoraSysColors.material().primary
+                    : null,
+                isSelected: isSpeakerOn,
+                onPressed: () => unawaited(
+                  _change(
+                    context,
+                    () => ref
+                        .read(callControllerProvider.notifier)
+                        .setSpeaker(isOn: !isSpeakerOn),
+                    error: l10n.callErrorSpeakerChange,
+                  ),
+                ),
+              ),
+              const SizedBox(width: _controlGap),
               CallControl(
                 key: const Key('call-leave'),
                 label: l10n.callLeave,

@@ -5,7 +5,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/call/usecases/join_call_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/leave_call_usecase.dart';
 import 'package:twake_chat/domain/call/usecases/leave_call_usecase.provider.dart';
+import 'package:twake_chat/domain/call/usecases/set_call_camera_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/set_call_media_usecase.provider.dart';
+import 'package:twake_chat/domain/call/usecases/set_call_speaker_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/watch_call_participants_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/watch_call_room_encrypted_usecase.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
@@ -51,7 +53,7 @@ class CallController extends _$CallController {
     _start(roomId);
     try {
       final room = await _join(roomId, isVideo: isVideo);
-      if (ref.mounted) await _onJoined(roomId, room);
+      if (ref.mounted) await _onJoined(roomId, room, isVideo: isVideo);
     } catch (error, stackTrace) {
       _onJoinFailed(roomId, error, stackTrace);
       // A bug, not a failure of the call: it must reach the crash reports.
@@ -100,12 +102,20 @@ class CallController extends _$CallController {
         ),
       );
 
-  Future<void> _onJoined(String roomId, CallRoomInfo? room) async {
+  Future<void> _onJoined(
+    String roomId,
+    CallRoomInfo? room, {
+    required bool isVideo,
+  }) async {
     if (room == null) {
       state = const CallState.idle();
       return;
     }
-    state = CallState.connected(roomId: roomId, isDirect: room.isDirect);
+    state = CallState.connected(
+      roomId: roomId,
+      isDirect: room.isDirect,
+      isSpeakerOn: isVideo,
+    );
     _participants = ref
         .read(watchCallParticipantsUseCaseProvider)
         .execute(roomId)
@@ -218,5 +228,43 @@ class CallController extends _$CallController {
     } on CallException {
       return false;
     }
+  }
+
+  /// False when the device refused the change.
+  Future<bool> setCamera({required bool isOn}) async {
+    if (state is! CallConnected) return false;
+    try {
+      await ref.read(setCallCameraUseCaseProvider).execute(isOn: isOn);
+    } on CallException {
+      return false;
+    }
+    if (!ref.mounted) return true;
+    final current = state;
+    if (current is! CallConnected || current.isSpeakerChosen) return true;
+    await _setSpeaker(isOn: isOn, isForced: false);
+    return true;
+  }
+
+  /// False when the device refused the change.
+  Future<bool> setSpeaker({required bool isOn}) =>
+      _setSpeaker(isOn: isOn, isForced: true);
+
+  Future<bool> _setSpeaker({required bool isOn, required bool isForced}) async {
+    if (state is! CallConnected) return false;
+    try {
+      await ref
+          .read(setCallSpeakerUseCaseProvider)
+          .execute(isOn: isOn, isForced: isForced);
+    } on CallException {
+      return false;
+    }
+    if (!ref.mounted) return true;
+    final current = state;
+    if (current is! CallConnected) return true;
+    state = current.copyWith(
+      isSpeakerOn: isOn,
+      isSpeakerChosen: current.isSpeakerChosen || isForced,
+    );
+    return true;
   }
 }

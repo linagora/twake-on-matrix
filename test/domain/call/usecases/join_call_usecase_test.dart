@@ -28,6 +28,24 @@ void main() {
     expect(repository.calls, isEmpty);
   }
 
+  test('execute_inAVideoCall_prefersTheSpeaker', () async {
+    // Act
+    await join();
+
+    // Assert
+    expect(repository.connectedMedia?.isSpeakerOn, isTrue);
+  });
+
+  test('execute_inAnAudioCall_prefersTheEarpiece', () async {
+    // Act
+    await JoinCallUseCase(
+      repository,
+    ).execute(roomId: '!room', serviceUrl: 'https://rtc.test', isVideo: false);
+
+    // Assert
+    expect(repository.connectedMedia?.isSpeakerOn, isFalse);
+  });
+
   test('execute_always_endsTheStaleOneThenConnectsAndJoins', () async {
     // Act
     final room = await join();

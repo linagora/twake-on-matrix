@@ -237,6 +237,89 @@ void main() {
     expect(isOn, isFalse);
   });
 
+  test('join_anAudioCall_startsOnTheEarpiece', () async {
+    // Act
+    await controller().join('!room', isVideo: false);
+
+    // Assert
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+  });
+
+  test('setCamera_beforeAnOutputIsPicked_turnsTheSpeakerOn', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+
+    // Act
+    final isChanged = await controller().setCamera(isOn: true);
+
+    // Assert
+    expect(isChanged, isTrue);
+    expect((state() as CallConnected).isSpeakerOn, isTrue);
+    expect(
+      repository.calls,
+      containsAllInOrder(['camera true', 'speaker true forced=false']),
+    );
+  });
+
+  test('setCamera_afterTheEarpieceIsPicked_keepsIt', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+    await controller().setSpeaker(isOn: true);
+    await controller().setSpeaker(isOn: false);
+    repository.calls.clear();
+
+    // Act
+    await controller().setCamera(isOn: true);
+
+    // Assert
+    expect(repository.calls, ['camera true']);
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+  });
+
+  test('setCamera_whenRefused_answersFalseAndKeepsTheOutput', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+    repository.mediaError = const CallMediaFailedException();
+
+    // Act
+    final isChanged = await controller().setCamera(isOn: true);
+
+    // Assert
+    expect(isChanged, isFalse);
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+  });
+
+  test('setSpeaker_inTheCall_forcesItOverAHeadset', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+
+    // Act
+    final isChanged = await controller().setSpeaker(isOn: true);
+
+    // Assert
+    expect(isChanged, isTrue);
+    expect((state() as CallConnected).isSpeakerOn, isTrue);
+    expect(repository.calls.last, 'speaker true forced=true');
+  });
+
+  test('setSpeaker_whenRefused_answersFalse', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+    repository.speakerError = const CallMediaFailedException();
+
+    // Act
+    final isChanged = await controller().setSpeaker(isOn: true);
+
+    // Assert
+    expect(isChanged, isFalse);
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+  });
+
+  test('setSpeaker_outsideACall_answersFalse', () async {
+    // Act & Assert
+    expect(await controller().setSpeaker(isOn: true), isFalse);
+  });
+
   test('leave_beforeTheMediaConnects_connectsNoMedia', () async {
     // Arrange
     final joining = controller().join('!room', isVideo: false);

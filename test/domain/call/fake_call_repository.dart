@@ -40,6 +40,7 @@ class FakeCallRepository implements CallRepository {
   CallException? joinError;
   CallException? leaveError;
   CallException? mediaError;
+  CallException? speakerError;
   CallException? declineError;
   Object? staleError;
   Object? ringError;
@@ -58,6 +59,7 @@ class FakeCallRepository implements CallRepository {
   /// The ring is sent only once this completes.
   Completer<void>? ringGate;
 
+  CallMediaState? connectedMedia;
   final calls = <String>[];
   final participants = StreamController<List<CallParticipant>>.broadcast();
   final encryptions = StreamController<void>.broadcast();
@@ -137,6 +139,7 @@ class FakeCallRepository implements CallRepository {
 
   @override
   Future<void> connectMedia(CallServer server, CallMediaState media) async {
+    connectedMedia = media;
     calls.add(
       'connect mic=${media.isMicrophoneOn} camera=${media.isCameraOn} '
       'encrypted=${media.isEncrypted}',
@@ -161,6 +164,18 @@ class FakeCallRepository implements CallRepository {
   Future<void> setMicrophone({required bool isOn}) async {
     calls.add('microphone $isOn');
     if (mediaError case final error?) throw error;
+  }
+
+  @override
+  Future<void> setCamera({required bool isOn}) async {
+    calls.add('camera $isOn');
+    if (mediaError case final error?) throw error;
+  }
+
+  @override
+  Future<void> setSpeaker({required bool isOn, required bool isForced}) async {
+    calls.add('speaker $isOn forced=$isForced');
+    if (speakerError case final error?) throw error;
   }
 
   @override

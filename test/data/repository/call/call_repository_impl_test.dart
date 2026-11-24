@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
 import 'package:twake_chat/data/datasource/call/call_token_datasource.dart';
@@ -148,6 +149,17 @@ class _FakeMedia implements CallMediaDatasource {
       calls.add('microphone $isOn');
 
   @override
+  Future<void> setCamera({required bool isOn}) async =>
+      calls.add('camera $isOn');
+
+  @override
+  Future<void> setSpeaker({required bool isOn, required bool isForced}) async =>
+      calls.add('speaker $isOn $isForced');
+
+  @override
+  Widget? videoOf(String participantId) => null;
+
+  @override
   Stream<List<CallParticipant>> watchParticipants() =>
       Stream.value(participants);
 }
@@ -200,12 +212,16 @@ void main() {
       const CallMediaState(isMicrophoneOn: true, isEncrypted: true),
     );
     await repository.setMicrophone(isOn: false);
+    await repository.setCamera(isOn: true);
+    await repository.setSpeaker(isOn: true, isForced: false);
     await repository.disconnectMedia();
 
     // Assert
     expect(media.calls, [
       'connect wss://lk.test true false true',
       'microphone false',
+      'camera true',
+      'speaker true false',
       'disconnect',
     ]);
     expect(rtc.calls, isEmpty);

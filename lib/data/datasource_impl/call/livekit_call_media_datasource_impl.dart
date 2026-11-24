@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:matrix/matrix.dart' show Logs;
@@ -16,8 +17,19 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     lk.Room Function(lk.E2EEOptions? encryption) createRoom = _newRoom,
     @visibleForTesting
     Future<lk.BaseKeyProvider> Function() createKeyProvider = _newKeyProvider,
+    @visibleForTesting
+    Future<void> Function({required bool isOn, required bool isForced})
+        setSpeakerOutput =
+        _preferSpeaker,
   }) : _createRoom = createRoom,
-       _createKeyProvider = createKeyProvider;
+       _createKeyProvider = createKeyProvider,
+       _setSpeakerOutput = setSpeakerOutput;
+
+  static Future<void> _preferSpeaker({
+    required bool isOn,
+    required bool isForced,
+  }) =>
+      lk.AudioManager.instance.setSpeakerOutputPreferred(isOn, force: isForced);
 
   static lk.Room _newRoom(lk.E2EEOptions? encryption) => lk.Room(
     roomOptions: lk.RoomOptions(
@@ -29,6 +41,8 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
 
   final lk.Room Function(lk.E2EEOptions? encryption) _createRoom;
   final Future<lk.BaseKeyProvider> Function() _createKeyProvider;
+  final Future<void> Function({required bool isOn, required bool isForced})
+  _setSpeakerOutput;
 
   /// The user of a LiveKit identity: the part before the device id.
   @visibleForTesting
@@ -82,6 +96,8 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       // giving up.
       ..on<lk.RoomDisconnectedEvent>((event) => onLost(event.reason));
     try {
+      // Read by LiveKit when it starts the audio.
+      await _setSpeakerOutput(isOn: media.isSpeakerOn, isForced: false);
       await room.connect(server.url, server.token);
     } catch (error, stackTrace) {
       await listener.dispose();
@@ -166,6 +182,46 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   Future<void> setMicrophone({required bool isOn}) =>
       _updateLocalParticipant((local) => local.setMicrophoneEnabled(isOn));
 
+  @override
+  Future<void> setCamera({required bool isOn}) =>
+      _updateLocalParticipant((local) => local.setCameraEnabled(isOn));
+
+  @override
+  Future<void> setSpeaker({required bool isOn, required bool isForced}) async {
+    try {
+      await _setSpeakerOutput(isOn: isOn, isForced: isForced);
+    } catch (error, stackTrace) {
+      _rethrowErrors(error, stackTrace);
+      throw CallMediaFailedException(cause: error);
+    }
+  }
+
+  @override
+  Widget? videoOf(String participantId) {
+    final room = _room;
+    final local = room?.localParticipant;
+    final lk.Participant? participant = local?.identity == participantId
+        ? local
+        : room?.remoteParticipants[participantId];
+    final track = participant == null ? null : _cameraOf(participant);
+    if (track == null) return null;
+    return lk.VideoTrackRenderer(
+      track,
+      key: ValueKey(track.mediaStreamTrack.id),
+      fit: lk.VideoViewFit.cover,
+    );
+  }
+
+  /// Null until a remote camera is subscribed: its tile shows the avatar.
+  static lk.VideoTrack? _cameraOf(lk.Participant participant) {
+    final publication = participant.getTrackPublicationBySource(
+      lk.TrackSource.camera,
+    );
+    final track = publication?.track;
+    if (publication == null || publication.muted) return null;
+    return track is lk.VideoTrack ? track : null;
+  }
+
   Future<void> _updateLocalParticipant(
     Future<Object?> Function(lk.LocalParticipant local) run,
   ) async {
@@ -210,7 +266,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     userId: userIdOf(participant.identity),
     isLocal: isLocal,
     isMicrophoneOn: participant.isMicrophoneEnabled(),
-    isCameraOn: participant.isCameraEnabled(),
+    isCameraOn: _cameraOf(participant) != null,
     isSpeaking: participant.isSpeaking,
   );
 }

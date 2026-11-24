@@ -23,8 +23,12 @@ class _FakeLocal extends Fake implements lk.LocalParticipant {
   @override
   bool isMicrophoneEnabled() => false;
 
+  final cameraChanges = <bool>[];
+
   @override
-  bool isCameraEnabled() => false;
+  lk.LocalTrackPublication? getTrackPublicationBySource(
+    lk.TrackSource source,
+  ) => null;
 
   @override
   bool get isSpeaking => false;
@@ -34,6 +38,16 @@ class _FakeLocal extends Fake implements lk.LocalParticipant {
     bool enabled, {
     lk.AudioCaptureOptions? audioCaptureOptions,
   }) async => throw failure!;
+
+  @override
+  Future<lk.LocalTrackPublication?> setCameraEnabled(
+    bool enabled, {
+    lk.CameraCaptureOptions? cameraCaptureOptions,
+  }) async {
+    cameraChanges.add(enabled);
+    if (failure case final failure?) throw failure;
+    return null;
+  }
 }
 
 class _FakeE2EEManager extends Fake implements lk.E2EEManager {
@@ -65,6 +79,8 @@ class _FakeRtcKeyProvider extends Fake implements rtc.KeyProvider {
 class _FakeRoom extends Fake implements lk.Room {
   _FakeRoom([Object? failure]) : localParticipant = _FakeLocal(failure);
 
+  final speakerChanges = <String>[];
+
   @override
   final _FakeE2EEManager e2eeManager = _FakeE2EEManager();
 
@@ -72,7 +88,7 @@ class _FakeRoom extends Fake implements lk.Room {
   final events = lk.EventsEmitter<lk.RoomEvent>();
 
   @override
-  final lk.LocalParticipant localParticipant;
+  final _FakeLocal localParticipant;
 
   @override
   final remoteParticipants = UnmodifiableMapView<String, lk.RemoteParticipant>(
@@ -177,6 +193,86 @@ void main() {
       throwsStateError,
     );
     expect(room.disconnected, isTrue);
+  });
+
+  group('audio output and camera', () {
+    late _FakeRoom room;
+    late LiveKitCallMediaDatasourceImpl datasource;
+    Object? speakerFailure;
+
+    setUp(() {
+      room = _FakeRoom();
+      speakerFailure = null;
+      datasource = LiveKitCallMediaDatasourceImpl(
+        createRoom: (_) => room,
+        setSpeakerOutput: ({required isOn, required isForced}) async {
+          room.speakerChanges.add('$isOn forced=$isForced');
+          if (speakerFailure case final failure?) throw failure;
+        },
+      );
+    });
+
+    test('connect_inAVideoCall_prefersTheSpeaker', () async {
+      // Act
+      await datasource.connect(
+        _server,
+        const CallMediaState(
+          isMicrophoneOn: false,
+          isSpeakerOn: true,
+          isEncrypted: false,
+        ),
+      );
+
+      // Assert
+      expect(room.speakerChanges, ['true forced=false']);
+    });
+
+    test('connect_inAnAudioCall_prefersTheEarpiece', () async {
+      // Act
+      await datasource.connect(
+        _server,
+        const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
+      );
+
+      // Assert
+      expect(room.speakerChanges, ['false forced=false']);
+    });
+
+    test('setSpeaker_whenTheDeviceRefuses_failsAsMedia', () async {
+      // Arrange
+      speakerFailure = 'no audio session';
+
+      // Act & Assert
+      await expectLater(
+        datasource.setSpeaker(isOn: true, isForced: true),
+        throwsA(isA<CallMediaFailedException>()),
+      );
+    });
+
+    test('setCamera_inTheCall_turnsTheOwnCameraOn', () async {
+      // Arrange
+      await datasource.connect(
+        _server,
+        const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
+      );
+
+      // Act
+      await datasource.setCamera(isOn: true);
+
+      // Assert
+      expect(room.localParticipant.cameraChanges, [true]);
+    });
+
+    test('videoOf_withoutACamera_isNull', () async {
+      // Arrange
+      await datasource.connect(
+        _server,
+        const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
+      );
+
+      // Act & Assert
+      expect(datasource.videoOf(_ownIdentity), isNull);
+    });
   });
 
   group('in an encrypted call', () {

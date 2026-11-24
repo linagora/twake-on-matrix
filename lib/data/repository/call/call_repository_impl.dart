@@ -101,6 +101,13 @@ class CallRepositoryImpl implements CallRepository {
       _media.setMicrophone(isOn: isOn);
 
   @override
+  Future<void> setCamera({required bool isOn}) => _media.setCamera(isOn: isOn);
+
+  @override
+  Future<void> setSpeaker({required bool isOn, required bool isForced}) =>
+      _media.setSpeaker(isOn: isOn, isForced: isForced);
+
+  @override
   Stream<List<CallParticipant>> watchParticipants(CallRoom room) =>
       _media.watchParticipants().map(
         (participants) => [
