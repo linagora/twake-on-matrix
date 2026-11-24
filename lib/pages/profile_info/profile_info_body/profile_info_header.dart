@@ -116,8 +116,8 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
                         begin: Alignment.center,
                         end: Alignment.centerLeft,
                       ).transform(widget.animationController.value),
-                      child: Text(
-                        presence.localizedSubtitle(L10n.of(context)!),
+                      child: _PresenceSubtitle(
+                        presence: presence,
                         style:
                             ProfileInfoBodyViewStyle.presenceTextStyle(
                               context,
@@ -129,8 +129,6 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
                                 end: sysColors.onPrimary,
                               ).transform(widget.animationController.value),
                             ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -179,8 +177,8 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
             ),
             if (presence != null) ...[
               const SizedBox(height: 8),
-              Text(
-                presence.localizedSubtitle(L10n.of(context)!),
+              _PresenceSubtitle(
+                presence: presence,
                 style: ProfileInfoBodyViewStyle.presenceTextStyle(
                   context,
                   isOnline: presence.status == PresenceStatus.online,
@@ -229,6 +227,36 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
           size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
         );
       },
+    );
+  }
+}
+
+class _PresenceSubtitle extends StatelessWidget {
+  const _PresenceSubtitle({required this.presence, required this.style});
+
+  final PersonPresence presence;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final statusMessage = presence.statusMessage;
+    final presenceText = Text(presence.localizedPresence(l10n), style: style);
+    if (statusMessage == null) return presenceText;
+    // The status gives way first so the presence always stays visible.
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            '$statusMessage · ',
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        presenceText,
+      ],
     );
   }
 }
