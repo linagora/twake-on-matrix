@@ -260,6 +260,7 @@ class _LogoutFlow {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          activeMatrixClientProvider.overrideWith((ref) => client),
           reportFailureProvider.overrideWithValue(
             (error, _, _) => failures.add(error),
           ),
