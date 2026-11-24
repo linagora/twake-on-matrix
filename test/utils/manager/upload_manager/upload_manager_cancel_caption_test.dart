@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -14,6 +15,9 @@ import 'package:twake_chat/data/model/media/upload_file_json.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/pending_file_info.dart';
+import 'package:twake_chat/utils/manager/upload_manager/models/upload_caption_info.dart';
+import 'package:twake_chat/utils/manager/upload_manager/models/upload_file_info.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
@@ -60,12 +64,19 @@ class _FakePathProvider extends PathProviderPlatform {
   Future<String?> getApplicationSupportPath() async => path;
 }
 
+/// Knows the replied-to message and the placeholders shown so far; the
+/// lookup of the replied-to message waits on [replyLookup] when it is set.
 class _ReplyAwareDatabase extends LenientDatabase {
   Event? replyTarget;
+  Completer<void>? replyLookup;
+  final Map<String, Event> stored = {};
 
   @override
-  Future<Event?> getEventById(String eventId, Room room) async =>
-      eventId == replyTarget?.eventId ? replyTarget : null;
+  Future<Event?> getEventById(String eventId, Room room) async {
+    if (eventId != replyTarget?.eventId) return stored[eventId];
+    await replyLookup?.future;
+    return replyTarget;
+  }
 }
 
 const _thread = ThreadSendTarget(rootEventId: r'$root', lastEventId: r'$last');
@@ -77,6 +88,8 @@ void main() {
   late UploadManager manager;
   late Directory tempDir;
   late PathProviderPlatform originalPathProvider;
+  late _ReplyAwareDatabase database;
+  final savedUploadInfo = <String, Map<String, dynamic>>{};
 
   setUpAll(() async {
     queue = _RecordingQueue();
@@ -86,7 +99,7 @@ void main() {
     originalPathProvider = PathProviderPlatform.instance;
     PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
 
-    final database = _ReplyAwareDatabase();
+    database = _ReplyAwareDatabase();
     final client = await getClient(database: database);
     room = Room(
       client: client,
@@ -102,6 +115,18 @@ void main() {
       originServerTs: DateTime.utc(2026, 11, 9),
     );
     database.replyTarget = replyTarget;
+    client.onSync.stream.listen((update) {
+      for (final event
+          in update.rooms?.join?[room.id]?.timeline?.events ??
+              const <MatrixEvent>[]) {
+        if (event.unsigned?['transaction_id'] != event.eventId) continue;
+        database.stored[event.eventId] = Event.fromMatrixEvent(event, room);
+        final uploadInfo = event.unsigned?['upload_info'];
+        if (uploadInfo is Map<String, dynamic>) {
+          savedUploadInfo[event.eventId] = uploadInfo;
+        }
+      }
+    });
     manager = UploadManager();
   });
 
@@ -113,6 +138,8 @@ void main() {
 
   setUp(() {
     queue.added.clear();
+    database.replyLookup = null;
+    savedUploadInfo.clear();
     FakeMatrixApi.calledEndpoints.clear();
   });
 
@@ -263,5 +290,95 @@ void main() {
     await runQueuedSends();
 
     expect(sentMessages(), isEmpty);
+  });
+
+  test('the caption handed over is saved in the placeholder for a retry '
+      'after a restart', () async {
+    final txids = await send(['a.txt', 'b.txt', 'c.txt']);
+
+    await cancel(txids.last);
+    await pumpEventQueue();
+
+    final saved = savedUploadInfo[txids[1]];
+    expect((saved?['captionInfo'] as Map?)?['caption'], 'look');
+  });
+
+  test('a file whose bytes never came does not take the caption', () async {
+    await manager.uploadFileMobile(
+      room: room,
+      fileInfos: [
+        PendingFileInfo(
+          'a.txt',
+          size: 3,
+          resolved: Future<FileInfo>.error(Exception('download failed')),
+        ),
+        FileInfo('b.txt', bytes: Uint8List.fromList([1, 2, 3])),
+      ],
+      caption: 'look',
+      inReplyTo: replyTarget,
+    );
+    await pumpEventQueue();
+
+    await cancel(queue.added.single.id!);
+    await runQueuedSends();
+
+    final sent = sentMessages().single;
+    expect(sent['msgtype'], MessageTypes.Text);
+    expect(sent['body'], 'look');
+  });
+
+  test('a file that starts while the reply is looked up does not take the '
+      'caption nor the reply', () async {
+    final file = File('${tempDir.path}/restored.txt')
+      ..writeAsBytesSync([1, 2, 3]);
+    Event restored(String txid, {UploadCaptionInfo? caption, String? reply}) {
+      final info = UploadFileInfo(
+        txid: txid,
+        createdAt: DateTime.now(),
+        uploadStateStreamController: StreamController(),
+        cancelToken: CancelToken(),
+        captionInfo: caption,
+        inReplyToEventId: reply,
+        batchId: 'restored-batch',
+        fileInfo: FileInfo('restored.txt', filePath: file.path),
+      );
+      return database.stored[txid] = Event(
+        senderId: room.client.userID!,
+        type: EventTypes.Message,
+        room: room,
+        eventId: txid,
+        status: EventStatus.error,
+        content: {'msgtype': MessageTypes.File, 'body': 'restored.txt'},
+        unsigned: {'transaction_id': txid, 'upload_info': info.toJson()},
+        originServerTs: DateTime.now(),
+      );
+    }
+
+    // Both files of the batch come back from the database after a restart.
+    final first = restored(
+      'restored-1',
+      caption: UploadCaptionInfo(txid: 'restored-caption', caption: 'look'),
+      reply: replyTarget.eventId,
+    );
+    final second = restored('restored-2');
+    await manager.getUploadFileInfo(first.eventId, room: room);
+    await manager.retryUpload(second);
+
+    database.replyLookup = Completer();
+    final cancelling = manager.cancelUpload(first);
+    final secondSend = queue.added.removeAt(0);
+    final sending = secondSend.runnable();
+    database.replyLookup!.complete();
+    await cancelling;
+    await sending;
+    secondSend.onTaskCompleted?.call();
+    await runQueuedSends();
+
+    final sent = sentMessages();
+    expect(sent, hasLength(2));
+    expect(replyOf(sent.first), isNull);
+    expect(sent.last['msgtype'], MessageTypes.Text);
+    expect(hasCaption(sent.last), isTrue);
+    expect(replyOf(sent.last), reply);
   });
 }

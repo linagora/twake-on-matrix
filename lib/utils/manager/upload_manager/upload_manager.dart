@@ -149,27 +149,28 @@ class UploadManager {
     final replyId = cancelled.inReplyToEventId;
     if (caption == null && replyId == null) return;
 
+    final inReplyTo = replyId == null
+        ? null
+        : cancelledJob?.inReplyTo ?? await room.getEventById(replyId);
     final waiting = cancelled.batchId == null
         ? const <_MobileSendJob>[]
         : _mobileJobs.values
               .where(
-                (job) => !job.started && job.info?.batchId == cancelled.batchId,
+                (job) =>
+                    !job.started &&
+                    job.info?.isFailed != true &&
+                    job.info?.batchId == cancelled.batchId,
               )
               .toList();
-    final inReplyTo = replyId == null
-        ? null
-        : cancelledJob?.inReplyTo ?? await room.getEventById(replyId);
 
     if (replyId != null && waiting.isNotEmpty) {
-      waiting.first
-        ..inReplyTo = inReplyTo
-        ..info?.inReplyToEventId = replyId;
+      final heir = waiting.first..inReplyTo = inReplyTo;
+      _handOver(room, heir, (info) => info.inReplyToEventId = replyId);
     }
     if (caption == null) return;
     if (waiting.isNotEmpty) {
-      waiting.last
-        ..captionInfo = caption.caption
-        ..info?.captionInfo = caption;
+      final heir = waiting.last..captionInfo = caption.caption;
+      _handOver(room, heir, (info) => info.captionInfo = caption);
       return;
     }
     final thread = _threadOf(cancelled);
@@ -186,6 +187,18 @@ class UploadManager {
         ),
       ),
     );
+  }
+
+  // Saved in the placeholder so a retry after a restart keeps it.
+  void _handOver(
+    Room room,
+    _MobileSendJob heir,
+    void Function(UploadFileInfo info) update,
+  ) {
+    final info = heir.info;
+    if (info == null) return;
+    update(info);
+    unawaited(_updateEventUploadInfo(room, heir.txid, info));
   }
 
   ThreadSendTarget? _threadOf(UploadFileInfo info) {
