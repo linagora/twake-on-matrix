@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/widgets/twake_components/floating_capsule.dart';
@@ -7,6 +8,17 @@ import 'package:twake_chat/widgets/twake_components/twake_header.dart';
 import 'chat_list_header_test_harness.dart';
 
 const _pen = Key('new_chat_pen');
+
+bool _penFocused() {
+  final focused = FocusManager.instance.primaryFocus?.context;
+  if (focused == null) return false;
+  var found = false;
+  focused.visitAncestorElements((element) {
+    found = element.widget.key == _pen;
+    return !found;
+  });
+  return found;
+}
 
 void main() {
   setUpHeaderTests();
@@ -50,6 +62,22 @@ void main() {
       final h = await HeaderHarness.pump(tester, const HeaderView.phone());
 
       await tester.tap(find.byKey(_pen));
+
+      verify(h.controller.goToNewPrivateChat()).called(1);
+    });
+
+    testWidgets('GIVEN a phone with a hardware keyboard\n'
+        'WHEN Tab reaches the pen and Enter is pressed\n'
+        'THEN a new direct chat opens', (tester) async {
+      final h = await HeaderHarness.pump(tester, const HeaderView.phone());
+
+      for (var i = 0; i < 20 && !_penFocused(); i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+      }
+      expect(_penFocused(), isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
 
       verify(h.controller.goToNewPrivateChat()).called(1);
     });

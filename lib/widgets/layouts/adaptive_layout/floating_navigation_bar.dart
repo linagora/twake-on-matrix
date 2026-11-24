@@ -174,10 +174,13 @@ class _Item extends StatelessWidget {
       child: Semantics(
         button: true,
         selected: isSelected,
-        child: GestureDetector(
+        // An InkWell, not a GestureDetector: a hardware keyboard can focus it.
+        child: InkWell(
           key: destination.navigationKey,
-          behavior: HitTestBehavior.opaque,
           onTap: onTap,
+          customBorder: const StadiumBorder(),
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
