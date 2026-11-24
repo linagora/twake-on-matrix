@@ -13,6 +13,10 @@
 # Uncomment the line if you want fastlane to automatically update itself
 #update_fastlane
 
+require 'base64'
+require 'fileutils'
+require 'shellwords'
+
 setup_ci
 
 default_platform(:mac)
@@ -74,6 +78,21 @@ platform :mac do
     )
   end
 
+  desc "Seed the macOS certificate and profile, then export them as base64"
+  lane :seed_export do
+    seed
+    keychain_path = FastlaneCore::Helper.keychain_path(ENV["MATCH_KEYCHAIN_NAME"])
+    p12_path = File.join(Dir.pwd, "macos-signing.p12")
+    sh("security export -k #{Shellwords.escape(keychain_path)} -t identities -f pkcs12 " \
+       "-P #{Shellwords.escape(ENV['MATCH_PASSWORD'])} -o #{Shellwords.escape(p12_path)}")
+    profile_path = ENV["sigh_app.twake.ios.chat_appstore_macos_profile-path"]
+    profile_copy = File.join(Dir.pwd, "macos-signing.provisionprofile")
+    FileUtils.cp(profile_path, profile_copy)
+    File.write("macos-signing.p12.base64", Base64.strict_encode64(File.binread(p12_path)))
+    File.write("macos-signing.provisionprofile.base64", Base64.strict_encode64(File.binread(profile_copy)))
+    UI.success("Wrote macos-signing.p12.base64 and macos-signing.provisionprofile.base64")
+  end
+
   desc "Push a new macOS build to TestFlight"
   lane :beta do
     app_store_connect_api_key(
@@ -81,28 +100,29 @@ platform :mac do
       issuer_id: ENV["APPLE_ISSUER_ID"],
       key_content: ENV["APPLE_KEY_CONTENT"]
     )
-    # readonly: the certificates and the profile are created once by hand
-    # (`fastlane match appstore --platform macos --additional_cert_types mac_installer_distribution`);
-    # a release must never create new ones.
-    sync_code_signing(
-      type: "appstore",
-      app_identifier: [BUNDLE_ID],
-      platform: "macos",
-      readonly: true,
-      additional_cert_types: ["mac_installer_distribution"],
-      git_private_key: ENV["APPLE_CERTIFICATES_SSH_KEY"]
+    # The certificate and the profile are exported once by `seed_export` and
+    # kept in the repository secrets; a release never talks to match.
+    p12_path = File.join(Dir.pwd, "macos-signing.p12")
+    File.binwrite(p12_path, Base64.strict_decode64(ENV["MACOS_CERTIFICATE_P12_BASE64"]))
+    import_certificate(
+      certificate_path: p12_path,
+      keychain_name: ENV["MATCH_KEYCHAIN_NAME"],
+      keychain_password: ENV["MATCH_KEYCHAIN_PASSWORD"],
+      certificate_password: ENV["MATCH_PASSWORD"]
     )
-    profile = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING][BUNDLE_ID]
+    profile_path = File.join(Dir.pwd, "macos-signing.provisionprofile")
+    File.binwrite(profile_path, Base64.strict_decode64(ENV["MACOS_PROVISIONING_PROFILE_BASE64"]))
+    profile = FastlaneCore::ProvisioningProfile.parse(profile_path)["Name"]
+    FastlaneCore::ProvisioningProfile.install(profile_path)
     build_number = latest_testflight_build_number(app_identifier: BUNDLE_ID, platform: "osx", initial_build_number: 0) + 1
     version_name = last_git_tag.gsub("v", "")
-    # Flutter writes the version, the Sentry dart-defines and the obfuscation flags into
-    # Generated.xcconfig; xcodebuild below reads them. Same flags as the Android release;
-    # the symbols are uploaded to Sentry by scripts/run-sentry.sh after this lane.
+    # Flutter writes the Sentry dart-defines and the obfuscation map to
+    # Generated.xcconfig; the build below reads them. Same defines as the
+    # mobile release; the symbols are uploaded to Sentry after this lane.
     sh("cd ../.. && flutter build macos --config-only --release --build-name=#{version_name} --build-number=#{build_number} " \
-       "--dart-define=SENTRY_DSN=\"${SENTRY_DSN:-}\" --dart-define=SENTRY_ENVIRONMENT=\"${SENTRY_ENVIRONMENT:-}\" " \
-       "--obfuscate --split-debug-info=build/app/outputs/symbols " \
-       "--extra-gen-snapshot-options=--save-obfuscation-map=build/app/obfuscation.map.json")
+       "--dart-define=SENTRY_DSN=\"#{ENV['SENTRY_DSN']}\" --dart-define=SENTRY_ENVIRONMENT=\"#{ENV['SENTRY_ENVIRONMENT']}\" " \
+       "--obfuscate --split-debug-info=build/macos/symbols")
     build(profile: profile)
-    upload_to_testflight(app_identifier: BUNDLE_ID, pkg: lane_context[SharedValues::PKG_OUTPUT_PATH])
+    upload_to_testflight(app_identifier: BUNDLE_ID, platform: "osx", pkg: lane_context[SharedValues::PKG_OUTPUT_PATH])
   end
 end

@@ -73,16 +73,38 @@ jobs:
           APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
           APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-        run: bundle exec fastlane seed
+        run: bundle exec fastlane seed_export
         working-directory: macos
+
+      - name: Upload the signing material
+        if: inputs.seed_match
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-signing
+          path: macos/macos-signing.*.base64
+          retention-days: 1
+
+      - name: Check the macOS signing secrets
+        id: macos_signing
+        env:
+          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          if [ -n "$MACOS_CERTIFICATE_P12_BASE64" ] && [ -n "$MACOS_PROVISIONING_PROFILE_BASE64" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Compute Sentry release version
         id: sentry_version
         run: echo "release=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Release on TestFlight
+        if: steps.macos_signing.outputs.available == 'true'
         env:
-          APPLE_CERTIFICATES_SSH_KEY: ${{ secrets.APPLE_CERTIFICATES_SSH_KEY }}
+          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          MACOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.MACOS_PROVISIONING_PROFILE_BASE64 }}
           APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
           APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
           APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
