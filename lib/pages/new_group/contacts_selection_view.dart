@@ -171,7 +171,7 @@ class ContactsSelectionView extends StatelessWidget {
             if (presentationRecentContact.isNotEmpty) {
               return child!;
             }
-            if (PlatformInfos.isWeb) {
+            if (PlatformInfos.isDesktop) {
               if (failure is GetPresentationContactsFailure ||
                   failure is GetPresentationContactsEmpty) {
                 final keyword = controller.textEditingController.text;
@@ -235,7 +235,7 @@ class ContactsSelectionView extends StatelessWidget {
                   .isNotEmpty) {
                 return child!;
               }
-              if (!PlatformInfos.isWeb) {
+              if (!PlatformInfos.isDesktop) {
                 if (controller.phoneBookFilterSuccess) {
                   return child!;
                 }

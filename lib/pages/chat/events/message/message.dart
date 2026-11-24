@@ -248,7 +248,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
         return const SizedBox.shrink();
       }
       return OptionalSelectionContainerDisabled(
-        isEnabled: PlatformInfos.isWeb,
+        isEnabled: PlatformInfos.isDesktop,
         child: StateMessage(widget.event),
       );
     }
@@ -256,7 +256,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
     if (widget.event.type == EventTypes.Message &&
         widget.event.messageType == EventTypes.KeyVerificationRequest) {
       return OptionalSelectionContainerDisabled(
-        isEnabled: PlatformInfos.isWeb,
+        isEnabled: PlatformInfos.isDesktop,
         child: VerificationRequestContent(
           event: widget.event,
           timeline: widget.timeline,
@@ -287,7 +287,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
             bottom: hasReactionEvent ? kMessageReactionsOverlayHeight : 0,
           ),
           child: OptionalSelectionContainerDisabled(
-            isEnabled: PlatformInfos.isWeb,
+            isEnabled: PlatformInfos.isDesktop,
             child: placeHolderWidget(
               widget.onAvatarTap,
               event: widget.event,
@@ -363,7 +363,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
             valueListenable: inviewNotifier,
             builder: (context, inView, _) {
               return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
+                isEnabled: PlatformInfos.isDesktop,
                 child: StickyTimestampWidget(
                   content: !inView
                       ? widget.event.originServerTs.relativeTime(context)
@@ -384,7 +384,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
             ),
           ),
           OptionalSelectionContainerDisabled(
-            isEnabled: PlatformInfos.isWeb,
+            isEnabled: PlatformInfos.isDesktop,
             child: StickyTimestampWidget(
               content: L10n.of(context)!.unreadMessages,
             ),

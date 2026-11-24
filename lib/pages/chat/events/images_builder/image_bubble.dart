@@ -1,11 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
-import 'package:twake_chat/pages/chat/events/images_builder/image_builder_web.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/widgets/blur_hash_background.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,60 +81,46 @@ class ImageBubble extends StatelessWidget {
         borderRadius: rounded
             ? MessageContentStyle.borderRadiusBubble
             : BorderRadius.zero,
-        child:
-            (PlatformInfos.isWeb &&
-                !event.isBubbleEventEncrypted(isThumbnail: thumbnailOnly))
-            ? UnencryptedImageBuilderWeb(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: maxWidth,
+              height: bubbleHeight,
+              child: BlurHashBackground(
+                hash: event.blurHash ?? MessageContentStyle.defaultBlurHash,
+              ),
+            ),
+            MxcImage(
+              event: event,
+              width: width,
+              height: height,
+              cacheWidth: noResizeThumbnail
+                  ? null
+                  : context.getCacheSize(width),
+              cacheHeight: noResizeThumbnail
+                  ? null
+                  : context.getCacheSize(height),
+              fit: fit,
+              animated: animated,
+              isThumbnail: thumbnailOnly,
+              placeholder: (context) => ImagePlaceholder(
                 event: event,
-                bubbleMaxWidth: bubbleMaxWidth,
-                isThumbnail: thumbnailOnly,
                 width: width,
                 height: height,
-                onTapPreview: onTapPreview,
-                onTapSelectMode: onTapSelectMode,
                 fit: fit,
-              )
-            : Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: maxWidth,
-                    height: bubbleHeight,
-                    child: BlurHashBackground(
-                      hash:
-                          event.blurHash ?? MessageContentStyle.defaultBlurHash,
-                    ),
-                  ),
-                  MxcImage(
-                    event: event,
-                    width: width,
-                    height: height,
-                    cacheWidth: noResizeThumbnail
-                        ? null
-                        : context.getCacheSize(width),
-                    cacheHeight: noResizeThumbnail
-                        ? null
-                        : context.getCacheSize(height),
-                    fit: fit,
-                    animated: animated,
-                    isThumbnail: thumbnailOnly,
-                    placeholder: (context) => ImagePlaceholder(
-                      event: event,
-                      width: width,
-                      height: height,
-                      fit: fit,
-                    ),
-                    onTapPreview: onTapPreview,
-                    onTapSelectMode: onTapSelectMode,
-                    isPreview: isPreview,
-                    animationDuration: animationDuration,
-                    cacheKey: thumbnailCacheKey,
-                    cacheMap: thumbnailCacheMap,
-                    noResize: noResizeThumbnail,
-                    imageData: imageData,
-                  ),
-                ],
               ),
+              onTapPreview: onTapPreview,
+              onTapSelectMode: onTapSelectMode,
+              isPreview: isPreview,
+              animationDuration: animationDuration,
+              cacheKey: thumbnailCacheKey,
+              cacheMap: thumbnailCacheMap,
+              noResize: noResizeThumbnail,
+              imageData: imageData,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -4,7 +4,6 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/app_state/room/timeline_search_event_state.dart';
 import 'package:twake_chat/pages/chat/chat_view_style.dart';
 import 'package:twake_chat/pages/chat/events/message_download_content.dart';
-import 'package:twake_chat/pages/chat/events/message_download_content_web.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_search/chat_search.dart';
 import 'package:twake_chat/pages/chat_search/chat_search_style.dart';
@@ -16,7 +15,6 @@ import 'package:twake_chat/presentation/same_type_events_builder/same_type_event
 import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/result_extension.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -257,11 +255,7 @@ class _MessageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (event.messageType) {
       case MessageTypes.File:
-        if (PlatformInfos.isWeb) {
-          return MessageDownloadContentWeb(event, highlightText: searchWord);
-        } else {
-          return MessageDownloadContent(event, highlightText: searchWord);
-        }
+        return MessageDownloadContent(event, highlightText: searchWord);
       default:
         return HighlightText(
           text: event

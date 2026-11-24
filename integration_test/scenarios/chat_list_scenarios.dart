@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
@@ -8,16 +7,10 @@ import '../help/soft_assertion_helper.dart';
 
 /// Resolves the group the chat-list scenarios operate on.
 ///
-/// Web runs against the isolated Synapse fixture provisioned by the workflow
-/// (`TitleOfGroupTest`, `GroupID`). Mobile runs against a shared staging
-/// account with no such staged room, so it uses the in-app room fixture and its
-/// room id for API-sent messages.
+/// Uses the in-app room fixture and its room id for API-sent messages.
 Future<(String, String?)> _resolveGroupFixture(
   BaseTestScenario scenario,
 ) async {
-  if (kIsWeb) {
-    return (const String.fromEnvironment('TitleOfGroupTest'), null);
-  }
   final fixture = await prepareMobileGroupFixture(scenario);
   return (fixture.title, fixture.roomId);
 }
@@ -36,10 +29,6 @@ Future<(String, String?)> _resolveGroupFixture(
 class ChatListSearchScenario extends BaseTestScenario {
   ChatListSearchScenario(super.$, super.robots);
 
-  static const _webSearchByMatrixAddress = String.fromEnvironment(
-    'SearchByMatrixAddress',
-  );
-  static const _webSearchByTitle = String.fromEnvironment('SearchByTitle');
   static const _currentAccount = String.fromEnvironment('CurrentAccount');
 
   @override
@@ -63,19 +52,12 @@ class ChatListSearchScenario extends BaseTestScenario {
 
     // Resolve the platform fixture. Mobile uses an in-app room whose title
     // contains an uppercase "U" so the diacritic probe stays meaningful.
-    final String searchByTitle;
-    final String searchByMatrixAddress;
-    if (!kIsWeb) {
-      final fixture = await prepareMobileRoomFixture(
-        this,
-        mobileChatListFixtureTitle,
-      );
-      searchByTitle = fixture.title;
-      searchByMatrixAddress = fixture.memberMatrixId;
-    } else {
-      searchByTitle = _webSearchByTitle;
-      searchByMatrixAddress = _webSearchByMatrixAddress;
-    }
+    final fixture = await prepareMobileRoomFixture(
+      this,
+      mobileChatListFixtureTitle,
+    );
+    final searchByTitle = fixture.title;
+    final searchByMatrixAddress = fixture.memberMatrixId;
 
     // Two chats-tab search behaviours are mobile-only and intentionally not
     // asserted here (same scoping as the contact-search migration): the
@@ -94,10 +76,10 @@ class ChatListSearchScenario extends BaseTestScenario {
     final addressMatches =
         (await robots.chatListRobot().getListOfChatGroup()).length;
     s.softAssertEquals(
-      kIsWeb ? addressMatches == 1 : addressMatches >= 1,
+      addressMatches >= 1,
       true,
       'Search by $searchByMatrixAddress expected '
-      '${kIsWeb ? 'exactly 1' : 'at least 1'} group, got $addressMatches',
+      'at least 1 group, got $addressMatches',
     );
 
     // Diacritic-insensitive: title with 'U' replaced by 'Ù' should still match.

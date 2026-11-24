@@ -19,7 +19,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker_android/image_picker_android.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
-import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
@@ -28,13 +27,17 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:twake_chat/data/account/sources/account_boot_snapshot_source.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:twake_chat/providers/sso_token_vault_provider.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 import 'utils/background_push.dart';
 import 'widgets/twake_app.dart';
 
-void main() async {
+void main([List<String> args = const []]) async {
+  // The SSO webview of Windows and Linux draws its title bar with a second
+  // engine that runs this main(): it must show the title bar, not the app.
+  if (runWebViewTitleBarWidget(args)) return;
   await runZonedGuarded(
     initializeApp,
     (error, stackTrace) => Logs().wtf('Error in main', error, stackTrace),
@@ -106,12 +109,6 @@ Future<void> initializeApp() async {
       '${AppConfig.applicationName} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
     );
     return;
-  }
-
-  if (PlatformInfos.isWeb) {
-    CozyConfigManager()
-        .injectCozyScript(AppConfig.cozyExternalBridgeVersion)
-        .then((value) => CozyConfigManager().initialize());
   }
 
   // Started in foreground mode.

@@ -107,12 +107,8 @@ mixin ChatDetailsTabMixin<T extends ConsumerStatefulWidget>
   Future<Uint8List?> _handleDownloadAndPlayVideo(Event event) {
     return handleDownloadVideoEvent(
       event: event,
-      playVideoAction: PlatformInfos.isWeb
-          ? (bytes) => playVideoAction(context, bytes, event: event)
-          : null,
-      playVideoActionByUrl: PlatformInfos.isWeb
-          ? null
-          : (url) => playVideoActionByUrl(context, url, event: event),
+      playVideoActionByUrl: (url) =>
+          playVideoActionByUrl(context, url, event: event),
     );
   }
 
@@ -430,7 +426,7 @@ mixin ChatDetailsTabMixin<T extends ConsumerStatefulWidget>
 
     if (role != null) {
       _setPermission(user, role);
-    } else if (PlatformInfos.isWeb) {
+    } else if (PlatformInfos.isDesktop) {
       _openAssignRolesPageForWeb(user);
     } else {
       _openAssignRolesPageForMobile(user);

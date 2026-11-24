@@ -27,7 +27,7 @@ mixin UnblockUserMixin {
       message: L10n.of(context)!.unblockDescriptionDialog,
       okLabel: L10n.of(context)!.unblock,
       cancelLabel: L10n.of(context)!.cancel,
-      showCloseButton: PlatformInfos.isWeb,
+      showCloseButton: PlatformInfos.isDesktop,
     );
     if (confirmResult == ConfirmResult.cancel) return;
     unblockUserSubscription = unblockUserInteractor

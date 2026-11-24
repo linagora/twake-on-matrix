@@ -5,7 +5,6 @@ void main() {
   TestBase().runPatrolTest(
     description:
         'Open settings contact visibility screen test and verify everyone option is present',
-    mobileOnly: true,
     // Contacts visibility is persisted through the staging TOM backend
     // (`/_twake`), which the local-Synapse harness does not provide.
     requiresBackend: true,
@@ -16,7 +15,6 @@ void main() {
   TestBase().runPatrolTest(
     description:
         'Open settings contact visibility screen test and my contacts option is present',
-    mobileOnly: true,
     // Contacts visibility is persisted through the staging TOM backend
     // (`/_twake`), which the local-Synapse harness does not provide.
     requiresBackend: true,
@@ -27,7 +25,6 @@ void main() {
   TestBase().runPatrolTest(
     description:
         'Open settings contact visibility screen test and nobody option is present',
-    mobileOnly: true,
     // Contacts visibility is persisted through the staging TOM backend
     // (`/_twake`), which the local-Synapse harness does not provide.
     requiresBackend: true,

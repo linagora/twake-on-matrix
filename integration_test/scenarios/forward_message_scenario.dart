@@ -1,14 +1,7 @@
-import 'package:flutter/foundation.dart';
-
 import '../base/base_test_scenario.dart';
 import '../base/mobile_group_fixture.dart';
 
 // ── Configurable via --dart-define ───────────────────────────────────────────
-
-const _webSourceRoom = String.fromEnvironment(
-  'SearchByTitle',
-  defaultValue: 'My Default Group',
-);
 
 // Non-overlapping names: a textContaining finder on "Receiver Group" would also
 // match "Receiver Group 2", so neither name is a prefix of the other.
@@ -38,18 +31,13 @@ Future<String> _sendAndOpenForward(BaseTestScenario scenario) async {
   final robots = scenario.robots;
   final $ = scenario.$;
 
-  final String sourceRoom;
-  if (!kIsWeb) {
-    // Prepare every room before navigating away from the chat list: the
-    // fixture helper needs the chat list mounted. The two receiver rooms are
-    // what the forward picker searches for as destinations.
-    final fixture = await prepareMobileGroupFixture(scenario);
-    await prepareMobileRoomFixture(scenario, _receiver1);
-    await prepareMobileRoomFixture(scenario, _receiver2);
-    sourceRoom = fixture.title;
-  } else {
-    sourceRoom = _webSourceRoom;
-  }
+  // Prepare every room before navigating away from the chat list: the
+  // fixture helper needs the chat list mounted. The two receiver rooms are
+  // what the forward picker searches for as destinations.
+  final fixture = await prepareMobileGroupFixture(scenario);
+  await prepareMobileRoomFixture(scenario, _receiver1);
+  await prepareMobileRoomFixture(scenario, _receiver2);
+  final sourceRoom = fixture.title;
 
   await robots.chatListRobot().openSearchScreen();
   final opened = await robots.searchViewRobot().searchAndOpenRoom(sourceRoom);

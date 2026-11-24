@@ -111,7 +111,7 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                                   ) {
                                     return GestureDetector(
                                       onTap: () {
-                                        if (PlatformInfos.isWeb) {
+                                        if (PlatformInfos.isDesktop) {
                                           menuController.isOpen
                                               ? menuController.close()
                                               : menuController.open();
@@ -168,7 +168,7 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
                   color:
                       LinagoraRefColors.material().neutral[90] ?? Colors.black,
                 ),
-                color: widget.responsive.isWebDesktop(context)
+                color: widget.responsive.isDesktopPlatformWide(context)
                     ? Theme.of(context).colorScheme.surface
                     : LinagoraSysColors.material().onPrimary,
               ),

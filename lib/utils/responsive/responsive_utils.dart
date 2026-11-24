@@ -88,32 +88,17 @@ class ResponsiveUtils {
     return MediaQuery.sizeOf(context).shortestSide < heightShortest;
   }
 
-  bool hasLeftMenuDrawerActive(BuildContext context) {
-    if (PlatformInfos.isWeb) {
-      return isMobile(context) || isTablet(context) || isTabletLarge(context);
-    } else {
-      return true;
-    }
-  }
-
-  bool isWebDesktop(BuildContext context) =>
-      PlatformInfos.isWeb && isDesktop(context);
-
-  bool isWebNotDesktop(BuildContext context) =>
-      PlatformInfos.isWeb && !isDesktop(context);
+  bool isDesktopPlatformWide(BuildContext context) =>
+      PlatformInfos.isDesktop && isDesktop(context);
 
   bool isMobileOrTablet(BuildContext context) =>
       isMobile(context) || isTablet(context);
 
   bool landscapeTabletSupported(BuildContext context) {
-    if (PlatformInfos.isWeb) {
-      return isTabletLarge(context);
-    } else {
-      return !isLandscapeMobile(context) &&
-          (isLandscapeTablet(context) ||
-              isTabletLarge(context) ||
-              isDesktop(context));
-    }
+    return !isLandscapeMobile(context) &&
+        (isLandscapeTablet(context) ||
+            isTabletLarge(context) ||
+            isDesktop(context));
   }
 
   bool isSingleColumnLayout(BuildContext context) {
@@ -138,6 +123,6 @@ class ResponsiveUtils {
   bool isRightColumnStacked(BuildContext context) {
     final breakpoint = getChatAdaptiveBreakPoint(context);
     final screenWidth = MediaQuery.sizeOf(context).width;
-    return PlatformInfos.isWeb && screenWidth < breakpoint;
+    return PlatformInfos.isDesktop && screenWidth < breakpoint;
   }
 }

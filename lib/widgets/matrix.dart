@@ -1,5 +1,9 @@
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/utils/desktop_lifecycle.dart';
+import 'package:twake_chat/utils/dock_badge.dart';
 import 'package:twake_chat/utils/secure_storage.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -19,9 +23,7 @@ import 'package:twake_chat/presentation/mixins/init_config_mixin.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:universal_html/html.dart' as html hide File;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
@@ -80,7 +82,6 @@ import 'package:twake_chat/utils/uia_request_manager.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:twake_chat/widgets/set_active_client_state.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
@@ -101,15 +102,16 @@ import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:universal_html/html.dart' as html;
 
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/background_push.dart';
-import '../utils/web_push/web_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:twake_chat/data/model/push/twake_local_notification_payload.dart';
+import 'package:twake_chat/utils/flutter_local_notifications_port.dart';
 
 class Matrix extends ConsumerStatefulWidget {
   final Widget? child;
@@ -455,13 +457,8 @@ class MatrixState extends ConsumerState<Matrix>
 
   static const _syncErrorSentryThrottle = Duration(minutes: 10);
 
-  /// Re-registers the Web Push pusher when the app language changes so its
-  /// (generic) notification text follows the account language.
-  VoidCallback? _webPushLocaleListener;
   final StreamController<ClientLoginStateEvent> onClientLoginStateChanged =
       StreamController.broadcast();
-  StreamSubscription<html.Event>? onFocusSub;
-  StreamSubscription<html.Event>? onBlurSub;
   final initSettingsCompleter = Completer<void>();
   bool _hasSetupSharingStreams = false;
 
@@ -480,8 +477,6 @@ class MatrixState extends ConsumerState<Matrix>
     });
   }
 
-  bool webHasFocus = true;
-
   String? get activeRoomId => TwakeApp.router.activeRoomId;
 
   ({String roomId, String threadRootId})? get activeThread =>
@@ -491,6 +486,58 @@ class MatrixState extends ConsumerState<Matrix>
       ? NotificationsClient()
       : null;
   final Map<String, int> linuxNotificationIds = {};
+  final macosNotifications = PlatformInfos.isMacOS
+      ? FlutterLocalNotificationsPort()
+      : null;
+
+  final _desktopLifecycle = DesktopLifecycle(
+    MethodChannelDesktopLifecyclePort(),
+    isMacOS: PlatformInfos.isMacOS,
+  );
+  final _dockBadge = DockBadgeUpdater(FlutterAppBadgerDockPort());
+
+  /// macOS: keep the app alive in the Dock while an account is signed in, and
+  /// show the unread total of all accounts on the Dock icon.
+  void _updateMacosDock({Client? loggedOut}) {
+    if (!PlatformInfos.isMacOS) return;
+    final clients = accountClients.where((c) => c != loggedOut).toList();
+    unawaited(
+      _desktopLifecycle.onLoginStateChanged(
+        isLoggedIn: clients.any((c) => c.isLogged()),
+      ),
+    );
+    unawaited(
+      _dockBadge.update([
+        for (final c in clients)
+          // A left or banned room keeps its counts (includeLeave sync).
+          for (final r in c.rooms.where(
+            (r) =>
+                r.membership == Membership.join ||
+                r.membership == Membership.invite,
+          ))
+            // switch to unreadBadgeCount once threads land
+            DockBadgeRoom(
+              notificationCount: r.notificationCount,
+              highlightCount: r.highlightCount,
+              isInvite: r.membership == Membership.invite,
+              isMuted: r.isMuted,
+            ),
+      ]),
+    );
+  }
+
+  /// Rooms with a macOS notification on screen, with the account it is for.
+  final Map<String, String> macosNotifiedRooms = {};
+
+  static String? _payloadEventId(NotificationResponse? r) {
+    try {
+      return TwakeLocalNotificationPayload.fromJson(
+        jsonDecode(r?.payload ?? '{}') as Map<String, dynamic>,
+      ).eventId;
+    } catch (_) {
+      return null;
+    }
+  }
 
   late final _loginHost = _MatrixLoginHost(this);
   late final LoginSessions _loginSessions;
@@ -505,6 +552,20 @@ class MatrixState extends ConsumerState<Matrix>
     // The boot clients and the persisted state are overridden by `main` when
     // the container is made; the account state adopts them on its first read.
     _subscriptions = ref.read(clientSubscriptionsProvider);
+    // The macOS permission is asked after the first sync, not here. A tap
+    // reuses the mobile push routing (account switch, then the room).
+    unawaited(
+      macosNotifications
+          ?.init(
+            (r) => (backgroundPush ??= BackgroundPush(
+              this,
+              client,
+            )).onSelectNotification(r, eventId: _payloadEventId(r)),
+          )
+          .catchError(
+            (Object e, StackTrace s) => _report(e, s, 'notification init'),
+          ),
+    );
     _quietLogouts = ref.read(quietLogoutsProvider);
     _logoutRemovals = ref.read(logoutRemovalsProvider);
     _candidateRemovals = ref.read(candidateRemovalsProvider);
@@ -534,20 +595,10 @@ class MatrixState extends ConsumerState<Matrix>
         _pushController.setTeardown(_pushTeardown);
       }
       WidgetsBinding.instance.addObserver(this);
-      if (PlatformInfos.isWeb) {
-        html.window.addEventListener('focus', onWindowFocus);
-        html.window.addEventListener('blur', onWindowBlur);
-        html.document.addEventListener('visibilitychange', onVisibilityChange);
-        FocusManager.instance.addListener(_onFocusManagerChange);
-      }
       await initMatrix();
       await ref.read(emojiDataProvider.future);
       await tryToGetFederationConfigurations();
-      if (PlatformInfos.isWeb) {
-        initConfigWeb().then((_) => initSettings());
-      } else {
-        initConfigMobile().then((_) => initSettings());
-      }
+      initConfigMobile().then((_) => initSettings());
     });
   }
 
@@ -645,6 +696,15 @@ class MatrixState extends ConsumerState<Matrix>
           )
           .cancel,
     );
+    if (PlatformInfos.isMacOS) {
+      _subscriptions.keep(
+        name,
+        'dockBadge',
+        () => currentClient.onSync.stream
+            .listen((_) => _updateMacosDock())
+            .cancel,
+      );
+    }
     _subscriptions.keep(
       name,
       'uiaRequest',
@@ -677,41 +737,31 @@ class MatrixState extends ConsumerState<Matrix>
         }
       }).cancel,
     );
-    if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
-      // The pusher is registered while the name is open; one that finishes
-      // after a rollback or a logout is deleted again.
-      Future<void> setUpWebPush() => _subscriptions.runGuarded(
-        name,
-        setUp: () => setupWebPush(currentClient),
-        undo: () => removeWebPush(currentClient, unsubscribe: false),
-      );
-      void setUpWebPushReported() => unawaited(
-        setUpWebPush().catchError(
-          (Object e, StackTrace s) => _report(e, s, 'web push of $name'),
-        ),
-      );
-
-      Future<void> initWebNotifications() async {
+    if (PlatformInfos.isLinux || PlatformInfos.isMacOS) {
+      Future<void> initDesktopNotifications() async {
         // Cancelled (a rollback, a logout) before this ran: set nothing up.
         if (!_subscriptions.isOpen(name)) return;
-        if (kIsWeb) {
-          setUpWebPushReported();
-          // Re-register on language change (and once the locale resolves after
-          // a cold start) so the generic notification text matches the account
-          // language. removeListener+addListener keeps a single live listener.
-          final listener = _webPushLocaleListener;
-          if (listener != null) {
-            LocalizationService.currentLocale.removeListener(listener);
-          }
-          _webPushLocaleListener = setUpWebPushReported;
-          LocalizationService.currentLocale.addListener(
-            _webPushLocaleListener!,
+        // `keep` starts nothing for a name that was closed meanwhile.
+        if (PlatformInfos.isMacOS) {
+          unawaited(
+            macosNotifications?.requestPermission().catchError(
+              (Object e, StackTrace s) =>
+                  _report(e, s, 'notification permission'),
+            ),
           );
-        } else {
-          await _requestNotificationPermission();
+          _subscriptions.keep(
+            name,
+            'notificationClear',
+            () => currentClient.onSync.stream
+                .listen(
+                  (_) => clearReadMacosNotifications(currentClient).catchError(
+                    (Object e, StackTrace s) =>
+                        _report(e, s, 'notification clear'),
+                  ),
+                )
+                .cancel,
+          );
         }
-        // The permission prompt can outlast the login: `keep` starts nothing
-        // for a name that was closed meanwhile.
         _subscriptions.keep(
           name,
           'notification',
@@ -724,16 +774,25 @@ class MatrixState extends ConsumerState<Matrix>
                     ) &&
                     e.content['sender'] != currentClient.userID,
               )
-              .listen(showLocalNotification)
+              .listen((e) {
+                if (!PlatformInfos.isMacOS) return showLocalNotification(e);
+                unawaited(
+                  showMacosNotification(currentClient, e).catchError(
+                    (Object err, StackTrace s) =>
+                        _report(err, s, 'notification of $name'),
+                  ),
+                );
+              })
               .cancel,
         );
       }
 
       // On a warm start the first sync may already have happened before this
-      // listener attaches, so onSync.stream.first would never fire and web push
-      // setup would silently be skipped. Run immediately if already synced.
+      // listener attaches, so onSync.stream.first would never fire and the
+      // notification setup would silently be skipped. Run immediately if
+      // already synced.
       if (currentClient.prevBatch != null) {
-        await initWebNotifications();
+        await initDesktopNotifications();
       } else {
         // Waits for a sync that may never come: the wait is cancelled with the
         // other subscriptions of the client.
@@ -741,7 +800,7 @@ class MatrixState extends ConsumerState<Matrix>
           name,
           'firstSync',
           currentClient.onSync.stream,
-          () => initWebNotifications().catchError(
+          () => initDesktopNotifications().catchError(
             (Object e, StackTrace s) => _report(e, s, 'notifications of $name'),
           ),
         );
@@ -803,21 +862,10 @@ class MatrixState extends ConsumerState<Matrix>
     );
   }
 
-  Future<void> _requestNotificationPermission() async {
-    try {
-      final isInsideCozy = await CozyConfigManager().isInsideCozy;
-      if (isInsideCozy) {
-        CozyConfigManager().requestNotificationPermission();
-        return;
-      }
-    } catch (_) {}
-
-    await html.Notification.requestPermission();
-  }
-
   Future<void> _listenLoginStateChanged(LoginState state, Client client) async {
     if (state != LoginState.loggedIn) _homeserverCheckLog.forget(client);
     if (_quietLogouts.consume(client.clientName, state)) return;
+    _updateMacosDock(loggedOut: state == LoginState.loggedIn ? null : client);
     final loggedInWithMultipleClients = accountClients.length > 1;
     if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
       await _handleLogoutWithMultipleAccount(state, client);
@@ -859,7 +907,6 @@ class MatrixState extends ConsumerState<Matrix>
     if (PlatformInfos.isMobile && target.isLogged()) {
       await backgroundPush?.removePusherForClient(target);
     }
-    if (kIsWeb) await removeWebPush(target, unsubscribe: false);
   }
 
   /// Pusher deletions that failed before the last exit run again now, for the
@@ -1041,11 +1088,6 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _cancelSubs(String name) async {
     // The listener goes first: a failing cancel below must not leave it live.
-    final webPushListener = _webPushLocaleListener;
-    if (webPushListener != null) {
-      LocalizationService.currentLocale.removeListener(webPushListener);
-      _webPushLocaleListener = null;
-    }
     await _subscriptions.cancel(name);
   }
 
@@ -1131,11 +1173,6 @@ class MatrixState extends ConsumerState<Matrix>
     final initialUserId = clientOrNull?.userID;
     if (initialUserId != null) {
       unawaited(ref.read(contactSyncServiceProvider(initialUserId)).refresh());
-    }
-
-    if (kIsWeb) {
-      onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
-      onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
     }
 
     _ensureBackgroundPush();
@@ -1694,57 +1731,6 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  /// Last focusable leaf [FocusNode] that had focus, updated continuously via
-  /// [FocusManager] listener so it stays valid even after the browser clears
-  /// DOM focus on tab switch.
-  FocusNode? _lastFocusedNode;
-
-  /// Called on every Flutter focus change. Saves only leaf nodes that can
-  /// actually receive input (excludes FocusScope and non-focusable nodes).
-  void _onFocusManagerChange() {
-    final current = FocusManager.instance.primaryFocus;
-    if (current != null &&
-        current.canRequestFocus &&
-        current is! FocusScopeNode) {
-      _lastFocusedNode = current;
-    }
-  }
-
-  /// Restores focus after a post-frame delay so the Flutter engine finishes
-  /// its own focus handling (view-level focus) before we override it.
-  ///
-  /// Re-reads [_lastFocusedNode] inside the callback to avoid overwriting a
-  /// newer focus target that may have been set between the call and execution.
-  /// Only restores if focus is still effectively unset (null or a FocusScopeNode,
-  /// which can't receive keyboard input directly).
-  void _restoreFocus() {
-    if (_lastFocusedNode == null) return;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      final node = _lastFocusedNode;
-      if (node == null || !node.canRequestFocus) return;
-      // Only restore if no real (leaf) node has taken focus in the meantime.
-      final currentFocus = FocusManager.instance.primaryFocus;
-      if (currentFocus == null || currentFocus is FocusScopeNode) {
-        node.requestFocus();
-      }
-    });
-  }
-
-  void onWindowFocus(html.Event e) {
-    didChangeAppLifecycleState(AppLifecycleState.resumed);
-    _restoreFocus();
-  }
-
-  void onWindowBlur(html.Event e) {
-    didChangeAppLifecycleState(AppLifecycleState.paused);
-  }
-
-  void onVisibilityChange(html.Event e) {
-    if (html.document.hidden != true) {
-      _restoreFocus();
-    }
-  }
-
   /// Without [url], the authentication server comes from [summary], or from
   /// the one the picker holds when none is given. A login set-up that is
   /// retried passes the summary of its own login.
@@ -1833,16 +1819,8 @@ class MatrixState extends ConsumerState<Matrix>
       }
     }
     Sentry.configureScope((scope) => scope.setUser(null));
-    if (PlatformInfos.isMobile) {
-      await _deletePersistActiveAccount();
-      await _leaveLoggedInScreens(const HomeTwakeWelcomeRoute().location);
-    } else {
-      if (kIsWeb) await removeWebPush(loggedOut);
-      await _leaveLoggedInScreens(
-        const HomeRoute($extra: true).location,
-        extra: true,
-      );
-    }
+    await _deletePersistActiveAccount();
+    await _leaveLoggedInScreens(const HomeTwakeWelcomeRoute().location);
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.accounts.length == 1) {
       // A switch or a removal can change the state between the check and the
@@ -2039,12 +2017,6 @@ class MatrixState extends ConsumerState<Matrix>
     WidgetsBinding.instance.removeObserver(this);
     // Saved in `initState`: `ref` is not safe to use in `dispose`.
     _loginSessions.release(_loginHost);
-    if (PlatformInfos.isWeb) {
-      html.window.removeEventListener('focus', onWindowFocus);
-      html.window.removeEventListener('blur', onWindowBlur);
-      html.document.removeEventListener('visibilitychange', onVisibilityChange);
-      FocusManager.instance.removeListener(_onFocusManagerChange);
-    }
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
     // The keep-alive providers free the subscriptions and the removals when
@@ -2062,8 +2034,6 @@ class MatrixState extends ConsumerState<Matrix>
       }),
     );
     _httpClientOwner?.httpClient.close();
-    onFocusSub?.cancel();
-    onBlurSub?.cancel();
     backgroundPush?.onRoomSync?.cancel();
     showToMBootstrap.dispose();
     linuxNotifications?.close();

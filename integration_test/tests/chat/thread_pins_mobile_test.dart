@@ -9,7 +9,6 @@ void main() {
     description:
         'A pinned thread reply shows in the pins of the room and opens its '
         'thread on it, without moving the room',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => PinnedThreadReplyScenario($, robots),
   );
 
@@ -18,7 +17,6 @@ void main() {
     description:
         'The thread screen has its own pinned bar, updated when pinning and '
         'unpinning from it',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => ThreadPinnedBarScenario($, robots),
   );
 }

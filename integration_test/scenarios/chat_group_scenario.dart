@@ -3,42 +3,26 @@ import 'package:twake_chat/pages/chat/chat_event_list.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:twake_chat/pages/chat/event_info_dialog.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
 import '../base/mobile_group_fixture.dart';
 import '../robots/chat_group_detail_robot.dart';
 import 'chat_scenario.dart';
 
-const _webGroup = String.fromEnvironment(
-  'SearchByTitle',
-  defaultValue: 'My Default Group',
-);
 int _uid() => DateTime.now().microsecondsSinceEpoch;
 
-Future<String?> _openGroup(BaseTestScenario scenario) async {
+Future<void> _openGroup(BaseTestScenario scenario) async {
   final robots = scenario.robots;
-  if (!kIsWeb) {
-    final fixture = await prepareMobileGroupFixture(scenario);
-    await robots.chatListRobot().openSearchScreen();
-    final opened = await robots.searchViewRobot().searchAndOpenRoom(
-      fixture.title,
-    );
-    if (!opened) {
-      throw Exception('Test failed: Room "${fixture.title}" was not found.');
-    }
-    return fixture.roomId;
-  }
-
+  final fixture = await prepareMobileGroupFixture(scenario);
   await robots.chatListRobot().openSearchScreen();
-  final opened = await robots.searchViewRobot().searchAndOpenRoom(_webGroup);
+  final opened = await robots.searchViewRobot().searchAndOpenRoom(
+    fixture.title,
+  );
   if (!opened) {
-    throw Exception('Test failed: Room "$_webGroup" was not found.');
+    throw Exception('Test failed: Room "${fixture.title}" was not found.');
   }
-  return null;
 }
 
 /// Opens the platform fixture room, posts one message through the UI (sender)
@@ -55,7 +39,7 @@ Future<(String, String)> _prepareMessages(
   final robots = scenario.robots;
   final $ = scenario.$;
 
-  final roomId = await _openGroup(scenario);
+  await _openGroup(scenario);
   await $.pump(const Duration(seconds: 1));
 
   final id = _uid();
@@ -66,13 +50,9 @@ Future<(String, String)> _prepareMessages(
   await _waitShown(scenario, senderMsg);
 
   if (receiverFixtureMessage != null) {
-    if (!kIsWeb) {
-      final fixture = await prepareMobileGroupFixture(scenario);
-      await prepareMobileReceiverMessages(scenario, fixture);
-    } else {
-      await sendMessageAsReceiver(message: receiverMsg, roomId: roomId);
-    }
-    await _waitShown(scenario, receiverMsg, searchTimeline: !kIsWeb);
+    final fixture = await prepareMobileGroupFixture(scenario);
+    await prepareMobileReceiverMessages(scenario, fixture);
+    await _waitShown(scenario, receiverMsg, searchTimeline: true);
   }
 
   return (senderMsg, receiverMsg);
@@ -146,9 +126,7 @@ class ChatGroupReplyScenario extends BaseTestScenario {
   Future<void> runTestLogic() async {
     final (senderMsg, receiverMsg) = await _prepareMessages(
       this,
-      receiverFixtureMessage: kIsWeb
-          ? 'receiver sent at ${_uid()}'
-          : mobileReceiverMessageReply,
+      receiverFixtureMessage: mobileReceiverMessageReply,
     );
 
     final replySender = 'reply sender at ${_uid()}';
@@ -158,7 +136,7 @@ class ChatGroupReplyScenario extends BaseTestScenario {
     await _waitExists(this, replySender);
 
     final replyReceiver = 'reply receiver at ${_uid()}';
-    await _waitShown(this, receiverMsg, searchTimeline: !kIsWeb);
+    await _waitShown(this, receiverMsg, searchTimeline: true);
     await robots.messageMenuRobot().openReply(receiverMsg);
     await robots.chatGroupDetailRobot().sendMessage(replyReceiver);
     await _waitExists(this, replyReceiver);
@@ -210,16 +188,14 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
   Future<void> runTestLogic() async {
     final (senderMsg, receiverMsg) = await _prepareMessages(
       this,
-      receiverFixtureMessage: kIsWeb
-          ? 'receiver sent at ${_uid()}'
-          : mobileReceiverMessageDelete,
+      receiverFixtureMessage: mobileReceiverMessageDelete,
     );
 
     await _waitShown(this, senderMsg);
     await robots.messageMenuRobot().openDelete(senderMsg);
     await _waitAbsent(this, senderMsg);
 
-    await _waitShown(this, receiverMsg, searchTimeline: !kIsWeb);
+    await _waitShown(this, receiverMsg, searchTimeline: true);
     await robots.messageMenuRobot().openDelete(receiverMsg);
     await _waitAbsent(this, receiverMsg);
   }
@@ -227,8 +203,8 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
 
 /// Mobile-only: verify the long-press pull-down menu surfaces the right actions
 /// for a sender-owned (owner level) and a receiver-owned (member level)
-/// message. The pull-down menu only exists on mobile, so this is registered
-/// with `mobileOnly: true` and drives concrete robots directly.
+/// message. The pull-down menu only exists on mobile, so this drives concrete robots
+/// directly.
 class ChatGroupDisplayMenuScenario extends BaseTestScenario {
   ChatGroupDisplayMenuScenario(super.$, super.robots);
 
@@ -256,7 +232,7 @@ class ChatGroupDisplayMenuScenario extends BaseTestScenario {
 
 /// Mobile-only: copy a sender-owned and a receiver-owned message and paste them
 /// back into the composer, verifying the pasted text is sent. Uses the system
-/// clipboard via concrete robots, so this is registered with `mobileOnly: true`.
+/// clipboard via concrete robots.
 class ChatGroupCopyScenario extends BaseTestScenario {
   ChatGroupCopyScenario(super.$, super.robots);
 

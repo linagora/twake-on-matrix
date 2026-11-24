@@ -405,7 +405,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       _suggestionsController.open();
     } else {
       _suggestionsController.close();
-      if (PlatformInfos.isWeb ||
+      if (PlatformInfos.isDesktop ||
           widget.showEmojiPickerNotifier?.value == false) {
         widget.typeAheadFocusNode?.requestFocus();
       }
@@ -496,7 +496,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
                 _suggestionsController.open();
                 widget.onChanged?.call(text);
               },
-              contextMenuBuilder: PlatformInfos.isWeb
+              contextMenuBuilder: PlatformInfos.isDesktop
                   ? null
                   : (context, editableTextState) =>
                         mobileTwakeContextMenuBuilder(
@@ -538,7 +538,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
               _handleSuggestionsCallbackMobile();
             }
 
-            if (PlatformInfos.isWeb) {
+            if (PlatformInfos.isDesktop) {
               _handleSuggestionsCallbackWeb(suggestions);
             }
             widget.focusSuggestionController.suggestions = suggestions;

@@ -185,7 +185,7 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
   }
 
   void _showImagesPickerAction() async {
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       pickAvatarImageOnWeb();
       return;
     }

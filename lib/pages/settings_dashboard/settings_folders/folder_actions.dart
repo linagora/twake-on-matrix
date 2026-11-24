@@ -69,7 +69,7 @@ Future<void> showFolderMenu(
   required Offset position,
 }) async {
   final l10n = L10n.of(context)!;
-  final menu = _FolderMenu()..disableRightClick();
+  final menu = _FolderMenu();
   final index = await menu.showTwakeContextMenu(
     offset: position,
     context: context,
@@ -78,7 +78,6 @@ Future<void> showFolderMenu(
       ContextMenuAction(name: l10n.folderDelete, icon: Icons.delete_outline),
     ],
   );
-  menu.enableRightClick();
   if (!context.mounted) return;
   switch (index) {
     case 0:

@@ -217,7 +217,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
       );
     }
 
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       child = GestureDetector(
         onSecondaryTapDown: (_) async => await _handleRightClick(context),
         child: child,
@@ -433,14 +433,9 @@ class _ParticipantListItemState extends State<ParticipantListItem>
   Future<void> _handleRightClick(BuildContext context) async {
     if (!canChangePermissions) return;
     try {
-      disableRightClick();
-
       final RenderBox? renderBox =
           _participantItemKey.currentContext?.findRenderObject() as RenderBox?;
-      if (renderBox == null) {
-        enableRightClick();
-        return;
-      }
+      if (renderBox == null) return;
 
       final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
@@ -458,7 +453,6 @@ class _ParticipantListItemState extends State<ParticipantListItem>
         offset: menuPosition,
         context: context,
         listActions: menuActions,
-        onClose: enableRightClick,
         leadingIcon: true,
       );
       if (selectedIndex is int &&
@@ -468,7 +462,6 @@ class _ParticipantListItemState extends State<ParticipantListItem>
       }
     } catch (e) {
       Logs().e('ParticipantListItem::_handleRightClick()', e);
-      enableRightClick();
       if (mounted) {
         TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
       }

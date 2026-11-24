@@ -21,10 +21,9 @@ import 'abstract/abstract_login_robot.dart';
 class LoginRobot extends CoreRobot implements AbstractLoginRobot {
   LoginRobot(super.$);
 
-  bool get _isAndroid =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  bool get _isAndroid => defaultTargetPlatform == TargetPlatform.android;
 
-  bool get _isIOS => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+  bool get _isIOS => defaultTargetPlatform == TargetPlatform.iOS;
 
   Selector getLoginTxt() {
     if (_isAndroid) {

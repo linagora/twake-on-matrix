@@ -136,7 +136,7 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
   }
 
   void saveFileAction(BuildContext context, Event? event) {
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       event?.saveFile(context);
     } else {
       if (event != null) {

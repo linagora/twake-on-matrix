@@ -5,7 +5,6 @@ import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/add_story/add_story.dart';
 import 'package:twake_chat/pages/archive/archive.dart';
-import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
 import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_messages.dart';
@@ -152,8 +151,8 @@ class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute({this.$extra});
 
   /// The extra is shared with the child routes, whose redirect also builds
-  /// this route from it: the login route carries a [LoginClientOwner], this
-  /// one a `loggedOut` flag. A narrower type would throw on the child's.
+  /// this route from it: the login route carries a [LoginClientOwner]. A
+  /// narrower type would throw on the child's.
   final Object? $extra;
 
   @override
@@ -161,15 +160,8 @@ class HomeRoute extends GoRouteData with $HomeRoute {
       _loggedInRedirect(context, state);
 
   @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    final extra = $extra;
-    return _defaultPage(
-      context,
-      PlatformInfos.isMobile
-          ? const TwakeWelcome()
-          : AutoHomeserverPicker(loggedOut: extra is bool ? extra : null),
-    );
-  }
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, const TwakeWelcome());
 }
 
 mixin _LoginRoute on GoRouteData {

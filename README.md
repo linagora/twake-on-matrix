@@ -15,8 +15,6 @@
   <p align="center">
     <a href="https://twake-chat.com">Website</a>
     •
-    <a href="https://beta.twake.app/web/#/rooms">View Demo</a>
-    •
     <a href="https://github.com/linagora/twake-on-matrix/issues">Report Bug</a>
     •
     <a href="https://github.com/orgs/linagora/projects/6/views/5">Roadmap</a>
@@ -64,22 +62,6 @@ You can at any moment verify your flutter installation using:
 ```bash
 flutter doctor -v
 ```
-
-#### Web
-
-For web development, install:
-
-- [Google Chrome](https://www.google.com/chrome/)
-- Rust using [rustup](https://rustup.rs/)
-- [yq](https://github.com/mikefarah/yq)
-
-The web target uses `flutter_vodozemac` for end-to-end encryption. Before running or building the application for the first time, generate the required web package:
-
-```bash
-./scripts/prepare-web.sh
-```
-
-Run this command again after updating the `flutter_vodozemac` dependency.
 
 #### Android
 
@@ -142,7 +124,7 @@ Supported platforms:
 
 ### Configure the app
 
-In order to run the web target you must provide a default configuration file. This can be done by copying the `config.sample.json` to `config.json`.
+In order to run the app you must provide a default configuration file. This can be done by copying the `config.sample.json` to `config.json`.
 
 ```bash
 cp config.sample.json config.json
@@ -167,8 +149,6 @@ Here is an example working with `matrix.org`:
   "dev_mode": true,
   "qr_code_download_url": "https://sign-up.twake.app/download/chat",
   "enable_logs": true,
-  "vapid_public_key": "",
-  "web_push_enabled": false,
   "support_url": "https://twake.app/support",
   "cozy_external_bridge_version": "0.16.1"
 }
@@ -190,7 +170,7 @@ flutter devices   # To list available run targets
 
 ```bash
 # flutter run -d <device>, e.g:
-flutter run -d chrome
+flutter run -d linux
 ```
 
 ### Assets
@@ -251,13 +231,6 @@ Weblate update/pull, open a PR from `l10n` into `main`) is documented in
 
 Please use the helper script corresponding to your target in order to build:
 
-### Web
-
-```bash
-./scripts/prepare-web.sh
-./scripts/build-web.sh
-```
-
 ### Linux
 
 ```bash
@@ -271,140 +244,6 @@ Please use the helper script corresponding to your target in order to build:
 # ./scripts/build-android-apk.sh    ## For release purposes
 ./scripts/build-android-debug.sh
 ```
-
-### Performance Profiling
-
-#### Why Chrome DevTools instead of Flutter DevTools?
-
-Flutter DevTools is designed for native (iOS/Android/Desktop) profiling and provides frame-level insights via the Dart VM. On **Flutter Web** however, the Dart code is compiled to JavaScript and runs inside a browser engine. Flutter DevTools cannot profile the JavaScript execution, browser rendering pipeline, or web worker scheduling.
-
-**Chrome DevTools Performance panel** is the right tool for Flutter Web because it captures the actual browser behavior: main thread long tasks, animation frame durations, garbage collection pauses, network timing, and GPU compositing — which is where the real bottlenecks are on web.
-
-#### The problem with manual analysis
-
-A Chrome DevTools performance trace recorded over a typical user session (navigating conversations, scrolling, viewing members) produces a **JSON file exceeding 350,000 lines**. The flame chart is virtually unreadable by eye for identifying patterns across hundreds of animation frames and long tasks.
-
-#### Automated profiling with Chrome DevTools MCP
-
-We use the [Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp/?tab=readme-ov-file) server connected to an AI coding assistant (OpenCode + Claude Code) to **automate the entire profiling workflow**:
-
-1. **Install the MCP server** — add to your OpenCode MCP configuration (~/.config/opencode/opencode.json):
-
-   ```json
-   {
-     "$schema": "https://opencode.ai/config.json",
-     "mcp": {
-       "chrome-devtools": {
-         "type": "local",
-         "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
-       }
-     }
-   }
-   ```
-
-2. **Switch to the original branch you want to compare with your changes**
-
-3. **Ask Claude Opus 4.6 to perform the profiling** — example prompt:
-
-   > Run the app on Chrome, in profile mode, connect via the Chrome DevTools MCP, set CPU throttling to 4x (recommended threshold to simulate a low-end device), start a performance trace, navigate through the app (open DM conversations, group rooms, scroll through messages, view member lists), stop the trace, and analyze the results. Compare before/after if applicable (Sync XHR (main thread), Animation frame avg, Jank, Long tasks, JS Heap).
-
-Every now and then, manually scroll through the app using your mouse to make sure that the programmatic scrolling isn't skewing the data.
-
-4. **Switch to the branch where your changes are and ask again the AI to run the app and compare with the first run**
-
-5. **What the AI does automatically**:
-   - Connects to the running Chrome instance via the DevTools Protocol
-   - Sets CPU 4x throttling to simulate a low-end device
-   - Starts a performance trace recording
-   - Navigates the app by dispatching pointer/wheel events on the Flutter canvas
-   - Stops the trace and saves the raw JSON (typically 20+ MB compressed)
-   - Parses the trace programmatically to extract: long tasks (>50ms), animation frame durations (avg, P95, P99, jank %), GC pauses, XHR/sync timing, JS heap size
-   - Produces a comparison table if a baseline trace exists
-
-#### Key metrics to watch
-
-| Metric                 | Target   | Description                                                   |
-| ---------------------- | -------- | ------------------------------------------------------------- |
-| Sync XHR (main thread) | < 50ms   | Time spent parsing `/sync` responses on the main thread       |
-| Animation frame avg    | < 16.7ms | Average frame duration (60fps = 16.7ms budget)                |
-| Jank (frames > 16.7ms) | < 20%    | Percentage of frames that miss the 60fps deadline             |
-| Long tasks (> 50ms)    | Minimize | Tasks that block the main thread and cause visible stuttering |
-| JS Heap                | Monitor  | Memory pressure indicator — high values increase GC frequency |
-
-## Deployment
-
-### Web version using Docker
-
-#### Build web Docker image
-
-The image is built without SSH. The `web-builder` stage is pinned to
-`$BUILDPLATFORM`: it runs once, natively on the build host, and the final nginx
-stage carries platform-neutral web assets. CI builds and pushes
-`linux/amd64` and `linux/arm64` variants (see
-[`.github/workflows/image.yaml`](.github/workflows/image.yaml)).
-
-Build requirements (all Sentry values are injected from build args — nothing is
-hardcoded in the image):
-
-| Argument / secret        | Required | Default |
-|--------------------------|----------|---------|
-| `--build-arg SENTRY_PROJECT`   | yes   | — |
-| `--build-arg SENTRY_ORG`       | yes   | — |
-| `--build-arg SENTRY_RELEASE`   | no    | version from `pubspec.yaml` |
-| `--build-arg SENTRY_DIST`      | no    | build number from `pubspec.yaml` |
-| `--build-arg SENTRY_DSN`       | no    | empty |
-| `--build-arg SENTRY_ENVIRONMENT` | no  | empty |
-| `--secret id=sentry_auth_token,src=<file>` | no | source maps not uploaded |
-
-Example local build:
-
-```bash
-docker build \
-  --secret id=sentry_auth_token,src=<token-file> \
-  --build-arg SENTRY_PROJECT=twake-chat \
-  --build-arg SENTRY_ORG=datcorp \
-  --build-arg SENTRY_ENVIRONMENT=prod \
-  -t linagora/twake-web:<tag> .
-```
-
-#### Run the web image
-
-- Create a config file `config.json` in the root of the project with the following
-  [docs](https://github.com/linagora/twake-on-matrix/blob/main/docs/configurations/config_web_app_for_public_platform.md)
-
-- Run the image using the following command:
-
-```
-docker run -d -p <host port>:<host port> -e TWAKECHAT_LISTEN_PORT=<host port> --name <container name> -v <host path>:/usr/share/nginx/html/web/config.json linagora/twake-web:<tag>
-```
-
-- Open the browser and go to `http://localhost:<hostport>`
-
-### Sample to run Twake Chat web client with `matrix.org`
-
-- Create a config file `config.json` with `matrix.org`
-
-```json
-{
-  "app_grid_dashboard_available": true,
-  "application_name": "Twake Chat",
-  "application_welcome_message": "Welcome to Twake Chat!",
-  "default_homeserver": "matrix.org",
-  "hide_unknown_events": false,
-  "homeserver": "https://matrix.org/",
-  "issue_id": "",
-  "privacy_url": "https://twake.app/en/privacy/",
-  "render_html": true
-}
-```
-
-- Run the image using the following command with my port is `6868`:
-
-```
-docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /path/to/config.json:/usr/share/nginx/html/web/config.json linagora/twake-web:v2.19.7
-```
-
-- Open the browser and go to `http://localhost:6868`
 
 # Special thanks
 

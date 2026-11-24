@@ -12,7 +12,6 @@ import 'package:twake_chat/domain/usecase/invitation/get_invitation_status_inter
 import 'package:twake_chat/domain/usecase/invitation/hive_delete_invitation_status_interactor.dart';
 import 'package:twake_chat/domain/usecase/invitation/hive_get_invitation_status_interactor.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -42,9 +41,6 @@ mixin InvitationStatusMixin {
     required String contactId,
     required PresentationContact contact,
   }) {
-    if (PlatformInfos.isWeb) {
-      return;
-    }
     final initialState = getInvitationStatusNotifier.value
         .getSuccessOrNull<GetInvitationStatusInitial>();
     if (initialState == null) {

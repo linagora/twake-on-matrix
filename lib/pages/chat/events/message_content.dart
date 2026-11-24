@@ -4,10 +4,8 @@ import 'package:twake_chat/pages/chat/events/formatted_text_widget.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/message_content_image_builder.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
-import 'package:twake_chat/pages/chat/events/message_download_content_web.dart';
 import 'package:twake_chat/pages/chat/events/message_upload_content.dart';
 import 'package:twake_chat/pages/chat/events/message_video_download_content.dart';
-import 'package:twake_chat/pages/chat/events/message_video_download_content_web.dart';
 import 'package:twake_chat/pages/chat/events/message_video_upload_content.dart';
 import 'package:twake_chat/pages/chat/events/sending_video_widget.dart';
 import 'package:twake_chat/pages/chat/events/unknown_content.dart';
@@ -86,7 +84,7 @@ class MessageContent extends StatelessWidget
 
   Widget _buildAlbum(BuildContext context, List<Event> members) {
     final album = OptionalSelectionContainerDisabled(
-      isEnabled: PlatformInfos.isWeb,
+      isEnabled: PlatformInfos.isDesktop,
       child: MediaAlbumBubble<Event>(
         members: members,
         keyOf: (member) => member.transactionId ?? member.eventId,
@@ -176,7 +174,7 @@ class MessageContent extends StatelessWidget
               );
             }
             return OptionalSelectionContainerDisabled(
-              isEnabled: PlatformInfos.isWeb,
+              isEnabled: PlatformInfos.isDesktop,
               child: MessageImageBuilder(
                 event: event,
                 onTapPreview: onTapPreview,
@@ -186,21 +184,19 @@ class MessageContent extends StatelessWidget
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
             return OptionalSelectionContainerDisabled(
-              isEnabled: PlatformInfos.isWeb,
+              isEnabled: PlatformInfos.isDesktop,
               child: Sticker(event),
             );
           case CuteEventContent.eventType:
             return CuteContent(event);
           case MessageTypes.Audio:
-            if (PlatformInfos.isMobile ||
-                PlatformInfos.isMacOS ||
-                PlatformInfos.isWeb
+            if (PlatformInfos.isMobile || PlatformInfos.isMacOS
             // Disabled until https://github.com/bleonard252/just_audio_mpv/issues/3
             // is fixed
             //   || PlatformInfos.isLinux
             ) {
               return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
+                isEnabled: PlatformInfos.isDesktop,
                 child: AudioPlayerWidget(
                   event,
                   color: textColor,
@@ -209,7 +205,7 @@ class MessageContent extends StatelessWidget
               );
             }
             return OptionalSelectionContainerDisabled(
-              isEnabled: PlatformInfos.isWeb,
+              isEnabled: PlatformInfos.isDesktop,
               child: MessageDownloadContent(event),
             );
 
@@ -221,7 +217,7 @@ class MessageContent extends StatelessWidget
                 children: [
                   if (event.isVideoAvailable) ...[
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isDesktop,
                       child: Align(
                         alignment: Alignment.center,
                         child: _MessageVideoBuilder(
@@ -236,24 +232,14 @@ class MessageContent extends StatelessWidget
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (!PlatformInfos.isWeb) ...[
-                          Align(
-                            alignment: Alignment.center,
-                            child: MessageDownloadContent(event),
-                          ),
-                        ] else ...[
-                          OptionalSelectionContainerDisabled(
-                            isEnabled: PlatformInfos.isWeb,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: MessageDownloadContentWeb(event),
-                            ),
-                          ),
-                        ],
+                        Align(
+                          alignment: Alignment.center,
+                          child: MessageDownloadContent(event),
+                        ),
                         Padding(
                           padding: MessageContentStyle.endOfBubbleWidgetPadding,
                           child: OptionalSelectionContainerDisabled(
-                            isEnabled: PlatformInfos.isWeb,
+                            isEnabled: PlatformInfos.isDesktop,
                             child: Text.rich(
                               WidgetSpan(child: endOfBubbleWidget),
                             ),
@@ -286,7 +272,7 @@ class MessageContent extends StatelessWidget
             }
             if (event.isVideoAvailable) {
               return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
+                isEnabled: PlatformInfos.isDesktop,
                 child: _MessageVideoBuilder(
                   event: event,
                   onFileTapped: (event) =>
@@ -297,18 +283,11 @@ class MessageContent extends StatelessWidget
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (!PlatformInfos.isWeb) ...[
-                    MessageDownloadContent(event),
-                  ] else ...[
-                    OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: MessageDownloadContentWeb(event),
-                    ),
-                  ],
+                  MessageDownloadContent(event),
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isDesktop,
                       child: Text.rich(WidgetSpan(child: endOfBubbleWidget)),
                     ),
                   ),
@@ -323,38 +302,18 @@ class MessageContent extends StatelessWidget
                   : CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (!PlatformInfos.isWeb) ...[
-                  if (event.isSending() ||
-                      event.status == EventStatus.error) ...[
-                    MessageUploadingContent(
-                      event: event,
-                      style: const MessageFileTileStyle(),
-                    ),
-                  ] else
-                    MessageDownloadContent(event),
-                ] else ...[
-                  if (event.isSending() ||
-                      event.status == EventStatus.error) ...[
-                    OptionalSelectionContainerDisabled(
-                      isEnabled:
-                          PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
-                      child: MessageUploadingContent(
-                        event: event,
-                        style: const MessageFileTileStyle(),
-                      ),
-                    ),
-                  ] else
-                    OptionalSelectionContainerDisabled(
-                      isEnabled:
-                          PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
-                      child: MessageDownloadContentWeb(event),
-                    ),
-                ],
+                if (event.isSending() || event.status == EventStatus.error) ...[
+                  MessageUploadingContent(
+                    event: event,
+                    style: const MessageFileTileStyle(),
+                  ),
+                ] else
+                  MessageDownloadContent(event),
                 if (!event.isCaptionModeOrReply())
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isDesktop,
                       child: Text.rich(WidgetSpan(child: endOfBubbleWidget)),
                     ),
                   ),
@@ -462,7 +421,7 @@ class MessageContent extends StatelessWidget
         }
       default:
         return OptionalSelectionContainerDisabled(
-          isEnabled: PlatformInfos.isWeb,
+          isEnabled: PlatformInfos.isDesktop,
           child: UnknownContent(event: event),
         );
     }
@@ -512,14 +471,6 @@ class _MessageVideoBuilder extends StatelessWidget {
       );
     }
 
-    if (PlatformInfos.isWeb) {
-      return MessageVideoDownloadContentWeb(
-        event: event,
-        width: displayImageInfo.size.width,
-        height: displayImageInfo.size.height,
-        bubbleWidth: textWidth,
-      );
-    }
     return MessageVideoDownloadContent(
       event: event,
       width: displayImageInfo.size.width,

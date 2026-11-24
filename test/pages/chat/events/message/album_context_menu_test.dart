@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:twake_chat/pages/chat/events/message/message_context_menu_action.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 
 import '../../../../lenient_database.dart';
 
@@ -66,7 +67,9 @@ void main() {
       MessageContextMenuAction.select,
       MessageContextMenuAction.selectAll,
       MessageContextMenuAction.pin,
-      MessageContextMenuAction.saveToGallery,
+      // Platform.isXxx cannot be faked, so the expected menu follows the host:
+      // the gallery exists on mobile only.
+      if (PlatformInfos.isMobile) MessageContextMenuAction.saveToGallery,
       MessageContextMenuAction.delete,
     ]);
   });

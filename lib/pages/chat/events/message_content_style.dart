@@ -42,7 +42,8 @@ class MessageContentStyle {
   static double imageBubbleWidth(double displayWidth) =>
       max(MessageContentStyle.imageBubbleMinWidth, displayWidth);
 
-  static double imageBubbleHeight(double displayHeight) => PlatformInfos.isWeb
+  static double imageBubbleHeight(double displayHeight) =>
+      PlatformInfos.isDesktop
       ? displayHeight
       : max(MessageContentStyle.imageBubbleMinHeight, displayHeight);
 

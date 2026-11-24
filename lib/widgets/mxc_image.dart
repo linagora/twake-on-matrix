@@ -186,14 +186,12 @@ class _MxcImageState extends State<MxcImage>
 
     if (event != null) {
       try {
-        if (!PlatformInfos.isWeb) {
-          final fileInfo = await event.getFileInfo(
-            getThumbnail: widget.isThumbnail,
-          );
-          Logs().d('MxcImage::Downloaded get file info = $fileInfo');
-          if (fileInfo != null) {
-            return (imageData: fileInfo.bytes, filePath: fileInfo.filePath);
-          }
+        final fileInfo = await event.getFileInfo(
+          getThumbnail: widget.isThumbnail,
+        );
+        Logs().d('MxcImage::Downloaded get file info = $fileInfo');
+        if (fileInfo != null) {
+          return (imageData: fileInfo.bytes, filePath: fileInfo.filePath);
         }
 
         final matrixFile = await event.downloadAndDecryptAttachment(
@@ -279,7 +277,10 @@ class _MxcImageState extends State<MxcImage>
     if (widget.onTapPreview != null) {
       widget.onTapPreview!();
       final result =
-          await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+          await Navigator.of(
+            context,
+            rootNavigator: PlatformInfos.isDesktop,
+          ).push(
             HeroPageRoute(
               builder: (context) {
                 return DismissibleMediaView(

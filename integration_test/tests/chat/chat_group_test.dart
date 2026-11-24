@@ -7,7 +7,6 @@ void main() {
   TestBase().runPatrolTest(
     tags: ["chat_group_test_test01"],
     description: 'verify the display of pull down menu in a direct chat',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => ChatGroupDisplayMenuScenario($, robots),
   );
 
@@ -28,7 +27,6 @@ void main() {
   TestBase().runPatrolTest(
     tags: ["chat_group_test_test04"],
     description: 'copy a message in a direct chat',
-    mobileOnly: true,
     // Paste uses the system clipboard/context menu; unreliable on an emulator.
     requiresHardware: true,
     scenarioBuilder: ($, robots) => ChatGroupCopyScenario($, robots),

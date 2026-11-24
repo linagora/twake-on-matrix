@@ -60,7 +60,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
       return;
     }
     if (widget.onTapPreview != null) {
-      await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+      await Navigator.of(context, rootNavigator: PlatformInfos.isDesktop).push(
         HeroPageRoute(
           builder: (context) {
             return DismissibleMediaView(

@@ -18,10 +18,6 @@ config.json
 *.g.dart
 **/*.mocks.dart
 
-# libolm package
-/assets/js/package
-/assets/assets/js/package
-
 # IntelliJ related
 *.iml
 *.ipr
@@ -83,22 +79,12 @@ devenv.local.nix
 # Patrol generated
 test_bundle.dart
 
-# Patrol web (Playwright) artifacts
-playwright-report/
-test-results/
-
 sentry.properties
 
 .fvm
 
 # Riverpod migration snippets — generated output
 docs/migration/snippets_generated/
-# Playwright
-playwright-report/
-test-results/
-
-# Patrol web local env (provisioned Synapse creds — never commit)
-.env.patrol-web
 
 # Local Claude tooling
 .claude/workflows/
@@ -110,9 +96,6 @@ ios/Runner.xcworkspace/xcshareddata/swiftpm/
 # local artifacts
 .codegraph
 .vodozemac
-
-# Fetched by scripts/fetch-web-vendor.sh, pinned and integrity checked there.
-web/vendor/dotlottie/
 
 # Hive boxes written by tests
 /test/**/*.hive

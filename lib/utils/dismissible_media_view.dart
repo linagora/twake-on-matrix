@@ -43,7 +43,7 @@ class _DismissibleMediaViewState extends State<DismissibleMediaView> {
           builder: (context, isZoomed, child) {
             return CustomDismissible(
               onDismissed: () => Navigator.of(context).pop(),
-              enabled: !isZoomed && !_pinching && !PlatformInfos.isWeb,
+              enabled: !isZoomed && !_pinching && !PlatformInfos.isDesktop,
               dismissOverChildDrags: widget.dismissOverChildDrags,
               child: child!,
             );

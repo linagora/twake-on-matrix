@@ -121,7 +121,7 @@ class MessageStyle {
 
       final matrixFile = event.getMatrixFile();
 
-      if (matrixFile != null && matrixFile.isSendingImageInMobile()) {
+      if (matrixFile != null && matrixFile.isSendingImage()) {
         final file = matrixFile as MatrixImageFile;
         displayImageInfo = Size(
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
@@ -141,12 +141,6 @@ class MessageStyle {
       );
       if (event.isReplyEvent()) {
         return double.infinity;
-      }
-      if (matrixFile != null && matrixFile.isSendingImageInWeb()) {
-        return _calculateMediaBubbleWidth(
-          displayImageInfo: displayImageInfo,
-          textWidth: textWidth,
-        );
       }
 
       return _calculateMediaBubbleWidth(
@@ -180,7 +174,7 @@ class MessageStyle {
 
       final matrixFile = event.getMatrixFile();
 
-      if (matrixFile != null && matrixFile.isSendingImageInMobile()) {
+      if (matrixFile != null && matrixFile.isSendingImage()) {
         final file = matrixFile as MatrixImageFile;
         displayImageInfo = Size(
           file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
@@ -198,17 +192,6 @@ class MessageStyle {
         ),
         hasBlur: true,
       );
-      if (matrixFile != null && matrixFile.isSendingImageInWeb()) {
-        final file = matrixFile as MatrixImageFile;
-        displayImageInfo = Size(
-          file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
-          file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
-        ).getDisplayImageInfo(context);
-        return _calculateMediaBubbleWidth(
-          displayImageInfo: displayImageInfo,
-          textWidth: textWidth,
-        );
-      }
       return _calculateMediaBubbleWidth(
         displayImageInfo: displayImageInfo,
         textWidth: textWidth,

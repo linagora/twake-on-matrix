@@ -239,7 +239,7 @@ class DraftChatView extends StatelessWidget {
                         onTapRecorderWeb: () =>
                             controller.onTapRecorderWeb(context: context),
                         onFinishRecorderWeb: controller.sendVoiceMessageWeb,
-                        onDeleteRecorderWeb: controller.stopRecordWeb,
+                        onDeleteRecorderWeb: controller.discardRecordWeb,
                         recordDurationWebNotifier:
                             controller.recordDurationWebNotifier,
                       ),

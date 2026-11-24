@@ -167,7 +167,6 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   void initState() {
     super.initState();
     activeRoomIdNotifier.value = widget.activeRoomId;
-    resetLocationPathWithLoginToken();
     // Initial sharing intent is now handled in chat_list.dart after _trySync completes
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {

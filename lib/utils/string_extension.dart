@@ -387,28 +387,6 @@ extension StringCasingExtension on String {
     return match?.group(1);
   }
 
-  String getBaseUrlBeforeHash() {
-    final fragmentIndex = indexOf('#/');
-    return fragmentIndex != -1 ? substring(0, fragmentIndex) : this;
-  }
-
-  String generateLoginAuthPath({
-    String? homeserverParams,
-    bool isDevMode = false,
-  }) {
-    final newHomeserverParams = homeserverParams?.trim() ?? '';
-    final path = isDevMode ? 'web/auth.html' : 'auth.html';
-    return '$this$path$newHomeserverParams';
-  }
-
-  String generateLogoutAuthPath({bool isDevMode = false}) {
-    if (isDevMode) {
-      return '${this}web/auth.html';
-    } else {
-      return '${this}auth.html';
-    }
-  }
-
   String? findContactIdByHash({
     required Map<String, List<String>> hashToContactIdMappings,
   }) {

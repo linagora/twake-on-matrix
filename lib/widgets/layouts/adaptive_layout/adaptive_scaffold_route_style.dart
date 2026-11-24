@@ -7,24 +7,24 @@ class AdaptiveScaffoldRouteStyle {
 
   static EdgeInsetsDirectional secondaryBodyWidgetPadding(
     BuildContext context,
-    bool isWebAndDesktop,
+    bool isDesktopLayout,
   ) {
-    return isWebAndDesktop && responsiveUtils.isWebDesktop(context)
+    return isDesktopLayout && responsiveUtils.isDesktopPlatformWide(context)
         ? const EdgeInsetsDirectional.only(top: 8)
         : EdgeInsetsDirectional.zero;
   }
 
   static EdgeInsetsDirectional bodyWidgetPadding(
     BuildContext context,
-    bool isWebAndDesktop,
+    bool isDesktopLayout,
   ) {
-    return isWebAndDesktop && responsiveUtils.isWebDesktop(context)
+    return isDesktopLayout && responsiveUtils.isDesktopPlatformWide(context)
         ? const EdgeInsetsDirectional.only(top: 8)
         : EdgeInsetsDirectional.zero;
   }
 
-  static BorderRadiusGeometry secondaryBodyBorder(bool isWebAndDesktop) {
-    if (isWebAndDesktop) {
+  static BorderRadiusGeometry secondaryBodyBorder(bool isDesktopLayout) {
+    if (isDesktopLayout) {
       return const BorderRadius.all(Radius.circular(16.0));
     } else {
       return BorderRadius.zero;

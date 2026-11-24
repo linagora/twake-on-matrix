@@ -11,7 +11,7 @@ class ChatDetailsMediaStyle {
   );
 
   static int crossAxisCount(BuildContext context) {
-    if (responsive.isWebDesktop(context)) {
+    if (responsive.isDesktopPlatformWide(context)) {
       return 5;
     } else {
       return 3;

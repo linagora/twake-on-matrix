@@ -140,18 +140,6 @@ release_mode_launches:
     - docker
     - famedly
 
-build_web:
-  stage: build
-  before_script:
-    [sudo apt update && sudo apt install curl -y, ./scripts/prepare-web.sh]
-  script: [./scripts/build-web.sh]
-  artifacts:
-    paths:
-      - build/web/
-  tags:
-    - docker
-    - famedly
-
 # yes, we *do* build a Windows DLL on Linux. More reliable.
 build_olm_windows:
   image: archlinux:latest
@@ -264,28 +252,6 @@ fdroid_repo:
   only:
     - main
 
-pages:
-  needs:
-    - "build_web"
-    - "fdroid_repo"
-  stage: deploy
-  image: node:alpine
-  before_script:
-    - apk update
-    - apk add jq unzip curl wget bash
-  script:
-    - cd docs
-    - npx tailwindcss -o ./tailwind.css --minify
-    - cd ..
-    - mv docs public
-    - mv repo public || true
-    - mv build/web/ public/web
-  artifacts:
-    paths:
-      - public
-  only:
-    - main
-
 build_linux_x86:
   stage: build
   image: registry.gitlab.com/famedly/company/frontend/flutter-dockerimages/flutter-linux/stable
@@ -362,14 +328,6 @@ upload_android:
     - |
       curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file build/android/app-release.apk ${PACKAGE_REGISTRY_URL}/fluffychat.apk
 
-upload_web:
-  extends: .release
-  script:
-    # workaround bug of Flutter engine
-    - tar czf package.tar.gz --ignore-failed-read -C build/web/ .
-    - |
-      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file package.tar.gz ${PACKAGE_REGISTRY_URL}/fluffychat-web.tar.gz
-
 upload_linux_x86:
   extends: .release
   script:
@@ -416,5 +374,4 @@ release:
         --assets-link "{\"name\":\"fluffychat-linux-x86.tar.gz\",\"url\":\"${PACKAGE_REGISTRY_URL}/fluffychat-linux-x86.tar.gz\"}" \
         --assets-link "{\"name\":\"fluffychat-linux-arm64.tar.gz\",\"url\":\"${PACKAGE_REGISTRY_URL}/fluffychat-linux-arm64.tar.gz\"}" \
         --assets-link "{\"name\":\"fluffychat-windows.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}/fluffychat-windows.zip\"}" \
-        --assets-link "{\"name\":\"fluffychat-windows.msix\",\"url\":\"${PACKAGE_REGISTRY_URL}/fluffychat-windows.msix\"}" \
-        --assets-link "{\"name\":\"fluffychat-web.tar.gz\",\"url\":\"${PACKAGE_REGISTRY_URL}/fluffychat-web.tar.gz\"}"
+        --assets-link "{\"name\":\"fluffychat-windows.msix\",\"url\":\"${PACKAGE_REGISTRY_URL}/fluffychat-windows.msix\"}"

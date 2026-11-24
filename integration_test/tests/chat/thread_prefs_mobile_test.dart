@@ -9,7 +9,6 @@ void main() {
     description:
         'Follow then unfollow a thread from its menu: the web reads the '
         'choice, the menu follows it',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => FollowFromMenuScenario($, robots),
   );
 
@@ -18,7 +17,6 @@ void main() {
     description:
         'Mute a thread: the server holds the silent push rule; unmute '
         'removes it',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => MuteFromMenuScenario($, robots),
   );
 
@@ -26,7 +24,6 @@ void main() {
     tags: ['thread_prefs_mobile_test03'],
     description:
         'Resolve a thread: check on its header and its card; reopen it',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => ResolveFromMenuScenario($, robots),
   );
 
@@ -35,7 +32,6 @@ void main() {
     description:
         'A mute and a resolve made on the web apply on the mobile, the '
         'thread still open',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => WebChoiceAppliesScenario($, robots),
   );
 }

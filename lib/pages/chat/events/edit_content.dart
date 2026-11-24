@@ -44,7 +44,7 @@ class EditContent extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: Center(
                   child: OptionalSelectionContainerDisabled(
-                    isEnabled: PlatformInfos.isWeb,
+                    isEnabled: PlatformInfos.isDesktop,
                     child: ReplyPreviewIconBuilder(event: displayEvent),
                   ),
                 ),

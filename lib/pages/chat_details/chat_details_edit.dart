@@ -159,7 +159,7 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
   }
 
   void _handleEditAvatarAction({required BuildContext context}) async {
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       pickAvatarImageOnWeb();
       return;
     }

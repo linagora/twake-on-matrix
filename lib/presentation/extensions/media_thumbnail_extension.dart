@@ -5,9 +5,7 @@ import 'package:dartz/dartz.dart' hide id;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/utils/extension/web_url_creation_extension.dart';
-import 'package:twake_chat/utils/js_window/non_js_window.dart'
-    if (dart.library.js) 'package:twake_chat/utils/js_window/js_window.dart';
+import 'package:twake_chat/utils/js_window/non_js_window.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
@@ -57,12 +55,9 @@ extension MediaThumbnailExtension on Room {
   /// Generates a video thumbnail from [MatrixVideoFile] **bytes**.
   ///
   /// **Use this when you only have bytes and no file path** — e.g. displaying
-  /// a received video downloaded from the Matrix server, or on web where there
-  /// is no local file system.
+  /// a received video downloaded from the Matrix server.
   ///
-  /// Works on web + mobile:
-  /// - Web: bytes → blob URL → [VideoThumbnail].
-  /// - Mobile: bytes → temp file → [VideoThumbnail] → delete temp file.
+  /// Bytes → temp file → [VideoThumbnail] → delete temp file.
   ///
   /// If you have a **file path**, use [generateVideoThumbnailFromPath] instead.
   Future<MatrixImageFile?> generateVideoThumbnail(
@@ -72,17 +67,12 @@ extension MediaThumbnailExtension on Room {
     String? url;
     try {
       uploadStreamController?.add(const Right(GeneratingThumbnailState()));
-      if (PlatformInfos.isWeb) {
-        // Web: create an object/blob URL from bytes — no file system access.
-        url = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
-      } else {
-        // Mobile: VideoThumbnail needs a file path, so write bytes to a temp
-        // file, generate the thumbnail, then clean up.
-        final tempDir = await getTemporaryDirectory();
-        final tempFile = File('${tempDir.path}/${originalFile.name}');
-        await tempFile.writeAsBytes(originalFile.bytes);
-        url = tempFile.path;
-      }
+      // VideoThumbnail needs a file path, so write bytes to a temp file,
+      // generate the thumbnail, then clean up.
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/${originalFile.name}');
+      await tempFile.writeAsBytes(originalFile.bytes);
+      url = tempFile.path;
 
       final result = await VideoThumbnail.thumbnailData(
         video: url,
@@ -122,8 +112,6 @@ extension MediaThumbnailExtension on Room {
           } catch (e) {
             Logs().w('Failed to delete temp video thumbnail file', e);
           }
-        } else if (PlatformInfos.isWeb) {
-          url.revokeWebUrl();
         }
       }
     }
@@ -136,16 +124,11 @@ extension MediaThumbnailExtension on Room {
   /// Passes the path straight to [VideoThumbnail] — no bytes loaded into
   /// memory, no temp file created.
   ///
-  /// **Mobile-only** — do not call on web (no local file system).
   /// If you only have bytes, use [generateVideoThumbnail] instead.
   Future<MatrixImageFile?> generateVideoThumbnailFromPath(
     String filePath, {
     String? videoFileName,
   }) async {
-    assert(
-      !PlatformInfos.isWeb,
-      'generateVideoThumbnailFromPath is mobile-only',
-    );
     try {
       final result = await VideoThumbnail.thumbnailData(
         video: filePath,
@@ -181,12 +164,12 @@ extension MediaThumbnailExtension on Room {
 
   Future<int?> getVideoDuration(MatrixVideoFile originalFile) async {
     VideoPlayerController? videoPlayerController;
-    String? blobUrl;
+    File? tempFile;
     try {
-      blobUrl = originalFile.bytes.toWebUrl(mimeType: originalFile.mimeType);
-      videoPlayerController = VideoPlayerController.networkUrl(
-        Uri.parse(blobUrl),
-      );
+      final tempDir = await getTemporaryDirectory();
+      tempFile = File('${tempDir.path}/${originalFile.name}');
+      await tempFile.writeAsBytes(originalFile.bytes);
+      videoPlayerController = VideoPlayerController.file(tempFile);
       await videoPlayerController.initialize();
       final duration = videoPlayerController.value.duration.inMilliseconds;
       return duration;
@@ -195,7 +178,11 @@ extension MediaThumbnailExtension on Room {
       return null;
     } finally {
       videoPlayerController?.dispose();
-      if (blobUrl != null && PlatformInfos.isWeb) blobUrl.revokeWebUrl();
+      try {
+        await tempFile?.delete();
+      } catch (e) {
+        Logs().w('Failed to delete temp video file', e);
+      }
     }
   }
 

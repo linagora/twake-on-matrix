@@ -9,7 +9,6 @@ void main() {
     description:
         'The bar is Contacts, Chats, Activity, Settings and every tab opens '
         'its own page',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => ActivityTabsScenario($, robots),
   );
 
@@ -18,7 +17,6 @@ void main() {
     description:
         'A followed thread opened from Activity › Replies goes back to '
         'Activity, Replies still chosen',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) =>
         ActivityOpenFollowedThreadScenario($, robots),
   );
@@ -28,7 +26,6 @@ void main() {
     description:
         'An unread room opened from Activity › Unread goes back to Activity, '
         'Unread still chosen, the room read',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => ActivityOpenUnreadRoomScenario($, robots),
   );
 }

@@ -296,7 +296,7 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   void onHover(bool isHovered, int index, Event event) {
     if (widget.pinnedEvents.asMap().containsKey(index) &&
-        PinnedMessagesStyle.responsiveUtils.isWebDesktop(context) &&
+        PinnedMessagesStyle.responsiveUtils.isDesktopPlatformWide(context) &&
         !openingPopupMenu.value) {
       isHoverNotifier.value = isHovered ? event.eventId : null;
     }
@@ -354,7 +354,7 @@ class PinnedMessagesController extends State<PinnedMessages>
       if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
       ChatContextMenuActions.jumpToMessage,
       ChatContextMenuActions.select,
-      if (PlatformInfos.isWeb && event.hasAttachment)
+      if (PlatformInfos.isDesktop && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
       if (event.canDelete) ChatContextMenuActions.delete,
     ];
