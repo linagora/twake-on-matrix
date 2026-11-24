@@ -128,7 +128,9 @@ platform :mac do
     profile = FastlaneCore::ProvisioningProfile.parse(profile_path)["Name"]
     FastlaneCore::ProvisioningProfile.install(profile_path)
     build_number = latest_testflight_build_number(app_identifier: BUNDLE_ID, platform: "osx", initial_build_number: 0) + 1
-    version_name = last_git_tag.gsub("v", "")
+    # Reachable from HEAD, like the Sentry release version of the workflow:
+    # last_git_tag picks the newest tag of the repository even on an older ref.
+    version_name = sh("git describe --tags --abbrev=0", log: false).strip.sub(/\Av/, "")
     # Flutter writes the Sentry dart-defines and the obfuscation map to
     # Generated.xcconfig; the build below reads them. Same flags as the
     # mobile release: the paths match symbols_path and dart_symbol_map_path
