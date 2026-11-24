@@ -189,4 +189,33 @@ void main() {
       });
     });
   }
+
+  group('HtmlMessage anchors', () {
+    const label = 'Read the release notes';
+    Widget anchor() => HtmlMessage(
+      html: '<p><a href="$_url">$label</a></p>',
+      room: room,
+      linkStyle: const TextStyle(color: Colors.blue),
+    );
+
+    testWidgets('a drag that starts on an anchor scrolls without opening it', (
+      tester,
+    ) async {
+      final scrollController = await pumpInTimeline(tester, anchor());
+
+      await pressHoldThenDrag(tester, linkStart(tester, label));
+
+      expect(platform.launches, isEmpty);
+      expect(scrollController.offset, greaterThan(0));
+    });
+
+    testWidgets('a tap on an anchor opens its href', (tester) async {
+      await pumpInTimeline(tester, anchor());
+
+      await tester.tapAt(linkStart(tester, label));
+      await tester.pumpAndSettle();
+
+      expect(platform.launches, [_url]);
+    });
+  });
 }
