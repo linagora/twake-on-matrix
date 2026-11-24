@@ -129,6 +129,8 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
                                 end: sysColors.onPrimary,
                               ).transform(widget.animationController.value),
                             ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
