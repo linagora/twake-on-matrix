@@ -31,8 +31,6 @@ class _FakeClient extends Fake implements Client {
 
 class _FakeController extends Fake implements SettingsNotificationsController {
   @override
-
-  @override
   bool? getNotificationSetting(NotificationSettingsItem item) => true;
 
   @override
