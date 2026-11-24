@@ -1,3 +1,6 @@
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -9,10 +12,25 @@ class ChatListViewStyle {
 
   static const double editIconSize = 18.0;
 
-  static Size preferredSizeAppBar({bool? hasAudioEvent}) =>
-      hasAudioEvent == true
-      ? const Size.fromHeight(160 + RoomListFilterStyle.height)
-      : const Size.fromHeight(120 + RoomListFilterStyle.height);
+  static const double _audioPlayerHeight = 40;
+
+  static Size preferredSizeAppBar(
+    BuildContext context, {
+    required bool isSingleColumn,
+    bool? hasAudioEvent,
+  }) {
+    final double audioPlayer = hasAudioEvent == true ? _audioPlayerHeight : 0;
+    if (!isSingleColumn) {
+      return Size.fromHeight(120 + RoomListFilterStyle.height + audioPlayer);
+    }
+    return Size.fromHeight(
+      AppConfig.toolbarHeight(context) +
+          ChatListHeaderStyle.newChatCapsuleGap +
+          ChatListHeaderStyle.searchBarContainerHeight +
+          RoomListFilterPills.height +
+          audioPlayer,
+    );
+  }
 
   // Slidable Ratio of one slidable item
   static const double slidableSizeRatio = 0.23;

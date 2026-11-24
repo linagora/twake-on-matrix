@@ -1,10 +1,11 @@
 import 'dart:ui' show Tristate;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:twake_chat/pages/activity/activity_page.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
+import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 
 import '../base/core_robot.dart';
 
@@ -67,12 +68,12 @@ class ActivityRobot extends CoreRobot {
   /// Activity selected.
   Future<void> expectOnActivityTab() async {
     await page.waitUntilVisible(timeout: _timeout);
-    final bar = $.tester.widget<BottomNavigationBar>(
-      find.byType(BottomNavigationBar).last,
+    final bar = $.tester.widget<FloatingNavigationBar>(
+      find.byType(FloatingNavigationBar).last,
     );
     expect(
-      bar.items[bar.currentIndex].label,
-      'Activity',
+      bar.selected,
+      AdaptiveDestinationEnum.activity,
       reason: 'the Activity tab is the one selected',
     );
   }

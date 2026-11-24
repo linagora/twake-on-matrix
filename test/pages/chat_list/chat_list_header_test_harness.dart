@@ -14,7 +14,9 @@ import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
@@ -31,7 +33,7 @@ import '../../providers/fake_active_account.dart';
 // Shared by the collapsing header tests and the status bar tests.
 //
 // Contract for the implementer: the whole top block of the room list
-// (TwakeHeader + search + RoomListFilterBar) stays one `ChatListHeader`
+// (TwakeHeader + search + filter chips) stays one `ChatListHeader`
 // widget, whether it sits in the Scaffold appBar (wide layouts) or in a
 // SliverAppBar of the CustomScrollView of ChatListBodyView (one column).
 final headerFinder = find.byType(ChatListHeader);
@@ -42,8 +44,16 @@ const wideSize = Size(1400, 900);
 /// Status bar of an iPhone with a notch, in logical pixels.
 const statusBar = 47.0;
 
-/// What the Scaffold gave the old appBar: preferredSize + the status bar.
-const headerBlockHeight = 120 + RoomListFilterStyle.height + statusBar;
+/// The phone header: app bar, new chat capsule gap, search, pills, status bar.
+const headerBlockHeight =
+    48 +
+    ChatListHeaderStyle.newChatCapsuleGap +
+    ChatListHeaderStyle.searchBarContainerHeight +
+    RoomListFilterPills.height +
+    statusBar;
+
+/// What the Scaffold gives the appBar of a wide layout.
+const wideHeaderBlockHeight = 120 + RoomListFilterStyle.height + statusBar;
 
 /// Same setup before every test of a header file.
 void setUpHeaderTests() {

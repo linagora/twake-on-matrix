@@ -1,6 +1,7 @@
 import 'package:twake_chat/pages/contacts_tab/contacts_tab_body_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import '../base/base_scenario.dart';
 import '../base/core_robot.dart';
 import '../help/soft_assertion_helper.dart';
@@ -47,7 +48,7 @@ class ContactScenario extends BaseScenario {
       'Contacts tab is not visible',
     );
     s.softAssertEquals(
-      $(BottomNavigationBar).visible,
+      $(FloatingNavigationBar).visible,
       true,
       'Bottom navigator bar is not visible',
     );
