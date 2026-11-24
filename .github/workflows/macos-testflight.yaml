@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (the build uses this tag's version)"
+        description: "Ref to build from: main to seed the signing material once, or a release tag cut after the secrets-based lanes merged (the build uses the version of the last reachable tag)"
         required: true
-        default: "v2.28.0"
+        default: "main"
       seed_match:
         description: "Seed the macOS App Store profile and installer certificate in match first"
         type: boolean
@@ -34,6 +34,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag }}
+          # last_git_tag and the Sentry release version need the tags.
+          fetch-depth: 0
 
       - name: Require Sentry DSN
         run: test -n "$SENTRY_DSN" || { echo "::error::SENTRY_DSN is empty"; exit 1; }
@@ -65,6 +67,9 @@ jobs:
       - name: Prepare macOS release
         run: ./scripts/prepare-macos.sh
 
+      # Writes MACOS_CERTIFICATE_P12_BASE64 and MACOS_PROVISIONING_PROFILE_BASE64
+      # in the repository secrets; the p12 never leaves the runner. GH_TOKEN is a
+      # token scoped to the repository secrets of this repository.
       - name: Seed the match profile and certificate
         if: inputs.seed_match
         env:
@@ -73,16 +78,9 @@ jobs:
           APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
           APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          GH_TOKEN: ${{ secrets.MACOS_SIGNING_SECRETS_TOKEN }}
         run: bundle exec fastlane seed_export
         working-directory: macos
-
-      - name: Upload the signing material
-        if: inputs.seed_match
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-signing
-          path: macos/macos-signing.*.base64
-          retention-days: 1
 
       - name: Check the macOS signing secrets
         id: macos_signing
@@ -96,9 +94,17 @@ jobs:
             echo "available=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # Without the check a run with missing secrets would end green after
+      # uploading nothing; fail like the Sentry DSN check above instead.
+      - name: Fail when the signing secrets are missing
+        if: ${{ !inputs.seed_match && steps.macos_signing.outputs.available != 'true' }}
+        run: |
+          echo "::error::MACOS_CERTIFICATE_P12_BASE64 and MACOS_PROVISIONING_PROFILE_BASE64 are required: run this workflow once with seed_match=true to create them."
+          exit 1
+
       - name: Compute Sentry release version
         id: sentry_version
-        run: echo "release=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        run: echo "release=$(git describe --tags --abbrev=0 | sed 's/^v//')" >> "$GITHUB_OUTPUT"
 
       - name: Release on TestFlight
         if: steps.macos_signing.outputs.available == 'true'

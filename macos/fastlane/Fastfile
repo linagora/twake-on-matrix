@@ -78,19 +78,32 @@ platform :mac do
     )
   end
 
-  desc "Seed the macOS certificate and profile, then export them as base64"
+  desc "Seed the macOS certificate and profile, then store them in the repository secrets"
   lane :seed_export do
     seed
     keychain_path = FastlaneCore::Helper.keychain_path(ENV["MATCH_KEYCHAIN_NAME"])
     p12_path = File.join(Dir.pwd, "macos-signing.p12")
+    # log: false keeps MATCH_PASSWORD out of the workflow log and of the
+    # failure message: fastlane prints the sh command by default.
     sh("security export -k #{Shellwords.escape(keychain_path)} -t identities -f pkcs12 " \
-       "-P #{Shellwords.escape(ENV['MATCH_PASSWORD'])} -o #{Shellwords.escape(p12_path)}")
+       "-P #{Shellwords.escape(ENV['MATCH_PASSWORD'])} -o #{Shellwords.escape(p12_path)}", log: false)
     profile_path = ENV["sigh_app.twake.ios.chat_appstore_macos_profile-path"]
     profile_copy = File.join(Dir.pwd, "macos-signing.provisionprofile")
     FileUtils.cp(profile_path, profile_copy)
-    File.write("macos-signing.p12.base64", Base64.strict_encode64(File.binread(p12_path)))
-    File.write("macos-signing.provisionprofile.base64", Base64.strict_encode64(File.binread(profile_copy)))
-    UI.success("Wrote macos-signing.p12.base64 and macos-signing.provisionprofile.base64")
+    p12_base64 = File.join(Dir.pwd, "macos-signing.p12.base64")
+    profile_base64 = File.join(Dir.pwd, "macos-signing.provisionprofile.base64")
+    File.write(p12_base64, Base64.strict_encode64(File.binread(p12_path)))
+    File.write(profile_base64, Base64.strict_encode64(File.binread(profile_copy)))
+    # The p12 never leaves the runner: the seed writes the two repository
+    # secrets itself. gh reads GH_TOKEN; in CI it is a token scoped to the
+    # repository secrets, locally the maintainer's own gh session.
+    repo = ENV.fetch("GITHUB_REPOSITORY")
+    sh("gh secret set MACOS_CERTIFICATE_P12_BASE64 --repo #{Shellwords.escape(repo)} " \
+       "< #{Shellwords.escape(p12_base64)}", log: false)
+    sh("gh secret set MACOS_PROVISIONING_PROFILE_BASE64 --repo #{Shellwords.escape(repo)} " \
+       "< #{Shellwords.escape(profile_base64)}", log: false)
+    FileUtils.rm_f([p12_path, profile_copy, p12_base64, profile_base64])
+    UI.success("Stored the macOS signing material in the repository secrets")
   end
 
   desc "Push a new macOS build to TestFlight"
@@ -117,11 +130,14 @@ platform :mac do
     build_number = latest_testflight_build_number(app_identifier: BUNDLE_ID, platform: "osx", initial_build_number: 0) + 1
     version_name = last_git_tag.gsub("v", "")
     # Flutter writes the Sentry dart-defines and the obfuscation map to
-    # Generated.xcconfig; the build below reads them. Same defines as the
-    # mobile release; the symbols are uploaded to Sentry after this lane.
+    # Generated.xcconfig; the build below reads them. Same flags as the
+    # mobile release: the paths match symbols_path and dart_symbol_map_path
+    # of the sentry_dart_plugin config in pubspec.yaml, so scripts/run-sentry.sh
+    # uploads the macOS symbols and deobfuscates the crashes.
     sh("cd ../.. && flutter build macos --config-only --release --build-name=#{version_name} --build-number=#{build_number} " \
        "--dart-define=SENTRY_DSN=\"#{ENV['SENTRY_DSN']}\" --dart-define=SENTRY_ENVIRONMENT=\"#{ENV['SENTRY_ENVIRONMENT']}\" " \
-       "--obfuscate --split-debug-info=build/macos/symbols")
+       "--obfuscate --split-debug-info=build/app/outputs/symbols " \
+       "--extra-gen-snapshot-options=--save-obfuscation-map=build/app/obfuscation.map.json")
     build(profile: profile)
     upload_to_testflight(app_identifier: BUNDLE_ID, platform: "osx", pkg: lane_context[SharedValues::PKG_OUTPUT_PATH])
   end
