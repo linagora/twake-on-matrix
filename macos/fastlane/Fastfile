@@ -68,6 +68,18 @@ platform :mac do
       issuer_id: ENV["APPLE_ISSUER_ID"],
       key_content: ENV["APPLE_KEY_CONTENT"]
     )
+    # Revoke any orphan Mac Installer Distribution certificates in App Store Connect
+    # so match can create a fresh one without hitting the distribution certificate limit.
+    installer_type = Spaceship::ConnectAPI::Certificate::CertificateType::MAC_INSTALLER_DISTRIBUTION
+    begin
+      Spaceship::ConnectAPI::Certificate.all(filter: { certificateType: installer_type }).each do |cert|
+        UI.message("Revoking orphan #{installer_type} certificate: #{cert.name} (#{cert.id})")
+        cert.delete!
+      end
+    rescue => ex
+      UI.important("Failed to prune orphan certificates: #{ex.message}")
+    end
+
     sync_code_signing(
       type: "appstore",
       app_identifier: [BUNDLE_ID],
