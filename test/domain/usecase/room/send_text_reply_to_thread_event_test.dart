@@ -105,6 +105,58 @@ void main() {
     });
   });
 
+  test('a long reply to a message of a thread sends every part into that '
+      'thread, each part following the previous one', () async {
+    // txn id -> event id the server gave, read from the sync the SDK replays.
+    final serverIds = <String, String>{};
+    final subscription = room.client.onSync.stream.listen((sync) {
+      for (final event
+          in sync.rooms?.join?[room.id]?.timeline?.events ?? <MatrixEvent>[]) {
+        final txnId = event.unsigned?['transaction_id'];
+        if (txnId is String && event.eventId != txnId) {
+          serverIds[txnId] = event.eventId;
+        }
+      }
+    });
+    addTearDown(subscription.cancel);
+
+    // 2500 characters with a 1000 limit: three parts.
+    await interactor.execute(
+      room: room,
+      text: 'a' * 1000 + 'b' * 1000 + 'c' * 500,
+      inReplyTo: threadReply(),
+    );
+
+    final parts = [
+      for (final entry in FakeMatrixApi.calledEndpoints.entries)
+        if (entry.key.contains('/send/m.room.message/'))
+          for (final body in entry.value)
+            (
+              id: serverIds[Uri.decodeComponent(entry.key.split('/').last)],
+              content: (jsonDecode(body as String) as Map)
+                  .cast<String, Object?>(),
+            ),
+    ];
+    expect(parts, hasLength(3), reason: 'the text was split in three parts');
+    expect(parts[0].id, isNotNull);
+    expect(parts[1].id, isNotNull);
+
+    expect(parts[0].content['m.relates_to'], {
+      'rel_type': 'm.thread',
+      'event_id': rootId,
+      'is_falling_back': false,
+      'm.in_reply_to': {'event_id': threadReplyId},
+    }, reason: 'the first part quotes the replied message');
+    for (final index in [1, 2]) {
+      expect(parts[index].content['m.relates_to'], {
+        'rel_type': 'm.thread',
+        'event_id': rootId,
+        'is_falling_back': true,
+        'm.in_reply_to': {'event_id': parts[index - 1].id},
+      }, reason: 'part ${index + 1} follows part $index in the thread');
+    }
+  });
+
   test('a reply to a thread root stays a plain reply in the room', () async {
     final content = await sendAndReadContent(inReplyTo: threadRoot());
 
