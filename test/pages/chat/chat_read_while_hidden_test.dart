@@ -24,7 +24,7 @@ import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
-import 'package:twake_chat/providers/matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -212,7 +212,7 @@ void main() {
     addTearDown(router.dispose);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [matrixClientProvider.overrideWithValue(client)],
+        overrides: [activeMatrixClientProvider.overrideWithValue(client)],
         child: Provider<MatrixState>.value(
           value: _FakeMatrix(client),
           child: Builder(

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/providers/matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 class ConnectionStatusHeader extends ConsumerStatefulWidget {
   const ConnectionStatusHeader({super.key, this.connectedWidget});
@@ -18,7 +18,7 @@ class ConnectionStatusHeader extends ConsumerStatefulWidget {
 
 class ConnectionStatusHeaderState
     extends ConsumerState<ConnectionStatusHeader> {
-  late final StreamSubscription _onSyncSub;
+  StreamSubscription? _onSyncSub;
   SyncStatusUpdate? _lastStatus;
   bool _lastHideState = true;
   Timer? _debounceTimer;
@@ -27,8 +27,8 @@ class ConnectionStatusHeaderState
   void initState() {
     super.initState();
     _onSyncSub = ref
-        .read(matrixClientProvider)
-        .onSyncStatus
+        .read(activeMatrixClientProvider)
+        ?.onSyncStatus
         .stream
         .listen(_onStatusUpdate);
   }
@@ -38,7 +38,8 @@ class ConnectionStatusHeaderState
     _debounceTimer = Timer(const Duration(milliseconds: 100), () {
       if (!mounted) return;
 
-      final client = ref.read(matrixClientProvider);
+      final client = ref.read(activeMatrixClientProvider);
+      if (client == null) return;
       final hide = client.onSync.value != null && client.prevBatch != null;
 
       if (_lastStatus?.status != update.status || _lastHideState != hide) {
@@ -53,13 +54,14 @@ class ConnectionStatusHeaderState
   @override
   void dispose() {
     _debounceTimer?.cancel();
-    _onSyncSub.cancel();
+    _onSyncSub?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final client = ref.watch(matrixClientProvider);
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
     final status =
         _lastStatus ??
         client.onSyncStatus.value ??

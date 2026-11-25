@@ -1,5 +1,5 @@
 import 'package:twake_chat/pages/chat_list/client_chooser_button_style.dart';
-import 'package:twake_chat/providers/matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_style.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +24,8 @@ class AdaptiveScaffoldPrimaryNavigationView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final client = ref.watch(matrixClientProvider);
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
     return Material(
       color: Theme.of(context).colorScheme.surface,
       child: Container(

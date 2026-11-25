@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
-import 'package:twake_chat/providers/matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 import 'package:twake_chat/widgets/unread_rooms_badge.dart';
 
@@ -15,10 +15,10 @@ class _FakeClient extends Fake implements Client {
   final List<Room> rooms = [];
 }
 
-Future<void> _pumpBadge(WidgetTester tester, Client client) =>
+Future<void> _pumpBadge(WidgetTester tester, Client? Function() active) =>
     tester.pumpWidget(
       ProviderScope(
-        overrides: [matrixClientProvider.overrideWithValue(client)],
+        overrides: [activeMatrixClientProvider.overrideWith((ref) => active())],
         child: MaterialApp(home: UnreadRoomsBadge(filter: (_) => true)),
       ),
     );
@@ -42,9 +42,29 @@ void main() {
     );
 
     // Act
-    await _pumpBadge(tester, client);
+    await _pumpBadge(tester, () => client);
 
     // Assert
     expect(_shownCount(tester), 1);
+  });
+
+  testWidgets('UnreadRoomsBadge_whenClientDroppedWhileMounted_showsNothing', (
+    tester,
+  ) async {
+    // Arrange
+    Client? active = _FakeClient();
+    await _pumpBadge(tester, () => active);
+    expect(find.byType(TwakeNavigationIcon), findsOneWidget);
+
+    // Act
+    active = null;
+    ProviderScope.containerOf(
+      tester.element(find.byType(UnreadRoomsBadge)),
+    ).invalidate(activeMatrixClientProvider);
+    await tester.pump();
+
+    // Assert
+    expect(tester.takeException(), isNull);
+    expect(find.byType(TwakeNavigationIcon), findsNothing);
   });
 }

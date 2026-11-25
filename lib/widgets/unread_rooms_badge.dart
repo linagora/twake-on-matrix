@@ -5,7 +5,7 @@ import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/providers/matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 class UnreadRoomsBadge extends ConsumerWidget {
   final bool Function(Room) filter;
@@ -21,7 +21,8 @@ class UnreadRoomsBadge extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final client = ref.watch(matrixClientProvider);
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
     return StreamBuilder(
       stream: client.onSync.stream.where(
         (syncUpdate) => syncUpdate.hasRoomUpdate,
