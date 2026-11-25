@@ -254,6 +254,47 @@ void main() {
 
   group('writeDecryptedAttachment', () {
     test(
+      'writeDecryptedAttachment_whenTheLastLogoutSweepsDuringTheConversion_leavesNoConvertedFile',
+      () async {
+        // Arrange
+        final converting = Completer<void>();
+        final convertStarted = Completer<void>();
+        final file = MatrixFile(
+          bytes: Uint8List.fromList([1, 2, 3]),
+          name: 'voice.ogg',
+        );
+        final writing = plainFileEvent(room).writeDecryptedAttachment(
+          file,
+          convert: (written) async {
+            convertStarted.complete();
+            await converting.future;
+            return File('${written.path}.caf')
+              ..createSync(recursive: true)
+              ..writeAsBytesSync([4, 5, 6]);
+          },
+        );
+        await convertStarted.future;
+
+        // Act
+        final deleting =
+            DownloadFileExtension.deleteDownloadedFilesAtLastLogout(
+              isStillLoggedOut: () => true,
+            );
+        // Without the fix the sweep ends first; with it, it waits.
+        await Future.any([
+          deleting,
+          Future<void>.delayed(const Duration(milliseconds: 200)),
+        ]);
+        converting.complete();
+        final converted = await writing;
+        await deleting;
+
+        // Assert
+        expect(converted.existsSync(), isFalse);
+      },
+    );
+
+    test(
       'writeDecryptedAttachment_whenTheClientIsLoggedOut_writesNothing',
       () async {
         // Arrange

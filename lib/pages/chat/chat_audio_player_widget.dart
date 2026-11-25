@@ -184,11 +184,13 @@ class ChatAudioPlayerWidget extends StatelessWidget {
           matrixFile.bytes.isEmpty) {
         throw Exception('Downloaded file has no content');
       }
-      file = await currentEvent.writeDecryptedAttachment(matrixFile);
-
-      if (Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-        file = await _handleOggAudioFileIniOS(file);
-      }
+      file = await currentEvent.writeDecryptedAttachment(
+        matrixFile,
+        convert:
+            Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg'
+            ? _handleOggAudioFileIniOS
+            : null,
+      );
 
       matrix?.currentAudioStatus.value = AudioPlayerStatus.downloaded;
     } catch (e, s) {

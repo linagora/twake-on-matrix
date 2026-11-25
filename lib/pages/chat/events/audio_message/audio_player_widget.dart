@@ -125,11 +125,13 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     try {
       matrixFile = await widget.event.downloadAndDecryptAttachment();
 
-      file = await widget.event.writeDecryptedAttachment(matrixFile);
-
-      if (Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-        file = await handleOggAudioFileIniOS(file);
-      }
+      file = await widget.event.writeDecryptedAttachment(
+        matrixFile,
+        convert:
+            Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg'
+            ? handleOggAudioFileIniOS
+            : null,
+      );
 
       matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
     } catch (e, s) {

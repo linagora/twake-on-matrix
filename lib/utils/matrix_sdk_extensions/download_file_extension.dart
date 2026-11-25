@@ -38,14 +38,16 @@ extension DownloadFileExtension on Event {
     await StorageDirectoryManager.instance.deleteDownloadedFiles();
   }
 
-  Future<File> writeDecryptedAttachment(MatrixFile file) {
+  Future<File> writeDecryptedAttachment(
+    MatrixFile file, {
+    Future<File> Function(File written)? convert,
+  }) {
     if (!room.client.isLogged()) {
       throw StateError('The client logged out during the download');
     }
-    final writing = StorageDirectoryManager.instance.writeDecryptedFile(
-      eventId: eventId,
-      file: file,
-    );
+    final writing = StorageDirectoryManager.instance
+        .writeDecryptedFile(eventId: eventId, file: file)
+        .then<File>((written) => convert == null ? written : convert(written));
     final done = writing.then<void>((_) {}, onError: (_) {});
     _writesInFlight.add(done);
     return writing.whenComplete(() => _writesInFlight.remove(done));
