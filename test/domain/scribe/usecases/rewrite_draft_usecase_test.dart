@@ -141,26 +141,25 @@ void main() {
     expect(renewed, 1);
   });
 
-  test('another account active by the renewal: no sign-in for it', () async {
-    source.refusesFirstToken = true;
-    obtain = () async {
-      account = '@bob:example.com';
-      return session;
-    };
+  for (final duringRenewal in [false, true]) {
+    final moment = duringRenewal ? 'during' : 'before';
+    test('an account switch $moment the renewal sends nothing', () async {
+      source.refusesFirstToken = true;
+      Future<DriveSession> switchAccount() async {
+        account = '@bob:example.com';
+        return session;
+      }
 
-    await expectLater(rewrite(), throwsA(isA<DriveSessionSuperseded>()));
-    expect(renewed, 0);
-    expect(source.calls, isEmpty);
-  });
+      if (duringRenewal) {
+        renew = switchAccount;
+      } else {
+        obtain = switchAccount;
+      }
 
-  test('a renewal that ends under another account is dropped', () async {
-    source.refusesFirstToken = true;
-    renew = () async {
-      account = '@bob:example.com';
-      return session;
-    };
-
-    await expectLater(rewrite(), throwsA(isA<DriveSessionSuperseded>()));
-    expect(source.calls, isEmpty);
-  });
+      await expectLater(rewrite(), throwsA(isA<DriveSessionSuperseded>()));
+      // Before: no renewal starts for the other account.
+      expect(renewed, 0);
+      expect(source.calls, isEmpty);
+    });
+  }
 }
