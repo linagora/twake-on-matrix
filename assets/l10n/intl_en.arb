@@ -3499,11 +3499,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "callErrorSpeakerChange": "The audio output could not be changed. Try again.",
-  "@callErrorSpeakerChange": {
-    "type": "text",
-    "placeholders": {}
-  },
   "callLeave": "Leave the call",
   "@callLeave": {
     "type": "text",

@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
-import 'package:twake_chat/data/datasource_impl/call/call_media_datasource.provider.dart';
 import 'package:twake_chat/data/repository/call/call_repository.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
+import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/call/call_controller.dart';
 import 'package:twake_chat/pages/call/call_screen.dart';
+import 'package:twake_chat/pages/call/call_video.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -19,11 +19,6 @@ import '../../domain/call/fake_call_repository.dart';
 import 'call_controller_test.dart' show summaryWithFoci;
 
 const _roomId = '!room:hs.test';
-
-class _FakeVideoViews implements CallVideoViews {
-  @override
-  Widget? videoOf(String participantId) => Text('video of $participantId');
-}
 
 void main() {
   late FakeCallRepository repository;
@@ -37,7 +32,6 @@ void main() {
       overrides: [
         callRepositoryProvider.overrideWithValue(repository),
         activeMatrixClientProvider.overrideWithValue(null),
-        callVideoViewsProvider.overrideWithValue(_FakeVideoViews()),
       ],
     );
     container
@@ -291,13 +285,20 @@ void main() {
     // Act
     repository.participants.add([
       participant('@bob:hs.test:BOB', isLocal: true),
-      participant('@alice:hs.test:ALICE').copyWith(isCameraOn: true),
+      participant(
+        '@alice:hs.test:ALICE',
+      ).copyWith(isCameraOn: true, video: const CallVideoTrack('alice camera')),
     ]);
     await settle(tester);
 
     // Assert
-    expect(find.text('video of @alice:hs.test:ALICE'), findsOneWidget);
-    expect(find.text('video of @bob:hs.test:BOB'), findsNothing);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is CallVideo && widget.video.handle == 'alice camera',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('speaker_inTheCall_turnsTheSpeakerOn', (tester) async {

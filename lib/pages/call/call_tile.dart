@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:twake_chat/data/datasource_impl/call/call_media_datasource.provider.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/call/call_video.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 
-class CallTile extends ConsumerWidget {
+class CallTile extends StatelessWidget {
   const CallTile({required this.participant, super.key});
 
   static const _width = 160.0;
@@ -16,10 +15,8 @@ class CallTile extends ConsumerWidget {
   final CallParticipant participant;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final video = participant.isCameraOn
-        ? ref.watch(callVideoViewsProvider).videoOf(participant.id)
-        : null;
+  Widget build(BuildContext context) {
+    final video = participant.video;
     final l10n = L10n.of(context)!;
     final displayName = participant.displayName ?? participant.userId;
     final name = participant.isLocal ? l10n.you : displayName;
@@ -51,7 +48,7 @@ class CallTile extends ConsumerWidget {
                 aspectRatio: _videoAspectRatio,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: video,
+                  child: CallVideo(video: video),
                 ),
               )
             else

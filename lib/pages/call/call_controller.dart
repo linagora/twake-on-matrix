@@ -242,32 +242,28 @@ class CallController extends _$CallController {
     if (!ref.mounted || call != _cancellation) return true;
     final current = state;
     if (current is! CallConnected || current.isSpeakerChosen) return true;
-    return _setSpeaker(isOn: isOn, isForced: false);
+    await _setSpeaker(isOn: isOn, isForced: false);
+    return true;
   }
 
-  /// False when the device refused the change.
-  Future<bool> setSpeaker({required bool isOn}) =>
+  Future<void> setSpeaker({required bool isOn}) =>
       _setSpeaker(isOn: isOn, isForced: true);
 
-  Future<bool> _setSpeaker({required bool isOn, required bool isForced}) async {
-    if (state is! CallConnected) return false;
+  /// Best effort, as the audio route of LiveKit.
+  Future<void> _setSpeaker({required bool isOn, required bool isForced}) async {
+    if (state is! CallConnected) return;
     final call = _cancellation;
-    try {
-      await ref
-          .read(setCallSpeakerUseCaseProvider)
-          .execute(isOn: isOn, isForced: isForced);
-    } on CallException {
-      return false;
-    }
-    if (!ref.mounted || call != _cancellation) return true;
+    await ref
+        .read(setCallSpeakerUseCaseProvider)
+        .execute(isOn: isOn, isForced: isForced);
+    if (!ref.mounted || call != _cancellation) return;
     final current = state;
-    if (current is! CallConnected) return true;
+    if (current is! CallConnected) return;
     // An explicit choice made meanwhile wins over the camera's.
-    if (!isForced && current.isSpeakerChosen) return true;
+    if (!isForced && current.isSpeakerChosen) return;
     state = current.copyWith(
       isSpeakerOn: isOn,
       isSpeakerChosen: current.isSpeakerChosen || isForced,
     );
-    return true;
   }
 }

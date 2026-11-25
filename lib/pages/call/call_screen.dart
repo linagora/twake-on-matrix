@@ -276,13 +276,9 @@ class _CallStage extends ConsumerWidget {
                     : null,
                 isSelected: isSpeakerOn,
                 onPressed: () => unawaited(
-                  _change(
-                    context,
-                    () => ref
-                        .read(callControllerProvider.notifier)
-                        .setSpeaker(isOn: !isSpeakerOn),
-                    error: l10n.callErrorSpeakerChange,
-                  ),
+                  ref
+                      .read(callControllerProvider.notifier)
+                      .setSpeaker(isOn: !isSpeakerOn),
                 ),
               ),
               const SizedBox(width: _controlGap),

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
 import 'package:twake_chat/data/datasource/call/call_token_datasource.dart';
@@ -155,9 +154,6 @@ class _FakeMedia implements CallMediaDatasource {
   @override
   Future<void> setSpeaker({required bool isOn, required bool isForced}) async =>
       calls.add('speaker $isOn $isForced');
-
-  @override
-  Widget? videoOf(String participantId) => null;
 
   @override
   Stream<List<CallParticipant>> watchParticipants() =>

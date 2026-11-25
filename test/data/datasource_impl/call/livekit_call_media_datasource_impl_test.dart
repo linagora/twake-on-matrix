@@ -15,9 +15,14 @@ const _ownIdentity = '@alice:localhost:DEV';
 
 class _FakeCameraTrack extends Fake implements lk.LocalVideoTrack {
   var stopped = false;
+  Object? stopFailure;
 
   @override
-  Future<bool> stop() async => stopped = true;
+  Future<bool> stop() async {
+    stopped = true;
+    if (stopFailure case final failure?) throw failure;
+    return true;
+  }
 }
 
 class _FakeVideoPublication extends Fake
@@ -233,14 +238,12 @@ void main() {
     late _FakeCameraTrack cameraTrack;
     late int camerasCreated;
     Completer<void>? captureGate;
-    Object? speakerFailure;
 
     setUp(() {
       room = _FakeRoom();
       cameraTrack = _FakeCameraTrack();
       camerasCreated = 0;
       captureGate = null;
-      speakerFailure = null;
       datasource = LiveKitCallMediaDatasourceImpl(
         createRoom: (_) => room,
         createCameraTrack: () async {
@@ -250,7 +253,6 @@ void main() {
         },
         setSpeakerOutput: ({required isOn, required isForced}) async {
           room.speakerChanges.add('$isOn forced=$isForced');
-          if (speakerFailure case final failure?) throw failure;
         },
       );
     });
@@ -279,17 +281,6 @@ void main() {
 
       // Assert
       expect(room.speakerChanges, ['false forced=false']);
-    });
-
-    test('setSpeaker_whenTheDeviceRefuses_failsAsMedia', () async {
-      // Arrange
-      speakerFailure = 'no audio session';
-
-      // Act & Assert
-      await expectLater(
-        datasource.setSpeaker(isOn: true, isForced: true),
-        throwsA(isA<CallMediaFailedException>()),
-      );
     });
 
     test('setCamera_inTheCall_turnsTheOwnCameraOn', () async {
@@ -378,16 +369,65 @@ void main() {
       expect(room.localParticipant.cameraChanges, [false]);
     });
 
-    test('videoOf_withoutACamera_isNull', () async {
+    test('watchParticipants_withoutACamera_givesNoVideo', () async {
       // Arrange
       await datasource.connect(
         _server,
         const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
       );
 
-      // Act & Assert
-      expect(datasource.videoOf(_ownIdentity), isNull);
+      // Act
+      final own = (await datasource.watchParticipants().first).single;
+
+      // Assert
+      expect(own.isCameraOn, isFalse);
+      expect(own.video, isNull);
     });
+
+    test('setCamera_whenLeftWhileTheCameraOpens_stopsTheTrack', () async {
+      // Arrange
+      await datasource.connect(
+        _server,
+        const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
+      );
+      captureGate = Completer<void>();
+      final camera = datasource.setCamera(isOn: true);
+      await pumpEventQueue();
+
+      // Act
+      await datasource.disconnect();
+      captureGate!.complete();
+      await camera;
+
+      // Assert
+      expect(cameraTrack.stopped, isTrue);
+      expect(room.localParticipant.publishedTracks, isEmpty);
+    });
+
+    test(
+      'setCamera_whenTheStopFailsAfterAFailedPublish_keepsThePublishError',
+      () async {
+        // Arrange
+        await datasource.connect(
+          _server,
+          const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
+        );
+        room.localParticipant.publishFailure = 'publish timed out';
+        cameraTrack.stopFailure = 'already stopped';
+
+        // Act & Assert
+        await expectLater(
+          datasource.setCamera(isOn: true),
+          throwsA(
+            isA<CallMediaFailedException>().having(
+              (error) => error.cause,
+              'cause',
+              'publish timed out',
+            ),
+          ),
+        );
+      },
+    );
   });
 
   group('in an encrypted call', () {

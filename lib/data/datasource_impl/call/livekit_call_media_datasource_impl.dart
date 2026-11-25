@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:matrix/matrix.dart' show Logs;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_media_key.dart';
@@ -101,6 +102,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       // Our own disconnect disposes the listener first: this one is LiveKit
       // giving up.
       ..on<lk.RoomDisconnectedEvent>((event) => onLost(event.reason));
+    await _askBluetoothConnect();
     try {
       // Read by LiveKit when it starts the audio.
       await _setSpeakerOutput(isOn: media.isSpeakerOn, isForced: false);
@@ -211,39 +213,42 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       return;
     }
     final track = await _createCameraTrack();
+    if (!identical(_room?.localParticipant, local)) {
+      // Left the call while the camera opened.
+      await _stopQuietly(track);
+      return;
+    }
     try {
       await local.publishVideoTrack(track);
     } catch (_) {
-      await track.stop();
+      await _stopQuietly(track);
       rethrow;
     }
   }
 
-  @override
-  Future<void> setSpeaker({required bool isOn, required bool isForced}) async {
+  /// The error that matters is the one before this stop.
+  static Future<void> _stopQuietly(lk.LocalVideoTrack track) async {
     try {
-      await _setSpeakerOutput(isOn: isOn, isForced: isForced);
+      await track.stop();
     } catch (error, stackTrace) {
-      _rethrowErrors(error, stackTrace);
-      throw CallMediaFailedException(cause: error);
+      Logs().w('LiveKitCallMedia: camera not stopped', error, stackTrace);
     }
   }
 
-  @override
-  Widget? videoOf(String participantId) {
-    final room = _room;
-    final local = room?.localParticipant;
-    final lk.Participant? participant = local?.identity == participantId
-        ? local
-        : room?.remoteParticipants[participantId];
-    final track = participant == null ? null : _cameraOf(participant);
-    if (track == null) return null;
-    return lk.VideoTrackRenderer(
-      track,
-      key: ValueKey(track.mediaStreamTrack.id),
-      fit: lk.VideoViewFit.cover,
-    );
+  /// Android 12+: without it LiveKit never routes to a Bluetooth headset.
+  static Future<void> _askBluetoothConnect() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await Permission.bluetoothConnect.request();
+    } catch (error, stackTrace) {
+      Logs().w('LiveKitCallMedia: Bluetooth not asked', error, stackTrace);
+    }
   }
+
+  /// Best effort: livekit_client 2.13.2 catches and logs the route errors.
+  @override
+  Future<void> setSpeaker({required bool isOn, required bool isForced}) =>
+      _setSpeakerOutput(isOn: isOn, isForced: isForced);
 
   /// Null until a remote camera is subscribed: its tile shows the avatar.
   static lk.VideoTrack? _cameraOf(lk.Participant participant) {
@@ -294,12 +299,16 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   CallParticipant _toParticipant(
     lk.Participant participant, {
     required bool isLocal,
-  }) => CallParticipant(
-    id: participant.identity,
-    userId: userIdOf(participant.identity),
-    isLocal: isLocal,
-    isMicrophoneOn: participant.isMicrophoneEnabled(),
-    isCameraOn: _cameraOf(participant) != null,
-    isSpeaking: participant.isSpeaking,
-  );
+  }) {
+    final camera = _cameraOf(participant);
+    return CallParticipant(
+      id: participant.identity,
+      userId: userIdOf(participant.identity),
+      isLocal: isLocal,
+      isMicrophoneOn: participant.isMicrophoneEnabled(),
+      isCameraOn: camera != null,
+      isSpeaking: participant.isSpeaking,
+      video: camera == null ? null : CallVideoTrack(camera),
+    );
+  }
 }

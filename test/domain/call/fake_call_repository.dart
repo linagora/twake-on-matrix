@@ -40,7 +40,6 @@ class FakeCallRepository implements CallRepository {
   CallException? joinError;
   CallException? leaveError;
   CallException? mediaError;
-  CallException? speakerError;
   CallException? declineError;
   Object? staleError;
   Object? ringError;
@@ -189,7 +188,6 @@ class FakeCallRepository implements CallRepository {
       speakerGateOf.add(gate);
       await gate.future;
     }
-    if (speakerError case final error?) throw error;
   }
 
   @override

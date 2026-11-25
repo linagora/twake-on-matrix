@@ -1,14 +1,8 @@
-import 'package:flutter/widgets.dart';
 import 'package:twake_chat/domain/model/call/call_media_key.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 
-abstract class CallVideoViews {
-  /// Null while the participant shows no video.
-  Widget? videoOf(String participantId);
-}
-
-abstract class CallMediaDatasource implements CallVideoViews {
+abstract class CallMediaDatasource {
   Future<void> connect(CallServer server, CallMediaState media);
 
   Future<void> setMediaKey(CallMediaKey key);

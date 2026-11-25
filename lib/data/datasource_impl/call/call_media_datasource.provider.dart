@@ -13,7 +13,3 @@ CallMediaDatasource callMediaDatasource(Ref ref) {
   ref.onDispose(() => unawaited(datasource.dispose()));
   return datasource;
 }
-
-@Riverpod(keepAlive: true)
-CallVideoViews callVideoViews(Ref ref) =>
-    ref.watch(callMediaDatasourceProvider);

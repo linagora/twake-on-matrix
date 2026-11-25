@@ -460,9 +460,11 @@ reaches the bottom, as before.
 
 ## D26. Calls start audio-only; the camera and the speaker are buttons (decided by Johann, 2026-11-23)
 
-A call on mobile starts with the camera off, unlike Twake Space Chat, whose
-calls start with the camera on. The call screen has a camera button and a
-speaker button, next to the microphone.
+A call on mobile starts with the camera off, as D15 decided. Twake Space
+Chat no longer does: since its D778 (2026-11-21) its calls start with the
+camera on, so the « as the calls of Twake Space Chat » of D15 is out of date,
+not its rule. The call screen has a camera button and a speaker button, next
+to the microphone.
 
 - The camera shows the own video in the own tile, and the others see it in
   theirs. A tile without a video keeps the avatar.

@@ -294,39 +294,11 @@ void main() {
     await controller().join('!room', isVideo: false);
 
     // Act
-    final isChanged = await controller().setSpeaker(isOn: true);
+    await controller().setSpeaker(isOn: true);
 
     // Assert
-    expect(isChanged, isTrue);
     expect((state() as CallConnected).isSpeakerOn, isTrue);
     expect(repository.calls.last, 'speaker true forced=true');
-  });
-
-  test('setSpeaker_whenRefused_answersFalse', () async {
-    // Arrange
-    await controller().join('!room', isVideo: false);
-    repository.speakerError = const CallMediaFailedException();
-
-    // Act
-    final isChanged = await controller().setSpeaker(isOn: true);
-
-    // Assert
-    expect(isChanged, isFalse);
-    expect((state() as CallConnected).isSpeakerOn, isFalse);
-  });
-
-  test('setCamera_whenTheAutomaticSpeakerFails_answersFalse', () async {
-    // Arrange
-    await controller().join('!room', isVideo: false);
-    repository.speakerError = const CallMediaFailedException();
-
-    // Act
-    final isChanged = await controller().setCamera(isOn: true);
-
-    // Assert
-    expect(isChanged, isFalse);
-    expect(repository.calls, contains('camera true'));
-    expect(state(), isA<CallConnected>());
   });
 
   test('setCamera_finishingInALaterCall_leavesItsSpeaker', () async {
@@ -365,9 +337,12 @@ void main() {
     expect((state() as CallConnected).isSpeakerChosen, isTrue);
   });
 
-  test('setSpeaker_outsideACall_answersFalse', () async {
-    // Act & Assert
-    expect(await controller().setSpeaker(isOn: true), isFalse);
+  test('setSpeaker_outsideACall_changesNothing', () async {
+    // Act
+    await controller().setSpeaker(isOn: true);
+
+    // Assert
+    expect(repository.calls, isEmpty);
   });
 
   test('leave_beforeTheMediaConnects_connectsNoMedia', () async {
