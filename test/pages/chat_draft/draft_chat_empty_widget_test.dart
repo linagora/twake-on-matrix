@@ -42,10 +42,18 @@ void main() {
   testWidgets('keeps its natural size when there is room', (tester) async {
     await pumpIn(tester, 600);
 
-    expect(tester.getSize(find.byType(DraftChatEmpty)).height, lessThan(600));
-    expect(
-      tester.getSize(find.text('No message here yet')).height,
-      greaterThan(20),
-    );
+    final card = find
+        .descendant(
+          of: find.byType(DraftChatEmpty),
+          matching: find.byType(InkWell),
+        )
+        .first;
+    final fitted = find
+        .descendant(
+          of: find.byType(DraftChatEmpty),
+          matching: find.byType(FittedBox),
+        )
+        .first;
+    expect(tester.getSize(fitted), tester.getSize(card));
   });
 }
