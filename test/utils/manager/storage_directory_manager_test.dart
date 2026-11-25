@@ -114,6 +114,34 @@ void main() {
         expect(tempDir.listSync().whereType<File>(), isEmpty);
       },
     );
+
+    test(
+      'writeDecryptedFile_whenOnlyDownloadsIsAvailable_throwsAndWritesNothing',
+      () async {
+        // Arrange
+        final downloads = Directory(p.join(tempDir.path, 'Downloads'))
+          ..createSync();
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(pathProviderChannel, (call) async {
+              if (call.method == 'getDownloadsDirectory') return downloads.path;
+              throw PlatformException(code: 'unavailable');
+            });
+        final matrixFile = MatrixFile(
+          bytes: Uint8List.fromList([1, 2, 3]),
+          name: 'voice.ogg',
+        );
+
+        // Act
+        final writing = StorageDirectoryManager.instance.writeDecryptedFile(
+          eventId: eventId,
+          file: matrixFile,
+        );
+
+        // Assert
+        await expectLater(writing, throwsStateError);
+        expect(downloads.listSync(), isEmpty);
+      },
+    );
   });
 
   group('getFilePathInAppDownloads', () {

@@ -112,8 +112,12 @@ class StorageDirectoryManager {
     required String eventId,
     required MatrixFile file,
   }) async {
+    final root = await _appFileStoreDirectory();
+    if (root == null) {
+      throw StateError('No app-owned directory for decrypted files');
+    }
     final decryptedFile = File(
-      await getDecryptedFilePath(eventId: eventId, fileName: file.name),
+      '$root/$_decryptedFolder/$eventId/${file.name.safeFileName}',
     );
     await decryptedFile.parent.create(recursive: true);
     return decryptedFile.writeAsBytes(file.bytes);
