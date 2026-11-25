@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_prompt.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
-import 'package:twake_chat/providers/rewrite_draft_usecase_provider.dart';
+import 'package:twake_chat/domain/scribe/usecases/rewrite_draft_usecase.provider.dart';
 
 part 'scribe_controller.g.dart';
 

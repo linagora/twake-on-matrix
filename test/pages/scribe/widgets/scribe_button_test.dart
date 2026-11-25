@@ -12,12 +12,12 @@ import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
 import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
 import 'package:twake_chat/domain/scribe/sources/scribe_source.dart';
 import 'package:twake_chat/domain/scribe/usecases/rewrite_draft_usecase.dart';
+import 'package:twake_chat/domain/scribe/usecases/rewrite_draft_usecase.provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/scribe/providers/scribe_room_provider.dart';
 import 'package:twake_chat/pages/scribe/widgets/scribe_button.dart';
 import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/providers/drive_session_provider.dart';
-import 'package:twake_chat/providers/rewrite_draft_usecase_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 const _roomId = '!room:example.com';

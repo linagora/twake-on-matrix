@@ -9,8 +9,8 @@ import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
 import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
 import 'package:twake_chat/domain/scribe/sources/scribe_source.dart';
 import 'package:twake_chat/domain/scribe/usecases/rewrite_draft_usecase.dart';
+import 'package:twake_chat/domain/scribe/usecases/rewrite_draft_usecase.provider.dart';
 import 'package:twake_chat/pages/scribe/scribe_controller.dart';
-import 'package:twake_chat/providers/rewrite_draft_usecase_provider.dart';
 
 const _roomId = '!room:example.com';
 const _room = ScribeRoom(
