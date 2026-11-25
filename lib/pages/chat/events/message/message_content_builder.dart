@@ -27,6 +27,9 @@ class MessageContentBuilder extends ConsumerWidget
   final bool selectMode;
   final Future<void> Function(Event)? onRetryTextMessage;
 
+  /// True on the thread screen.
+  final bool inThread;
+
   const MessageContentBuilder({
     super.key,
     required this.event,
@@ -36,6 +39,7 @@ class MessageContentBuilder extends ConsumerWidget
     this.scrollToEventId,
     this.selectMode = true,
     this.onRetryTextMessage,
+    this.inThread = false,
   });
 
   @override
@@ -98,6 +102,7 @@ class MessageContentBuilder extends ConsumerWidget
                   children: [
                     MessageContent(
                       displayEvent,
+                      inThread: inThread,
                       videoCallBaseUrl: videoCallBaseUrl,
                       textColor: textColor,
                       textWidth: stepWidth,

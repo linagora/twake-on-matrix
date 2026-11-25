@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:twake_chat/domain/voice_message/entities/shown_message.dart';
 import 'package:twake_chat/domain/voice_message/exceptions/voice_message_exception.dart';
 import 'package:twake_chat/domain/voice_message/usecases/find_next_voice_message_use_case.provider.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
@@ -11,7 +12,12 @@ part 'voice_autoplay_controller.g.dart';
 sealed class VoiceAutoplayState with _$VoiceAutoplayState {
   const factory VoiceAutoplayState.idle() = VoiceAutoplayIdle;
 
-  /// The chat screen plays [eventId], unless the user started another audio.
+  /// [eventId] played to its end: the screen answers with what it shows.
+  /// [run] tells two ends of the same message apart.
+  const factory VoiceAutoplayState.ended(String eventId, int run) =
+      VoiceAutoplayEnded;
+
+  /// The screen plays [eventId], unless the user started another audio.
   const factory VoiceAutoplayState.next(String eventId) = VoiceAutoplayNext;
 }
 
@@ -26,9 +32,18 @@ class VoiceAutoplayController extends _$VoiceAutoplayController {
   VoiceAutoplayState build(String roomId, String? threadRootId) =>
       const VoiceAutoplayState.idle();
 
-  Future<void> voiceMessageEnded(String eventId) async {
+  void voiceMessageEnded(String eventId) {
     if (!ref.mounted) return;
-    final run = ++_run;
+    state = VoiceAutoplayState.ended(eventId, ++_run);
+  }
+
+  /// [shown] is what the screen shows, oldest first.
+  Future<void> findNext(
+    String eventId, {
+    required List<ShownMessage> shown,
+  }) async {
+    if (!ref.mounted) return;
+    final run = _run;
     state = const VoiceAutoplayState.idle();
     try {
       final next = await ref
@@ -37,6 +52,7 @@ class VoiceAutoplayController extends _$VoiceAutoplayController {
             roomId: roomId,
             eventId: eventId,
             threadRootId: threadRootId,
+            shown: shown,
           );
       // A message that ended since then starts its own run.
       if (!ref.mounted || run != _run || next == null) return;
@@ -46,7 +62,7 @@ class VoiceAutoplayController extends _$VoiceAutoplayController {
       ref.read(reportFailureProvider)(
         error,
         stackTrace,
-        'VoiceAutoplayController::voiceMessageEnded',
+        'VoiceAutoplayController::findNext',
       );
     }
   }

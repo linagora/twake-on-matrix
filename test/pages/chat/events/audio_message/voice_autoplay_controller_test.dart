@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/data/voice_message/repositories/voice_message_repository.provider.dart';
+import 'package:twake_chat/domain/voice_message/entities/shown_message.dart';
 import 'package:twake_chat/domain/voice_message/exceptions/voice_message_exception.dart';
 import 'package:twake_chat/domain/voice_message/repositories/voice_message_repository.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/voice_autoplay_controller.dart';
@@ -28,7 +29,7 @@ class _Repository implements VoiceMessageRepository {
     threads.add(threadRootId);
     await gate?.future;
     await gates[eventId]?.future;
-    if (error != null) throw error!;
+    if (error case final error?) throw error;
     return next[eventId];
   }
 }
@@ -54,47 +55,91 @@ void main() {
     );
   });
 
+  ShownMessage voice(String id) =>
+      ShownMessage(eventId: id, isVoiceMessage: true);
+  ShownMessage text(String id) =>
+      ShownMessage(eventId: id, isVoiceMessage: false);
+
   test('starts idle', () {
     container.listen(provider, (_, _) {});
 
     expect(container.read(provider), const VoiceAutoplayState.idle());
   });
 
-  test('queues the next voice message when one ends', () async {
-    repository.next['v1'] = 'v2';
-    final states = <VoiceAutoplayState>[];
-    container.listen(provider, (_, next) => states.add(next));
-
-    await container.read(provider.notifier).voiceMessageEnded('v1');
-
-    expect(repository.asked, ['v1']);
-    expect(states.last, const VoiceAutoplayState.next('v2'));
-  });
-
-  test('queues each next message of the run', () async {
-    repository.next.addAll({'v1': 'v2', 'v2': 'v3'});
+  test('asks the screen what it shows when a voice message ends', () {
     final states = <VoiceAutoplayState>[];
     container.listen(provider, (_, next) => states.add(next));
     final controller = container.read(provider.notifier);
 
-    await controller.voiceMessageEnded('v1');
-    await controller.voiceMessageEnded('v2');
-    await controller.voiceMessageEnded('v3');
+    controller.voiceMessageEnded('v1');
+    controller.voiceMessageEnded('v1');
 
     expect(states, const [
-      VoiceAutoplayState.next('v2'),
-      VoiceAutoplayState.idle(),
-      VoiceAutoplayState.next('v3'),
-      VoiceAutoplayState.idle(),
+      VoiceAutoplayState.ended('v1', 1),
+      VoiceAutoplayState.ended('v1', 2),
     ]);
   });
 
-  test('stays idle when the next message is not a voice message', () async {
+  test('takes the next voice message from what the screen shows', () async {
+    repository.next['v1'] = 'stored';
     container.listen(provider, (_, _) {});
+    final controller = container.read(provider.notifier)
+      ..voiceMessageEnded('v1');
 
-    await container.read(provider.notifier).voiceMessageEnded('v1');
+    await controller.findNext('v1', shown: [voice('v1'), voice('v2')]);
+
+    expect(container.read(provider), const VoiceAutoplayState.next('v2'));
+    expect(repository.asked, isEmpty);
+  });
+
+  test(
+    'stops at a message of the screen that is not a voice message',
+    () async {
+      container.listen(provider, (_, _) {});
+      final controller = container.read(provider.notifier)
+        ..voiceMessageEnded('v1');
+
+      await controller.findNext(
+        'v1',
+        shown: [voice('v1'), text('t'), voice('v2')],
+      );
+
+      expect(container.read(provider), const VoiceAutoplayState.idle());
+    },
+  );
+
+  test('stops after the last message of the screen', () async {
+    container.listen(provider, (_, _) {});
+    final controller = container.read(provider.notifier)
+      ..voiceMessageEnded('v2');
+
+    await controller.findNext('v2', shown: [voice('v1'), voice('v2')]);
 
     expect(container.read(provider), const VoiceAutoplayState.idle());
+    expect(repository.asked, isEmpty);
+  });
+
+  test('reads the store when the screen does not show the message', () async {
+    repository.next['v1'] = 'v2';
+    container.listen(provider, (_, _) {});
+    final controller = container.read(provider.notifier)
+      ..voiceMessageEnded('v1');
+
+    await controller.findNext('v1', shown: [voice('other')]);
+
+    expect(repository.asked, ['v1']);
+    expect(container.read(provider), const VoiceAutoplayState.next('v2'));
+  });
+
+  test('reads the store in the thread of its screen', () async {
+    final thread = voiceAutoplayControllerProvider(_roomId, r'$root');
+    container.listen(thread, (_, _) {});
+    final controller = container.read(thread.notifier)
+      ..voiceMessageEnded(r'$root');
+
+    await controller.findNext(r'$root', shown: const []);
+
+    expect(repository.threads, [r'$root']);
   });
 
   test('stops when the chat screen is left during the lookup', () async {
@@ -102,14 +147,15 @@ void main() {
       ..next['v1'] = 'v2'
       ..gate = Completer();
     final sub = container.listen(provider, (_, _) {});
-    final controller = container.read(provider.notifier);
+    final controller = container.read(provider.notifier)
+      ..voiceMessageEnded('v1');
 
-    final ended = controller.voiceMessageEnded('v1');
+    final lookup = controller.findNext('v1', shown: const []);
     sub.close();
     await container.pump();
     repository.gate!.complete();
 
-    await expectLater(ended, completes);
+    await expectLater(lookup, completes);
   });
 
   test('does nothing once the chat screen is left', () async {
@@ -118,28 +164,10 @@ void main() {
     sub.close();
     await container.pump();
 
-    await controller.voiceMessageEnded('v1');
+    controller.voiceMessageEnded('v1');
+    await controller.findNext('v1', shown: const []);
 
     expect(repository.asked, isEmpty);
-  });
-
-  test('reports a failed lookup and stays idle', () async {
-    repository.error = StateError('db');
-    container.listen(provider, (_, _) {});
-
-    await container.read(provider.notifier).voiceMessageEnded('v1');
-
-    expect(failures.single, isA<FindNextVoiceMessageException>());
-    expect(container.read(provider), const VoiceAutoplayState.idle());
-  });
-
-  test('looks up the next message in the thread of its screen', () async {
-    final thread = voiceAutoplayControllerProvider(_roomId, r'$root');
-    container.listen(thread, (_, _) {});
-
-    await container.read(thread.notifier).voiceMessageEnded(r'$root');
-
-    expect(repository.threads, [r'$root']);
   });
 
   test('drops the next message of a run that a newer one replaced', () async {
@@ -148,10 +176,12 @@ void main() {
       ..gates['v1'] = Completer();
     final states = <VoiceAutoplayState>[];
     container.listen(provider, (_, next) => states.add(next));
-    final controller = container.read(provider.notifier);
+    final controller = container.read(provider.notifier)
+      ..voiceMessageEnded('v1');
 
-    final stale = controller.voiceMessageEnded('v1');
-    await controller.voiceMessageEnded('other');
+    final stale = controller.findNext('v1', shown: const []);
+    controller.voiceMessageEnded('other');
+    await controller.findNext('other', shown: const []);
     repository.gates['v1']!.complete();
     await stale;
 
@@ -160,5 +190,17 @@ void main() {
       const VoiceAutoplayState.next('other-next'),
     );
     expect(states, isNot(contains(const VoiceAutoplayState.next('v2'))));
+  });
+
+  test('reports a failed lookup and stays idle', () async {
+    repository.error = Exception('db');
+    container.listen(provider, (_, _) {});
+    final controller = container.read(provider.notifier)
+      ..voiceMessageEnded('v1');
+
+    await controller.findNext('v1', shown: const []);
+
+    expect(failures.single, isA<FindNextVoiceMessageException>());
+    expect(container.read(provider), const VoiceAutoplayState.idle());
   });
 }

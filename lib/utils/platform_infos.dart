@@ -15,10 +15,7 @@ abstract class PlatformInfos {
 
   static bool get isWindows => Platform.isWindows;
 
-  @visibleForTesting
-  static bool isTestingForMacOS = false;
-
-  static bool get isMacOS => isTestingForMacOS || Platform.isMacOS;
+  static bool get isMacOS => Platform.isMacOS;
 
   @visibleForTesting
   static bool isTestingForIOS = false;

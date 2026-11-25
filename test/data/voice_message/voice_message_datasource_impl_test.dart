@@ -154,16 +154,16 @@ void main() {
     expect(await next('root'), 'main');
   });
 
-  test('finds a message older than the first pages, however old', () async {
+  test('stops looking past 3200 stored events', () async {
     store([
       event('v0'),
       event('v1'),
-      for (var i = 0; i < 6500; i++)
+      for (var i = 0; i < 3300; i++)
         event('t$i', msgtype: MessageTypes.Text, voice: false),
     ]);
 
-    expect(await next('v0'), 'v1');
-    expect(client.db.limits.last, 6400 * 2);
+    expect(await next('v0'), isNull);
+    expect(client.db.limits, [50, 100, 200, 400, 800, 1600, 3200]);
   });
 
   test('reads older pages until it finds the event', () async {

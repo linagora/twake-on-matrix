@@ -1,6 +1,7 @@
 // #2796: when a voice message ends, the chat plays the next one if it is a
 // voice message too.
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' show Directory, File;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -19,6 +20,8 @@ import 'package:provider/provider.dart' show Provider;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/data/voice_message/repositories/voice_message_repository.provider.dart';
+import 'package:twake_chat/domain/drive/entities/drive_config.dart';
+import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/delete_event_interactor.dart';
@@ -42,7 +45,12 @@ import '../../../../fake_client.dart';
 
 const _roomId = '!room:example.org';
 
-/// Serves media downloads once [media] completes, the rest as [FakeMatrixApi].
+/// A message the chat does not show, as after a jump: only the store knows
+/// what follows it.
+const _notShown = 'not-shown';
+
+/// Fails media downloads, or serves them once [media] completes; the rest as
+/// [FakeMatrixApi].
 class _Api extends http.BaseClient {
   final _api = FakeMatrixApi();
   Completer<void>? media;
@@ -52,7 +60,14 @@ class _Api extends http.BaseClient {
     if (!request.url.path.contains('/media/download/')) {
       return _api.send(request);
     }
-    await media?.future;
+    final media = this.media;
+    if (media == null) {
+      return http.StreamedResponse(
+        Stream.value(utf8.encode('{"errcode":"M_NOT_FOUND"}')),
+        404,
+      );
+    }
+    await media.future;
     return http.StreamedResponse(Stream.value([1, 2, 3]), 200);
   }
 }
@@ -116,9 +131,9 @@ class _Room extends Room {
   );
 }
 
-Event _voice(Room room, String id, {String? url}) => Event(
+Event _voice(Room room, String id) => Event(
   content: {
-    'url': ?url,
+    'url': 'mxc://example.org/$id',
     'body': 'voice_message_$id.ogg',
     'msgtype': MessageTypes.Audio,
     'info': {'mimetype': 'audio/ogg'},
@@ -141,7 +156,7 @@ class _Repository implements VoiceMessageRepository {
     required String roomId,
     required String eventId,
     String? threadRootId,
-  }) async => eventId == 'v1' ? 'v2' : null;
+  }) async => eventId == _notShown ? 'v2' : null;
 }
 
 class _FakeMatrix extends Fake implements MatrixState {
@@ -228,10 +243,15 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockStreamHandler(
-          const EventChannel('flutter_keyboard_visibility'),
-          MockStreamHandler.inline(onListen: (_, _) {}),
-        );
+      // The voice recorder of the mobile composer.
+      ..setMockMethodCallHandler(
+        const MethodChannel('com.llfbandit.record/messages'),
+        (_) async => null,
+      )
+      ..setMockStreamHandler(
+        const EventChannel('flutter_keyboard_visibility'),
+        MockStreamHandler.inline(onListen: (_, _) {}),
+      );
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
     getIt
       ..registerSingleton(ResponsiveUtils())
@@ -242,15 +262,15 @@ void main() {
       ..registerFactory(UnblockUserInteractor.new)
       ..registerSingleton<UploadManager>(_NoUploads())
       ..registerSingleton(const SearchEngine());
-    // The voice bubble shows on mobile and macOS only, not on the Linux CI.
-    PlatformInfos.isTestingForMacOS = true;
+    // The mobile path, on any host: the voice bubble shows on mobile.
+    PlatformInfos.isTestingForIOS = true;
     PathProviderPlatform.instance = _FakePathProvider();
     client = _Client(_Api());
     matrix = _FakeMatrix(client);
   });
 
   tearDown(() async {
-    PlatformInfos.isTestingForMacOS = false;
+    PlatformInfos.isTestingForIOS = false;
     await getIt.reset();
   });
 
@@ -271,6 +291,9 @@ void main() {
       ProviderScope(
         overrides: [
           voiceMessageRepositoryProvider.overrideWithValue(_Repository()),
+          driveConfigProvider.overrideWithValue(
+            const DriveConfig(ssoUrl: '', ssoClientId: ''),
+          ),
         ],
         child: Provider<MatrixState>.value(
           value: matrix,
@@ -304,11 +327,11 @@ void main() {
     ProviderContainer container,
     String eventId,
   ) async {
-    await tester.runAsync(
-      () => container
+    await tester.runAsync(() async {
+      container
           .read(voiceAutoplayControllerProvider(_roomId, null).notifier)
-          .voiceMessageEnded(eventId),
-    );
+          .voiceMessageEnded(eventId);
+    });
     // The download of the next one runs outside the fake clock.
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 100)),
@@ -414,11 +437,6 @@ void main() {
     );
     addTearDown(keepAlive.close);
     final player = matrix.audioPlayer;
-    client.room.events.first = _voice(
-      client.room,
-      'v2',
-      url: 'mxc://example.org/v2',
-    );
     client.api.media = Completer();
     await endVoiceMessage(tester, container, 'v1');
     expect(matrix.voiceMessageEvent.value?.eventId, 'v2');
@@ -433,6 +451,16 @@ void main() {
 
     expect(matrix.voiceMessageEvent.value, isNull);
     expect(matrix.audioPlayer, same(player));
+    await closeChat(tester);
+  });
+
+  testWidgets('the store gives the next one of a message the chat does not '
+      'show', (tester) async {
+    final container = await openChat(tester);
+
+    await endVoiceMessage(tester, container, _notShown);
+
+    expect(matrix.voiceMessageEvent.value?.eventId, 'v2');
     await closeChat(tester);
   });
 }

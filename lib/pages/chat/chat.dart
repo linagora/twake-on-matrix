@@ -143,6 +143,8 @@ import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
+import 'package:twake_chat/domain/voice_message/entities/shown_message.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/voice_message_extension.dart';
 
 import 'events/audio_message/audio_player_widget.dart';
 import 'events/audio_message/voice_autoplay_controller.dart';
@@ -3548,10 +3550,26 @@ class ChatController extends ConsumerState<Chat>
   bool get _isFrontScreen =>
       mounted && (ModalRoute.of(context)?.isCurrent ?? true);
 
+  VoiceAutoplayController get _voiceAutoplay => ref.read(
+    voiceAutoplayControllerProvider(widget.roomId, threadRootId).notifier,
+  );
+
+  void _findNextVoiceMessage(String eventId) {
+    if (!_isFrontScreen) return;
+    final shown = eventsToDisplay.reversed
+        .where(isEventVisible)
+        .map(
+          (event) => ShownMessage(
+            eventId: event.eventId,
+            isVoiceMessage: event.isVoiceMessage,
+          ),
+        )
+        .toList();
+    unawaited(_voiceAutoplay.findNext(eventId, shown: shown));
+  }
+
   Future<void> _playNextVoiceMessage(String eventId) async {
-    final autoplay = ref.read(
-      voiceAutoplayControllerProvider(widget.roomId, threadRootId).notifier,
-    );
+    final autoplay = _voiceAutoplay;
     final event = await room?.getEventById(eventId);
     final matrix = this.matrix;
     if (!_isFrontScreen || event == null || matrix == null) return;
@@ -3563,10 +3581,10 @@ class ChatController extends ConsumerState<Chat>
         matrix,
         event,
         canStart: () => _isFrontScreen,
-        onEnded: () => unawaited(autoplay.voiceMessageEnded(event.eventId)),
+        onEnded: () => autoplay.voiceMessageEnded(event.eventId),
       );
-    } catch (_) {
-      // playVoiceMessage already logged and shown the failure.
+    } on Exception catch (e, s) {
+      Logs().e('Chat::_playNextVoiceMessage', e, s);
     }
   }
 
@@ -3655,8 +3673,13 @@ class ChatController extends ConsumerState<Chat>
     _voiceAutoplaySubscription = ref.listenManual(
       voiceAutoplayControllerProvider(widget.roomId, threadRootId),
       (_, next) {
-        if (next case VoiceAutoplayNext(:final eventId)) {
-          unawaited(_playNextVoiceMessage(eventId));
+        switch (next) {
+          case VoiceAutoplayEnded(:final eventId):
+            _findNextVoiceMessage(eventId);
+          case VoiceAutoplayNext(:final eventId):
+            unawaited(_playNextVoiceMessage(eventId));
+          case VoiceAutoplayIdle():
+            break;
         }
       },
     );

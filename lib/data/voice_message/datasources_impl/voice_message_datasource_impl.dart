@@ -2,6 +2,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/voice_message/datasources/voice_message_datasource.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/voice_message_extension.dart';
 
 class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
   const VoiceMessageDatasourceImpl(this._client);
@@ -9,6 +10,7 @@ class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
   final Client _client;
 
   static const _firstPageSize = 50;
+  static const _maxEvents = 3200;
 
   @override
   Future<String?> nextVoiceMessageId({
@@ -18,7 +20,7 @@ class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
   }) async {
     final room = _client.getRoomById(roomId);
     if (room == null) return null;
-    for (var limit = _firstPageSize; ; limit *= 2) {
+    for (var limit = _firstPageSize; limit <= _maxEvents; limit *= 2) {
       final newestFirst = await _client.database.getEventList(
         room,
         limit: limit,
@@ -33,6 +35,7 @@ class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
       }
       if (newestFirst.length < limit) return null;
     }
+    return null;
   }
 
   /// [threadRootId] is the thread screen the message plays in, null in the
@@ -42,7 +45,7 @@ class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
     Iterable<Event> newer,
     String? threadRootId,
   ) {
-    if (!_isVoiceMessage(played)) return null;
+    if (!played.isVoiceMessage) return null;
     final inThread = threadRootId != null;
     for (final event in newer) {
       if (inThread && event.threadRootId != threadRootId) continue;
@@ -52,13 +55,8 @@ class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
       )) {
         continue;
       }
-      return _isVoiceMessage(event) ? event.eventId : null;
+      return event.isVoiceMessage ? event.eventId : null;
     }
     return null;
   }
-
-  static bool _isVoiceMessage(Event event) =>
-      !event.redacted &&
-      event.messageType == MessageTypes.Audio &&
-      event.content.containsKey('org.matrix.msc3245.voice');
 }

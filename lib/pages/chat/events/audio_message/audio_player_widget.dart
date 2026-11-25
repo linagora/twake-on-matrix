@@ -5,7 +5,6 @@ import 'package:async/async.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_play_extension.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_style.dart';
-import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/voice_autoplay_controller.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
@@ -35,6 +34,9 @@ class AudioPlayerWidget extends ConsumerStatefulWidget {
   final Event event;
   final Timeline timeline;
 
+  /// The thread whose screen shows this message, null in the chat.
+  final String? threadRootId;
+
   static const int wavesCount = 80;
 
   const AudioPlayerWidget(
@@ -42,6 +44,7 @@ class AudioPlayerWidget extends ConsumerStatefulWidget {
     this.color = Colors.black,
     super.key,
     required this.timeline,
+    this.threadRootId,
   });
 
   @override
@@ -196,11 +199,10 @@ class AudioPlayerState extends ConsumerState<AudioPlayerWidget>
       return;
     }
 
-    final screen = context.findAncestorStateOfType<ChatController>();
     final autoplay = ref.read(
       voiceAutoplayControllerProvider(
         widget.event.roomId!,
-        screen?.threadRootId,
+        widget.threadRootId,
       ).notifier,
     );
     try {
@@ -208,11 +210,10 @@ class AudioPlayerState extends ConsumerState<AudioPlayerWidget>
         context,
         matrix,
         widget.event,
-        onEnded: () =>
-            unawaited(autoplay.voiceMessageEnded(widget.event.eventId)),
+        onEnded: () => autoplay.voiceMessageEnded(widget.event.eventId),
       );
-    } catch (_) {
-      // playVoiceMessage already logged and shown the failure.
+    } on Exception catch (e, s) {
+      Logs().e('AudioPlayerWidget::_onButtonTap', e, s);
     }
   }
 
