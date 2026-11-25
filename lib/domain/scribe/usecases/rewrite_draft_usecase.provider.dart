@@ -6,9 +6,6 @@ import 'package:twake_chat/providers/drive_session_provider.dart';
 
 part 'rewrite_draft_usecase.provider.g.dart';
 
-/// The Scribe signs in with the Drive session. The notifier is read at call
-/// time, so a request always uses the session of the active account; a
-/// renewal for an account that is no longer active is refused.
 @Riverpod(keepAlive: true)
 RewriteDraftUseCase rewriteDraftUseCase(Ref ref) => RewriteDraftUseCase(
   source: ref.watch(scribeSourceProvider),

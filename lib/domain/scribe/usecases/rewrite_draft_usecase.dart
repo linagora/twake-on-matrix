@@ -5,9 +5,6 @@ import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
 import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
 import 'package:twake_chat/domain/scribe/sources/scribe_source.dart';
 
-/// Rewrites the whole draft of a composer with one Scribe option. Nothing
-/// leaves the device for a room that does not offer the Scribe, or for a blank
-/// draft.
 class RewriteDraftUseCase {
   const RewriteDraftUseCase({
     required ScribeSource source,
@@ -21,24 +18,12 @@ class RewriteDraftUseCase {
 
   final ScribeSource _source;
 
-  /// Signs the user in to the workplace when needed.
   final Future<DriveSession> Function() _obtainSession;
 
-  /// For a token the workplace refused as stale.
   final Future<DriveSession> Function() _renewSession;
 
-  /// The active account, read when a rewrite starts and around a renewal.
   final String? Function() _currentAccount;
 
-  /// Returns the text that replaces [draft]; never sends a message.
-  ///
-  /// Throws [ScribeNotOffered] when [room] does not offer the Scribe and
-  /// [ScribeEmptyDraft] when [draft] is blank, both before signing in. Then
-  /// the `DriveException`s of signing in, [DriveSessionSuperseded] when there
-  /// is no active account (mid switch) or it changed while signing in or
-  /// around a renewal, and the
-  /// [ScribeException]s of
-  /// `ScribeSource.rewrite`.
   Future<String> execute({
     required ScribeRoom room,
     required ScribePrompt prompt,
@@ -47,7 +32,6 @@ class RewriteDraftUseCase {
     if (!room.offersScribe) throw const ScribeNotOffered();
     if (draft.trim().isEmpty) throw const ScribeEmptyDraft();
     final account = _currentAccount();
-    // Mid account switch: no account to sign in for.
     if (account == null) throw const DriveSessionSuperseded();
     final session = await _obtainSession();
     _requireAccount(account);
@@ -66,7 +50,6 @@ class RewriteDraftUseCase {
     return renewed;
   }
 
-  /// The draft is sent only under the account that started the rewrite.
   void _requireAccount(String account) {
     if (_currentAccount() != account) throw const DriveSessionSuperseded();
   }
