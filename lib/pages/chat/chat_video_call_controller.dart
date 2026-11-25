@@ -10,7 +10,7 @@ class ChatVideoCallController extends _$ChatVideoCallController {
   ChatVideoCallState build(String userId, String roomId) =>
       const ChatVideoCallState.idle();
 
-  /// Does nothing while a call is already starting in [roomId].
+  /// Does nothing while a call is already starting for this account in [roomId].
   ///
   /// Throws a `VideoCallException`.
   Future<void> start(

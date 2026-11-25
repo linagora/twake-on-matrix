@@ -85,6 +85,7 @@ void main() {
     WidgetTester tester,
     ProviderContainer container, {
     bool showButton = true,
+    Room? room,
   }) => tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
@@ -94,7 +95,7 @@ void main() {
         supportedLocales: L10n.supportedLocales,
         home: Scaffold(
           body: showButton
-              ? ChatVideoCallButton(_FakeChatController(mockRoom))
+              ? ChatVideoCallButton(_FakeChatController(room ?? mockRoom))
               : const SizedBox.shrink(),
         ),
       ),
@@ -147,6 +148,24 @@ void main() {
 
       // Assert
       expect(find.byType(TwakeIconButton), findsNothing);
+    });
+
+    testWidgets('build_whenTheClientHasNoUserId_isHidden', (tester) async {
+      // Arrange
+      when(mockClient.userID).thenReturn(null);
+
+      // Act
+      await pumpButton(tester);
+
+      // Assert
+      expect(find.byType(TwakeIconButton), findsNothing);
+      final child = tester.widget<SizedBox>(
+        find.descendant(
+          of: find.byType(ChatVideoCallButton),
+          matching: find.byType(SizedBox),
+        ),
+      );
+      expect((child.width, child.height), (0.0, 0.0));
     });
 
     testWidgets('onTap_withATokenService_opensTheInAppCall', (tester) async {
@@ -322,6 +341,32 @@ void main() {
       expect(find.byType(TwakeIconButton), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
+
+    testWidgets(
+      'build_whileTheCallIsStartingFromAnotherAccount_offersTheCall',
+      (tester) async {
+        // Arrange
+        final completer = Completer<void>();
+        whenExecute().thenAnswer((_) => completer.future);
+        final container = await pumpButton(tester);
+        await tester.tap(find.byType(TwakeIconButton));
+        await tester.pump();
+        final bobClient = MockClient();
+        when(bobClient.userID).thenReturn('@bob:example.com');
+        final bobRoom = MockRoom();
+        when(bobRoom.client).thenReturn(bobClient);
+        when(bobRoom.id).thenReturn(testRoomId);
+
+        // Act
+        await pumpTree(tester, container, room: bobRoom);
+
+        // Assert
+        expect(find.byType(TwakeIconButton), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        completer.complete();
+        await tester.pump();
+      },
+    );
 
     testWidgets('build_whenTheCallFailsToStart_showsASnackBar', (tester) async {
       // Arrange
