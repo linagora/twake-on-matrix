@@ -77,6 +77,8 @@ final class SendTextMessageInteractor {
 
     final List<String> parts = splitter.split(text);
     var target = thread;
+    // A reply to a message of a thread, sent from the room, goes there too.
+    final String? rootId = thread?.rootEventId ?? inReplyTo?.threadRootId;
     for (final (int index, String part) in parts.indexed) {
       try {
         final String? sentId = await room.sendTextEvent(
@@ -84,17 +86,12 @@ final class SendTextMessageInteractor {
           inReplyTo: index == 0 ? inReplyTo : null,
           // A part starting with "/" is not a command.
           parseCommands: false,
-          threadRootEventId:
-              target?.rootEventId ??
-              (index == 0 ? inReplyTo?.threadRootId : null),
+          threadRootEventId: rootId,
           threadLastEventId: target?.lastEventId,
         );
         // The next part follows this one in the thread.
-        if (sentId != null && target != null) {
-          target = ThreadSendTarget(
-            rootEventId: target.rootEventId,
-            lastEventId: sentId,
-          );
+        if (sentId != null && rootId != null) {
+          target = ThreadSendTarget(rootEventId: rootId, lastEventId: sentId);
         }
       } on Exception catch (error, stackTrace) {
         // The part is already in error in the timeline, keep going.
