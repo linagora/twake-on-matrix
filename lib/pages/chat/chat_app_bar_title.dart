@@ -156,7 +156,7 @@ class _ChatAppBarStatusContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final peerId = room.directChatMatrixID;
     if (peerId != null) {
-      return _DirectChatAppBarStatusContent(
+      return DirectChatAppBarStatusContent(
         connectivityResultStream: connectivityResultStream,
         room: room,
         peerId: peerId,
@@ -170,14 +170,14 @@ class _ChatAppBarStatusContent extends StatelessWidget {
   }
 }
 
-class _ChatAppBarAvatar extends ConsumerWidget {
+class _ChatAppBarAvatar extends StatelessWidget {
   const _ChatAppBarAvatar({required this.room, required this.name});
 
   final Room room;
   final String name;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final size = ChatAppBarTitleStyle.avatarSize(context);
     final avatar = Avatar(
       fontSize: ChatAppBarTitleStyle.avatarFontSize,
@@ -187,18 +187,37 @@ class _ChatAppBarAvatar extends ConsumerWidget {
     );
     final peerId = room.directChatMatrixID;
     if (peerId == null) return avatar;
+    return ChatAppBarPresenceBadge(peerId: peerId, size: size, child: avatar);
+  }
+}
+
+class ChatAppBarPresenceBadge extends ConsumerWidget {
+  const ChatAppBarPresenceBadge({
+    super.key,
+    required this.peerId,
+    required this.size,
+    required this.child,
+  });
+
+  final String peerId;
+  final double size;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final presence = ref.watch(personPresenceProvider(peerId)).value;
     return LinagoraPresenceBadge(
       presence: presence?.badge,
       size: size,
       style: ChatAppBarTitleStyle.presenceBadgeStyle(context),
-      child: avatar,
+      child: child,
     );
   }
 }
 
-class _DirectChatAppBarStatusContent extends ConsumerWidget {
-  const _DirectChatAppBarStatusContent({
+class DirectChatAppBarStatusContent extends ConsumerWidget {
+  const DirectChatAppBarStatusContent({
+    super.key,
     required this.connectivityResultStream,
     required this.room,
     required this.peerId,

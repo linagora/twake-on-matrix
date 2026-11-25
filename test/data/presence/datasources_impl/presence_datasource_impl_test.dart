@@ -7,24 +7,46 @@ import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:twake_chat/data/presence/datasources_impl/presence_datasource_impl.dart';
 import 'package:twake_chat/domain/presence/entities/person_presence.dart';
 
-class _FakeClient extends Fake implements Client {
-  _FakeClient(this.current);
-
-  CachedPresence current;
-  final fetched = <String>[];
-  Completer<void>? readGate;
+/// Counts who listens to the presence changes.
+class _CountedChanges extends CachedStreamController<CachedPresence> {
+  int listeners = 0;
+  late final _controller = StreamController<CachedPresence>.broadcast(
+    onListen: () => listeners++,
+    onCancel: () => listeners--,
+  );
 
   @override
-  final onPresenceChanged = CachedStreamController<CachedPresence>();
+  Stream<CachedPresence> get stream => _controller.stream;
+
+  @override
+  void add(CachedPresence value) => _controller.add(value);
+}
+
+class _FakeClient extends Fake implements Client {
+  CachedPresence? cached;
+  GetPresenceResponse? server;
+  final serverReads = <String>[];
+  Completer<void>? serverGate;
+
+  @override
+  final _CountedChanges onPresenceChanged = _CountedChanges();
 
   @override
   Future<CachedPresence> fetchCurrentPresence(
     String userId, {
     bool fetchOnlyFromCached = false,
   }) async {
-    fetched.add(userId);
-    await readGate?.future;
-    return current;
+    expect(fetchOnlyFromCached, isTrue);
+    return cached ?? CachedPresence.neverSeen(userId);
+  }
+
+  @override
+  Future<GetPresenceResponse> getPresence(String userId) async {
+    serverReads.add(userId);
+    await serverGate?.future;
+    final server = this.server;
+    if (server == null) throw Exception('presence unavailable');
+    return server;
   }
 }
 
@@ -43,25 +65,31 @@ void main() {
   late List<PersonPresence?> values;
 
   setUp(() {
-    client = _FakeClient(_presence(PresenceType.offline));
+    client = _FakeClient();
     values = [];
   });
 
-  Future<void> watch() async {
+  Future<StreamSubscription<PersonPresence?>> watch() async {
     final subscription = PresenceDatasourceImpl(
       client,
     ).watchPresence(_alice).listen(values.add);
     addTearDown(subscription.cancel);
     await pumpEventQueue();
+    return subscription;
   }
 
-  test('emits the known presence first', () async {
-    client.current = _presence(PresenceType.online, statusMsg: 'In a meeting');
+  test('asks the server on every listen, after the cached value', () async {
+    client.cached = _presence(PresenceType.unavailable);
+    client.server = GetPresenceResponse(
+      presence: PresenceType.online,
+      statusMsg: 'In a meeting',
+    );
 
     await watch();
 
-    expect(client.fetched, [_alice]);
+    expect(client.serverReads, [_alice]);
     expect(values, [
+      const PersonPresence(status: PresenceStatus.away),
       const PersonPresence(
         status: PresenceStatus.online,
         statusMessage: 'In a meeting',
@@ -69,7 +97,30 @@ void main() {
     ]);
   });
 
+  test('waits for the server when nothing is cached', () async {
+    client.server = GetPresenceResponse(presence: PresenceType.online);
+
+    await watch();
+
+    expect(values, [const PersonPresence(status: PresenceStatus.online)]);
+  });
+
+  test('keeps the cached value when the server fails', () async {
+    client.cached = _presence(PresenceType.unavailable);
+
+    await watch();
+
+    expect(values, [const PersonPresence(status: PresenceStatus.away)]);
+  });
+
+  test('says offline when the server fails and nothing is cached', () async {
+    await watch();
+
+    expect(values, [const PersonPresence(status: PresenceStatus.offline)]);
+  });
+
   test('then emits each change of that person only', () async {
+    client.server = GetPresenceResponse(presence: PresenceType.offline);
     await watch();
 
     client.onPresenceChanged
@@ -83,19 +134,25 @@ void main() {
     ]);
   });
 
-  test('keeps a change that lands while the presence is read', () async {
-    client.readGate = Completer<void>();
-    final subscription = PresenceDatasourceImpl(
-      client,
-    ).watchPresence(_alice).listen(values.add);
-    addTearDown(subscription.cancel);
-    await pumpEventQueue();
+  test('keeps a change that lands while the server is read', () async {
+    client.serverGate = Completer<void>();
+    client.server = GetPresenceResponse(presence: PresenceType.offline);
+    await watch();
 
     client.onPresenceChanged.add(_presence(PresenceType.online));
-    client.readGate!.complete();
+    client.serverGate!.complete();
     await pumpEventQueue();
 
     expect(values.map((presence) => presence?.status), [PresenceStatus.online]);
+  });
+
+  test('stops listening to the changes when cancelled', () async {
+    final subscription = await watch();
+    expect(client.onPresenceChanged.listeners, 1);
+
+    await subscription.cancel();
+
+    expect(client.onPresenceChanged.listeners, 0);
   });
 
   test('emits null without an active client', () async {

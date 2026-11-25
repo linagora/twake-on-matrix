@@ -18,22 +18,49 @@ class PresenceDatasourceImpl implements PresenceDatasource {
     controller = StreamController<PersonPresence?>(
       onListen: () {
         var hasChanged = false;
-        // Listen before reading: a change that lands during the read wins
+        void addRead(CachedPresence presence) {
+          if (!hasChanged) controller.add(toPersonPresence(presence));
+        }
+
+        // Listen before reading: a change that lands during the reads wins
         changes = client.onPresenceChanged.stream
             .where((presence) => presence.userid == userId)
             .listen((presence) {
               hasChanged = true;
               controller.add(toPersonPresence(presence));
             });
-        client.fetchCurrentPresence(userId).then((presence) {
-          if (hasChanged || controller.isClosed) return;
-          controller.add(toPersonPresence(presence));
-        }, onError: controller.addError);
+        _read(client, userId, addRead).catchError(controller.addError);
       },
       onCancel: () => changes?.cancel(),
     );
     return controller.stream;
   }
+
+  /// The cached presence at once when known, then the server's.
+  static Future<void> _read(
+    Client client,
+    String userId,
+    void Function(CachedPresence) add,
+  ) async {
+    final cached = await client.fetchCurrentPresence(
+      userId,
+      fetchOnlyFromCached: true,
+    );
+    final isKnown = !_isNeverSeen(cached);
+    if (isKnown) add(cached);
+    try {
+      final response = await client.getPresence(userId);
+      add(CachedPresence.fromPresenceResponse(response, userId));
+    } catch (_) {
+      if (!isKnown) add(cached);
+    }
+  }
+
+  static bool _isNeverSeen(CachedPresence presence) =>
+      presence.presence == PresenceType.offline &&
+      presence.lastActiveTimestamp == null &&
+      presence.statusMsg == null &&
+      presence.currentlyActive == null;
 
   static PersonPresence toPersonPresence(CachedPresence presence) {
     final isOnline =

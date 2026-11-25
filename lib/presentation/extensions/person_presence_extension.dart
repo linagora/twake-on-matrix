@@ -3,6 +3,9 @@ import 'package:twake_chat/domain/presence/entities/person_presence.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 
+/// Between a status and the presence: `status · presence`.
+const presenceSubtitleSeparator = ' · ';
+
 extension PersonPresenceExtension on PersonPresence {
   LinagoraPresence get badge => switch (status) {
     PresenceStatus.online => LinagoraPresence.online,
@@ -31,6 +34,8 @@ extension PersonPresenceExtension on PersonPresence {
   String localizedSubtitle(L10n l10n) {
     final presence = localizedPresence(l10n);
     final statusMessage = this.statusMessage;
-    return statusMessage == null ? presence : '$statusMessage · $presence';
+    return statusMessage == null
+        ? presence
+        : '$statusMessage$presenceSubtitleSeparator$presence';
   }
 }

@@ -116,7 +116,7 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
                         begin: Alignment.center,
                         end: Alignment.centerLeft,
                       ).transform(widget.animationController.value),
-                      child: _PresenceSubtitle(
+                      child: PresenceSubtitle(
                         presence: presence,
                         style:
                             ProfileInfoBodyViewStyle.presenceTextStyle(
@@ -177,7 +177,7 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
             ),
             if (presence != null) ...[
               const SizedBox(height: 8),
-              _PresenceSubtitle(
+              PresenceSubtitle(
                 presence: presence,
                 style: ProfileInfoBodyViewStyle.presenceTextStyle(
                   context,
@@ -231,8 +231,12 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
   }
 }
 
-class _PresenceSubtitle extends StatelessWidget {
-  const _PresenceSubtitle({required this.presence, required this.style});
+class PresenceSubtitle extends StatelessWidget {
+  const PresenceSubtitle({
+    super.key,
+    required this.presence,
+    required this.style,
+  });
 
   final PersonPresence presence;
   final TextStyle? style;
@@ -249,7 +253,7 @@ class _PresenceSubtitle extends StatelessWidget {
       children: [
         Flexible(
           child: Text(
-            '$statusMessage · ',
+            '$statusMessage$presenceSubtitleSeparator',
             style: style,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

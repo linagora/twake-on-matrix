@@ -460,8 +460,10 @@ reaches the bottom, as before.
 
 ## D25. A presence dot on people, and their presence under their name (decided by Johann, 2026-11-20, following Twake Space Chat D466 and D54)
 
-A person's avatar carries a dot at its bottom right: green when online, amber
-when away (Matrix presence `unavailable`), none when offline or unknown
+A person's avatar carries a dot at its bottom right: green when online
+(Matrix presence `online`, or `currently_active`), amber when away (presence
+`unavailable`), none when offline or unknown (Matrix presence:
+https://spec.matrix.org/v1.16/client-server-api/#presence)
 (`LinagoraPresenceBadge` of the design system: 10 up to a 40 avatar, 12
 above, a 2 ring in the colour behind the avatar). The dot sits on the circle
 at 45°, so it stays on the edge of large avatars; Twake Space Chat pins it to
@@ -474,8 +476,10 @@ presence alone without a status: « Online », « online 5m ago » up to « a
 while ago », or « Offline » when no activity is known. Only the online state
 says « Online »; an away person shows when they were last active.
 
-The presence comes from the `/sync` the app already runs (no polling, unlike
-Twake Space Chat, whose sliding sync carries none). The chat list, members,
+Opening a screen shows the cached presence at once, then asks the server once
+(`GET /presence/{userId}/status`); after that the `/sync` the app already
+runs keeps it current (no polling, unlike Twake Space Chat, whose sliding sync
+carries none). The chat list, members,
 contacts and the avatars of messages get the dot in the next changes.
 
 ## D26. Calls start audio-only; the camera and the speaker are buttons (decided by Johann, 2026-11-23)
