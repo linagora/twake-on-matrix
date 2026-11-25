@@ -153,6 +153,11 @@ platform :mac do
        "--obfuscate --split-debug-info=build/app/outputs/symbols " \
        "--extra-gen-snapshot-options=--save-obfuscation-map=build/app/obfuscation.map.json")
     build(profile: profile)
-    upload_to_testflight(app_identifier: BUNDLE_ID, app_platform: "osx", pkg: lane_context[SharedValues::PKG_OUTPUT_PATH])
+    upload_to_testflight(
+      app_identifier: BUNDLE_ID,
+      app_platform: "osx",
+      pkg: lane_context[SharedValues::PKG_OUTPUT_PATH],
+      skip_waiting_for_build_processing: true
+    )
   end
 end
