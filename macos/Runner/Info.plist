@@ -36,6 +36,12 @@
 	<string>Twake Chat needs the microphone for calls and voice messages.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Twake Chat needs the camera for video calls and photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Open photos from your gallery and share them with your contacts on Twake Chat.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save photos/videos to device on Twake Chat.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Play audio and voice messages in the app.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>
