@@ -133,6 +133,23 @@ void main() {
       expect(renewals, 1);
     });
 
+    for (final token in ['', '  ']) {
+      test(
+        'a blank exchanged token "$token" is rejected, no draft sent',
+        () async {
+          onExchange = (options) => jsonResponse({'access_token': token});
+
+          await expectLater(rewrite(), throwsA(isA<DriveExchangeRejected>()));
+          expect(
+            adapter.requests.where(
+              (request) => request.uri.path == '/ai/v1/chat/completions',
+            ),
+            isEmpty,
+          );
+        },
+      );
+    }
+
     test('a workplace without the Chat app says so', () async {
       onExchange = (options) =>
           jsonResponse({'error': 'chat is not installed'}, 400);
