@@ -41,12 +41,23 @@ class _RecordingQueue extends UploadWorkerQueue {
 }
 
 class _FakeMediaApi extends Mock implements MediaAPI {
+  bool failNextUpload = false;
+
   @override
   Future<UploadFileResponse> uploadFileMobile({
     required FileInfo fileInfo,
     CancelToken? cancelToken,
     ProgressCallback? onSendProgress,
-  }) async => const UploadFileResponse(contentUri: 'mxc://fakeServer/file');
+  }) async {
+    if (failNextUpload) {
+      failNextUpload = false;
+      throw MatrixException.fromJson({
+        'errcode': 'M_UNKNOWN',
+        'error': 'network down',
+      });
+    }
+    return const UploadFileResponse(contentUri: 'mxc://fakeServer/file');
+  }
 }
 
 class _FakePathProvider extends PathProviderPlatform {
@@ -69,12 +80,14 @@ class _FakePathProvider extends PathProviderPlatform {
 class _ReplyAwareDatabase extends LenientDatabase {
   Event? replyTarget;
   Completer<void>? replyLookup;
+  bool replyLookupFails = false;
   final Map<String, Event> stored = {};
 
   @override
   Future<Event?> getEventById(String eventId, Room room) async {
     if (eventId != replyTarget?.eventId) return stored[eventId];
     await replyLookup?.future;
+    if (replyLookupFails) throw Exception('offline');
     return replyTarget;
   }
 }
@@ -89,12 +102,14 @@ void main() {
   late Directory tempDir;
   late PathProviderPlatform originalPathProvider;
   late _ReplyAwareDatabase database;
+  late _FakeMediaApi mediaApi;
   final savedUploadInfo = <String, Map<String, dynamic>>{};
 
   setUpAll(() async {
     queue = _RecordingQueue();
     getIt.registerSingleton<UploadWorkerQueue>(queue);
-    getIt.registerSingleton<MediaAPI>(_FakeMediaApi());
+    mediaApi = _FakeMediaApi();
+    getIt.registerSingleton<MediaAPI>(mediaApi);
     tempDir = await Directory.systemTemp.createTemp('cancel_caption_test');
     originalPathProvider = PathProviderPlatform.instance;
     PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
@@ -138,7 +153,10 @@ void main() {
 
   setUp(() {
     queue.added.clear();
-    database.replyLookup = null;
+    database
+      ..replyLookup = null
+      ..replyLookupFails = false;
+    mediaApi.failNextUpload = false;
     savedUploadInfo.clear();
     FakeMatrixApi.calledEndpoints.clear();
   });
@@ -192,6 +210,31 @@ void main() {
       originServerTs: DateTime.now(),
     ),
   );
+
+  /// A file of a batch as the app finds it in its database after a restart.
+  Event restored(String txid, {UploadCaptionInfo? caption, String? reply}) {
+    final file = File('${tempDir.path}/$txid.txt')..writeAsBytesSync([1, 2, 3]);
+    final info = UploadFileInfo(
+      txid: txid,
+      createdAt: DateTime.now(),
+      uploadStateStreamController: StreamController(),
+      cancelToken: CancelToken(),
+      captionInfo: caption,
+      inReplyToEventId: reply,
+      batchId: 'restored-batch',
+      fileInfo: FileInfo('$txid.txt', filePath: file.path),
+    );
+    return database.stored[txid] = Event(
+      senderId: room.client.userID!,
+      type: EventTypes.Message,
+      room: room,
+      eventId: txid,
+      status: EventStatus.error,
+      content: {'msgtype': MessageTypes.File, 'body': 'restored.txt'},
+      unsigned: {'transaction_id': txid, 'upload_info': info.toJson()},
+      originServerTs: DateTime.now(),
+    );
+  }
 
   bool hasCaption(Map<String, Object?> content) =>
       '${content['body']}'.endsWith('look');
@@ -329,31 +372,6 @@ void main() {
 
   test('a file that starts while the reply is looked up does not take the '
       'caption nor the reply', () async {
-    final file = File('${tempDir.path}/restored.txt')
-      ..writeAsBytesSync([1, 2, 3]);
-    Event restored(String txid, {UploadCaptionInfo? caption, String? reply}) {
-      final info = UploadFileInfo(
-        txid: txid,
-        createdAt: DateTime.now(),
-        uploadStateStreamController: StreamController(),
-        cancelToken: CancelToken(),
-        captionInfo: caption,
-        inReplyToEventId: reply,
-        batchId: 'restored-batch',
-        fileInfo: FileInfo('restored.txt', filePath: file.path),
-      );
-      return database.stored[txid] = Event(
-        senderId: room.client.userID!,
-        type: EventTypes.Message,
-        room: room,
-        eventId: txid,
-        status: EventStatus.error,
-        content: {'msgtype': MessageTypes.File, 'body': 'restored.txt'},
-        unsigned: {'transaction_id': txid, 'upload_info': info.toJson()},
-        originServerTs: DateTime.now(),
-      );
-    }
-
     // Both files of the batch come back from the database after a restart.
     final first = restored(
       'restored-1',
@@ -380,5 +398,65 @@ void main() {
     expect(sent.last['msgtype'], MessageTypes.Text);
     expect(hasCaption(sent.last), isTrue);
     expect(replyOf(sent.last), reply);
+  });
+  test('a reply that cannot be looked up is dropped and the caption still '
+      'goes as a text message', () async {
+    final lone = restored(
+      'restored-offline',
+      caption: UploadCaptionInfo(txid: 'offline-caption', caption: 'look'),
+      reply: replyTarget.eventId,
+    );
+    await manager.getUploadFileInfo(lone.eventId, room: room);
+    database.replyLookupFails = true;
+
+    await manager.cancelUpload(lone);
+    await runQueuedSends();
+
+    final sent = sentMessages().single;
+    expect(sent['msgtype'], MessageTypes.Text);
+    expect(sent['body'], 'look');
+    expect(replyOf(sent), isNull);
+  });
+
+  test('retrying the file that took the caption sends the caption', () async {
+    final txids = await send(['a.txt', 'b.txt', 'c.txt']);
+    await cancel(txids.last);
+    await runNextSend();
+    mediaApi.failNextUpload = true;
+    await runNextSend();
+    expect(sentMessages(), hasLength(1), reason: 'the second upload failed');
+
+    await manager.retryUpload(
+      Event(
+        senderId: room.client.userID!,
+        type: EventTypes.Message,
+        room: room,
+        eventId: txids[1],
+        status: EventStatus.error,
+        content: {'msgtype': MessageTypes.File, 'body': 'b.txt'},
+        originServerTs: DateTime.now(),
+      ),
+    );
+    await runQueuedSends();
+
+    final sent = sentMessages();
+    expect(sent, hasLength(2));
+    expect(hasCaption(sent.last), isTrue);
+  });
+  test('a cancelled send that fails keeps no caption to send again', () async {
+    final txid = (await send(['a.txt'])).single;
+    final upload = queue.added.removeAt(0);
+    mediaApi.failNextUpload = true;
+    // The failure then reports to the stream the cancel already closed.
+    final running = upload.runnable().then((_) {}, onError: (_) {});
+
+    await cancel(txid);
+    await running;
+    await pumpEventQueue();
+    await runQueuedSends();
+
+    expect(savedUploadInfo[txid]?['captionInfo'], isNull);
+    expect(savedUploadInfo[txid]?['inReplyToEventId'], isNull);
+    expect(sentMessages().single['body'], endsWith('look'));
   });
 }

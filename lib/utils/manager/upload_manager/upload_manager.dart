@@ -148,10 +148,14 @@ class UploadManager {
     final caption = cancelled.captionInfo;
     final replyId = cancelled.inReplyToEventId;
     if (caption == null && replyId == null) return;
+    // A cancelled send that comes back as failed must not send them again.
+    cancelled
+      ..captionInfo = null
+      ..inReplyToEventId = null;
 
     final inReplyTo = replyId == null
         ? null
-        : cancelledJob?.inReplyTo ?? await room.getEventById(replyId);
+        : cancelledJob?.inReplyTo ?? await _replyTarget(room, replyId);
     final waiting = cancelled.batchId == null
         ? const <_MobileSendJob>[]
         : _mobileJobs.values
@@ -163,9 +167,13 @@ class UploadManager {
               )
               .toList();
 
-    if (replyId != null && waiting.isNotEmpty) {
+    if (inReplyTo != null && waiting.isNotEmpty) {
       final heir = waiting.first..inReplyTo = inReplyTo;
-      _handOver(room, heir, (info) => info.inReplyToEventId = replyId);
+      _handOver(
+        room,
+        heir,
+        (info) => info.inReplyToEventId = inReplyTo.eventId,
+      );
     }
     if (caption == null) return;
     if (waiting.isNotEmpty) {
@@ -187,6 +195,18 @@ class UploadManager {
         ),
       ),
     );
+  }
+
+  Future<Event?> _replyTarget(Room room, String eventId) async {
+    try {
+      return await room.getEventById(eventId);
+    } on Exception catch (e) {
+      Logs().w(
+        'UploadManager::_replyTarget(): $eventId not found, the '
+        'reply is dropped: $e',
+      );
+      return null;
+    }
   }
 
   // Saved in the placeholder so a retry after a restart keeps it.
