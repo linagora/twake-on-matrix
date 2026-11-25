@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
 import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
@@ -11,19 +13,35 @@ class ScribeRoomSourceImpl implements ScribeRoomSource {
 
   static const scribeStateType = 'app.twake.chat.scribe';
 
+  /// Read again after every sync: whether the room is direct lives in the
+  /// account data (`m.direct`), whose change brings no room update.
   @override
-  Stream<ScribeRoom> watchRoom(String roomId) async* {
-    final room = _roomOf(roomId);
-    // A room not opened yet holds only the important state in memory.
-    await room.postLoad();
-    var current = _scribeRoomOf(room);
-    yield current;
-    await for (final _ in room.onUpdate.stream) {
-      final next = _scribeRoomOf(room);
-      if (next == current) continue;
-      current = next;
-      yield next;
-    }
+  Stream<ScribeRoom> watchRoom(String roomId) {
+    StreamSubscription<SyncUpdate>? syncs;
+    final controller = StreamController<ScribeRoom>(
+      onCancel: () => syncs?.cancel(),
+    );
+    controller.onListen = () async {
+      try {
+        final room = _roomOf(roomId);
+        ScribeRoom? current;
+        // Listening first: a sync during the load or a pause is kept.
+        syncs = room.client.onSync.stream.listen((_) {
+          final next = _scribeRoomOf(room);
+          if (current == null || next == current) return;
+          current = next;
+          controller.add(next);
+        });
+        // A room not opened yet holds only the important state in memory.
+        await room.postLoad();
+        final first = _scribeRoomOf(room);
+        current = first;
+        controller.add(first);
+      } on Exception catch (e, s) {
+        controller.addError(e, s);
+      }
+    };
+    return controller.stream;
   }
 
   @override

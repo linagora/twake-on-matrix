@@ -15,13 +15,46 @@ import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
 import '../../../providers/fake_active_account.dart';
 import 'scribe_room_source_impl_test.mocks.dart';
 
+/// The client's syncs, telling whether anyone still listens.
+class _Syncs implements CachedStreamController<SyncUpdate> {
+  final _controller = StreamController<SyncUpdate>.broadcast();
+  var _count = 0;
+
+  bool get hasListener => _controller.hasListener;
+
+  /// One more completed sync.
+  void sync() => add(SyncUpdate(nextBatch: '${_count++}'));
+
+  @override
+  SyncUpdate? get value => null;
+
+  @override
+  Object? get lastError => null;
+
+  @override
+  Stream<SyncUpdate> get stream => _controller.stream;
+
+  @override
+  void add(SyncUpdate value) => _controller.add(value);
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) =>
+      _controller.addError(error, stackTrace);
+
+  @override
+  Future close() => _controller.close();
+
+  @override
+  bool get isClosed => _controller.isClosed;
+}
+
 @GenerateNiceMocks([MockSpec<Client>(), MockSpec<Room>()])
 void main() {
   const roomId = '!room:example.com';
 
   late MockClient client;
   late MockRoom room;
-  late CachedStreamController<String> roomUpdates;
+  late _Syncs syncs;
   late ScribeRoomSourceImpl source;
 
   Event scribeState({required bool enabled}) => Event(
@@ -37,11 +70,11 @@ void main() {
   setUp(() {
     client = MockClient();
     room = MockRoom();
-    roomUpdates = CachedStreamController();
+    syncs = _Syncs();
     when(client.getRoomById(roomId)).thenReturn(room);
     when(room.id).thenReturn(roomId);
     when(room.client).thenReturn(client);
-    when(room.onUpdate).thenReturn(roomUpdates);
+    when(client.onSync).thenReturn(syncs);
     when(room.encrypted).thenReturn(true);
     when(room.isDirectChat).thenReturn(false);
     when(room.isSpace).thenReturn(false);
@@ -97,17 +130,58 @@ void main() {
       final subscription = source.watchRoom(roomId).listen(emitted.add);
       await pumpEventQueue();
 
-      roomUpdates.add(roomId);
+      syncs.sync();
       await pumpEventQueue();
       when(
         room.getState(ScribeRoomSourceImpl.scribeStateType),
       ).thenReturn(scribeState(enabled: true));
-      roomUpdates.add(roomId);
+      syncs.sync();
       await pumpEventQueue();
 
       expect(emitted.map((room) => room.scribeEnabled), [false, true]);
-      // The stream waits on the room's updates: its cancel never completes.
-      unawaited(subscription.cancel());
+      await subscription.cancel();
+    });
+
+    test('keeps a change that syncs while the listener pauses', () async {
+      final emitted = <ScribeRoom>[];
+      final subscription = source.watchRoom(roomId).listen(emitted.add);
+      await pumpEventQueue();
+
+      subscription.pause();
+      when(
+        room.getState(ScribeRoomSourceImpl.scribeStateType),
+      ).thenReturn(scribeState(enabled: true));
+      syncs.sync();
+      await pumpEventQueue();
+      subscription.resume();
+      await pumpEventQueue();
+
+      expect(emitted.map((room) => room.scribeEnabled), [false, true]);
+      await subscription.cancel();
+    });
+
+    test('sees a room that became a direct chat (m.direct only)', () async {
+      final emitted = <ScribeRoom>[];
+      final subscription = source.watchRoom(roomId).listen(emitted.add);
+      await pumpEventQueue();
+
+      // A sync that changes only the account data: no room update.
+      when(room.isDirectChat).thenReturn(true);
+      syncs.sync();
+      await pumpEventQueue();
+
+      expect(emitted.map((room) => room.isDirect), [false, true]);
+      await subscription.cancel();
+    });
+
+    test('stops listening to the syncs as soon as it is cancelled', () async {
+      final subscription = source.watchRoom(roomId).listen((_) {});
+      await pumpEventQueue();
+      expect(syncs.hasListener, isTrue);
+
+      await subscription.cancel();
+
+      expect(syncs.hasListener, isFalse);
     });
 
     test('an unknown room fails', () async {
