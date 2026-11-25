@@ -71,131 +71,112 @@ void main() {
   setUp(() => getIt.registerSingleton<ResponsiveUtils>(ResponsiveUtils()));
   tearDown(() async => getIt.reset());
 
-  Future<void> pumpSetting(WidgetTester tester, _RoomSource source) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          driveConfigProvider.overrideWithValue(_configured),
-          scribeRoomSourceProvider.overrideWithValue(source),
-        ],
-        child: const MaterialApp(
-          localizationsDelegates: L10n.localizationsDelegates,
-          supportedLocales: L10n.supportedLocales,
-          home: Scaffold(body: ScribeRoomSetting(roomId: _roomId)),
-        ),
+  final hiddenIn = <String, _RoomSource Function()>{
+    'a clear room': () => _RoomSource(
+      const ScribeRoom(
+        isEncrypted: false,
+        isDirect: false,
+        scribeEnabled: false,
       ),
-    );
-    await tester.pumpAndSettle();
+    ),
+    'an encrypted direct chat': () => _RoomSource(
+      const ScribeRoom(isEncrypted: true, isDirect: true, scribeEnabled: false),
+    ),
+    'a room still loading': () =>
+        _RoomSource(_ownedGroup)
+          ..watched = StreamController<ScribeRoom>().stream,
+    'a room that cannot be read': () =>
+        _RoomSource(_ownedGroup)
+          ..watched = Stream.error(const ScribeRoomNotFound()),
+  };
+  for (final MapEntry(key: room, value: sourceOf) in hiddenIn.entries) {
+    testWidgets('is hidden in $room', (tester) async {
+      await _pumpSetting(tester, sourceOf());
+
+      expect(find.byType(LinagoraSettingItem), findsNothing);
+    });
   }
 
-  LinagoraSettingItem setting(WidgetTester tester) =>
-      tester.widget(find.byType(LinagoraSettingItem));
+  testWidgets('a member reads the state but cannot change it', _memberTest);
+  testWidgets(
+    'the owner turns it on; the switch waits for the sync',
+    _ownerTest,
+  );
+  testWidgets('a refused change goes back and says so', _refusedTest);
+  testWidgets('a refusal after the screen closed changes nothing', _closedTest);
+}
 
-  testWidgets('is hidden in a clear room', (tester) async {
-    await pumpSetting(
-      tester,
-      _RoomSource(
-        const ScribeRoom(
-          isEncrypted: false,
-          isDirect: false,
-          scribeEnabled: false,
-        ),
+Future<void> _pumpSetting(WidgetTester tester, _RoomSource source) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        driveConfigProvider.overrideWithValue(_configured),
+        scribeRoomSourceProvider.overrideWithValue(source),
+      ],
+      child: const MaterialApp(
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        home: Scaffold(body: ScribeRoomSetting(roomId: _roomId)),
       ),
-    );
+    ),
+  );
+  await tester.pumpAndSettle();
+}
 
-    expect(find.byType(LinagoraSettingItem), findsNothing);
-  });
+LinagoraSettingItem _setting(WidgetTester tester) =>
+    tester.widget(find.byType(LinagoraSettingItem));
 
-  testWidgets('is hidden in an encrypted direct chat', (tester) async {
-    await pumpSetting(
-      tester,
-      _RoomSource(
-        const ScribeRoom(
-          isEncrypted: true,
-          isDirect: true,
-          scribeEnabled: false,
-        ),
-      ),
-    );
-
-    expect(find.byType(LinagoraSettingItem), findsNothing);
-  });
-
-  testWidgets('is hidden while the room loads', (tester) async {
-    await pumpSetting(
-      tester,
-      _RoomSource(_ownedGroup)..watched = StreamController<ScribeRoom>().stream,
-    );
-
-    expect(find.byType(LinagoraSettingItem), findsNothing);
-  });
-
-  testWidgets('is hidden when the room cannot be read', (tester) async {
-    await pumpSetting(
-      tester,
-      _RoomSource(_ownedGroup)
-        ..watched = Stream.error(const ScribeRoomNotFound()),
-    );
-
-    expect(find.byType(LinagoraSettingItem), findsNothing);
-  });
-
-  testWidgets('a member reads the state but cannot change it', (tester) async {
-    await pumpSetting(
-      tester,
-      _RoomSource(_ownedGroup.copyWith(isOwner: false, scribeEnabled: true)),
-    );
-
-    expect(setting(tester).value, isTrue);
-    expect(setting(tester).enabled, isFalse);
-  });
-
-  testWidgets('the owner turns it on; the switch waits for the sync', (
+Future<void> _memberTest(WidgetTester tester) async {
+  await _pumpSetting(
     tester,
-  ) async {
-    final source = _RoomSource(_ownedGroup);
-    await pumpSetting(tester, source);
+    _RoomSource(_ownedGroup.copyWith(isOwner: false, scribeEnabled: true)),
+  );
 
-    setting(tester).onChanged!(true);
-    await tester.pumpAndSettle();
+  expect(_setting(tester).value, isTrue);
+  expect(_setting(tester).enabled, isFalse);
+}
 
-    expect(source.writes, [true]);
-    expect(setting(tester).value, isTrue);
-    expect(setting(tester).enabled, isFalse);
+Future<void> _ownerTest(WidgetTester tester) async {
+  final source = _RoomSource(_ownedGroup);
+  await _pumpSetting(tester, source);
 
-    source.sync(_ownedGroup.copyWith(scribeEnabled: true));
-    await tester.pumpAndSettle();
+  _setting(tester).onChanged!(true);
+  await tester.pumpAndSettle();
 
-    expect(setting(tester).value, isTrue);
-    expect(setting(tester).enabled, isTrue);
-  });
+  expect(source.writes, [true]);
+  expect(_setting(tester).value, isTrue);
+  expect(_setting(tester).enabled, isFalse);
 
-  testWidgets('a refused change goes back and says so', (tester) async {
-    final source = _RoomSource(_ownedGroup)..failWrites = true;
-    await pumpSetting(tester, source);
+  source.sync(_ownedGroup.copyWith(scribeEnabled: true));
+  await tester.pumpAndSettle();
 
-    setting(tester).onChanged!(true);
-    await tester.pumpAndSettle();
+  expect(_setting(tester).value, isTrue);
+  expect(_setting(tester).enabled, isTrue);
+}
 
-    expect(setting(tester).value, isFalse);
-    expect(setting(tester).enabled, isTrue);
-    expect(find.text("Couldn't change Scribe. Try again."), findsOneWidget);
-  });
+Future<void> _refusedTest(WidgetTester tester) async {
+  final source = _RoomSource(_ownedGroup)..failWrites = true;
+  await _pumpSetting(tester, source);
 
-  testWidgets('a refusal after the screen closed changes nothing', (
-    tester,
-  ) async {
-    final source = _RoomSource(_ownedGroup)
-      ..failWrites = true
-      ..heldWrite = Completer();
-    await pumpSetting(tester, source);
+  _setting(tester).onChanged!(true);
+  await tester.pumpAndSettle();
 
-    setting(tester).onChanged!(true);
-    await tester.pump();
-    await tester.pumpWidget(const SizedBox());
-    source.heldWrite!.complete();
-    await tester.pump();
+  expect(_setting(tester).value, isFalse);
+  expect(_setting(tester).enabled, isTrue);
+  expect(find.text("Couldn't change Scribe. Try again."), findsOneWidget);
+}
 
-    expect(tester.takeException(), isNull);
-  });
+Future<void> _closedTest(WidgetTester tester) async {
+  final source = _RoomSource(_ownedGroup)
+    ..failWrites = true
+    ..heldWrite = Completer();
+  await _pumpSetting(tester, source);
+
+  _setting(tester).onChanged!(true);
+  await tester.pump();
+  await tester.pumpWidget(const SizedBox());
+  source.heldWrite!.complete();
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
 }
