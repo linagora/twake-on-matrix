@@ -38,7 +38,9 @@ class ScribeRoomSourceImpl implements ScribeRoomSource {
         current = first;
         controller.add(first);
       } on Exception catch (e, s) {
+        // Nothing more comes for this room: closing also stops the syncs.
         controller.addError(e, s);
+        await controller.close();
       }
     };
     return controller.stream;
