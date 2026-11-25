@@ -3,6 +3,15 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
+/// Someone who replied in a thread, as the room knows them.
+class ThreadReplier {
+  const ThreadReplier({required this.userId, this.displayName, this.avatarUrl});
+
+  final String userId;
+  final String? displayName;
+  final Uri? avatarUrl;
+}
+
 /// What the card under a thread root shows: built from the server
 /// aggregation of the root, then kept up to date with the replies, edits
 /// and redactions received live.
@@ -12,6 +21,7 @@ class ThreadSummary {
     required this.replyCount,
     required this.lastReply,
     required this.lastReplyText,
+    required this.repliers,
   });
 
   final String rootEventId;
@@ -22,6 +32,9 @@ class ThreadSummary {
 
   /// Text of [lastReply] with its latest edit applied.
   final String? lastReplyText;
+
+  /// Each person who replied once, the most recent replier first.
+  final List<ThreadReplier> repliers;
 
   static ThreadSummary? fromRoot(
     Event root, {
@@ -42,18 +55,28 @@ class ThreadSummary {
         (aggregate?.tryGet<int>('count') ?? 0) + fresh.length - serverDeleted;
     if (count == 0) return null;
 
-    final last = _sortedCandidates(
-      replies,
-      serverLatest,
-      deletedIds,
-    ).lastOrNull;
+    final candidates = _sortedCandidates(replies, serverLatest, deletedIds);
+    final last = candidates.lastOrNull;
     return ThreadSummary._(
       rootEventId: root.eventId,
       replyCount: count,
       lastReply: last,
       lastReplyText: last == null ? null : _textWithEdit(last, liveEvents),
+      repliers: _repliersOf(root.room, candidates),
     );
   }
+
+  /// [candidates] is oldest first.
+  static List<ThreadReplier> _repliersOf(Room room, List<Event> candidates) => [
+    for (final id in candidates.reversed.map((e) => e.senderId).toSet())
+      _replierOf(room.unsafeGetUserFromMemoryOrFallback(id)),
+  ];
+
+  static ThreadReplier _replierOf(User user) => ThreadReplier(
+    userId: user.id,
+    displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
+  );
 
   static Map<String, Object?>? _aggregateOf(Event root) => root.unsigned
       ?.tryGetMap<String, Object?>('m.relations')

@@ -128,7 +128,7 @@ class PinnedThreadReplyScenario extends BaseTestScenario {
     );
     await waitForThreadMessage(this, root);
 
-    await threads.openFromCard(lastReply: reply);
+    await threads.openFromCard(root: root);
     await threads.expectMessageInThread(reply);
     await _pin($, reply);
     await threads.closeThread();
@@ -194,7 +194,7 @@ class ThreadPinnedBarScenario extends BaseTestScenario {
     // A pin of the room only: the thread shows no bar, nor the room's.
     await _pin($, roomMessage);
     await pins.expectShowing(roomMessage);
-    await threads.openFromCard(lastReply: reply);
+    await threads.openFromCard(root: root);
     await threads.expectMessageInThread(reply);
     await pins.expectHidden();
     expect(pins.showing(roomMessage), findsNothing);
@@ -231,7 +231,7 @@ class ThreadPinnedBarScenario extends BaseTestScenario {
 
     // Unpinning from the thread screen: the bar of the thread goes when its
     // last pin goes; the room keeps its own pin.
-    await threads.openFromCard(lastReply: reply);
+    await threads.openFromCard(root: root);
     await _unpin($, reply);
     await _unpin($, root);
     await pins.expectHidden();

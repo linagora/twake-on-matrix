@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
+import 'package:twake_chat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
 import 'package:twake_chat/pages/chat/input_bar/input_bar.dart';
 import 'package:twake_chat/pages/chat/thread/thread_app_bar_title.dart';
@@ -36,11 +37,12 @@ class ThreadRobot extends CoreRobot {
     MessageContent,
   ).containing(find.textContaining(message.text, findRichText: true));
 
-  /// The card is found by the text of its last reply, so the check does not
-  /// depend on where the card sits in the message row.
-  PatrolFinder card({required ThreadText lastReply}) => $(
-    ThreadSummaryCard,
-  ).containing(find.textContaining(lastReply.text, findRichText: true));
+  /// The card is the row « N comments » at the foot of the bubble of [root]:
+  /// it shows no reply text, so it is found through the bubble of its root.
+  PatrolFinder card({required ThreadText root}) =>
+      $(MessageContentWithTimestampBuilder)
+          .containing(find.textContaining(root.text, findRichText: true))
+          .$(ThreadSummaryCard);
 
   PatrolFinder get threadHeader => $(ThreadAppBarTitle);
 
@@ -52,20 +54,20 @@ class ThreadRobot extends CoreRobot {
       $(PullDownMenuItem).containing(find.text('Start a thread'));
 
   Future<void> expectCard({
-    required ThreadText lastReply,
-    required int messageCount,
+    required ThreadText root,
+    required int commentCount,
   }) async {
-    final found = card(lastReply: lastReply);
+    final label = commentCount == 1 ? '1 comment' : '$commentCount comments';
+    final found = card(root: root);
     await $.waitUntilVisible(found, timeout: _timeout);
-    expect(
-      found.$(find.textContaining('$messageCount message', findRichText: true)),
-      findsOneWidget,
-      reason: 'The card must show "$messageCount messages"',
+    await $.waitUntilExists(
+      found.$(find.text(label, findRichText: true)),
+      timeout: _timeout,
     );
   }
 
-  Future<void> openFromCard({required ThreadText lastReply}) async {
-    final found = card(lastReply: lastReply);
+  Future<void> openFromCard({required ThreadText root}) async {
+    final found = card(root: root);
     await $.waitUntilVisible(found, timeout: _timeout);
     await found.tap();
     await $.pumpAndTrySettle();
@@ -136,26 +138,16 @@ class ThreadRobot extends CoreRobot {
     await waitUntilAbsent($, threadHeader, timeout: _timeout);
   }
 
-  /// The reply text may show on the card of its root, nowhere else.
+  /// The reply text shows nowhere in the room: the card of its root shows
+  /// only « N comments ».
   ///
   /// The short pump lets a stray render of [reply] appear before the check;
   /// it is only safe because callers first wait for the card.
   Future<void> expectNotInMainTimeline(ThreadText reply) async {
     await $.pump(const Duration(seconds: 2));
-    final everywhere = find
-        .textContaining(reply.text, findRichText: true)
-        .evaluate()
-        .toSet();
-    final onCards = find
-        .descendant(
-          of: find.byType(ThreadSummaryCard),
-          matching: find.textContaining(reply.text, findRichText: true),
-        )
-        .evaluate()
-        .toSet();
     expect(
-      everywhere.difference(onCards),
-      isEmpty,
+      find.textContaining(reply.text, findRichText: true),
+      findsNothing,
       reason: 'A thread reply must not show in the main timeline',
     );
   }
@@ -214,9 +206,9 @@ class ThreadRobot extends CoreRobot {
     await waitUntilAbsent($, threadHeader.$(_resolvedMark), timeout: _timeout);
   }
 
-  Future<void> expectResolvedOnCard({required ThreadText lastReply}) async {
+  Future<void> expectResolvedOnCard({required ThreadText root}) async {
     await $.waitUntilExists(
-      card(lastReply: lastReply).$(_resolvedMark),
+      card(root: root).$(_resolvedMark),
       timeout: _timeout,
     );
   }

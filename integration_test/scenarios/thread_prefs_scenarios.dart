@@ -27,11 +27,11 @@ const _reopen = 'Reopen the thread';
 
 /// A thread of the receiver, open on screen.
 class _OpenThread {
-  const _OpenThread(this.fixture, this.ids, this.lastReply);
+  const _OpenThread(this.fixture, this.ids, this.root);
 
   final MobileGroupFixture fixture;
   final ({String rootId, String replyId}) ids;
-  final ThreadText lastReply;
+  final ThreadText root;
 
   String get roomId => fixture.roomId;
 
@@ -81,8 +81,8 @@ Future<_OpenThread> _openReceivedThread(BaseTestScenario scenario) async {
     reply: reply,
   );
   await waitForThreadMessage(scenario, root);
-  await ThreadRobot(scenario.$).openFromCard(lastReply: reply);
-  return _OpenThread(fixture, ids, reply);
+  await ThreadRobot(scenario.$).openFromCard(root: root);
+  return _OpenThread(fixture, ids, root);
 }
 
 /// The server answers a write after a moment: polls what it holds.
@@ -174,9 +174,9 @@ class ResolveFromMenuScenario extends BaseTestScenario {
     await threads.expectThreadMenuOffers([_reopen]);
 
     await threads.closeThread();
-    await threads.expectResolvedOnCard(lastReply: thread.lastReply);
+    await threads.expectResolvedOnCard(root: thread.root);
 
-    await threads.openFromCard(lastReply: thread.lastReply);
+    await threads.openFromCard(root: thread.root);
     await threads.chooseInThreadMenu(_reopen);
     await threads.expectNotResolvedInHeader();
   }
@@ -200,6 +200,6 @@ class WebChoiceAppliesScenario extends BaseTestScenario {
     await threads.expectResolvedInHeader();
 
     await threads.closeThread();
-    await threads.expectResolvedOnCard(lastReply: thread.lastReply);
+    await threads.expectResolvedOnCard(root: thread.root);
   }
 }
