@@ -71,13 +71,13 @@ void main() {
     room: room,
   );
 
-  final messages = <String, Widget Function(String)>{
-    'HtmlMessage': (body) => HtmlMessage(
+  final messages = <Type, Widget Function(String)>{
+    HtmlMessage: (body) => HtmlMessage(
       html: '<p>$body</p>',
       room: room,
       linkStyle: const TextStyle(color: Colors.blue),
     ),
-    'TwakeLinkPreview': (body) => TwakeLinkPreview(
+    TwakeLinkPreview: (body) => TwakeLinkPreview(
       event: textEvent(body),
       localizedBody: body,
       ownMessage: false,
@@ -148,8 +148,8 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  for (final MapEntry(key: name, value: build) in messages.entries) {
-    group('$name links', () {
+  for (final MapEntry(key: type, value: build) in messages.entries) {
+    group('$type links', () {
       testWidgets('a drag that starts on a link scrolls without opening it', (
         tester,
       ) async {
@@ -218,9 +218,7 @@ void main() {
         (tester) async {
           onIOS();
           await pumpInTimeline(tester, build(_phone));
-          final message = tester.getRect(
-            find.byWidgetPredicate((w) => w.runtimeType.toString() == name),
-          );
+          final message = tester.getRect(find.byType(type));
 
           await activateWithScreenReader(tester, _phone);
 
@@ -249,6 +247,31 @@ void main() {
           expect(
             tester.getRect(find.text('Copy number')).top,
             lessThan(tap.dy - 50),
+          );
+        },
+      );
+
+      testWidgets(
+        'a screen-reader activation after a long press ignores the press '
+        'position',
+        (tester) async {
+          onIOS();
+          final scrollController = await pumpInTimeline(
+            tester,
+            build(_phone),
+            onLongPress: () {},
+          );
+          final press = linkStart(tester, _phone);
+          await tester.longPressAt(press);
+          await tester.pumpAndSettle();
+          scrollController.jumpTo(150);
+          await tester.pumpAndSettle();
+
+          await activateWithScreenReader(tester, _phone);
+
+          expect(
+            tester.getRect(find.text('Copy number')).top,
+            lessThan(press.dy - 50),
           );
         },
       );

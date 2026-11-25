@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/pages/chat/phone_number_context_menu_actions.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/extension/url_extension.dart';
@@ -195,6 +197,7 @@ mixin LinkifyMixin {
   ({
     void Function(TapDownDetails, Link) onTapDownLink,
     void Function(Link) onTapLink,
+    void Function(PointerEvent) onPointerEnd,
   })
   linkTapHandlers(BuildContext context) {
     TapDownDetails? lastTapDown;
@@ -203,9 +206,10 @@ mixin LinkifyMixin {
       onTapLink: (link) {
         // A screen reader activates a link without any tap down.
         final details = lastTapDown ?? _tapDownAtCenterOf(context);
-        lastTapDown = null;
         handleOnTappedLinkHtml(context: context, details: details, link: link);
       },
+      // After onTapLink, so a drag or a long press leaves no stale position.
+      onPointerEnd: (_) => scheduleMicrotask(() => lastTapDown = null),
     );
   }
 

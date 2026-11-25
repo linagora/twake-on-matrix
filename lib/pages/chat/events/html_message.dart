@@ -69,7 +69,7 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
                 decorationColor: themeData.colorScheme.secondary,
               ),
     );
-    return Html(
+    final content = Html(
       data: renderHtml,
       defaultTextStyle: effectiveDefaultTextStyle,
       emoteSize: emoteSize,
@@ -211,6 +211,11 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
                 ),
         );
       },
+    );
+    return Listener(
+      onPointerUp: linkTap.onPointerEnd,
+      onPointerCancel: linkTap.onPointerEnd,
+      child: content,
     );
   }
 }
