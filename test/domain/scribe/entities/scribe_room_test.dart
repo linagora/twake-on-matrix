@@ -2,6 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
 
 void main() {
+  // Chat web's rules: `offersScribe` (src/domain/room.ts) and the room info
+  // section (src/ui/RoomScribeSection.tsx) of twake-space-chat.
+  bool webOffersScribe(ScribeRoom room) =>
+      !room.isEncrypted || (!room.isDirect && room.scribeEnabled);
+  bool webHasSetting(ScribeRoom room) =>
+      room.isEncrypted && !room.isDirect && !room.isSpace;
+
   group('ScribeRoom.offersScribe', () {
     test('a clear room offers it, direct or not', () {
       for (final isDirect in [false, true]) {
@@ -47,35 +54,26 @@ void main() {
     });
   });
 
-  test('every room follows Chat web (D215), all 32 combinations', () {
-    const flags = [false, true];
-    for (final isEncrypted in flags) {
-      for (final isDirect in flags) {
-        for (final scribeEnabled in flags) {
-          for (final isSpace in flags) {
-            for (final isOwner in flags) {
-              final room = ScribeRoom(
-                isEncrypted: isEncrypted,
-                isDirect: isDirect,
-                scribeEnabled: scribeEnabled,
-                isSpace: isSpace,
-                isOwner: isOwner,
-              );
-              // twake-space-chat: `offersScribe` (src/domain/room.ts) and
-              // `useScribeSection` (src/ui/RoomScribeSection.tsx).
-              final offers = !isEncrypted || (!isDirect && scribeEnabled);
-              final hasSetting = isEncrypted && !isDirect && !isSpace;
-              expect(room.offersScribe, offers, reason: '$room');
-              expect(room.hasScribeSetting, hasSetting, reason: '$room');
-              expect(
-                room.canChangeScribe,
-                hasSetting && isOwner,
-                reason: '$room',
-              );
-            }
-          }
-        }
-      }
+  test('every room follows Chat web, all 32 combinations', () {
+    // Each bit of the index is one flag of the room.
+    final rooms = List.generate(
+      32,
+      (bits) => ScribeRoom(
+        isEncrypted: bits & 1 != 0,
+        isDirect: bits & 2 != 0,
+        scribeEnabled: bits & 4 != 0,
+        isSpace: bits & 8 != 0,
+        isOwner: bits & 16 != 0,
+      ),
+    );
+    for (final room in rooms) {
+      expect(room.offersScribe, webOffersScribe(room), reason: '$room');
+      expect(room.hasScribeSetting, webHasSetting(room), reason: '$room');
+      expect(
+        room.canChangeScribe,
+        webHasSetting(room) && room.isOwner,
+        reason: '$room',
+      );
     }
   });
 
