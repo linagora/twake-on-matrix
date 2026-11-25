@@ -1,4 +1,4 @@
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/services/message_splitter.dart';
@@ -68,7 +68,10 @@ final class SendTextMessageInteractor {
         // An edit copies the thread relation into `m.new_content`: it is not
         // a reply.
         threadRootEventId: editEvent == null
-            ? thread?.rootEventId ?? inReplyTo?.threadRootId
+            ? thread?.rootEventId ??
+                  (inReplyTo == null
+                      ? null
+                      : ThreadRules.threadRootOf(inReplyTo))
             : null,
         threadLastEventId: editEvent == null ? thread?.lastEventId : null,
       );
@@ -78,7 +81,9 @@ final class SendTextMessageInteractor {
     final List<String> parts = splitter.split(text);
     var target = thread;
     // A reply to a message of a thread, sent from the room, goes there too.
-    final String? rootId = thread?.rootEventId ?? inReplyTo?.threadRootId;
+    final String? rootId =
+        thread?.rootEventId ??
+        (inReplyTo == null ? null : ThreadRules.threadRootOf(inReplyTo));
     for (final (int index, String part) in parts.indexed) {
       try {
         final String? sentId = await room.sendTextEvent(
