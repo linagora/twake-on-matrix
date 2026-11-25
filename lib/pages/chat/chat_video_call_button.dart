@@ -28,11 +28,12 @@ class ChatVideoCallButton extends ConsumerStatefulWidget {
 class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
   Future<void> _start(String baseUrl) async {
     final room = widget.controller.room;
-    if (room == null) return;
+    final userId = room?.client.userID;
+    if (room == null || userId == null) return;
     final l10n = L10n.of(context)!;
     try {
       await ref
-          .read(chatVideoCallControllerProvider(room.id).notifier)
+          .read(chatVideoCallControllerProvider(userId, room.id).notifier)
           .start(
             ref.read(startVideoCallUseCaseProvider(room.client)),
             baseUrl: baseUrl,
@@ -46,6 +47,7 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
   @override
   Widget build(BuildContext context) {
     final room = widget.controller.room;
+    final userId = room?.client.userID;
     final (:tokenServiceUrl, :meetUrl) = ref.watch(
       loginHomeserverSummaryProvider.select(
         (summary) => (
@@ -55,6 +57,7 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
       ),
     );
     if (room == null ||
+        userId == null ||
         !widget.controller.canStartVideoCall(tokenServiceUrl ?? meetUrl)) {
       return const SizedBox.shrink();
     }
@@ -77,7 +80,7 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
     }
     // D15: a member who may not write the call membership keeps the Meet link.
     if (meetUrl == null) return const SizedBox.shrink();
-    if (ref.watch(chatVideoCallControllerProvider(room.id))
+    if (ref.watch(chatVideoCallControllerProvider(userId, room.id))
         is ChatVideoCallStarting) {
       return const Padding(
         padding: EdgeInsets.all(8),

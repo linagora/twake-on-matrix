@@ -133,6 +133,7 @@ void main() {
     mockClient = MockClient();
     mockRoom = MockRoom();
     when(mockRoom.client).thenReturn(mockClient);
+    when(mockClient.userID).thenReturn('@alice:example.com');
     when(mockRoom.id).thenReturn(testRoomId);
     when(mockRoom.canChangeStateEvent(any)).thenReturn(true);
   });
