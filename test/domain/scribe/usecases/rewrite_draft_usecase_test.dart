@@ -14,6 +14,9 @@ class _Source implements ScribeSource {
   /// Set to have the workplace refuse the first token as stale.
   bool refusesFirstToken = false;
 
+  /// Runs when the token is refused, before the renewal.
+  void Function()? beforeRenewal;
+
   @override
   Future<String> rewrite({
     required DriveSession session,
@@ -21,7 +24,10 @@ class _Source implements ScribeSource {
     required ScribePrompt prompt,
     required String draft,
   }) async {
-    if (refusesFirstToken) await renewSession();
+    if (refusesFirstToken) {
+      beforeRenewal?.call();
+      await renewSession();
+    }
     calls.add((session: session, prompt: prompt, draft: draft));
     return 'rewritten';
   }
@@ -141,23 +147,27 @@ void main() {
     expect(renewed, 1);
   });
 
-  for (final duringRenewal in [false, true]) {
-    final moment = duringRenewal ? 'during' : 'before';
-    test('an account switch $moment the renewal sends nothing', () async {
-      source.refusesFirstToken = true;
-      Future<DriveSession> switchAccount() async {
-        account = '@bob:example.com';
-        return session;
-      }
-
-      if (duringRenewal) {
-        renew = switchAccount;
-      } else {
-        obtain = switchAccount;
+  for (final moment in ['during sign-in', 'before renewal', 'during renewal']) {
+    test('an account switch $moment sends nothing', () async {
+      void switchAccount() => account = '@bob:example.com';
+      // Signing in alone is enough to fail: no stale token needed.
+      source.refusesFirstToken = moment != 'during sign-in';
+      switch (moment) {
+        case 'during sign-in':
+          obtain = () async {
+            switchAccount();
+            return session;
+          };
+        case 'before renewal':
+          source.beforeRenewal = switchAccount;
+        default:
+          renew = () async {
+            switchAccount();
+            return session;
+          };
       }
 
       await expectLater(rewrite(), throwsA(isA<DriveSessionSuperseded>()));
-      // Before: no renewal starts for the other account.
       expect(renewed, 0);
       expect(source.calls, isEmpty);
     });
