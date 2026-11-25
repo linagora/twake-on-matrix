@@ -71,6 +71,8 @@ void main() {
   late _Source source;
   late TextEditingController draft;
   late List<String> rewritten;
+  // False: select mode took the composer away, the chat stays.
+  late ValueNotifier<bool> composerShown;
 
   setUp(() {
     // The snackbar reads its width from the responsive helper.
@@ -78,10 +80,12 @@ void main() {
     source = _Source();
     draft = TextEditingController(text: 'hi emery how are you?');
     rewritten = [];
+    composerShown = ValueNotifier(true);
   });
 
   tearDown(() async {
     draft.dispose();
+    composerShown.dispose();
     await getIt.reset();
   });
 
@@ -117,13 +121,18 @@ void main() {
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
           home: Scaffold(
-            body: Align(
-              alignment: Alignment.bottomLeft,
-              child: ScribeButton(
-                roomId: _roomId,
-                draft: draft,
-                onRewritten: rewritten.add,
-              ),
+            body: ValueListenableBuilder(
+              valueListenable: composerShown,
+              builder: (context, shown, _) => shown
+                  ? Align(
+                      alignment: Alignment.bottomLeft,
+                      child: ScribeButton(
+                        roomId: _roomId,
+                        draft: draft,
+                        onRewritten: rewritten.add,
+                      ),
+                    )
+                  : const SizedBox(),
             ),
           ),
         ),
@@ -133,7 +142,7 @@ void main() {
   }
 
   Future<void> openMenu(WidgetTester tester) async {
-    await tester.tap(find.byIcon(Icons.auto_awesome));
+    await tester.tap(find.byTooltip('Scribe'));
     await tester.pumpAndSettle();
   }
 
@@ -170,19 +179,19 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.auto_awesome), findsNothing);
+    expect(find.byTooltip('Scribe'), findsNothing);
   });
 
   testWidgets('is hidden when the room cannot be read', (tester) async {
     await pumpButton(tester, room: null);
 
-    expect(find.byIcon(Icons.auto_awesome), findsNothing);
+    expect(find.byTooltip('Scribe'), findsNothing);
   });
 
   testWidgets('is hidden without a workplace', (tester) async {
     await pumpButton(tester, config: _notConfigured);
 
-    expect(find.byIcon(Icons.auto_awesome), findsNothing);
+    expect(find.byTooltip('Scribe'), findsNothing);
   });
 
   testWidgets('offers the five actions of Chat web', (tester) async {
@@ -249,12 +258,12 @@ void main() {
       (ScribePrompt.changeTonePolite, 'hi emery how are you?'),
     ]);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.byIcon(Icons.auto_awesome), findsNothing);
+    expect(find.byTooltip('Scribe'), findsNothing);
 
     await answer(tester, (answer) => answer.complete('Hi Emery, how are you?'));
 
     expect(rewritten, ['Hi Emery, how are you?']);
-    expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
+    expect(find.byTooltip('Scribe'), findsOneWidget);
   });
 
   testWidgets('a failure keeps the draft and says so', (tester) async {
@@ -272,10 +281,12 @@ void main() {
       find.text("Couldn't rewrite your message. Try again."),
       findsOneWidget,
     );
-    expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
+    expect(find.byTooltip('Scribe'), findsOneWidget);
   });
 
-  testWidgets('text typed during the rewrite is kept', (tester) async {
+  testWidgets('text typed during the rewrite is kept, and it says so', (
+    tester,
+  ) async {
     await pumpButton(tester);
     await openMenu(tester);
 
@@ -284,6 +295,28 @@ void main() {
     await answer(tester, (answer) => answer.complete('A summary'));
 
     expect(rewritten, isEmpty);
+    expect(
+      find.text('Your message changed, so Scribe left it as it is.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a result after select mode hid the composer says so', (
+    tester,
+  ) async {
+    await pumpButton(tester);
+    await openMenu(tester);
+
+    await pick(tester, 'Correct');
+    composerShown.value = false;
+    await tester.pump();
+    await answer(tester, (answer) => answer.complete('Hi Emery'));
+
+    expect(rewritten, isEmpty);
+    expect(
+      find.text("The message box closed, so Scribe's text was not used."),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a result after the composer closed is dropped', (tester) async {

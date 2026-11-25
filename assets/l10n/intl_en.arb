@@ -3723,5 +3723,15 @@
   "@scribeSettingFailed": {
     "type": "text",
     "placeholders": {}
+  },
+  "scribeResultDroppedTyped": "Your message changed, so Scribe left it as it is.",
+  "@scribeResultDroppedTyped": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeResultDroppedClosed": "The message box closed, so Scribe's text was not used.",
+  "@scribeResultDroppedClosed": {
+    "type": "text",
+    "placeholders": {}
   }
 }

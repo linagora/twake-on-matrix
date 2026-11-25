@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' show Logs;
 import 'package:twake_chat/domain/drive/exceptions/drive_exception.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_prompt.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
 import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_style.dart';
 import 'package:twake_chat/pages/scribe/providers/scribe_room_provider.dart';
@@ -39,6 +42,12 @@ class ScribeButton extends ConsumerStatefulWidget {
 class _ScribeButtonState extends ConsumerState<ScribeButton> {
   static const _failureMessage = ScribeFailureMessage();
   static const double _progressSize = 20;
+
+  /// The space between the icon and the composer field, the same as the
+  /// space the attachment button leaves after its own icon.
+  static const double _iconGap = LinagoraSpacing.base * 1.5;
+  static const double _buttonWidth =
+      ChatInputRowStyle.chatInputRowMoreBtnSize + _iconGap;
   static const double _menuWidth = 200;
 
   final _menuController = MenuController();
@@ -67,24 +76,38 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
         minimumSize: WidgetStatePropertyAll(Size(_menuWidth, 0)),
       ),
       menuChildren: _menuChildren(l10n, room, host),
+      // Only a gap after the icon: the attachment button before it already
+      // ends with one, so both gaps around the icon match.
       builder: (context, controller, _) => SizedBox(
+        width: _buttonWidth,
         height: ChatInputRowStyle.chatInputRowHeight,
         child: isRewriting
             ? const Padding(
-                padding: EdgeInsets.all(
-                  (ChatInputRowStyle.chatInputRowHeight - _progressSize) / 2,
-                ),
-                child: SizedBox.square(
-                  dimension: _progressSize,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                padding: EdgeInsetsDirectional.only(end: _iconGap),
+                child: Center(
+                  child: SizedBox.square(
+                    dimension: _progressSize,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
               )
             : IconButton(
                 tooltip: l10n.scribe,
+                padding: const EdgeInsetsDirectional.only(end: _iconGap),
+                constraints: const BoxConstraints(),
+                style: const ButtonStyle(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 iconSize: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                icon: Icon(
-                  Icons.auto_awesome,
-                  color: Theme.of(context).colorScheme.primary,
+                // The same sparkle as Chat web.
+                icon: SvgPicture.asset(
+                  Assets.images.icScribe.path,
+                  width: ChatInputRowStyle.chatInputRowMoreBtnSize,
+                  height: ChatInputRowStyle.chatInputRowMoreBtnSize,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.primary,
+                    BlendMode.srcIn,
+                  ),
                 ),
                 onPressed: _open,
               ),
@@ -136,12 +159,15 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: _menuWidth),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: LinagoraSpacing.base * 1.5,
+          vertical: LinagoraSpacing.base,
+        ),
         child: Text(
           host == null || host.isEmpty
               ? l10n.scribeSentOutsideEncryption
               : l10n.scribeSentOutsideEncryptionTo(host),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: LinagoraTextStyle.material().bodySmall.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
@@ -151,12 +177,21 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
 
   Future<void> _rewrite(ScribeRoom room, ScribePrompt prompt) async {
     final draft = widget.draft.text;
+    // Select mode takes the composer away but keeps the chat's scaffold.
+    final screen = Scaffold.maybeOf(context)?.context ?? context;
     try {
       final text = await ref
           .read(scribeControllerProvider(widget.roomId).notifier)
           .rewrite(room: room, prompt: prompt, draft: draft);
+      if (!mounted) {
+        _sayDropped(screen, (l10n) => l10n.scribeResultDroppedClosed);
+        return;
+      }
       // The user typed meanwhile: their text wins.
-      if (!mounted || widget.draft.text != draft) return;
+      if (widget.draft.text != draft) {
+        _sayDropped(context, (l10n) => l10n.scribeResultDroppedTyped);
+        return;
+      }
       widget.onRewritten(text);
     } on Exception catch (e, s) {
       // The sources log the failures they map; an unmapped one is a bug.
@@ -167,6 +202,13 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
       final message = _failureMessage.of(L10n.of(context)!, e);
       if (message != null) TwakeSnackBar.show(context, message);
     }
+  }
+
+  /// Says why a rewrite left the composer as it was; nothing once the chat
+  /// itself is gone.
+  void _sayDropped(BuildContext context, String Function(L10n) messageOf) {
+    if (!context.mounted) return;
+    TwakeSnackBar.show(context, messageOf(L10n.of(context)!));
   }
 
   String _titleOf(L10n l10n, ScribeMenu menu) => switch (menu) {

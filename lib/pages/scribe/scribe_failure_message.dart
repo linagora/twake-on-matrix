@@ -13,6 +13,14 @@ class ScribeFailureMessage {
     _ => l10n.scribeRewriteFailed,
   };
 
+  /// For the room setting, where a missing room or an unknown failure means
+  /// the switch failed, not a rewrite.
+  String? ofSetting(L10n l10n, Exception error) => switch (error) {
+    ScribeRoomNotFound() => l10n.scribeSettingFailed,
+    ScribeException() || DriveException() => of(l10n, error),
+    _ => l10n.scribeSettingFailed,
+  };
+
   String? _ofScribe(L10n l10n, ScribeException error) => switch (error) {
     ScribeNotOffered() => l10n.scribeNotOffered,
     // The actions are disabled on a blank draft.

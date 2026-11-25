@@ -99,7 +99,7 @@ void main() {
 
   testWidgets('a member reads the state but cannot change it', _memberTest);
   testWidgets(
-    'the owner turns it on; the switch waits for the sync',
+    'the owner turns it on; the switch waits for the write',
     _ownerTest,
   );
   testWidgets('a refused change goes back and says so', _refusedTest);
@@ -137,15 +137,22 @@ Future<void> _memberTest(WidgetTester tester) async {
 }
 
 Future<void> _ownerTest(WidgetTester tester) async {
-  final source = _RoomSource(_ownedGroup);
+  final source = _RoomSource(_ownedGroup)..heldWrite = Completer();
   await _pumpSetting(tester, source);
 
   _setting(tester).onChanged!(true);
-  await tester.pumpAndSettle();
+  await tester.pump();
 
   expect(source.writes, [true]);
   expect(_setting(tester).value, isTrue);
   expect(_setting(tester).enabled, isFalse);
+
+  source.heldWrite!.complete();
+  await tester.pumpAndSettle();
+
+  // Written: the switch keeps the value and works again before the sync.
+  expect(_setting(tester).value, isTrue);
+  expect(_setting(tester).enabled, isTrue);
 
   source.sync(_ownedGroup.copyWith(scribeEnabled: true));
   await tester.pumpAndSettle();

@@ -108,10 +108,7 @@ class ChatInputRow extends StatelessWidget {
                                   ScribeButton(
                                     roomId: controller.room!.id,
                                     draft: controller.sendController,
-                                    onRewritten: (text) {
-                                      controller.sendController.text = text;
-                                      controller.onInputBarChanged(text);
-                                    },
+                                    onRewritten: controller.replaceDraft,
                                   ),
                                 ],
                               );
