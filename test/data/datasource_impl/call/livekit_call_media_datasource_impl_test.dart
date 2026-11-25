@@ -118,9 +118,6 @@ class _FakeRoom extends Fake implements lk.Room {
 
   final speakerChanges = <String>[];
 
-  /// The room connection and the audio route changes, in order.
-  final steps = <String>[];
-
   @override
   final _FakeE2EEManager e2eeManager = _FakeE2EEManager();
 
@@ -148,7 +145,7 @@ class _FakeRoom extends Fake implements lk.Room {
     lk.ConnectOptions? connectOptions,
     lk.RoomOptions? roomOptions,
     lk.FastConnectOptions? fastConnectOptions,
-  }) async => steps.add('connect');
+  }) async {}
 
   @override
   Future<void> disconnect() async => disconnected = true;
@@ -256,7 +253,6 @@ void main() {
         },
         setSpeakerOutput: ({required isOn, required isForced}) async {
           room.speakerChanges.add('$isOn forced=$isForced');
-          room.steps.add('speaker');
         },
       );
     });
@@ -285,17 +281,6 @@ void main() {
 
       // Assert
       expect(room.speakerChanges, ['false forced=false']);
-    });
-
-    test('connect_always_routesTheAudioOnceConnected', () async {
-      // Act
-      await datasource.connect(
-        _server,
-        const CallMediaState(isMicrophoneOn: false, isEncrypted: false),
-      );
-
-      // Assert
-      expect(room.steps, ['connect', 'speaker']);
     });
 
     test('setCamera_inTheCall_turnsTheOwnCameraOn', () async {

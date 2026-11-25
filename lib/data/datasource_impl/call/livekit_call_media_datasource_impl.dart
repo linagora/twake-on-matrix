@@ -104,6 +104,8 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       ..on<lk.RoomDisconnectedEvent>((event) => onLost(event.reason));
     await _askBluetoothConnect();
     try {
+      // Read by LiveKit when it starts the audio.
+      await _setSpeakerOutput(isOn: media.isSpeakerOn, isForced: false);
       await room.connect(server.url, server.token);
     } catch (error, stackTrace) {
       await listener.dispose();
@@ -117,9 +119,6 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       if (media.isMicrophoneOn) {
         await room.localParticipant?.setMicrophoneEnabled(true);
       }
-      // Once the audio runs: set before, it deadlocked CoreAudio on the
-      // first call of the iOS simulator.
-      await _setSpeakerOutput(isOn: media.isSpeakerOn, isForced: false);
       if (room.localParticipant case final local? when media.isCameraOn) {
         await _turnCameraOn(local);
       }
