@@ -22,18 +22,15 @@ class PreSearchRecentContactsContainer extends StatelessWidget {
     if (recentRooms.isEmpty) {
       return const SizedBox.shrink();
     } else {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: ListView.builder(
-          padding: RecentContactsBannerWidgetStyle
-              .chatRecentContactHorizontalPadding,
-          shrinkWrap: true,
-          physics: const ClampingScrollPhysics(),
-          scrollDirection: Axis.horizontal,
-          itemCount: recentRooms.length,
-          itemBuilder: (context, index) {
-            return PreSearchRecentContactWidget(room: recentRooms[index]);
-          },
+      return SingleChildScrollView(
+        padding: RecentContactsBannerWidgetStyle.chatRecentContactListPadding,
+        physics: const ClampingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: recentRooms
+              .map((room) => PreSearchRecentContactWidget(room: room))
+              .toList(),
         ),
       );
     }
@@ -54,7 +51,7 @@ class PreSearchRecentContactWidget extends StatelessWidget {
       child: SizedBox(
         width: RecentContactsBannerWidgetStyle.chatRecentContactItemWidth,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
               width: RecentContactsBannerWidgetStyle.avatarWidthSize,
@@ -64,7 +61,11 @@ class PreSearchRecentContactWidget extends StatelessWidget {
             Padding(
               padding:
                   RecentContactsBannerWidgetStyle.chatRecentContactItemPadding,
-              child: BuildDisplayName(profileDisplayName: displayName),
+              child: BuildDisplayName(
+                profileDisplayName: displayName,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),

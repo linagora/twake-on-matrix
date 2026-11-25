@@ -47,19 +47,11 @@ class SearchView extends StatelessWidget {
                           if (textEditingValue.text.isNotEmpty) {
                             return emptyChild!;
                           }
-                          return SliverAppBar(
-                            flexibleSpace: FlexibleSpaceBar(
-                              title: PreSearchRecentContactsContainer(
-                                searchController: searchController,
-                                recentRooms: data.rooms,
-                              ),
-                              titlePadding: const EdgeInsetsDirectional.only(
-                                start: 0.0,
-                              ),
+                          return SliverToBoxAdapter(
+                            child: PreSearchRecentContactsContainer(
+                              searchController: searchController,
+                              recentRooms: data.rooms,
                             ),
-                            toolbarHeight: 112,
-                            backgroundColor: Colors.transparent,
-                            automaticallyImplyLeading: false,
                           );
                         },
                       );

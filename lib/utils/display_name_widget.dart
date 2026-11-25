@@ -6,12 +6,16 @@ class BuildDisplayName extends StatelessWidget {
   final String? contactDisplayName;
   final String highlightKeyword;
   final TextStyle? style;
+  final int? maxLines;
+  final TextAlign? textAlign;
   const BuildDisplayName({
     super.key,
     this.profileDisplayName,
     this.contactDisplayName,
     this.highlightKeyword = "",
     this.style,
+    this.maxLines,
+    this.textAlign,
   });
 
   @override
@@ -30,6 +34,8 @@ class BuildDisplayName extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
       overflow: TextOverflow.ellipsis,
+      maxLines: maxLines,
+      textAlign: textAlign,
     );
   }
 }

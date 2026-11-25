@@ -9,6 +9,7 @@ class HighlightText extends StatelessWidget {
   final int? maxLines;
   final TextOverflow? overflow;
   final bool? softWrap;
+  final TextAlign? textAlign;
 
   const HighlightText({
     super.key,
@@ -19,6 +20,7 @@ class HighlightText extends StatelessWidget {
     this.maxLines,
     this.overflow,
     this.softWrap,
+    this.textAlign,
   });
 
   @override
@@ -35,6 +37,7 @@ class HighlightText extends StatelessWidget {
       maxLines: maxLines,
       overflow: overflow,
       softWrap: softWrap,
+      textAlign: textAlign,
     );
   }
 }
