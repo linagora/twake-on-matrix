@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart' hide State;
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1211,6 +1212,47 @@ void main() {
     });
 
     expect(identity.baseUrl, isNull);
+  });
+
+  testWidgets('a restored account with no stored ToM configuration still '
+      'sends the Matrix requests of the app to its homeserver', (tester) async {
+    final authorization = AuthorizationInterceptor();
+    _registerToM(
+      _FakeToMConfigurationsRepository({}),
+      authorization: authorization,
+    );
+    final homeServer = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.homeServerUrlInterceptorName,
+    );
+    final harness = _Harness(
+      tester,
+      [_ToMClient('a', userID: '@a:s', server: Uri.parse('https://hs.a'))],
+      overrides: [
+        phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+      ],
+    );
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+    });
+
+    late RequestOptions sent;
+    final dio = Dio()
+      ..interceptors.addAll([
+        homeServer,
+        authorization,
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            sent = options;
+            handler.resolve(Response(requestOptions: options));
+          },
+        ),
+      ]);
+    await tester.runAsync(() => dio.post<void>('/_matrix/media/v3/upload'));
+
+    expect(sent.uri, Uri.parse('https://hs.a/_matrix/media/v3/upload'));
+    expect(sent.headers[HttpHeaders.authorizationHeader], 'Bearer token-a');
   });
 
   testWidgets('switching to an account with no stored ToM configuration does '
