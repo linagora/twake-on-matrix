@@ -87,53 +87,44 @@ void main() {
     expect(source.calls.single.draft, '  Bonjour\nà tous  ');
   });
 
-  test(
-    'refuses a room that does not offer it, before signing in or sending',
-    () async {
+  // Each is refused before signing in, so nothing leaves the device.
+  final refusals = <(String, ScribeRoom, String, bool, Matcher)>[
+    (
+      'a room that does not offer it',
+      const ScribeRoom(
+        isEncrypted: true,
+        isDirect: false,
+        scribeEnabled: false,
+      ),
+      'secret',
+      true,
+      isA<ScribeNotOffered>(),
+    ),
+    ('a blank draft', _clearRoom, ' \n\t', true, isA<ScribeEmptyDraft>()),
+    (
+      'without an active account',
+      _clearRoom,
+      'hi',
+      false,
+      isA<DriveSessionSuperseded>(),
+    ),
+  ];
+  for (final (name, room, draft, hasAccount, refusal) in refusals) {
+    test('refuses $name, before signing in or sending', () async {
+      if (!hasAccount) account = null;
+
       await expectLater(
         useCase.execute(
-          room: const ScribeRoom(
-            isEncrypted: true,
-            isDirect: false,
-            scribeEnabled: false,
-          ),
-          prompt: ScribePrompt.correctGrammar,
-          draft: 'secret',
+          room: room,
+          prompt: ScribePrompt.summarize,
+          draft: draft,
         ),
-        throwsA(isA<ScribeNotOffered>()),
+        throwsA(refusal),
       );
       expect(obtained, 0);
       expect(source.calls, isEmpty);
-    },
-  );
-
-  test('refuses a blank draft, before signing in or sending', () async {
-    await expectLater(
-      useCase.execute(
-        room: _clearRoom,
-        prompt: ScribePrompt.summarize,
-        draft: ' \n\t',
-      ),
-      throwsA(isA<ScribeEmptyDraft>()),
-    );
-    expect(obtained, 0);
-    expect(source.calls, isEmpty);
-  });
-
-  test('without an active account, neither signs in nor sends', () async {
-    account = null;
-
-    await expectLater(
-      useCase.execute(
-        room: _clearRoom,
-        prompt: ScribePrompt.summarize,
-        draft: 'hi',
-      ),
-      throwsA(isA<DriveSessionSuperseded>()),
-    );
-    expect(obtained, 0);
-    expect(source.calls, isEmpty);
-  });
+    });
+  }
 
   test('a failed sign-in sends nothing', () async {
     obtain = () async => throw const DriveSignInCancelled();
