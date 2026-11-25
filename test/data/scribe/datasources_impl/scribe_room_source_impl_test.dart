@@ -15,14 +15,12 @@ import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
 import '../../../providers/fake_active_account.dart';
 import 'scribe_room_source_impl_test.mocks.dart';
 
-/// The client's syncs, telling whether anyone still listens.
 class _Syncs implements CachedStreamController<SyncUpdate> {
   final _controller = StreamController<SyncUpdate>.broadcast();
   var _count = 0;
 
   bool get hasListener => _controller.hasListener;
 
-  /// One more completed sync.
   void sync() => add(SyncUpdate(nextBatch: '${_count++}'));
 
   @override
@@ -165,7 +163,6 @@ void main() {
       final subscription = source.watchRoom(roomId).listen(emitted.add);
       await pumpEventQueue();
 
-      // A sync that changes only the account data: no room update.
       when(room.isDirectChat).thenReturn(true);
       syncs.sync();
       await pumpEventQueue();

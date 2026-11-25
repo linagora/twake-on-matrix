@@ -8,14 +8,6 @@ import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
 import 'package:twake_chat/domain/scribe/sources/scribe_source.dart';
 import 'package:twake_drive_picker/core.dart';
 
-/// The AI route of the user's workplace (`POST /ai/v1/chat/completions`,
-/// OpenAI chat completion format), with the token the Drive picker uses: the
-/// `twake_drive_picker` core trades the SSO id token for a workplace token and
-/// retries the exchange once, after a renewal, when the token is stale.
-///
-/// No `model` field: the workplace then answers with the language model alone,
-/// without searching the user's documents. Logs say where a step failed, never
-/// a token or the draft.
 class ScribeSourceImpl implements ScribeSource {
   ScribeSourceImpl({required Dio dio, required bool requireHttps})
     : _dio = dio,
@@ -45,15 +37,12 @@ class ScribeSourceImpl implements ScribeSource {
       oidcTokenGetter: () => current.idToken.value,
       oidcRefreshTrigger: () async {
         final renewed = await renewSession();
-        // The draft goes to the workplace of the first session only.
         if (renewed.platformUrl != session.platformUrl) {
           throw const DriveWorkplaceUnknown();
         }
         current = renewed;
         return current.idToken.value;
       },
-      // The Cozy bridge is for a page that embeds the workplace; the app
-      // always trades the token.
       isBridgeAvailable: () => false,
     );
     try {
@@ -77,7 +66,6 @@ class ScribeSourceImpl implements ScribeSource {
     }
   }
 
-  /// `choices[0].message.content`, trimmed; an empty answer is a failure.
   String _textOf(Object? answer) {
     final text = switch (answer) {
       {'choices': [{'message': {'content': final String content}}, ...]} =>
@@ -91,8 +79,6 @@ class ScribeSourceImpl implements ScribeSource {
     return text;
   }
 
-  /// The token, rate and network failures are the ones Drive has, with the
-  /// same exceptions; only a failed completion is the Scribe's own.
   Exception _failureOf(DioException e) {
     final status = e.response?.statusCode;
     Logs().w('ScribeSourceImpl::rewrite: ${e.type.name}, status $status');
@@ -106,12 +92,9 @@ class ScribeSourceImpl implements ScribeSource {
     return _byConnection(e.type) ?? const ScribeRewriteFailed();
   }
 
-  /// The exchange's answer when the Chat app is not on the user's workplace,
-  /// as Drive reads it.
   bool _isChatAppMissing(DioException e) =>
       '${e.response?.data}'.toLowerCase().contains('not installed');
 
-  /// What a failed connection means, or null when the server answered.
   DriveException? _byConnection(DioExceptionType type) => switch (type) {
     DioExceptionType.connectionTimeout ||
     DioExceptionType.sendTimeout ||
@@ -125,8 +108,6 @@ class ScribeSourceImpl implements ScribeSource {
   };
 }
 
-/// One completion request. Not idempotent, so it never rides the bridge and
-/// the runner never replays it: only the token exchange is retried.
 class _CompletionCall extends WorkplaceCall<Object?> {
   const _CompletionCall({
     required WorkplaceRequestExecutor executor,
@@ -157,9 +138,6 @@ class _CompletionCall extends WorkplaceCall<Object?> {
   );
 }
 
-/// The picker package's exchange parser uses unchecked casts; a malformed
-/// answer becomes a [FormatException] here instead of a [TypeError]. A blank
-/// token is malformed too: the request executor would throw a [StateError].
 class _ValidatedExchangeDataSource extends WorkplaceDataSourceImpl {
   _ValidatedExchangeDataSource({
     required super.executor,
