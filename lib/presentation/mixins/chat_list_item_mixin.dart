@@ -100,7 +100,7 @@ mixin ChatListItemMixin {
     );
     if (event.isAFile == true) {
       return Text(
-        "${user.calcDisplayname()}: ${event.filename}",
+        "${user.calcDisplayname()}: ${event.fileCaption ?? event.filename}",
         softWrap: false,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
