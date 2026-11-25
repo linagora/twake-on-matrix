@@ -50,6 +50,9 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
 
     final themeData = Theme.of(context);
 
+    // A link opens on tap up, so a drag that starts on it scrolls instead.
+    var lastTapDown = TapDownDetails();
+
     // `Html` renders through raw `RichText`, which (unlike `Text`/`Text.rich`)
     // does not merge the ambient `DefaultTextStyle`. We merge it in here so the
     // app font family is preserved for styles that don't specify one — the
@@ -78,9 +81,10 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
       linkTypes: const [LinkType.url, LinkType.phone],
       shrinkToFit: true,
       maxLines: maxLines,
-      onTapDownLink: (tapDownDetails, link) => handleOnTappedLinkHtml(
+      onTapDownLink: (details, _) => lastTapDown = details,
+      onTapLink: (link) => handleOnTappedLinkHtml(
         context: context,
-        details: tapDownDetails,
+        details: lastTapDown,
         link: link,
       ),
       linkBuilder: (url, childrenSpan, linkStyle) => filenameLinkAsPlainText(

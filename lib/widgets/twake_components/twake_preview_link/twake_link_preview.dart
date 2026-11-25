@@ -36,6 +36,8 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
   @override
   Widget build(BuildContext context) {
     final firstValidUrl = localizedBody.getFirstValidUrl();
+    // A link opens on tap up, so a drag that starts on it scrolls instead.
+    var lastTapDown = TapDownDetails();
     return TwakeLinkView(
       key: twakeLinkViewKey,
       firstValidUrl: firstValidUrl,
@@ -51,13 +53,12 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
               linkStyle: linkStyle,
               linkTypes: const [LinkType.url, LinkType.phone, LinkType.date],
               textAlign: TextAlign.start,
-              onTapDownLink: (tapDownDetails, link) {
-                handleOnTappedLinkHtml(
-                  context: context,
-                  details: tapDownDetails,
-                  link: link,
-                );
-              },
+              onTapDownLink: (details, _) => lastTapDown = details,
+              onTapLink: (link) => handleOnTappedLinkHtml(
+                context: context,
+                details: lastTapDown,
+                link: link,
+              ),
               linkBuilder: (link, style) {
                 if (link.type != LinkType.url) return null;
                 final url = link.value;
