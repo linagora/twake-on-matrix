@@ -120,6 +120,21 @@ void main() {
     expect(source.calls, isEmpty);
   });
 
+  test('without an active account, neither signs in nor sends', () async {
+    account = null;
+
+    await expectLater(
+      useCase.execute(
+        room: _clearRoom,
+        prompt: ScribePrompt.summarize,
+        draft: 'hi',
+      ),
+      throwsA(isA<DriveSessionSuperseded>()),
+    );
+    expect(obtained, 0);
+    expect(source.calls, isEmpty);
+  });
+
   test('a failed sign-in sends nothing', () async {
     obtain = () async => throw const DriveSignInCancelled();
 

@@ -184,12 +184,12 @@ void main() {
       expect(syncs.hasListener, isFalse);
     });
 
-    test('an unknown room fails', () async {
+    test('an unknown room fails, then the stream ends', () async {
       when(client.getRoomById(roomId)).thenReturn(null);
 
       await expectLater(
-        source.watchRoom(roomId).first,
-        throwsA(isA<ScribeRoomNotFound>()),
+        source.watchRoom(roomId),
+        emitsInOrder([emitsError(isA<ScribeRoomNotFound>()), emitsDone]),
       );
     });
   });
