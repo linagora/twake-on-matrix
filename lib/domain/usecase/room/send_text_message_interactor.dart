@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/services/message_splitter.dart';
@@ -66,7 +67,9 @@ final class SendTextMessageInteractor {
         parseCommands: isCommand,
         // An edit copies the thread relation into `m.new_content`: it is not
         // a reply.
-        threadRootEventId: editEvent == null ? thread?.rootEventId : null,
+        threadRootEventId: editEvent == null
+            ? thread?.rootEventId ?? inReplyTo?.threadRootId
+            : null,
         threadLastEventId: editEvent == null ? thread?.lastEventId : null,
       );
       return;
@@ -81,7 +84,9 @@ final class SendTextMessageInteractor {
           inReplyTo: index == 0 ? inReplyTo : null,
           // A part starting with "/" is not a command.
           parseCommands: false,
-          threadRootEventId: target?.rootEventId,
+          threadRootEventId:
+              target?.rootEventId ??
+              (index == 0 ? inReplyTo?.threadRootId : null),
           threadLastEventId: target?.lastEventId,
         );
         // The next part follows this one in the thread.

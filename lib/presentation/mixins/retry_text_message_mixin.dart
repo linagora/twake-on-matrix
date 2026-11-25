@@ -47,7 +47,7 @@ mixin RetryTextMessageMixin {
         txid: event.transactionId,
         inReplyTo: replyEvent,
         editEventId: editEventId,
-        threadRootEventId: threadRootId,
+        threadRootEventId: threadRootId ?? replyEvent?.threadRootId,
         threadLastEventId: threadLastEventId,
       );
       if (eventId == null) {

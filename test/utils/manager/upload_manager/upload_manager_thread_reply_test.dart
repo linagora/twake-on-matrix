@@ -16,6 +16,8 @@ import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/model/file_info/pending_file_info.dart';
+import 'package:twake_chat/presentation/extensions/send_file_fake_event_extension.dart';
+import 'package:twake_chat/presentation/extensions/send_file_web_extension.dart';
 import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
@@ -79,13 +81,13 @@ class _FakePathProvider extends PathProviderPlatform {
   Future<String?> getApplicationSupportPath() async => path;
 }
 
-/// Knows the replied-to message, so a retry can find it again.
+/// Knows the replied-to messages, so a retry can find them again.
 class _ReplyAwareDatabase extends LenientDatabase {
-  Event? replyTarget;
+  final known = <String, Event>{};
 
   @override
   Future<Event?> getEventById(String eventId, Room room) async =>
-      eventId == replyTarget?.eventId ? replyTarget : null;
+      known[eventId];
 }
 
 /// A file picked from the gallery, without the platform photo library.
@@ -106,6 +108,8 @@ const _thread = ThreadSendTarget(rootEventId: r'$root', lastEventId: r'$last');
 void main() {
   late Room room;
   late Event replyTarget;
+  late Event threadReply;
+  late Event inReplyTo;
   late _RecordingQueue queue;
   late _FakeMediaApi mediaApi;
   late UploadManager manager;
@@ -138,7 +142,26 @@ void main() {
       content: {'msgtype': 'm.text', 'body': 'hi'},
       originServerTs: DateTime.utc(2026, 11, 9),
     );
-    database.replyTarget = replyTarget;
+    // A reply of the thread of `$root`, as another client sends it.
+    threadReply = Event(
+      senderId: '@bob:example.com',
+      type: 'm.room.message',
+      room: room,
+      eventId: r'$threadReply',
+      content: {
+        'msgtype': 'm.text',
+        'body': 'in the thread',
+        'm.relates_to': {
+          'rel_type': RelationshipTypes.thread,
+          'event_id': r'$root',
+          'is_falling_back': true,
+          'm.in_reply_to': {'event_id': r'$root'},
+        },
+      },
+      originServerTs: DateTime.utc(2026, 11, 24),
+    );
+    database.known[replyTarget.eventId] = replyTarget;
+    database.known[threadReply.eventId] = threadReply;
 
     client.onSync.stream.listen((update) {
       for (final event
@@ -159,6 +182,7 @@ void main() {
   });
 
   setUp(() {
+    inReplyTo = replyTarget;
     queue.added.clear();
     placeholders.clear();
     FakeMatrixApi.calledEndpoints.clear();
@@ -191,7 +215,7 @@ void main() {
     room: room,
     files: [textFile()],
     caption: 'look',
-    inReplyTo: replyTarget,
+    inReplyTo: inReplyTo,
     thread: thread,
   );
 
@@ -200,7 +224,7 @@ void main() {
         room: room,
         fileInfos: [file],
         caption: 'look',
-        inReplyTo: replyTarget,
+        inReplyTo: inReplyTo,
         thread: thread,
       );
 
@@ -224,7 +248,7 @@ void main() {
         room: room,
         entities: [_PickedFile()],
         caption: 'look',
-        inReplyTo: replyTarget,
+        inReplyTo: inReplyTo,
         thread: thread,
       );
 
@@ -320,5 +344,66 @@ void main() {
         expect(content['body'], startsWith('> <@bob:example.com> hi'));
       });
     }
+  });
+
+  /// Bug (Twake Chat iOS, 2026-11-23/24): from the room screen, a reply to a
+  /// message of a thread went to the main timeline. Need
+  /// (https://spec.matrix.org/v1.4/client-server-api/#threading): it goes
+  /// into that thread, quoting the message. The room screen gives no thread
+  /// target, only the replied event.
+  const intoTheThread = {
+    'rel_type': 'm.thread',
+    'event_id': r'$root',
+    'is_falling_back': false,
+    'm.in_reply_to': {'event_id': r'$threadReply'},
+  };
+
+  group('a file replying to a message of a thread, sent from the room '
+      'screen, goes into that thread', () {
+    for (final entry in threadEntryPoints) {
+      test(entry.name, () async {
+        inReplyTo = threadReply;
+        await entry.upload(null);
+        await runQueuedSends();
+
+        final sent = sentMessages();
+        expect(sent, isNotEmpty, reason: 'the file message reached the server');
+        expect(sent.single['m.relates_to'], intoTheThread);
+      });
+    }
+  });
+
+  test('a voice message replying to a message of a thread, sent from the '
+      'room screen, goes into that thread', () async {
+    // As the room screen sends a recording: placeholder, then the file.
+    const txid = 'Twake-voice-1';
+    final voice = MatrixAudioFile(
+      bytes: Uint8List.fromList([1, 2, 3]),
+      name: 'voice.ogg',
+    );
+    final extraContent = {
+      'info': {...voice.info, 'duration': 2000},
+      'org.matrix.msc3245.voice': {},
+      'org.matrix.msc1767.audio': {'duration': 2000, 'waveform': <int>[]},
+    };
+    final placeholder = await room.sendFakeFileInfoEvent(
+      FileInfo(voice.name, bytes: voice.bytes),
+      txid: txid,
+      messageType: MessageTypes.Audio,
+      inReplyTo: threadReply,
+      extraContent: extraContent,
+    );
+    await room.sendFileOnWebEvent(
+      voice,
+      txid: txid,
+      fakeImageEvent: placeholder,
+      inReplyTo: threadReply,
+      extraContent: extraContent,
+    );
+
+    final sent = sentMessages();
+    expect(sent, isNotEmpty, reason: 'the voice message reached the server');
+    expect(sent.single['org.matrix.msc3245.voice'], isNotNull);
+    expect(sent.single['m.relates_to'], intoTheThread);
   });
 }
