@@ -64,11 +64,14 @@ class FoldersScreen extends ConsumerWidget {
           context,
           () => ref.read(foldersControllerProvider.notifier).reorder(from, to),
         ),
+        // A long press reorders everywhere: the desktop handle would cover Delete.
+        buildDefaultDragHandles: false,
         children: [
-          for (final folder in folders)
-            _FolderRow(
+          for (final (index, folder) in folders.indexed)
+            ReorderableDelayedDragStartListener(
               key: ValueKey(RoomListFilter.of(folder)),
-              folder: folder,
+              index: index,
+              child: _FolderRow(folder: folder),
             ),
         ],
       ),
@@ -117,7 +120,7 @@ class _RecommendedFolders extends ConsumerWidget {
 
 /// A folder, its badge and rule centred on its delete button.
 class _FolderRow extends ConsumerWidget {
-  const _FolderRow({super.key, required this.folder});
+  const _FolderRow({required this.folder});
 
   final Folder folder;
 

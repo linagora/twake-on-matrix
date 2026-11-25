@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -112,6 +113,39 @@ void _foldersScreenTests() {
         const Folder.user('Play'),
       ]);
     });
+
+    testWidgets('onDesktop_letsDeleteBeTapped', (tester) async {
+      await _pump(tester, const [Folder.user('Work')]);
+
+      expect(find.byIcon(Icons.drag_handle), findsNothing);
+      await tester.tap(find.byTooltip('Delete folder'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete this folder?'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+    testWidgets('onDesktop_reordersOnALongPressDrag', (tester) async {
+      await _pump(tester, const [Folder.user('Work'), Folder.user('Play')]);
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('Work')),
+      );
+      await tester.pump(kLongPressTimeout + kPressTimeout);
+      final distance =
+          tester.getCenter(find.text('Play')).dy -
+          tester.getCenter(find.text('Work')).dy;
+      for (var step = 0; step < 4; step++) {
+        await gesture.moveBy(Offset(0, distance / 2));
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(_savedFolders().whereType<UserFolder>(), [
+        const Folder.user('Play'),
+        const Folder.user('Work'),
+      ]);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
     testWidgets('whenDeleteIsCancelled_savesNothing', (tester) async {
       await _pump(tester, const [Folder.user('Work')]);
