@@ -104,6 +104,7 @@ class _FakeUpload extends Fake implements UploadManager {
   Future<void> failInterruptedUploads(Iterable<Event> events) async {}
 
   final uploads = <({Room room, List<FileInfo> files, String? caption})>[];
+  Object? error;
 
   @override
   Future<void> uploadFileMobile({
@@ -114,6 +115,7 @@ class _FakeUpload extends Fake implements UploadManager {
     ThreadSendTarget? thread,
   }) async {
     uploads.add((room: room, files: fileInfos, caption: caption));
+    if (error != null) throw error!;
   }
 }
 
@@ -386,28 +388,46 @@ void main() {
       ),
     ];
 
+    // Writing the pasted image to a file is real I/O, so the steps run in
+    // `runAsync` and wait on real time.
+    Future<void> waitUntil(bool Function() condition) => Future(() async {
+      while (!condition()) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    }).timeout(const Duration(seconds: 5));
+
+    Future<void> runPaste(
+      WidgetTester tester,
+      _Harness harness, {
+      required void Function() onCreateCall,
+      required bool Function() done,
+    }) => tester.runAsync(() async {
+      unawaited(harness.controller.onPasteImages(pasted));
+      await waitUntil(() => harness.repository.calls.isNotEmpty);
+      expect(harness.controller.sendController.text, isEmpty);
+      onCreateCall();
+      await waitUntil(done);
+    });
+
+    void sendFromPreview(_Harness harness) =>
+        harness.controller.mediaCaptionDialogPresenter =
+            (context, {required files, room, pendingText}) async =>
+                SendMediaNativeResult(files: files, caption: pendingText);
+
     testWidgets('creates the room and sends the image with the draft text', (
       tester,
     ) async {
       final room = _FakeRoom('!r:s');
       final harness = await _start(tester, rooms: {'!r:s': room});
       harness.controller.sendController.text = 'look';
-      harness.controller.mediaCaptionDialogPresenter =
-          (context, {required files, room, pendingText}) async =>
-              SendMediaNativeResult(files: files, caption: pendingText);
+      sendFromPreview(harness);
 
-      // Writing the pasted image to a file is real I/O.
-      await tester.runAsync(() async {
-        unawaited(harness.controller.onPasteImages(pasted));
-        while (harness.repository.calls.isEmpty) {
-          await Future<void>.delayed(const Duration(milliseconds: 10));
-        }
-        expect(harness.controller.sendController.text, isEmpty);
-        harness.lastCall.complete('!r:s');
-        while (harness.upload.uploads.isEmpty) {
-          await Future<void>.delayed(const Duration(milliseconds: 10));
-        }
-      });
+      await runPaste(
+        tester,
+        harness,
+        onCreateCall: () => harness.lastCall.complete('!r:s'),
+        done: () => harness.upload.uploads.isNotEmpty,
+      );
       await harness.settle();
 
       expect(harness.visited, ['!r:s']);
@@ -415,6 +435,48 @@ void main() {
       expect(upload.room, room);
       expect(upload.caption, 'look');
       expect(upload.files.single, isA<ImageFileInfo>());
+    });
+
+    testWidgets('a failed upload still opens the room', (tester) async {
+      final harness = await _start(tester, rooms: {'!r:s': _FakeRoom('!r:s')});
+      harness.upload.error = StateError('upload failed');
+      sendFromPreview(harness);
+
+      await runPaste(
+        tester,
+        harness,
+        onCreateCall: () => harness.lastCall.complete('!r:s'),
+        done: () => harness.upload.uploads.isNotEmpty,
+      );
+      await harness.settle();
+
+      expect(tester.takeException(), isNull);
+      expect(harness.visited, ['!r:s']);
+    });
+
+    testWidgets('a failed room creation gives the caption back', (
+      tester,
+    ) async {
+      final harness = await _start(tester);
+      harness.controller.sendController.text = 'look';
+      sendFromPreview(harness);
+
+      await runPaste(
+        tester,
+        harness,
+        onCreateCall: () => harness.lastCall.completeError(
+          const CreateDirectChatForbiddenException(),
+        ),
+        done: () => harness.controller.sendController.text.isNotEmpty,
+      );
+      await tester.pump();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(harness.controller.sendController.text, 'look');
+      expect(harness.controller.inputText.value, 'look');
+      expect(harness.controller.isSendingNotifier.value, isFalse);
+      expect(harness.upload.uploads, isEmpty);
+      expect(harness.visited, isEmpty);
     });
 
     testWidgets('creates nothing when the preview is cancelled', (
@@ -430,6 +492,42 @@ void main() {
       expect(harness.repository.calls, isEmpty);
       expect(harness.upload.uploads, isEmpty);
       expect(harness.controller.sendController.text, 'look');
+    });
+
+    testWidgets('a screen closed during the preview creates nothing', (
+      tester,
+    ) async {
+      final harness = await _start(tester);
+      final previewOpened = Completer<List<FileInfo>>();
+      final previewClosed = Completer<void>();
+      harness.controller.mediaCaptionDialogPresenter =
+          (context, {required files, room, pendingText}) async {
+            previewOpened.complete(files);
+            await previewClosed.future;
+            return SendMediaNativeResult(files: files);
+          };
+      var pasteDone = false;
+
+      unawaited(
+        harness.controller.onPasteImages(pasted).then((_) => pasteDone = true),
+      );
+      // The paste runs in the test zone, so its file I/O needs real time and
+      // a pump to move on.
+      for (var i = 0; !previewOpened.isCompleted; i++) {
+        if (i == 500) fail('The preview never opened');
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+      await harness.unmount();
+      previewClosed.complete();
+      await tester.pump();
+
+      expect(pasteDone, isTrue);
+      expect(tester.takeException(), isNull);
+      expect(harness.repository.calls, isEmpty);
+      expect(harness.upload.uploads, isEmpty);
     });
   });
 }

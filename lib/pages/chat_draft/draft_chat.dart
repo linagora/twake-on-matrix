@@ -182,11 +182,22 @@ class DraftChatController extends ConsumerState<DraftChat>
     if (!mounted || result == null) return;
     sendController.clear();
     await _createRoom(
-      onRoomCreatedSuccess: (room) => uploadManager.uploadFileMobile(
-        room: room,
-        fileInfos: result.files,
-        caption: result.caption,
-      ),
+      onRoomCreatedSuccess: (room) async {
+        try {
+          await uploadManager.uploadFileMobile(
+            room: room,
+            fileInfos: result.files,
+            caption: result.caption,
+          );
+        } catch (e, s) {
+          Logs().e('DraftChatController::onPasteImages(): $e', e, s);
+        }
+      },
+      onRoomCreatedFailed: () {
+        TwakeSnackBar.show(context, L10n.of(context)!.roomCreationFailed);
+        sendController.text = result.caption ?? '';
+        onInputBarChanged(sendController.text);
+      },
     );
   }
 
