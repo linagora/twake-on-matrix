@@ -9,7 +9,6 @@ import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
-import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -126,10 +125,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     try {
       matrixFile = await widget.event.downloadAndDecryptAttachment();
 
-      file = await StorageDirectoryManager.instance.writeDecryptedFile(
-        eventId: widget.event.eventId,
-        file: matrixFile,
-      );
+      file = await widget.event.writeDecryptedAttachment(matrixFile);
 
       if (Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
         file = await handleOggAudioFileIniOS(file);

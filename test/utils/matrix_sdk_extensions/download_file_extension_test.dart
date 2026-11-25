@@ -90,6 +90,19 @@ void main() {
     );
   }
 
+  Event plainFileEvent(Room inRoom) => Event(
+    type: EventTypes.Message,
+    content: {
+      'msgtype': MessageTypes.File,
+      'body': fileName,
+      'url': 'mxc://example.org/plain',
+    },
+    eventId: eventId,
+    senderId: '@bob:example.org',
+    originServerTs: DateTime.now(),
+    room: inRoom,
+  );
+
   group('decryptFile', () {
     test(
       'decryptFile_whenFileIsNamedDecrypted_writesPlainFileUnderOriginalName',
@@ -178,6 +191,90 @@ void main() {
         // Assert
         expect(await downloading, isNull);
         expect(Directory(p.join(tempDir.path, eventId)).existsSync(), isFalse);
+      },
+    );
+
+    test('getFileInfo_whenTheClientIsLoggedOut_downloadsNothing', () async {
+      // Arrange
+      final mediaAPI = _HangingMediaAPI();
+      getIt.registerSingleton<MediaAPI>(mediaAPI);
+      final loggedOutClient = Client(
+        'logged out',
+        httpClient: FakeMatrixApi(),
+        database: MockDatabase(),
+      )..homeserver = Uri.parse('https://fakeserver.notexisting');
+      final event = plainFileEvent(
+        Room(id: '!room:example.org', client: loggedOutClient),
+      );
+
+      // Act
+      final result = await event.getFileInfo();
+
+      // Assert
+      expect(result, isNull);
+      expect(mediaAPI.started.isCompleted, isFalse);
+    });
+  });
+
+  group('deleteDownloadedFilesAtLastLogout', () {
+    tearDown(() {
+      if (getIt.isRegistered<MediaAPI>()) getIt.unregister<MediaAPI>();
+    });
+
+    test(
+      'deleteDownloadedFilesAtLastLogout_whenAnAccountLogsInDuringTheWait_keepsTheFiles',
+      () async {
+        // Arrange
+        final mediaAPI = _HangingMediaAPI();
+        getIt.registerSingleton<MediaAPI>(mediaAPI);
+        final kept = File(
+          await StorageDirectoryManager.instance.getDecryptedFilePath(
+            eventId: r'$other:example.org',
+            fileName: fileName,
+          ),
+        )..createSync(recursive: true);
+        final downloading = plainFileEvent(room).getFileInfo();
+        await mediaAPI.started.future;
+        var loggedOut = true;
+
+        // Act
+        final deleting =
+            DownloadFileExtension.deleteDownloadedFilesAtLastLogout(
+              isStillLoggedOut: () => loggedOut,
+            );
+        loggedOut = false;
+        await deleting;
+        await downloading;
+
+        // Assert
+        expect(kept.existsSync(), isTrue);
+      },
+    );
+  });
+
+  group('writeDecryptedAttachment', () {
+    test(
+      'writeDecryptedAttachment_whenTheClientIsLoggedOut_writesNothing',
+      () async {
+        // Arrange
+        final loggedOutClient = Client('logged out', database: MockDatabase());
+        final event = plainFileEvent(
+          Room(id: '!room:example.org', client: loggedOutClient),
+        );
+        final file = MatrixFile(
+          bytes: Uint8List.fromList([1, 2, 3]),
+          name: 'voice.ogg',
+        );
+
+        // Act
+        final writing = Future(() => event.writeDecryptedAttachment(file));
+
+        // Assert
+        await expectLater(writing, throwsStateError);
+        expect(
+          Directory(p.join(tempDir.path, 'decrypted')).existsSync(),
+          isFalse,
+        );
       },
     );
   });

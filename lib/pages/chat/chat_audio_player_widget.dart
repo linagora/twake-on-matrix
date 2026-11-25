@@ -6,7 +6,7 @@ import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.d
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
-import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
@@ -184,10 +184,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
           matrixFile.bytes.isEmpty) {
         throw Exception('Downloaded file has no content');
       }
-      file = await StorageDirectoryManager.instance.writeDecryptedFile(
-        eventId: currentEvent.eventId,
-        file: matrixFile,
-      );
+      file = await currentEvent.writeDecryptedAttachment(matrixFile);
 
       if (Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
         file = await _handleOggAudioFileIniOS(file);

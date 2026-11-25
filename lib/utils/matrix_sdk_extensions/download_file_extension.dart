@@ -19,12 +19,36 @@ import 'package:matrix/matrix.dart';
 extension DownloadFileExtension on Event {
   static final _downloadsInFlight = <String, Future<void>>{};
   static final _cancelTokensInFlight = <CancelToken>{};
+  static final _writesInFlight = <Future<void>>{};
 
   static Future<void> cancelDownloadsInFlight() async {
     for (final token in _cancelTokensInFlight.toList()) {
       token.cancel();
     }
-    await Future.wait(_downloadsInFlight.values.toList());
+    await Future.wait([..._downloadsInFlight.values, ..._writesInFlight]);
+  }
+
+  /// [isStillLoggedOut] is read again after the wait: an account can log in
+  /// meanwhile and own the files.
+  static Future<void> deleteDownloadedFilesAtLastLogout({
+    required bool Function() isStillLoggedOut,
+  }) async {
+    await cancelDownloadsInFlight();
+    if (!isStillLoggedOut()) return;
+    await StorageDirectoryManager.instance.deleteDownloadedFiles();
+  }
+
+  Future<File> writeDecryptedAttachment(MatrixFile file) {
+    if (!room.client.isLogged()) {
+      throw StateError('The client logged out during the download');
+    }
+    final writing = StorageDirectoryManager.instance.writeDecryptedFile(
+      eventId: eventId,
+      file: file,
+    );
+    final done = writing.then<void>((_) {}, onError: (_) {});
+    _writesInFlight.add(done);
+    return writing.whenComplete(() => _writesInFlight.remove(done));
   }
 
   bool canContainAttachment() {

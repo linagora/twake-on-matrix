@@ -71,7 +71,6 @@ import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/data/account/quiet_logouts.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
-import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
@@ -1749,8 +1748,11 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _deleteDownloadedFiles() async {
     try {
-      await DownloadFileExtension.cancelDownloadsInFlight();
-      await StorageDirectoryManager.instance.deleteDownloadedFiles();
+      await DownloadFileExtension.deleteDownloadedFilesAtLastLogout(
+        isStillLoggedOut: () =>
+            ref.read(accountsProvider) is LastLoggedOut ||
+            ref.read(accountsProvider) is NoAccount,
+      );
     } catch (e, s) {
       _report(e, s, 'deletion of the downloaded files at the last logout');
     }

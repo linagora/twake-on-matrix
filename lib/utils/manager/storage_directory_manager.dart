@@ -105,8 +105,11 @@ class StorageDirectoryManager {
   }) async {
     final fileStoreDirectory = await StorageDirectoryManager.instance
         .getFileStoreDirectory();
-    return '$fileStoreDirectory/$_decryptedFolder/$eventId/${fileName.safeFileName}';
+    return _decryptedFilePath(fileStoreDirectory, eventId, fileName);
   }
+
+  String _decryptedFilePath(String root, String eventId, String fileName) =>
+      '$root/$_decryptedFolder/$eventId/${fileName.safeFileName}';
 
   Future<File> writeDecryptedFile({
     required String eventId,
@@ -116,9 +119,7 @@ class StorageDirectoryManager {
     if (root == null) {
       throw StateError('No app-owned directory for decrypted files');
     }
-    final decryptedFile = File(
-      '$root/$_decryptedFolder/$eventId/${file.name.safeFileName}',
-    );
+    final decryptedFile = File(_decryptedFilePath(root, eventId, file.name));
     await decryptedFile.parent.create(recursive: true);
     return decryptedFile.writeAsBytes(file.bytes);
   }
