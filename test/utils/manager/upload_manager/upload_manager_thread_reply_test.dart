@@ -11,6 +11,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/model/media/upload_file_json.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -181,12 +182,18 @@ void main() {
     await GetIt.I.reset();
   });
 
+  late bool flagBefore;
+
   setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
     inReplyTo = replyTarget;
     queue.added.clear();
     placeholders.clear();
     FakeMatrixApi.calledEndpoints.clear();
   });
+
+  tearDown(() => AppConfig.threadsEnabled = flagBefore);
 
   /// The content of every message the app sent to the server, in order.
   List<Map<String, Object?>> sentMessages() => [
@@ -371,6 +378,23 @@ void main() {
         expect(sent.single['m.relates_to'], intoTheThread);
       });
     }
+  });
+
+  /// Review of #3783 (jbrnzl): with `AppConfig.threadsEnabled` off, a thread
+  /// reply is an ordinary message of the room, so a reply to it stays a plain
+  /// reply.
+  test('with threads off, a file replying to a message of a thread stays a '
+      'plain reply in the room', () async {
+    AppConfig.threadsEnabled = false;
+    inReplyTo = threadReply;
+    await uploadWeb(null);
+    await runQueuedSends();
+
+    final sent = sentMessages();
+    expect(sent, isNotEmpty, reason: 'the file message reached the server');
+    expect(sent.single['m.relates_to'], {
+      'm.in_reply_to': {'event_id': r'$threadReply'},
+    });
   });
 
   test('a voice message replying to a message of a thread, sent from the '

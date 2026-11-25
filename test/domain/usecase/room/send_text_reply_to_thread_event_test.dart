@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/services/message_splitter.dart';
 import 'package:twake_chat/domain/services/room_send_queue_service.dart';
 import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
@@ -22,6 +23,10 @@ import '../../../lenient_database.dart';
 ///
 /// The reply is sent from the room screen (no thread screen open): the
 /// interactor gets no `ThreadSendTarget`, only the replied event.
+///
+/// With `AppConfig.threadsEnabled` off (review of #3783, jbrnzl), a thread
+/// reply is an ordinary message of the room: a reply to it stays a plain
+/// reply. The other cases run with the flag on.
 void main() {
   const rootId = r'$root';
   const threadReplyId = r'$threadReply';
@@ -29,6 +34,7 @@ void main() {
 
   late Room room;
   late SendTextMessageInteractor interactor;
+  late bool flagBefore;
 
   setUpAll(() async {
     final client = await getClient(database: LenientDatabase());
@@ -41,12 +47,16 @@ void main() {
   });
 
   setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
     interactor = SendTextMessageInteractor(
       splitter: const MessageSplitter(maxLength: 1000),
       sendQueue: RoomSendQueueService(),
     );
     FakeMatrixApi.calledEndpoints.clear();
   });
+
+  tearDown(() => AppConfig.threadsEnabled = flagBefore);
 
   Event message(String eventId, {Map<String, Object?>? relatesTo}) => Event(
     senderId: '@bob:example.com',
@@ -155,6 +165,17 @@ void main() {
         'm.in_reply_to': {'event_id': parts[index - 1].id},
       }, reason: 'part ${index + 1} follows part $index in the thread');
     }
+  });
+
+  test('with threads off, a reply to a message of a thread stays a plain '
+      'reply in the room', () async {
+    AppConfig.threadsEnabled = false;
+
+    final content = await sendAndReadContent(inReplyTo: threadReply());
+
+    expect(content['m.relates_to'], {
+      'm.in_reply_to': {'event_id': threadReplyId},
+    });
   });
 
   test('a reply to a thread root stays a plain reply in the room', () async {
