@@ -158,7 +158,8 @@ class _CompletionCall extends WorkplaceCall<Object?> {
 }
 
 /// The picker package's exchange parser uses unchecked casts; a malformed
-/// answer becomes a [FormatException] here instead of a [TypeError].
+/// answer becomes a [FormatException] here instead of a [TypeError]. A blank
+/// token is malformed too: the request executor would throw a [StateError].
 class _ValidatedExchangeDataSource extends WorkplaceDataSourceImpl {
   _ValidatedExchangeDataSource({
     required super.executor,
@@ -167,10 +168,15 @@ class _ValidatedExchangeDataSource extends WorkplaceDataSourceImpl {
 
   @override
   Future<String> exchangeToken(Uri platformUrl, String oidcIdToken) async {
+    final String token;
     try {
-      return await super.exchangeToken(platformUrl, oidcIdToken);
+      token = await super.exchangeToken(platformUrl, oidcIdToken);
     } on TypeError {
       throw const FormatException('invalid token exchange answer');
     }
+    if (token.trim().isEmpty) {
+      throw const FormatException('blank token exchange answer');
+    }
+    return token;
   }
 }

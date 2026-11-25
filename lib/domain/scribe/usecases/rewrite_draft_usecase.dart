@@ -35,7 +35,8 @@ class RewriteDraftUseCase {
   /// Throws [ScribeNotOffered] when [room] does not offer the Scribe and
   /// [ScribeEmptyDraft] when [draft] is blank, both before signing in. Then
   /// the `DriveException`s of signing in, [DriveSessionSuperseded] when the
-  /// active account changed before a renewal, and the [ScribeException]s of
+  /// active account changed while signing in or around a renewal, and the
+  /// [ScribeException]s of
   /// `ScribeSource.rewrite`.
   Future<String> execute({
     required ScribeRoom room,
@@ -46,6 +47,7 @@ class RewriteDraftUseCase {
     if (draft.trim().isEmpty) throw const ScribeEmptyDraft();
     final account = _currentAccount();
     final session = await _obtainSession();
+    _requireAccount(account);
     return _source.rewrite(
       session: session,
       renewSession: () => _renewFor(account),
@@ -54,11 +56,15 @@ class RewriteDraftUseCase {
     );
   }
 
-  /// The draft is sent only under the account that started the rewrite.
   Future<DriveSession> _renewFor(String? account) async {
-    if (_currentAccount() != account) throw const DriveSessionSuperseded();
+    _requireAccount(account);
     final renewed = await _renewSession();
-    if (_currentAccount() != account) throw const DriveSessionSuperseded();
+    _requireAccount(account);
     return renewed;
+  }
+
+  /// The draft is sent only under the account that started the rewrite.
+  void _requireAccount(String? account) {
+    if (_currentAccount() != account) throw const DriveSessionSuperseded();
   }
 }
