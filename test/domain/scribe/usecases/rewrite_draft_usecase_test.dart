@@ -11,6 +11,9 @@ import 'package:twake_chat/domain/scribe/usecases/rewrite_draft_usecase.dart';
 class _Source implements ScribeSource {
   final calls = <({DriveSession session, ScribePrompt prompt, String draft})>[];
 
+  /// Set to have the workplace refuse the first token as stale.
+  bool refusesFirstToken = false;
+
   @override
   Future<String> rewrite({
     required DriveSession session,
@@ -18,6 +21,7 @@ class _Source implements ScribeSource {
     required ScribePrompt prompt,
     required String draft,
   }) async {
+    if (refusesFirstToken) await renewSession();
     calls.add((session: session, prompt: prompt, draft: draft));
     return 'rewritten';
   }
@@ -37,6 +41,9 @@ void main() {
   late _Source source;
   late int obtained;
   late Future<DriveSession> Function() obtain;
+  late Future<DriveSession> Function() renew;
+  late int renewed;
+  late String? account;
   late RewriteDraftUseCase useCase;
 
   setUp(() {
@@ -46,10 +53,17 @@ void main() {
       obtained++;
       return session;
     };
+    renewed = 0;
+    renew = () async {
+      renewed++;
+      return session;
+    };
+    account = '@alice:example.com';
     useCase = RewriteDraftUseCase(
       source: source,
       obtainSession: () => obtain(),
-      renewSession: () async => session,
+      renewSession: () => renew(),
+      currentAccount: () => account,
     );
   });
 
@@ -111,6 +125,42 @@ void main() {
       ),
       throwsA(isA<DriveSignInCancelled>()),
     );
+    expect(source.calls, isEmpty);
+  });
+
+  Future<String> rewrite() => useCase.execute(
+    room: _clearRoom,
+    prompt: ScribePrompt.summarize,
+    draft: 'text',
+  );
+
+  test('renews a stale token for the account that started', () async {
+    source.refusesFirstToken = true;
+
+    expect(await rewrite(), 'rewritten');
+    expect(renewed, 1);
+  });
+
+  test('another account active by the renewal: no sign-in for it', () async {
+    source.refusesFirstToken = true;
+    obtain = () async {
+      account = '@bob:example.com';
+      return session;
+    };
+
+    await expectLater(rewrite(), throwsA(isA<DriveSessionSuperseded>()));
+    expect(renewed, 0);
+    expect(source.calls, isEmpty);
+  });
+
+  test('a renewal that ends under another account is dropped', () async {
+    source.refusesFirstToken = true;
+    renew = () async {
+      account = '@bob:example.com';
+      return session;
+    };
+
+    await expectLater(rewrite(), throwsA(isA<DriveSessionSuperseded>()));
     expect(source.calls, isEmpty);
   });
 }
