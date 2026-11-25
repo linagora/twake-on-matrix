@@ -26,6 +26,7 @@ import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interac
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.provider.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_controller.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_state.dart';
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 
 import 'tom_bootstrap_controller_test.mocks.dart';
 
@@ -60,28 +61,30 @@ void main() {
     unlockSsss = MockUnlockSsssWithRecoveryKeyInteractor();
   });
 
-  ProviderContainer createContainer() => ProviderContainer.test(
-    retry: (_, _) => null,
-    overrides: <Override>[
-      deleteRecoveryWordsInteractorProvider.overrideWithValue(
-        deleteRecoveryWords,
-      ),
-      getRecoveryWordsUseCaseProvider.overrideWithValue(getRecoveryWords),
-      saveRecoveryWordsInteractorProvider.overrideWithValue(
-        MockSaveRecoveryWordsInteractor(),
-      ),
-      unlockSsssWithRecoveryKeyInteractorProvider.overrideWithValue(unlockSsss),
-    ],
-  );
+  ProviderContainer createContainer({bool twakeSupported = true}) =>
+      ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: <Override>[
+          twakeSupportedProvider.overrideWithValue(twakeSupported),
+          deleteRecoveryWordsInteractorProvider.overrideWithValue(
+            deleteRecoveryWords,
+          ),
+          getRecoveryWordsUseCaseProvider.overrideWithValue(getRecoveryWords),
+          saveRecoveryWordsInteractorProvider.overrideWithValue(
+            MockSaveRecoveryWordsInteractor(),
+          ),
+          unlockSsssWithRecoveryKeyInteractorProvider.overrideWithValue(
+            unlockSsss,
+          ),
+        ],
+      );
 
   TomBootstrapControllerProvider controllerProvider({
     required bool wipeRecovery,
-    bool twakeSupported = true,
   }) => tomBootstrapControllerProvider(
     client,
     wipe: false,
     wipeRecovery: wipeRecovery,
-    twakeSupported: twakeSupported,
   );
 
   Future<TomBootstrapState> runController({
@@ -89,11 +92,8 @@ void main() {
     bool twakeSupported = true,
     Future<void> Function()? afterBuild,
   }) async {
-    final container = createContainer();
-    final provider = controllerProvider(
-      wipeRecovery: wipeRecovery,
-      twakeSupported: twakeSupported,
-    );
+    final container = createContainer(twakeSupported: twakeSupported);
+    final provider = controllerProvider(wipeRecovery: wipeRecovery);
     container.listen(provider, (_, _) {});
     await pumpEventQueue();
     await afterBuild?.call();

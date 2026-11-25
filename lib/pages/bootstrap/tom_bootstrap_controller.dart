@@ -13,6 +13,7 @@ import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.provider.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.provider.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_state.dart';
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
@@ -40,7 +41,6 @@ class TomBootstrapController extends _$TomBootstrapController {
     Client client, {
     required bool wipe,
     required bool wipeRecovery,
-    required bool twakeSupported,
   }) {
     _saveRecoveryWordsInteractor = ref.read(
       saveRecoveryWordsInteractorProvider,
@@ -56,10 +56,7 @@ class TomBootstrapController extends _$TomBootstrapController {
     if (client.userID != null) {
       DioCacheInterceptorForClient(client.userID!).setup(getIt);
     }
-    _loadInitialData(
-      wipeRecovery: wipeRecovery,
-      twakeSupported: twakeSupported,
-    );
+    _loadInitialData(wipeRecovery: wipeRecovery);
     return const TomBootstrapLoadingState();
   }
 
@@ -74,17 +71,14 @@ class TomBootstrapController extends _$TomBootstrapController {
     state = build(popTick: _popTick);
   }
 
-  Future<void> _loadInitialData({
-    required bool wipeRecovery,
-    required bool twakeSupported,
-  }) async {
+  Future<void> _loadInitialData({required bool wipeRecovery}) async {
     await client.firstSyncReceived;
     await client.userDeviceKeysLoading;
     await client.roomsLoading;
     await client.accountDataLoading;
 
     if (wipeRecovery) {
-      await _wipeRecoveryWord(twakeSupported: twakeSupported);
+      await _wipeRecoveryWord();
       return;
     }
     _refresh(TomBootstrapCheckingRecoveryState.new);
@@ -250,8 +244,10 @@ class TomBootstrapController extends _$TomBootstrapController {
     }
   }
 
-  Future<void> _wipeRecoveryWord({required bool twakeSupported}) async {
+  Future<void> _wipeRecoveryWord() async {
     final either = await _deleteRecoveryWordsInteractor.execute();
+    if (!ref.mounted) return;
+    final twakeSupported = ref.read(twakeSupportedProvider);
     _createBootstrap();
     either.fold((failure) {
       if (twakeSupported) {

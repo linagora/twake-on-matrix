@@ -22,6 +22,7 @@ import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -134,7 +135,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     // Read before the first await: the screen may be gone when a step fails.
     final report = ref.read(reportFailureProvider);
     final client = this.client;
-    final twakeSupported = matrix.twakeSupported;
+    final twakeSupported = ref.read(twakeSupportedProvider);
     try {
       await _removePushers(client);
       // Clearing the client also removes the recovery key

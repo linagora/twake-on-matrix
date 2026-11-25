@@ -67,6 +67,7 @@ import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 import 'package:twake_chat/data/account/rollback_removals.dart';
 import 'package:twake_chat/providers/rollback_removals_provider.dart';
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/data/account/quiet_logouts.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
@@ -168,10 +169,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   ValueNotifier<bool> showToMBootstrap = ValueNotifier(false);
 
-  bool get twakeSupported {
-    final tomServerUrlInterceptor = ref.read(tomServerUrlInterceptorProvider);
-    return tomServerUrlInterceptor.baseUrl != null;
-  }
+  bool get twakeSupported => ref.read(twakeSupportedProvider);
 
   BackgroundPush? backgroundPush;
 

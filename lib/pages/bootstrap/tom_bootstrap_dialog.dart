@@ -51,7 +51,6 @@ class _TomBootstrapDialogState extends ConsumerState<TomBootstrapDialog> {
       widget.client,
       wipe: widget.wipe,
       wipeRecovery: widget.wipeRecovery,
-      twakeSupported: Matrix.of(context).twakeSupported,
     );
 
     ref.listen(provider, (previous, next) {

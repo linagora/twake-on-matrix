@@ -11,6 +11,7 @@ import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
@@ -64,9 +65,6 @@ class _FakeMatrix extends Fake implements MatrixState {
   final String? authUrl;
 
   @override
-  bool get twakeSupported => false;
-
-  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       '_FakeMatrix';
 }
@@ -89,7 +87,10 @@ class _SettingsScreen {
   Future<void> pumpScreen(Settings settings) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [activeMatrixClientProvider.overrideWith((ref) => _active)],
+        overrides: [
+          activeMatrixClientProvider.overrideWith((ref) => _active),
+          twakeSupportedProvider.overrideWithValue(false),
+        ],
         child: Provider<MatrixState>.value(
           value: _matrix,
           child: MaterialApp(
@@ -261,6 +262,7 @@ class _LogoutFlow {
       ProviderScope(
         overrides: [
           activeMatrixClientProvider.overrideWith((ref) => client),
+          twakeSupportedProvider.overrideWithValue(false),
           reportFailureProvider.overrideWithValue(
             (error, _, _) => failures.add(error),
           ),

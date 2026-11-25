@@ -8,12 +8,14 @@ import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 import 'settings.dart';
 
-class SettingsView extends StatelessWidget {
+class SettingsView extends ConsumerWidget {
   final SettingsController controller;
   final String mxid;
   final String fallbackDisplayName;
@@ -29,7 +31,7 @@ class SettingsView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
     final sysColor = LinagoraSysColors.material();
     final refColorTertiary30 = LinagoraRefColors.material().tertiary[30];
@@ -158,7 +160,7 @@ class SettingsView extends StatelessWidget {
                 height: SettingsViewStyle.settingsItemDividerHeight,
               ),
             ),
-            if (!controller.matrix.twakeSupported)
+            if (!ref.watch(twakeSupportedProvider))
               ListenableBuilder(
                 listenable: Listenable.merge([
                   controller.showChatBackupSwitch,
