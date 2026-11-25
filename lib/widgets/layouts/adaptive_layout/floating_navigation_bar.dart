@@ -30,6 +30,8 @@ class FloatingNavigationBar extends StatelessWidget {
   static const double _sideMargin = 16;
   static const double _topMargin = 8;
   static const double _bottomGap = 12;
+  static const double _homeIndicatorOverlap = 13;
+  static const double _gestureBarGap = 8;
 
   static TextStyle get _labelStyle => LinagoraTextStyle.material().labelMedium;
 
@@ -38,8 +40,8 @@ class FloatingNavigationBar extends StatelessWidget {
     if (inset == 0) return _bottomGap;
     // On iOS the capsule may overlap the home indicator's inset, not the line.
     return Theme.of(context).platform == TargetPlatform.iOS
-        ? math.max(_bottomGap, inset - 13)
-        : inset + 8;
+        ? math.max(_bottomGap, inset - _homeIndicatorOverlap)
+        : inset + _gestureBarGap;
   }
 
   double _itemWidth(BuildContext context, Iterable<String> labels) {

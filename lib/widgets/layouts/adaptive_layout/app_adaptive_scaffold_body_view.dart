@@ -121,7 +121,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                   onOpenSettings: onOpenSettings,
                                   adaptiveScaffoldBodyArgs:
                                       adaptiveScaffoldBodyArgs,
-                                  currentProfile: currentProfile,
                                 );
                               },
                             );
@@ -146,7 +145,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       destinations: destinations,
                       onOpenSettings: onOpenSettings,
                       adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
-                      currentProfile: currentProfile,
                     ),
                   ),
                 ],
@@ -174,7 +172,6 @@ class _ColumnPageView extends StatelessWidget {
   final ValueNotifier<String?> activeRoomIdNotifier;
   final VoidCallback onOpenSettings;
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
-  final ValueNotifier<Profile?> currentProfile;
 
   const _ColumnPageView({
     required this.activeNavigationBarNotifier,
@@ -185,7 +182,6 @@ class _ColumnPageView extends StatelessWidget {
     required this.destinations,
     required this.onOpenSettings,
     required this.adaptiveScaffoldBodyArgs,
-    required this.currentProfile,
   });
 
   @override

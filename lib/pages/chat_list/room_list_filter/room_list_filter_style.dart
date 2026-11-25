@@ -13,6 +13,8 @@ class RoomListFilterStyle {
   static const double pillHeight = 32;
   static const double pillsTopPadding = 4;
   static const double pillsBottomPadding = 4;
+  static const double pillsHeight =
+      pillsTopPadding + pillHeight + pillsBottomPadding;
   static const double pillsSpacing = 8;
   static const double pillDotGap = 6;
   static const double pillsFadeWidth = 24;

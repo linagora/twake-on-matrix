@@ -1,16 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:twake_chat/domain/spaces/room_list_filter.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_item.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_folders/folder_actions.dart';
-import 'package:twake_chat/presentation/extensions/folder_extension.dart';
-import 'package:twake_chat/providers/room_list/folders_controller.dart';
-import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
-import 'package:twake_chat/providers/room_list/room_list_providers.dart';
 
 /// The phone variant of RoomListFilterBar: one row of pills that scrolls
 /// under an edge fade. A long press opens a folder's menu.
@@ -19,60 +12,32 @@ class RoomListFilterPills extends ConsumerWidget {
 
   final bool enabled;
 
-  static const double height =
-      RoomListFilterStyle.pillsTopPadding +
-      RoomListFilterStyle.pillHeight +
-      RoomListFilterStyle.pillsBottomPadding;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
-    final selected = ref.watch(shownRoomListFilterProvider);
-    final folders = ref.watch(roomListFoldersProvider);
-    void select(RoomListFilter view) =>
-        ref.read(roomListFilterControllerProvider.notifier).select(view);
+    final items = ref.watchRoomListFilterItems(l10n, enabled: enabled);
     return MediaQuery.withClampedTextScaling(
       maxScaleFactor: RoomListFilterStyle.pillsMaxTextScale,
       child: SizedBox(
-        height: height,
+        height: RoomListFilterStyle.pillsHeight,
         child: Semantics(
           label: l10n.roomListFilters,
           child: _EndFade(
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: RoomListFilterStyle.pillsPadding,
-              itemCount: folders.length + 1,
+              itemCount: items.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(width: RoomListFilterStyle.pillsSpacing),
               itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _Pill(
-                    label: l10n.all,
-                    isSelected: selected is RoomListFilterAll,
-                    onTap: enabled
-                        ? () => select(const RoomListFilter.all())
-                        : null,
-                  );
-                }
-                final folder = folders[index - 1];
-                final color = folder.color;
+                final item = items[index];
+                final color = item.color;
                 return _Pill(
-                  label: [?folder.emoji, folder.label(l10n)].join(' '),
+                  label: item.label,
                   dotColor: color == null ? null : Color(color.argb),
-                  isSelected: selected == RoomListFilter.of(folder),
-                  onTap: enabled
-                      ? () => select(RoomListFilter.of(folder))
-                      : null,
-                  onLongPress: enabled
-                      ? (context, position) => unawaited(
-                          showFolderMenu(
-                            context,
-                            ref,
-                            folder: folder,
-                            position: position,
-                          ),
-                        )
-                      : null,
+                  isSelected: item.isSelected,
+                  onTap: item.onSelected,
+                  onLongPress: item.onMenu,
                 );
               },
             ),

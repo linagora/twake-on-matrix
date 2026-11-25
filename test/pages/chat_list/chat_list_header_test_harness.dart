@@ -16,7 +16,6 @@ import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
-import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
@@ -49,7 +48,7 @@ const headerBlockHeight =
     48 +
     ChatListHeaderStyle.newChatCapsuleGap +
     ChatListHeaderStyle.searchBarContainerHeight +
-    RoomListFilterPills.height +
+    RoomListFilterStyle.pillsHeight +
     statusBar;
 
 /// What the Scaffold gives the appBar of a wide layout.
@@ -81,6 +80,7 @@ class HeaderView {
     this.topInset = 0,
     this.roomCount = 30,
     this.skeleton = false,
+    this.bottomBarHeight = 0,
   });
 
   const HeaderView.phone({int roomCount = 30, bool skeleton = false})
@@ -100,6 +100,9 @@ class HeaderView {
 
   /// No first sync yet: the skeleton is shown.
   final bool skeleton;
+
+  /// A bottom bar this high floats over the list; 0 for none.
+  final double bottomBarHeight;
 }
 
 /// The three views of the one column layout, under a status bar.
@@ -131,6 +134,9 @@ Future<void> scrollUp(WidgetTester tester, double distance) async {
 }
 
 final _screenKey = GlobalKey();
+
+/// The stand-in for the floating bar, when the view has one.
+const bottomBarKey = Key('bottom_bar');
 
 /// Colour really painted at x=100, y=20: inside the status bar band, no text.
 Future<Color> bandColor(WidgetTester tester) => _pixel(tester, 100, 20);
@@ -184,7 +190,9 @@ class HeaderHarness {
     final matrix = FakeMatrixState(client)..waitForFirstSync = skeleton;
     final controller = FakeChatListController(matrix, client);
 
-    await tester.pumpWidget(_screen(matrix, controller, client, rooms));
+    await tester.pumpWidget(
+      _screen(matrix, controller, client, rooms, view.bottomBarHeight),
+    );
     await _settle(tester, skeleton: skeleton);
     // Precondition of every case: without it a "hidden" check would pass on
     // a header that does not exist at all.
@@ -221,6 +229,7 @@ Widget _screen(
   FakeChatListController controller,
   Client client,
   int roomCount,
+  double bottomBarHeight,
 ) {
   return provider.Provider<MatrixState>.value(
     value: matrix,
@@ -238,6 +247,9 @@ Widget _screen(
           home: ChatListView(
             controller: controller,
             onTapBottomNavigation: (_) {},
+            bottomNavigationBar: bottomBarHeight > 0
+                ? SizedBox(key: bottomBarKey, height: bottomBarHeight)
+                : null,
           ),
         ),
       ),

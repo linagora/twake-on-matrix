@@ -1,6 +1,5 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
-import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -27,7 +26,7 @@ class ChatListViewStyle {
       AppConfig.toolbarHeight(context) +
           ChatListHeaderStyle.newChatCapsuleGap +
           ChatListHeaderStyle.searchBarContainerHeight +
-          RoomListFilterPills.height +
+          RoomListFilterStyle.pillsHeight +
           audioPlayer,
     );
   }

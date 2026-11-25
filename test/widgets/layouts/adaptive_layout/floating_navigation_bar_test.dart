@@ -10,6 +10,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_components/floating_capsule.dart';
 
 import '../../../fake_client.dart';
 import '../../../pages/activity/activity_test_support.dart';
@@ -27,6 +28,8 @@ class _Bar {
     this.textScale = 1,
     this.mentionCount = 0,
     this.invites = 0,
+    this.platform = TargetPlatform.android,
+    this.bottomInset = 0,
   });
 
   final AdaptiveDestinationEnum selected;
@@ -34,6 +37,8 @@ class _Bar {
   final double textScale;
   final int mentionCount;
   final int invites;
+  final TargetPlatform platform;
+  final double bottomInset;
 }
 
 Future<List<int>> _pumpBar(
@@ -42,6 +47,8 @@ Future<List<int>> _pumpBar(
 ]) async {
   tester.view.physicalSize = Size(bar.width, 800);
   tester.view.devicePixelRatio = 1;
+  tester.view.viewPadding = FakeViewPadding(bottom: bar.bottomInset);
+  tester.view.padding = FakeViewPadding(bottom: bar.bottomInset);
   addTearDown(tester.view.reset);
   final client = Client('testclient', database: EventIdListDatabase(const []));
   for (var i = 0; i < bar.invites; i++) {
@@ -68,6 +75,7 @@ Future<List<int>> _pumpBar(
           ],
         ),
         child: MaterialApp(
+          theme: ThemeData(platform: bar.platform),
           locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
@@ -104,6 +112,7 @@ void main() {
   _badgeTests();
   _textSizeTests();
   _keyboardTests();
+  _bottomMarginTests();
 }
 
 void _layoutTests() {
@@ -295,6 +304,52 @@ void _keyboardTests() {
       await tester.pump();
 
       expect(tapped, [0]);
+    });
+  });
+}
+
+/// Space between the bottom of the capsule and the bottom of the screen.
+double _gapBelowBar(WidgetTester tester) =>
+    800 - tester.getRect(find.byType(FloatingCapsule)).bottom;
+
+void _bottomMarginTests() {
+  group('FloatingNavigationBar bottom margin', () {
+    testWidgets('without a bottom inset it sits 12 pt from the edge', (
+      tester,
+    ) async {
+      await _pumpBar(tester);
+
+      expect(_gapBelowBar(tester), 12);
+    });
+
+    testWidgets('on iOS it overlaps the home indicator inset by 13 pt', (
+      tester,
+    ) async {
+      await _pumpBar(
+        tester,
+        const _Bar(platform: TargetPlatform.iOS, bottomInset: 34),
+      );
+
+      expect(_gapBelowBar(tester), 34 - 13);
+    });
+
+    testWidgets('on iOS it never comes closer than 12 pt to the edge', (
+      tester,
+    ) async {
+      await _pumpBar(
+        tester,
+        const _Bar(platform: TargetPlatform.iOS, bottomInset: 20),
+      );
+
+      expect(_gapBelowBar(tester), 12);
+    });
+
+    testWidgets('on Android it sits 8 pt above the gesture bar inset', (
+      tester,
+    ) async {
+      await _pumpBar(tester, const _Bar(bottomInset: 24));
+
+      expect(_gapBelowBar(tester), 24 + 8);
     });
   });
 }
