@@ -49,6 +49,7 @@ import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:twake_chat/pages/chat/chat_report_message_additional_reason_dialog.dart';
 import 'package:twake_chat/pages/chat/chat_view.dart';
+import 'package:twake_chat/pages/scribe/scribe_controller.dart';
 import 'package:twake_chat/pages/chat/context_item_chat_action.dart';
 import 'package:twake_chat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
@@ -2021,6 +2022,9 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void onInputBarSubmitted() async {
+    // The Scribe is rewriting the draft: the send button and Enter wait.
+    final roomId = room?.id;
+    if (roomId != null && ref.read(scribeControllerProvider(roomId))) return;
     await Future.delayed(const Duration(milliseconds: 100));
     await send();
     FocusScope.of(context).requestFocus(inputFocus);
