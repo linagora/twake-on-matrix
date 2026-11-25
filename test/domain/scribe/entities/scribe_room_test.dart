@@ -2,8 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
 
 void main() {
-  // Chat web's rules: `offersScribe` (src/domain/room.ts) and the room info
-  // section (src/ui/RoomScribeSection.tsx) of twake-space-chat.
   bool webOffersScribe(ScribeRoom room) =>
       !room.isEncrypted || (!room.isDirect && room.scribeEnabled);
   bool webHasSetting(ScribeRoom room) =>
@@ -55,7 +53,6 @@ void main() {
   });
 
   test('every room follows Chat web, all 32 combinations', () {
-    // Each bit of the index is one flag of the room.
     final rooms = List.generate(
       32,
       (bits) => ScribeRoom(

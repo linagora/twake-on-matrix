@@ -11,10 +11,8 @@ import 'package:twake_chat/domain/scribe/usecases/rewrite_draft_usecase.dart';
 class _Source implements ScribeSource {
   final calls = <({DriveSession session, ScribePrompt prompt, String draft})>[];
 
-  /// Set to have the workplace refuse the first token as stale.
   bool refusesFirstToken = false;
 
-  /// Runs when the token is refused, before the renewal.
   void Function()? beforeRenewal;
 
   @override
@@ -87,7 +85,6 @@ void main() {
     expect(source.calls.single.draft, '  Bonjour\nà tous  ');
   });
 
-  // Each is refused before signing in, so nothing leaves the device.
   final refusals = <(String, ScribeRoom, String, bool, Matcher)>[
     (
       'a room that does not offer it',
@@ -156,7 +153,6 @@ void main() {
   for (final moment in ['during sign-in', 'before renewal', 'during renewal']) {
     test('an account switch $moment sends nothing', () async {
       void switchAccount() => account = '@bob:example.com';
-      // Signing in alone is enough to fail: no stale token needed.
       source.refusesFirstToken = moment != 'during sign-in';
       switch (moment) {
         case 'during sign-in':

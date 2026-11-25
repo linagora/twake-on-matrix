@@ -1,13 +1,8 @@
 import 'package:twake_chat/domain/scribe/entities/scribe_prompt.dart';
 
-/// The prompts of the shared catalogue `linagora/ai-prompts`
-/// (`prompts/system_prompts.js`, `prompts/scribe/*.js`), copied as they are
-/// from Chat web (`src/adapters/assistant/scribePrompts.ts`) so web and mobile
-/// give the same answers. They stay in English whatever the user's language.
 class ScribePrompts {
   const ScribePrompts();
 
-  /// The chat messages that apply [prompt] to [text] (OpenAI format).
   List<Map<String, String>> messagesFor(ScribePrompt prompt, String text) => [
     {'role': 'system', 'content': _system},
     {
