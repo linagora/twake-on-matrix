@@ -12,9 +12,6 @@ import 'package:twake_chat/pages/scribe/scribe_setting_controller.dart';
 import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 
-/// Whether the Scribe works in an encrypted group, and the owner's switch
-/// (Chat web's room info). Hidden elsewhere. The switch shows the wanted value
-/// until the sync brings the room's state back.
 class ScribeRoomSetting extends ConsumerWidget {
   const ScribeRoomSetting({super.key, required this.roomId});
 
@@ -28,7 +25,6 @@ class ScribeRoomSetting extends ConsumerWidget {
     final isConfigured = ref.watch(
       driveConfigProvider.select((config) => config.isEnabled),
     );
-    // Without a workplace the room is not even read.
     if (!isConfigured) return const SizedBox.shrink();
     final room = ref.watch(scribeRoomProvider(roomId)).value;
     if (room == null || !room.hasScribeSetting) {
@@ -59,7 +55,6 @@ class ScribeRoomSetting extends ConsumerWidget {
           .read(scribeSettingControllerProvider(roomId).notifier)
           .save(room, enabled: enabled);
     } on Exception catch (e, s) {
-      // The source logs the failure it maps; an unmapped one is a bug.
       if (e is! ScribeException && e is! DriveException) {
         Logs().e('ScribeRoomSetting::_save', e, s);
       }

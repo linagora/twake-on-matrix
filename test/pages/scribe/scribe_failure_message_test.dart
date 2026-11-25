@@ -38,7 +38,6 @@ void main() {
     });
   }
 
-  // The setting says the switch failed where a rewrite would say so.
   final settingCases = <(Exception, String?)>[
     (const ScribeRoomNotFound(), l10n.scribeSettingFailed),
     (const FormatException('other'), l10n.scribeSettingFailed),

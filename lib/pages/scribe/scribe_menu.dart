@@ -1,14 +1,11 @@
 import 'package:twake_chat/domain/scribe/entities/scribe_prompt.dart';
 
-/// A page of the Scribe menu. A submenu replaces the root, as in the mobile
-/// design; its header goes back to the root.
 enum ScribeMenu {
   root,
   improve,
   tone,
   translate;
 
-  /// The entries in the order of Chat web's menu.
   List<ScribeMenuEntry> get entries => switch (this) {
     ScribeMenu.root => const [
       ScribePromptEntry(ScribePrompt.correctGrammar),
@@ -37,19 +34,16 @@ enum ScribeMenu {
   };
 }
 
-/// One line of a Scribe menu.
 sealed class ScribeMenuEntry {
   const ScribeMenuEntry();
 }
 
-/// Runs [prompt] on the draft.
 final class ScribePromptEntry extends ScribeMenuEntry {
   const ScribePromptEntry(this.prompt);
 
   final ScribePrompt prompt;
 }
 
-/// Opens [menu] in place of the current page.
 final class ScribeSubmenuEntry extends ScribeMenuEntry {
   const ScribeSubmenuEntry(this.menu);
 

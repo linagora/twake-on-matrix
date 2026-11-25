@@ -37,7 +37,6 @@ final _session = DriveSession(
   platformUrl: Uri.parse('https://alice.twake.example'),
 );
 
-/// Answers each rewrite with the next result the test gives.
 class _Source implements ScribeSource {
   final prompts = <(ScribePrompt, String)>[];
   Completer<String> answer = Completer();
@@ -59,7 +58,6 @@ class _SignedIn extends DriveSessionNotifier {
   DriveSession? build() => _session;
 }
 
-/// Not signed in until the test calls [signIn].
 class _SignsInLater extends DriveSessionNotifier {
   @override
   DriveSession? build() => null;
@@ -71,11 +69,9 @@ void main() {
   late _Source source;
   late TextEditingController draft;
   late List<String> rewritten;
-  // False: select mode took the composer away, the chat stays.
   late ValueNotifier<bool> composerShown;
 
   setUp(() {
-    // The snackbar reads its width from the responsive helper.
     getIt.registerSingleton<ResponsiveUtils>(ResponsiveUtils());
     source = _Source();
     draft = TextEditingController(text: 'hi emery how are you?');
@@ -91,12 +87,10 @@ void main() {
 
   Future<void> pumpButton(
     WidgetTester tester, {
-    // Null: the room cannot be read.
     ScribeRoom? room = _clearRoom,
     DriveConfig config = _configured,
     DriveSessionNotifier Function() sessionOf = _SignedIn.new,
   }) async {
-    // Made inside the test, so its answer arrives on the test's fake clock.
     source.answer = Completer();
     await tester.pumpWidget(
       ProviderScope(
@@ -150,14 +144,11 @@ void main() {
     find.ancestor(of: find.text(label), matching: find.byType(MenuItemButton)),
   );
 
-  /// Runs a menu action; a tap would run it only after the next frame.
   Future<void> pick(WidgetTester tester, String label) async {
     item(tester, label).onPressed!();
     await tester.pump();
   }
 
-  /// Gives the Scribe's answer, then draws the composer again (without
-  /// waiting for the snackbar to go away).
   Future<void> answer(
     WidgetTester tester,
     void Function(Completer<String> answer) give,

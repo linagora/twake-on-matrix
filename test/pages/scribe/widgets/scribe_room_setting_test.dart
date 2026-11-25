@@ -27,7 +27,6 @@ const _ownedGroup = ScribeRoom(
   isOwner: true,
 );
 
-/// A room whose switch the test drives; a write can be made to fail.
 class _RoomSource implements ScribeRoomSource {
   _RoomSource(ScribeRoom room) : _room = room;
 
@@ -36,13 +35,10 @@ class _RoomSource implements ScribeRoomSource {
   final writes = <bool>[];
   bool failWrites = false;
 
-  /// Set to keep the room loading or unreadable.
   Stream<ScribeRoom>? watched;
 
-  /// Set to hold a write until the test completes it.
   Completer<void>? heldWrite;
 
-  /// The sync brings the room back.
   void sync(ScribeRoom room) {
     _room = room;
     _updates.add(room);
@@ -150,7 +146,6 @@ Future<void> _ownerTest(WidgetTester tester) async {
   source.heldWrite!.complete();
   await tester.pumpAndSettle();
 
-  // Written: the switch keeps the value and works again before the sync.
   expect(_setting(tester).value, isTrue);
   expect(_setting(tester).enabled, isTrue);
 

@@ -2022,7 +2022,6 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void onInputBarSubmitted() async {
-    // The Scribe is rewriting the draft: the send button and Enter wait.
     final roomId = room?.id;
     if (roomId != null && ref.read(scribeControllerProvider(roomId))) return;
     await Future.delayed(const Duration(milliseconds: 100));
@@ -2079,8 +2078,6 @@ class ChatController extends ConsumerState<Chat>
     });
   }
 
-  /// Puts a Scribe rewrite in the composer, the caret at its end. It is
-  /// stored as the draft, but the others are not told the user is typing.
   void replaceDraft(String text) {
     sendController.value = TextEditingValue(
       text: text,

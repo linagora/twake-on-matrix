@@ -84,7 +84,6 @@ void main() {
 
   test('a controller disposed meanwhile still hands back the result', () async {
     final result = rewrite();
-    // The app went away during the rewrite.
     container.dispose();
 
     source.answer.complete('summary');

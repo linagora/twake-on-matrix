@@ -17,7 +17,6 @@ const _off = ScribeRoom(
   isOwner: true,
 );
 
-/// The room comes through [sync]; a write waits for [write].
 class _Source implements ScribeRoomSource {
   final _rooms = StreamController<ScribeRoom>.broadcast();
   Completer<void> write = Completer();
@@ -77,8 +76,6 @@ void main() {
     source.write.complete();
     await saving;
 
-    // The room changed without our value, here the user lost the owner
-    // level meanwhile.
     source.sync(_off.copyWith(isOwner: false));
     await settle();
 

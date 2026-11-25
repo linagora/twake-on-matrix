@@ -18,9 +18,6 @@ import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/providers/drive_session_provider.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 
-/// The Scribe of the composer: its menu rewrites the whole [draft], and the
-/// result replaces it through [onRewritten]. Hidden where the room does not
-/// offer the Scribe or the workplace is not configured.
 class ScribeButton extends ConsumerStatefulWidget {
   const ScribeButton({
     super.key,
@@ -43,8 +40,6 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
   static const _failureMessage = ScribeFailureMessage();
   static const double _progressSize = 20;
 
-  /// The space between the icon and the composer field, the same as the
-  /// space the attachment button leaves after its own icon.
   static const double _iconGap = LinagoraSpacing.base * 1.5;
   static const double _buttonWidth =
       ChatInputRowStyle.chatInputRowMoreBtnSize + _iconGap;
@@ -58,14 +53,12 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
     final isConfigured = ref.watch(
       driveConfigProvider.select((config) => config.isEnabled),
     );
-    // Without a workplace the room is not even read.
     if (!isConfigured) return const SizedBox.shrink();
     final room = ref.watch(scribeRoomProvider(widget.roomId)).value;
     if (room == null || !room.offersScribe) {
       return const SizedBox.shrink();
     }
     final isRewriting = ref.watch(scribeControllerProvider(widget.roomId));
-    // The workplace the draft goes to, known once the user signed in.
     final host = ref.watch(
       driveSessionProvider.select((session) => session?.platformUrl.host),
     );
@@ -76,8 +69,6 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
         minimumSize: WidgetStatePropertyAll(Size(_menuWidth, 0)),
       ),
       menuChildren: _menuChildren(l10n, room, host),
-      // Only a gap after the icon: the attachment button before it already
-      // ends with one, so both gaps around the icon match.
       builder: (context, controller, _) => SizedBox(
         width: _buttonWidth,
         height: ChatInputRowStyle.chatInputRowHeight,
@@ -99,7 +90,6 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 iconSize: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                // The same sparkle as Chat web.
                 icon: SvgPicture.asset(
                   Assets.images.icScribe.path,
                   width: ChatInputRowStyle.chatInputRowMoreBtnSize,
@@ -116,7 +106,6 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
   }
 
   void _open() {
-    // The menu sits above the composer, not under the keyboard.
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _menu = ScribeMenu.root);
     _menuController.open();
@@ -143,7 +132,6 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
             child: Text(_titleOf(l10n, menu)),
           ),
           ScribePromptEntry(:final prompt) => MenuItemButton(
-            // Correct and Summarize share the design's checklist icon.
             leadingIcon: _menu == ScribeMenu.root
                 ? const Icon(Icons.checklist)
                 : null,
@@ -154,7 +142,6 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
     ];
   }
 
-  /// In an encrypted room the draft leaves the encryption: say where to.
   Widget _encryptionNotice(L10n l10n, String? host) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: _menuWidth),
@@ -177,7 +164,6 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
 
   Future<void> _rewrite(ScribeRoom room, ScribePrompt prompt) async {
     final draft = widget.draft.text;
-    // Select mode takes the composer away but keeps the chat's scaffold.
     final screen = Scaffold.maybeOf(context)?.context ?? context;
     try {
       final text = await ref
@@ -187,14 +173,12 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
         _sayDropped(screen, (l10n) => l10n.scribeResultDroppedClosed);
         return;
       }
-      // The user typed meanwhile: their text wins.
       if (widget.draft.text != draft) {
         _sayDropped(context, (l10n) => l10n.scribeResultDroppedTyped);
         return;
       }
       widget.onRewritten(text);
     } on Exception catch (e, s) {
-      // The sources log the failures they map; an unmapped one is a bug.
       if (e is! ScribeException && e is! DriveException) {
         Logs().e('ScribeButton::_rewrite', e, s);
       }
@@ -204,8 +188,6 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
     }
   }
 
-  /// Says why a rewrite left the composer as it was; nothing once the chat
-  /// itself is gone.
   void _sayDropped(BuildContext context, String Function(L10n) messageOf) {
     if (!context.mounted) return;
     TwakeSnackBar.show(context, messageOf(L10n.of(context)!));

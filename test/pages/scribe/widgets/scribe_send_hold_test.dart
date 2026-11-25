@@ -7,7 +7,6 @@ import 'package:twake_chat/pages/scribe/widgets/scribe_send_hold.dart';
 
 const _roomId = '!room:example.com';
 
-/// A Scribe that is rewriting this room's draft.
 class _Rewriting extends ScribeController {
   @override
   bool build(String roomId) => true;

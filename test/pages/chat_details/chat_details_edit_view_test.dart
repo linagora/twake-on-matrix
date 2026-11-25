@@ -109,7 +109,6 @@ void main() {
       retry: (_, _) => null,
       overrides: [
         roomAccessRepositoryProvider.overrideWithValue(repository),
-        // No workplace: the Scribe section stays hidden.
         driveConfigProvider.overrideWithValue(
           const DriveConfig(ssoUrl: '', ssoClientId: ''),
         ),
