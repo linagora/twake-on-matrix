@@ -61,23 +61,24 @@ void main() {
     unlockSsss = MockUnlockSsssWithRecoveryKeyInteractor();
   });
 
-  ProviderContainer createContainer({bool twakeSupported = true}) =>
-      ProviderContainer.test(
-        retry: (_, _) => null,
-        overrides: <Override>[
+  ProviderContainer createContainer({
+    bool twakeSupported = true,
+    Override? twakeSupportedOverride,
+  }) => ProviderContainer.test(
+    retry: (_, _) => null,
+    overrides: <Override>[
+      twakeSupportedOverride ??
           twakeSupportedProvider.overrideWithValue(twakeSupported),
-          deleteRecoveryWordsInteractorProvider.overrideWithValue(
-            deleteRecoveryWords,
-          ),
-          getRecoveryWordsUseCaseProvider.overrideWithValue(getRecoveryWords),
-          saveRecoveryWordsInteractorProvider.overrideWithValue(
-            MockSaveRecoveryWordsInteractor(),
-          ),
-          unlockSsssWithRecoveryKeyInteractorProvider.overrideWithValue(
-            unlockSsss,
-          ),
-        ],
-      );
+      deleteRecoveryWordsInteractorProvider.overrideWithValue(
+        deleteRecoveryWords,
+      ),
+      getRecoveryWordsUseCaseProvider.overrideWithValue(getRecoveryWords),
+      saveRecoveryWordsInteractorProvider.overrideWithValue(
+        MockSaveRecoveryWordsInteractor(),
+      ),
+      unlockSsssWithRecoveryKeyInteractorProvider.overrideWithValue(unlockSsss),
+    ],
+  );
 
   TomBootstrapControllerProvider controllerProvider({
     required bool wipeRecovery,
@@ -231,6 +232,35 @@ void main() {
 
       // Assert
       expect(state, isA<TomBootstrapCheckingRecoveryState>());
+    },
+  );
+
+  test(
+    'build_whenTwakeSupportChangesDuringWipe_usesTheSupportAtStart',
+    () async {
+      // Arrange
+      var twakeSupported = true;
+      final container = createContainer(
+        twakeSupportedOverride: twakeSupportedProvider.overrideWith(
+          (ref) => twakeSupported,
+        ),
+      );
+      when(deleteRecoveryWords.execute()).thenAnswer((_) async {
+        twakeSupported = false;
+        container.invalidate(twakeSupportedProvider);
+        return const Left(DeleteRecoveryWordsFailed());
+      });
+      final provider = controllerProvider(wipeRecovery: true);
+
+      // Act
+      container.listen(provider, (_, _) {});
+      await pumpEventQueue();
+
+      // Assert
+      expect(
+        container.read(provider),
+        isA<TomBootstrapWipeRecoveryFailedState>(),
+      );
     },
   );
 }

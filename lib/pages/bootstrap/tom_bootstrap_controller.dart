@@ -245,9 +245,9 @@ class TomBootstrapController extends _$TomBootstrapController {
   }
 
   Future<void> _wipeRecoveryWord() async {
+    final twakeSupported = ref.read(twakeSupportedProvider);
     final either = await _deleteRecoveryWordsInteractor.execute();
     if (!ref.mounted) return;
-    final twakeSupported = ref.read(twakeSupportedProvider);
     _createBootstrap();
     either.fold((failure) {
       if (twakeSupported) {
