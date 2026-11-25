@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
@@ -16,13 +17,23 @@ class IncomingCallHost extends ConsumerStatefulWidget {
   const IncomingCallHost({
     required this.navigatorKey,
     required this.child,
+    this.createPlayer = AudioPlayer.new,
     super.key,
   });
 
   static const ringAsset = 'assets/sounds/call_ring.m4a';
 
+  /// Android rings it as a ringtone, so the ringer mode and Do Not Disturb
+  /// apply. iOS has no such attribute: the app sets no audio session
+  /// category, and the default one follows the silent switch.
+  static const ringAttributes = AndroidAudioAttributes(
+    contentType: AndroidAudioContentType.sonification,
+    usage: AndroidAudioUsage.notificationRingtone,
+  );
+
   final GlobalKey<NavigatorState> navigatorKey;
   final Widget child;
+  final AudioPlayer Function() createPlayer;
 
   @override
   ConsumerState<IncomingCallHost> createState() => _IncomingCallHostState();
@@ -62,8 +73,9 @@ class _IncomingCallHostState extends ConsumerState<IncomingCallHost> {
 
   Future<void> _startRing() async {
     if (_player != null) return;
-    final player = _player = AudioPlayer();
+    final player = _player = widget.createPlayer();
     try {
+      await player.setAndroidAudioAttributes(IncomingCallHost.ringAttributes);
       await player.setLoopMode(LoopMode.one);
       await player.setAsset(IncomingCallHost.ringAsset);
       if (identical(_player, player)) await player.play();

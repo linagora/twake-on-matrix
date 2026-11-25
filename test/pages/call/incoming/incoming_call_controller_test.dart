@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart' show Client;
 import 'package:twake_chat/data/repository/call/call_repository.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
@@ -24,6 +25,19 @@ CallRing _ring(String eventId, {String roomId = '!dm'}) => CallRing(
   expiresAt: DateTime(2100),
   roomName: 'Alice',
   isDirect: true,
+);
+
+class _FakeClient extends Fake implements Client {}
+
+class _ActiveClient extends Notifier<Client?> {
+  @override
+  Client? build() => null;
+
+  void set(Client? client) => state = client;
+}
+
+final _activeClientProvider = NotifierProvider<_ActiveClient, Client?>(
+  _ActiveClient.new,
 );
 
 void main() {
@@ -57,6 +71,56 @@ void main() {
           ]),
         );
     container.listen(incomingCallControllerProvider, (_, _) {});
+  });
+
+  group('accountChange', () {
+    final first = _FakeClient();
+    late FakeCallRepository firstRepository;
+    late ProviderContainer accounts;
+
+    IncomingCallState ringState() =>
+        accounts.read(incomingCallControllerProvider);
+
+    setUp(() async {
+      firstRepository = FakeCallRepository();
+      accounts = ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: [
+          activeMatrixClientProvider.overrideWith(
+            (ref) => ref.watch(_activeClientProvider),
+          ),
+          callRepositoryProvider.overrideWith(
+            (ref) => identical(ref.watch(activeMatrixClientProvider), first)
+                ? firstRepository
+                : FakeCallRepository(),
+          ),
+        ],
+      );
+      accounts.listen(incomingCallControllerProvider, (_, _) {});
+      accounts.read(_activeClientProvider.notifier).set(first);
+      await pumpEventQueue();
+      firstRepository.rings.add([_ring(r'$ring')]);
+      await pumpEventQueue();
+      expect(ringState(), isA<IncomingCallRinging>());
+    });
+
+    test('switchToAnotherAccount_whileItRings_goesQuiet', () async {
+      // Act
+      accounts.read(_activeClientProvider.notifier).set(_FakeClient());
+      await pumpEventQueue();
+
+      // Assert
+      expect(ringState(), const IncomingCallState.quiet());
+    });
+
+    test('logout_whileItRings_goesQuiet', () async {
+      // Act
+      accounts.read(_activeClientProvider.notifier).set(null);
+      await pumpEventQueue();
+
+      // Assert
+      expect(ringState(), const IncomingCallState.quiet());
+    });
   });
 
   test('build_withNoRing_isQuiet', () {

@@ -73,6 +73,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   CallMembershipExtender? _extender;
   final _trackers = <CallRingTracker>{};
   final _sentRings = <String, String>{};
+  final _disposed = Completer<void>();
 
   Client get _client => _maybeClient ?? (throw const CallNoClientException());
 
@@ -318,8 +319,9 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     );
   }
 
-  /// DECISION.md D21: the whole room rings, direct chats and groups alike,
-  /// as Twake Space Chat (matrix-js-sdk 43) rings it.
+  /// DECISION.md D21: the whole room rings, direct chats and groups alike.
+  /// No room mention: `.m.rule.is_room_mention` would take the push of a
+  /// caller allowed to mention the room, without the ring sound.
   @override
   Future<void> sendRing(CallJoin join, {required String membershipEventId}) =>
       _logged('ring not sent', () async {
@@ -333,7 +335,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
             'notification_type': 'ring',
             'sender_ts': DateTime.now().millisecondsSinceEpoch,
             'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
-            'm.mentions': {'user_ids': <String>[], 'room': true},
+            'm.mentions': <String, Object?>{},
             'm.relates_to': {
               'rel_type': 'm.reference',
               'event_id': membershipEventId,
@@ -414,8 +416,12 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     }
   }
 
+  /// Empty first: the tracker emits only on a change.
   @override
-  Stream<List<CallRing>> watchRings() => _watch((tracker) => tracker.rings);
+  Stream<List<CallRing>> watchRings() async* {
+    yield const [];
+    yield* _watch((tracker) => tracker.rings);
+  }
 
   @override
   Stream<MissedCall> watchMissedCalls() =>
@@ -427,10 +433,8 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         final client = _client;
         // Unknown before the first sync, however late: a rule of its owner
         // would be written over.
-        if (client.globalPushRules == null) {
-          await client.onSync.stream.any((_) => client.globalPushRules != null);
-        }
-        // Logged out before any sync.
+        await _untilPushRulesKnown(client);
+        // Disposed before any sync.
         final rules = client.globalPushRules;
         if (rules == null) return;
         final underride = rules.underride ?? const [];
@@ -445,6 +449,19 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
           );
         }
       });
+
+  /// A disposed client sends no more syncs: its datasource ends the wait.
+  Future<void> _untilPushRulesKnown(Client client) async {
+    if (client.globalPushRules != null) return;
+    final known = Completer<void>();
+    final syncs = client.onSync.stream.listen((_) {
+      if (client.globalPushRules != null && !known.isCompleted) {
+        known.complete();
+      }
+    });
+    await Future.any([known.future, _disposed.future]);
+    unawaited(syncs.cancel());
+  }
 
   @override
   Stream<void> watchRoomEncrypted(CallRoom call) async* {
@@ -478,6 +495,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   void dispose() {
+    if (!_disposed.isCompleted) _disposed.complete();
     _endSession().extended.ignore();
     _trackers.toList().forEach((tracker) => tracker.dispose());
   }

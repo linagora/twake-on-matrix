@@ -410,9 +410,13 @@ ring (MSC4075) in the room. Another device of the same account in the call
 counts as someone: only the first to join rings.
 
 - The whole room rings, direct chats and groups alike, as Twake Space Chat
-  rings it (matrix-js-sdk 43): `notification_type: ring`, `m.mentions`
-  `room: true`, a lifetime of 60 s (decided by Johann, 2026-11-23: mobile
-  behaves as the web).
+  rings it: `notification_type: ring`, a lifetime of 60 s (decided by Johann,
+  2026-11-23: mobile behaves as the web).
+- Unlike matrix-js-sdk 43, the ring mentions nobody (`m.mentions: {}`). With
+  `room: true`, `.m.rule.is_room_mention` takes the push of a caller allowed
+  to mention the room before the ring rule, and the push plays no ring sound
+  (seen on Synapse 1.162, 2026-11-25). Twake Space Chat reads a ring without
+  a mention; a ring that names other people only does not ring.
 - The ring is sent in the clear, also in an encrypted room: the push gateway
   and the other devices read it without the keys of the room. It holds no
   message content.

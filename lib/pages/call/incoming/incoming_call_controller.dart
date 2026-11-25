@@ -27,7 +27,9 @@ class IncomingCallController extends _$IncomingCallController {
 
   @override
   IncomingCallState build() {
-    final rings = ref.watch(callRingsProvider).value ?? const [];
+    // Not the rings of the account left, while the new one is read.
+    final rings =
+        ref.watch(callRingsProvider).unwrapPrevious().value ?? const [];
     final call = ref.watch(callControllerProvider);
     _handled.retainWhere((id) => rings.any((ring) => ring.eventId == id));
     return _pick(rings, call);

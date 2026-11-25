@@ -68,7 +68,7 @@ class _FakeRoom extends Fake implements Room {
   });
 
   @override
-  Membership get membership => Membership.join;
+  Membership membership = Membership.join;
 
   var displayName = 'General';
 
@@ -330,30 +330,33 @@ void main() {
   });
 
   group('sendRing', () {
-    test('the ring mentions the room and holds what the web sends', () async {
-      client.room
-        ..dmUser = _alice.user
-        ..joinedCount = 2;
-      final before = DateTime.now().millisecondsSinceEpoch;
+    test(
+      'the ring mentions nobody, so no room mention rule takes it',
+      () async {
+        client.room
+          ..dmUser = _alice.user
+          ..joinedCount = 2;
+        final before = DateTime.now().millisecondsSinceEpoch;
 
-      await datasource.sendRing(_videoJoin, membershipEventId: r'$member');
+        await datasource.sendRing(_videoJoin, membershipEventId: r'$member');
 
-      final after = DateTime.now().millisecondsSinceEpoch;
-      final sent = client.sent.single;
-      expect(sent.roomId, '!room:hs.test');
-      expect(sent.type, 'org.matrix.msc4075.rtc.notification');
-      final senderTs = sent.content['sender_ts'];
-      expect(senderTs, isA<int>());
-      expect(senderTs as int, inInclusiveRange(before, after));
-      expect({...sent.content}..remove('sender_ts'), {
-        'slot_id': 'm.call#ROOM',
-        'notification_type': 'ring',
-        'lifetime': 60000,
-        'm.mentions': {'user_ids': <String>[], 'room': true},
-        'm.relates_to': {'rel_type': 'm.reference', 'event_id': r'$member'},
-        'm.call.intent': 'video',
-      });
-    });
+        final after = DateTime.now().millisecondsSinceEpoch;
+        final sent = client.sent.single;
+        expect(sent.roomId, '!room:hs.test');
+        expect(sent.type, 'org.matrix.msc4075.rtc.notification');
+        final senderTs = sent.content['sender_ts'];
+        expect(senderTs, isA<int>());
+        expect(senderTs as int, inInclusiveRange(before, after));
+        expect({...sent.content}..remove('sender_ts'), {
+          'slot_id': 'm.call#ROOM',
+          'notification_type': 'ring',
+          'lifetime': 60000,
+          'm.mentions': <String, Object?>{},
+          'm.relates_to': {'rel_type': 'm.reference', 'event_id': r'$member'},
+          'm.call.intent': 'video',
+        });
+      },
+    );
 
     // DECISION.md D21: the whole room rings, as Twake Space Chat rings it.
     final rooms = <String, ({String? dmUser, int? joined})>{
@@ -377,7 +380,7 @@ void main() {
 
         final content = client.sent.single.content;
         expect(content['notification_type'], 'ring');
-        expect(content['m.mentions'], {'user_ids': <String>[], 'room': true});
+        expect(content['m.mentions'], <String, Object?>{});
       });
     });
 
@@ -702,6 +705,20 @@ void main() {
       });
     });
 
+    test('the rings start empty, before any ring', () {
+      fakeAsync((async) {
+        listen(async);
+
+        expect(lists, [isEmpty]);
+      });
+    });
+
+    test('without an account the rings are empty, then done', () async {
+      final rings = await MatrixRtcDatasourceImpl(null).watchRings().toList();
+
+      expect(rings, [isEmpty]);
+    });
+
     test('the ring of the user is not for the user', () {
       fakeAsync((async) {
         listen(async);
@@ -968,14 +985,27 @@ void main() {
       });
     });
 
-    test('a ring that mentions nobody does not ring', () {
+    // DECISION.md D21: a ring of Twake Chat mentions nobody and rings the
+    // whole room, as Twake Space Chat reads any ring.
+    test('a ring that mentions nobody rings', () {
       fakeAsync((async) {
         listen(async);
 
         client.ring(_Ring()..extra = {'m.mentions': <String, Object?>{}});
         async.flushMicrotasks();
 
-        expect(everRung(), isEmpty);
+        expect(lists.last.single.eventId, r'$ring');
+      });
+    });
+
+    test('a ring without mentions rings', () {
+      fakeAsync((async) {
+        listen(async);
+
+        client.ring(_Ring()..extra = {'m.mentions': null});
+        async.flushMicrotasks();
+
+        expect(lists.last.single.eventId, r'$ring');
       });
     });
 
@@ -1152,6 +1182,55 @@ void main() {
     }
 
     Iterable<String> missedRings() => missed.map((call) => call.ringEventId);
+
+    test('the user left the room: it rings no more, no missed call', () {
+      fakeAsync((async) {
+        ring(async);
+        client.room.membership = Membership.leave;
+
+        sync(async);
+
+        expect(lists.last, isEmpty);
+        expect(missedRings(), isEmpty);
+      });
+    });
+
+    test('the leave of the user in the timeline stops its ring', () {
+      fakeAsync((async) {
+        ring(async);
+
+        client.receive(
+          _Incoming()
+            ..type = 'm.room.member'
+            ..id = r'$leave'
+            ..sender = _bobHere.user
+            ..stateKey = _bobHere.user
+            ..content = {'membership': 'leave'},
+        );
+        async.flushMicrotasks();
+
+        expect(lists.last, isEmpty);
+        expect(missedRings(), isEmpty);
+      });
+    });
+
+    test('someone else leaving the room leaves the ring ringing', () {
+      fakeAsync((async) {
+        ring(async);
+
+        client.receive(
+          _Incoming()
+            ..type = 'm.room.member'
+            ..id = r'$leave'
+            ..sender = _alice.user
+            ..stateKey = _alice.user
+            ..content = {'membership': 'leave'},
+        );
+        async.flushMicrotasks();
+
+        expect(lists.last, hasLength(1));
+      });
+    });
 
     // Each sync gives the call members of the room state at that time.
     final cases =
@@ -1479,6 +1558,22 @@ void main() {
           'app.twake.chat.call_ring',
           'app.twake.chat.call_ring_legacy',
         ]);
+      });
+    });
+
+    test('disposed before any sync: the wait ends, nothing is set', () {
+      fakeAsync((async) {
+        client = _FakeClient()..rules = null;
+        datasource = MatrixRtcDatasourceImpl(client);
+        var isDone = false;
+        datasource.ensureCallRingPushRules().then<void>((_) => isDone = true);
+        async.flushMicrotasks();
+
+        datasource.dispose();
+        async.elapse(const Duration(seconds: 1));
+
+        expect(isDone, isTrue);
+        expect(client.pushRules, isEmpty);
       });
     });
 

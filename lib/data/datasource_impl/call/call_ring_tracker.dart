@@ -55,6 +55,8 @@ class CallRingTracker {
     switch (event.type) {
       case CallEventTypes.callMember:
         _onMembership(event);
+      case EventTypes.RoomMember:
+        _onRoomMember(event);
       case CallEventTypes.callDecline || CallEventTypes.callDeclineStable:
         _onDecline(event);
       case 'org.matrix.msc4075.rtc.notification' || CallEventTypes.callNotify:
@@ -65,12 +67,20 @@ class CallRingTracker {
   void _onMembership(Event event) {
     final inCall = event.content['device_id'] is String;
     if (!inCall || event.senderId != _client.userID) return;
-    final inRoom = [
-      for (final ring in _rings.values)
-        if (ring.room.id == event.roomId) ring.eventId,
-    ];
-    inRoom.forEach(_remove);
+    _removeRoom(event.roomId);
   }
+
+  /// Left or removed: the rings of that room are for the account no more.
+  void _onRoomMember(Event event) {
+    if (event.stateKey != _client.userID) return;
+    if (event.content['membership'] == Membership.join.name) return;
+    _removeRoom(event.roomId);
+  }
+
+  void _removeRoom(String? roomId) => [
+    for (final ring in _rings.values)
+      if (ring.room.id == roomId) ring.eventId,
+  ].forEach(_remove);
 
   /// A join can come with a limited sync only as room state. A call that had
   /// a member and has none left rings no more: the caller hung up, a missed
@@ -82,7 +92,9 @@ class CallRingTracker {
 
   Future<void> _checkCall(String ringId) async {
     final room = _client.getRoomById(_rings[ringId]?.room.id ?? '');
-    if (room == null || !await _isLoaded(room)) return;
+    if (room == null) return;
+    if (room.membership != Membership.join) return _remove(ringId);
+    if (!await _isLoaded(room)) return;
     if (!_rings.containsKey(ringId)) return;
     final live = _liveMembers(room);
     if (live.any((member) => member.senderId == _client.userID)) {
@@ -181,13 +193,15 @@ class CallRingTracker {
     final userId = _client.userID;
     if (userId == null || _isOwnOrKnown(event)) return false;
     if (!_isRing(event) || _isInCallHere(event.room)) return false;
-    // The server time, as the ring is tracked: the clock of the sender
-    // counts neither for the expiry nor for the lifetime.
-    return RtcNotificationContent(
-      senderTs: event.originServerTs,
-      notificationType: RtcNotificationType.ring,
-      lifetime: _lifetimeOf(event),
-    ).shouldNotifyUser(event: event, currentUserId: userId);
+    return !_mentionsOnlyOthers(event, userId);
+  }
+
+  /// A ring rings the whole room unless it names other people only.
+  static bool _mentionsOnlyOthers(Event event, String userId) {
+    final mentions = event.content['m.mentions'];
+    if (mentions is! Map || mentions['room'] == true) return false;
+    final userIds = mentions['user_ids'];
+    return userIds is List && userIds.isNotEmpty && !userIds.contains(userId);
   }
 
   bool _isOwnOrKnown(Event event) =>
