@@ -1674,6 +1674,11 @@ class ChatController extends ConsumerState<Chat>
         onUpdate: updateView,
         eventContextId: eventContextId,
       );
+      // Closed while loading: nothing else would cancel this timeline.
+      if (!mounted) {
+        loaded?.cancelSubscriptions();
+        return;
+      }
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
       if (!mounted) {
