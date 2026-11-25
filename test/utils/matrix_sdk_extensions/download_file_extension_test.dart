@@ -39,7 +39,11 @@ void main() {
     tempDir.deleteSync(recursive: true);
   });
 
-  Future<FileInfo?> downloadAndDecrypt(Uint8List plain, String fileName) async {
+  Future<FileInfo?> downloadAndDecrypt(
+    Uint8List plain,
+    String fileName, {
+    Room? inRoom,
+  }) async {
     final encrypted = await MatrixFile(bytes: plain, name: fileName).encrypt();
     final encryptedPath = await StorageDirectoryManager.instance
         .getFilePathInAppDownloads(eventId: eventId, fileName: fileName);
@@ -68,7 +72,7 @@ void main() {
       eventId: eventId,
       senderId: '@bob:example.org',
       originServerTs: DateTime.now(),
-      room: room,
+      room: inRoom ?? room,
     );
     final decryptedPath = await StorageDirectoryManager.instance
         .getDecryptedFilePath(eventId: eventId, fileName: fileName);
@@ -109,5 +113,27 @@ void main() {
         expect(await File(result!.filePath!).readAsBytes(), plain);
       },
     );
+
+    test('decryptFile_whenTheClientIsLoggedOut_writesNoPlainFile', () async {
+      // Arrange
+      final loggedOutRoom = Room(
+        id: '!room:example.org',
+        client: Client('logged out', database: MockDatabase()),
+      );
+      final plain = Uint8List.fromList(utf8.encode('%PDF-1.4 secret plan'));
+      final decryptedPath = await StorageDirectoryManager.instance
+          .getDecryptedFilePath(eventId: eventId, fileName: fileName);
+
+      // Act
+      final decrypting = downloadAndDecrypt(
+        plain,
+        fileName,
+        inRoom: loggedOutRoom,
+      );
+
+      // Assert
+      await expectLater(decrypting, throwsStateError);
+      expect(File(decryptedPath).existsSync(), isFalse);
+    });
   });
 }
