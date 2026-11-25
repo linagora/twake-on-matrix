@@ -1,18 +1,11 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 
 import '../../fake_client.dart';
 
-/// Issue #3263: the chat list shows the caption a file was sent with, not
-/// « sent a file ». Per the Matrix spec (v1.10, `m.file`), `body` is a caption
-/// only when `filename` is present and differs from it.
-/// https://spec.matrix.org/v1.10/client-server-api/#mfile
 void main() {
   late Room room;
-  final l10n = lookupL10n(const Locale('en'));
   const pdf = 'Contributions.pdf';
 
   Event file(Map<String, Object?> content, {String msgtype = 'm.file'}) =>
@@ -70,27 +63,15 @@ void main() {
     });
   });
 
-  group('chat list preview of a file', () {
-    test('shows the caption on one line', () async {
+  group('Event.chatListFileText', () {
+    test('puts a multi-line caption on one line', () {
       final event = file({'body': 'Would this\ndo?', 'filename': pdf});
 
-      expect(
-        await event.calcLocalizedBodyRemoveBreakLine(l10n),
-        'Would this do?',
-      );
-      expect(
-        event.calcLocalizedBodyFallbackRemoveBreakLine(l10n),
-        'Would this do?',
-      );
+      expect(event.chatListFileText, 'Would this do?');
     });
 
-    test('still says a file was sent when there is no caption', () async {
-      final event = file({'body': pdf, 'filename': pdf});
-
-      expect(
-        await event.calcLocalizedBodyRemoveBreakLine(l10n),
-        contains('sent a file'),
-      );
+    test('is the file name when there is no caption', () {
+      expect(file({'body': pdf, 'filename': pdf}).chatListFileText, pdf);
     });
   });
 }
