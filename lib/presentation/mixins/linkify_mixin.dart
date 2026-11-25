@@ -191,6 +191,32 @@ mixin LinkifyMixin {
     );
   }
 
+  /// A link opens on tap up, so a drag that starts on it scrolls instead.
+  ({
+    void Function(TapDownDetails, Link) onTapDownLink,
+    void Function(Link) onTapLink,
+  })
+  linkTapHandlers(BuildContext context) {
+    TapDownDetails? lastTapDown;
+    return (
+      onTapDownLink: (details, _) => lastTapDown = details,
+      onTapLink: (link) {
+        // A screen reader activates a link without any tap down.
+        final details = lastTapDown ?? _tapDownAtCenterOf(context);
+        lastTapDown = null;
+        handleOnTappedLinkHtml(context: context, details: details, link: link);
+      },
+    );
+  }
+
+  TapDownDetails _tapDownAtCenterOf(BuildContext context) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return TapDownDetails();
+    return TapDownDetails(
+      globalPosition: box.localToGlobal(box.size.center(Offset.zero)),
+    );
+  }
+
   void handleOnTappedLinkHtml({
     required BuildContext context,
     required TapDownDetails details,

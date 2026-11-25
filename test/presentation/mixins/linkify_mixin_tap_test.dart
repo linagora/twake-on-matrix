@@ -87,8 +87,9 @@ void main() {
 
   Future<ScrollController> pumpInTimeline(
     WidgetTester tester,
-    Widget message,
-  ) async {
+    Widget message, {
+    VoidCallback? onLongPress,
+  }) async {
     final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -109,7 +110,7 @@ void main() {
                 controller: scrollController,
                 children: [
                   const SizedBox(height: 200),
-                  message,
+                  GestureDetector(onLongPress: onLongPress, child: message),
                   const SizedBox(height: 2000),
                 ],
               ),
@@ -136,6 +137,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
     await gesture.up();
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> activateWithScreenReader(
+    WidgetTester tester,
+    String label,
+  ) async {
+    tester.semantics.tap(find.semantics.byLabel(label));
     await tester.pumpAndSettle();
   }
 
@@ -187,6 +196,62 @@ void main() {
         expect(tester.getRect(copy).top, greaterThan(tap.dy));
         expect(tester.getRect(copy).top, lessThan(tap.dy + 150));
       });
+
+      testWidgets('a long press on a link goes to the message', (tester) async {
+        var longPressed = false;
+        await pumpInTimeline(
+          tester,
+          build(_url),
+          onLongPress: () => longPressed = true,
+        );
+
+        await tester.longPressAt(linkStart(tester, _url));
+        await tester.pumpAndSettle();
+
+        expect(longPressed, isTrue);
+        expect(platform.launches, isEmpty);
+      });
+
+      testWidgets(
+        'a screen-reader activation of a phone number opens its menu at the '
+        'message',
+        (tester) async {
+          onIOS();
+          await pumpInTimeline(tester, build(_phone));
+          final message = tester.getRect(
+            find.byWidgetPredicate((w) => w.runtimeType.toString() == name),
+          );
+
+          await activateWithScreenReader(tester, _phone);
+
+          final copy = find.text('Copy number');
+          expect(copy, findsOneWidget);
+          expect(tester.getRect(copy).top, greaterThan(message.top));
+          expect(tester.getRect(copy).top, lessThan(message.bottom + 150));
+        },
+      );
+
+      testWidgets(
+        'a screen-reader activation after a tap ignores the old tap position',
+        (tester) async {
+          onIOS();
+          final scrollController = await pumpInTimeline(tester, build(_phone));
+          final tap = linkStart(tester, _phone);
+          await tester.tapAt(tap);
+          await tester.pumpAndSettle();
+          Navigator.of(tester.element(find.text('Copy number'))).pop();
+          await tester.pumpAndSettle();
+          scrollController.jumpTo(150);
+          await tester.pumpAndSettle();
+
+          await activateWithScreenReader(tester, _phone);
+
+          expect(
+            tester.getRect(find.text('Copy number')).top,
+            lessThan(tap.dy - 50),
+          );
+        },
+      );
     });
   }
 
