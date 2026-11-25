@@ -18,6 +18,14 @@ import 'package:matrix/matrix.dart';
 
 extension DownloadFileExtension on Event {
   static final _downloadsInFlight = <String, Future<void>>{};
+  static final _cancelTokensInFlight = <CancelToken>{};
+
+  static Future<void> cancelDownloadsInFlight() async {
+    for (final token in _cancelTokensInFlight.toList()) {
+      token.cancel();
+    }
+    await Future.wait(_downloadsInFlight.values.toList());
+  }
 
   bool canContainAttachment() {
     return [EventTypes.Message, EventTypes.Sticker].contains(type);
@@ -51,33 +59,42 @@ extension DownloadFileExtension on Event {
     required String filename,
     bool throwOnError = false,
   }) async {
-    final downloadLink = await mxcUrl.getDownloadUri(room.client);
-    final downloadKey = downloadLink.toString();
-    for (
-      var inFlight = _downloadsInFlight[downloadKey];
-      inFlight != null && cancelToken?.isCancelled != true;
-      inFlight = _downloadsInFlight[downloadKey]
-    ) {
-      await Future.any([inFlight, ?cancelToken?.whenCancel]);
-    }
     if (cancelToken?.isCancelled == true) return null;
-    final done = Completer<void>();
-    _downloadsInFlight[downloadKey] = done.future;
+    final ownToken = CancelToken();
+    cancelToken?.whenCancel.then((_) => ownToken.cancel());
+    _cancelTokensInFlight.add(ownToken);
     try {
-      return await _downloadOrRetrieve(
-        mxcUrl,
-        downloadLink,
-        savePath,
-        downloadStreamController: downloadStreamController,
-        progressCallback: progressCallback,
-        getThumbnail: getThumbnail,
-        cancelToken: cancelToken,
-        filename: filename,
-        throwOnError: throwOnError,
-      );
+      final downloadLink = await mxcUrl.getDownloadUri(room.client);
+      final downloadKey = downloadLink.toString();
+      for (
+        var inFlight = _downloadsInFlight[downloadKey];
+        inFlight != null && !ownToken.isCancelled;
+        inFlight = _downloadsInFlight[downloadKey]
+      ) {
+        await Future.any([inFlight, ownToken.whenCancel]);
+      }
+      // The last logout cancels the downloads in flight, then deletes them.
+      if (ownToken.isCancelled || !room.client.isLogged()) return null;
+      final done = Completer<void>();
+      _downloadsInFlight[downloadKey] = done.future;
+      try {
+        return await _downloadOrRetrieve(
+          mxcUrl,
+          downloadLink,
+          savePath,
+          downloadStreamController: downloadStreamController,
+          progressCallback: progressCallback,
+          getThumbnail: getThumbnail,
+          cancelToken: ownToken,
+          filename: filename,
+          throwOnError: throwOnError,
+        );
+      } finally {
+        _downloadsInFlight.remove(downloadKey);
+        done.complete();
+      }
     } finally {
-      _downloadsInFlight.remove(downloadKey);
-      done.complete();
+      _cancelTokensInFlight.remove(ownToken);
     }
   }
 

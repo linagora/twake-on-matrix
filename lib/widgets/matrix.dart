@@ -75,6 +75,7 @@ import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/offline_failure.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -1748,6 +1749,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _deleteDownloadedFiles() async {
     try {
+      await DownloadFileExtension.cancelDownloadsInFlight();
       await StorageDirectoryManager.instance.deleteDownloadedFiles();
     } catch (e, s) {
       _report(e, s, 'deletion of the downloaded files at the last logout');
