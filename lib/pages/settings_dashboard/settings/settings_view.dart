@@ -3,7 +3,6 @@ import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings_item_builder.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings_view_style.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
-import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
@@ -16,10 +15,18 @@ import 'settings.dart';
 
 class SettingsView extends StatelessWidget {
   final SettingsController controller;
+  final String mxid;
+  final String fallbackDisplayName;
   final Widget? bottomNavigationBar;
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
-  const SettingsView(this.controller, {super.key, this.bottomNavigationBar});
+  const SettingsView(
+    this.controller, {
+    super.key,
+    required this.mxid,
+    required this.fallbackDisplayName,
+    this.bottomNavigationBar,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +91,9 @@ class SettingsView extends StatelessWidget {
                                 ),
                                 child: Avatar(
                                   mxContent: avatarUrl,
-                                  name: controller.displayName,
+                                  name:
+                                      controller.displayNameNotifier.value ??
+                                      fallbackDisplayName,
                                   size: AvatarStyle.defaultSize,
                                   fontSize: SettingsViewStyle.fontSizeAvatar,
                                 ),
@@ -106,7 +115,7 @@ class SettingsView extends StatelessWidget {
                                           controller.displayNameNotifier,
                                       builder: (context, displayName, _) {
                                         return Text(
-                                          displayName ?? controller.displayName,
+                                          displayName ?? fallbackDisplayName,
                                           style: textTheme.titleLarge?.copyWith(
                                             color: colorScheme.onSurface,
                                           ),
@@ -116,7 +125,7 @@ class SettingsView extends StatelessWidget {
                                       },
                                     ),
                                     Text(
-                                      controller.client.mxid(context),
+                                      mxid,
                                       style: textTheme.labelLarge?.copyWith(
                                         color: refColorTertiary30,
                                       ),
