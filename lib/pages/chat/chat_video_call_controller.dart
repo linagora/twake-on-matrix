@@ -7,9 +7,10 @@ part 'chat_video_call_controller.g.dart';
 @riverpod
 class ChatVideoCallController extends _$ChatVideoCallController {
   @override
-  ChatVideoCallState build(String roomId) => const ChatVideoCallState.idle();
+  ChatVideoCallState build(String userId, String roomId) =>
+      const ChatVideoCallState.idle();
 
-  /// Does nothing while a call is already starting in [roomId].
+  /// Does nothing while a call is already starting for this account in [roomId].
   ///
   /// Throws a `VideoCallException`.
   Future<void> start(

@@ -15,6 +15,7 @@ import 'chat_video_call_controller_test.mocks.dart';
 void main() {
   const roomId = '!room:example.com';
   late MockStartVideoCallUseCase useCase;
+  const userId = '@alice:example.com';
   late ProviderContainer container;
 
   setUp(() {
@@ -31,7 +32,7 @@ void main() {
   );
 
   Future<void> start() => container
-      .read(chatVideoCallControllerProvider(roomId).notifier)
+      .read(chatVideoCallControllerProvider(userId, roomId).notifier)
       .start(useCase, baseUrl: 'https://meet.example.com', startedTitle: 't');
 
   group('ChatVideoCallController', () {
@@ -49,7 +50,7 @@ void main() {
 
         // Assert
         expect(
-          container.read(chatVideoCallControllerProvider(roomId)),
+          container.read(chatVideoCallControllerProvider(userId, roomId)),
           const ChatVideoCallState.starting(),
         );
         completer.complete();
@@ -67,7 +68,7 @@ void main() {
     test('start_whenTheUseCaseThrows_rethrowsAndGoesBackToIdle', () async {
       // Arrange
       final sub = container.listen(
-        chatVideoCallControllerProvider(roomId),
+        chatVideoCallControllerProvider(userId, roomId),
         (_, _) {},
       );
       addTearDown(sub.close);
@@ -78,6 +79,41 @@ void main() {
       // Act & Assert
       await expectLater(start(), throwsA(isA<VideoCallException>()));
       expect(sub.read(), const ChatVideoCallState.idle());
+    });
+
+    test('start_whenDisposedWhilePending_completesWithoutError', () async {
+      // Arrange
+      final completer = Completer<void>();
+      whenExecute().thenAnswer((_) => completer.future);
+      final pending = start();
+      await Future<void>.delayed(Duration.zero);
+
+      // Act
+      container.dispose();
+      completer.complete();
+
+      // Assert
+      await expectLater(pending, completes);
+    });
+
+    test('start_inTheSameRoomFromAnotherAccount_leavesItIdle', () async {
+      // Arrange
+      final completer = Completer<void>();
+      whenExecute().thenAnswer((_) => completer.future);
+
+      // Act
+      final pending = start();
+      await Future<void>.delayed(Duration.zero);
+
+      // Assert
+      expect(
+        container.read(
+          chatVideoCallControllerProvider('@bob:example.com', roomId),
+        ),
+        const ChatVideoCallState.idle(),
+      );
+      completer.complete();
+      await pending;
     });
   });
 }
