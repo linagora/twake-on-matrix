@@ -173,15 +173,12 @@ class ChatEventListItem extends StatelessWidget {
     );
   }
 
-  void _openThread(
-    BuildContext context, {
-    bool start = false,
-    Event? root,
-  }) => ThreadRoute(
-    roomid: event.room.id,
-    rootid: (root ?? event).eventId,
-    start: start,
-  ).push<void>(context);
+  void _openThread(BuildContext context, {bool start = false, Event? root}) =>
+      ThreadRoute(
+        roomid: event.room.id,
+        rootid: (root ?? event).eventId,
+        start: start,
+      ).push<void>(context);
 
   Widget _summaryCard(BuildContext context, ThreadSummary summary) =>
       ListenableBuilder(
