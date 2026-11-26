@@ -5,17 +5,15 @@ import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 class SpaceRowData {
   const SpaceRowData({
     required this.fold,
+    required this.roomCount,
     required this.unreadCount,
     required this.mentionCount,
     required this.onToggleFold,
-    this.onAddSubspace,
   });
 
   final SpaceFold fold;
+  final int roomCount;
   final int unreadCount;
   final int mentionCount;
   final VoidCallback onToggleFold;
-
-  /// A sub-space goes under a top space the user may add to.
-  final VoidCallback? onAddSubspace;
 }

@@ -2967,12 +2967,28 @@
       "name": {}
     }
   },
-  "addSubspaceTo": "Add subspace to {name}",
-  "@addSubspaceTo": {
+  "spaceRoomCount": "{count, plural, =1{1 room} other{{count} rooms}}",
+  "@spaceRoomCount": {
     "type": "text",
     "placeholders": {
-      "name": {}
+      "count": {
+        "type": "int"
+      }
     }
+  },
+  "spaceUnreadCount": "{count, plural, =1{1 unread} other{{count} unread}}",
+  "@spaceUnreadCount": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spaceAddRoom": "Add a room",
+  "@spaceAddRoom": {
+    "type": "text",
+    "placeholders": {}
   },
   "joinWithMembers": "{count, plural, =1{Join · 1 member} other{Join · {count} members}}",
   "@joinWithMembers": {
@@ -3085,11 +3101,6 @@
   },
   "spaceLeaveSubtitle": "The space and its chats will still remain after you left",
   "@spaceLeaveSubtitle": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceMentioned": "You were mentioned",
-  "@spaceMentioned": {
     "type": "text",
     "placeholders": {}
   },

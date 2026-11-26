@@ -7,6 +7,7 @@ import 'package:twake_chat/pages/chat_list/chat_list_sort_rooms.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view_style.dart';
 import 'package:twake_chat/pages/chat_list/common_chat_list_item.dart';
 import 'package:twake_chat/providers/room_list/folded_spaces_controller.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/add_to_space_row.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/joinable_subspace_row.dart';
 import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
@@ -83,6 +84,14 @@ class _RoomListSliver extends ConsumerWidget {
         return SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) => switch (rows[index]) {
+              final RoomListAddRow row => AddToSpaceRow(
+                key: ValueKey(row.key),
+                depth: row.depth,
+                onTap: () => controller.goToNewGroupChat(
+                  context,
+                  parentSpaceId: row.spaceId,
+                ),
+              ),
               final RoomListJoinableRow row => JoinableSubspaceRow(
                 key: ValueKey(row.key),
                 row: row,
@@ -134,14 +143,12 @@ class _RoomRow extends ConsumerWidget {
     if (row == null) return null;
     return SpaceRowData(
       fold: row.fold,
+      roomCount: row.roomCount,
       unreadCount: row.unreadCount,
       mentionCount: row.mentionCount,
       onToggleFold: () => ref
           .read(foldedSpacesControllerProvider.notifier)
           .toggle(row.entry.id),
-      onAddSubspace: row.depth == 0 && row.entry.canAddChildren
-          ? () => controller.goToNewSpace(context, parentSpaceId: row.entry.id)
-          : null,
     );
   }
 

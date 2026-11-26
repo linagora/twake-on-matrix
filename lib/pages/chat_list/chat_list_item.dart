@@ -7,7 +7,7 @@ import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_row_divider.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
-import 'package:twake_chat/pages/chat_list/room_list_filter/space_row_actions.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/space_row_body.dart';
 import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -151,40 +151,31 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Column(
-                              mainAxisAlignment: space != null
-                                  ? MainAxisAlignment.center
-                                  : MainAxisAlignment.start,
-                              children: [
-                                ChatListItemTitle(
-                                  room: room,
-                                  originServerTs: switch (previewResult) {
-                                    RoomPreviewFound(:final event)
-                                        when space == null =>
-                                      event.originServerTs,
-                                    _ => null,
-                                  },
-                                ),
-                                // A space is no conversation: nothing to preview.
-                                if (space == null)
+                            child: switch (space) {
+                              final SpaceRowData space => SpaceRowBody(
+                                name: displayName,
+                                space: space,
+                                isPinned: room.isFavourite,
+                                isInvitation: room.isInvitation,
+                              ),
+                              null => Column(
+                                children: [
+                                  ChatListItemTitle(
+                                    room: room,
+                                    originServerTs: switch (previewResult) {
+                                      RoomPreviewFound(:final event) =>
+                                        event.originServerTs,
+                                      _ => null,
+                                    },
+                                  ),
                                   ChatListItemSubtitle(
                                     room: room,
                                     previewResult: previewResult,
-                                  )
-                                else if (room.isInvitation)
-                                  Text(
-                                    L10n.of(context)!.invited,
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: LinagoraSysColors.material()
-                                              .primary,
-                                        ),
                                   ),
-                              ],
-                            ),
+                                ],
+                              ),
+                            },
                           ),
-                          if (space case final space?)
-                            SpaceRowActions(name: displayName, space: space),
                         ],
                       ),
                     ),
@@ -277,7 +268,6 @@ class _ChatListAvatar extends StatelessWidget {
 
   AvatarKindBadge? get _badge {
     if (room.isDirectChat) return null;
-    if (room.isSpace) return AvatarKindBadge.space;
     if (room.isFeed) return AvatarKindBadge.broadcast;
     return room.joinRules == JoinRules.public
         ? AvatarKindBadge.public
@@ -287,13 +277,14 @@ class _ChatListAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final badge = _badge;
-    if (badge == null) {
+    if (badge == null || room.isSpace) {
       return Avatar(
         mxContent: room.avatar,
         name: name,
         size: size,
         onTap: onTap,
         keepAlive: true,
+        cornerRadius: room.isSpace ? size / 4 : null,
       );
     }
     return AvatarWithKindBadge(

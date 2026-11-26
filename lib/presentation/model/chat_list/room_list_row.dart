@@ -28,12 +28,16 @@ class RoomListSpaceRow extends RoomListRow {
     required super.key,
     required super.depth,
     required this.fold,
+    required this.roomCount,
     required this.unreadCount,
     required this.mentionCount,
   });
 
   final RoomListEntry entry;
   final SpaceFold fold;
+
+  /// The joined rooms under it at any depth, folded or not.
+  final int roomCount;
   final int unreadCount;
   final int mentionCount;
 }
@@ -48,6 +52,14 @@ class RoomListJoinableRow extends RoomListRow {
 
   final SpaceChannel subspace;
   final String parentSpaceId;
+}
+
+/// The line that adds a room to an open top space, after all it holds.
+class RoomListAddRow extends RoomListRow {
+  RoomListAddRow(this.spaceId, {required super.depth})
+    : super(key: 'add:$spaceId');
+
+  final String spaceId;
 }
 
 /// The list as it shows: the pinned rooms, then every room by its place in
@@ -122,6 +134,7 @@ List<RoomListRow> _spaceRows(
       node.entry,
       key: node.entry.id,
       depth: depth,
+      roomCount: node.descendants.where((e) => !e.isSpace && e.isJoined).length,
       fold: !canFold
           ? SpaceFold.none
           : isOpen
@@ -142,6 +155,8 @@ List<RoomListRow> _spaceRows(
           parentSpaceId: node.entry.id,
           depth: depth + 1,
         ),
+      if (depth == 0 && node.entry.canAddChildren)
+        RoomListAddRow(node.entry.id, depth: 1),
     ],
   ];
 }

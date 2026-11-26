@@ -13,7 +13,6 @@ import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
 import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 
 import 'chat_list_item_test.dart' show buildRoom, wrap;
 import 'chat_list_item_test.mocks.dart';
@@ -258,22 +257,23 @@ void main() {
       expect(lines.first.bottom, tester.getRect(rows.first).bottom);
       expect(lines.last.bottom, tester.getRect(rows.last).bottom);
     });
+  });
 
-    // #3711: the kind badge of a space avatar sat on the line under the row.
-    testWidgets('a space row keeps its kind badge above the line', (
-      tester,
-    ) async {
-      final space = _chat('Team');
+  group('separator of a space row', () {
+    Future<List<Rect>> pumpChatThenSpace(WidgetTester tester) async {
+      final space = _chat('Team', id: '!space:server.tld');
       when(space.isDirectChat).thenReturn(false);
       when(space.isSpace).thenReturn(true);
 
       await tester.pumpWidget(
         _rows([
+          ChatListItem(_chat('Project Apollo')),
           ChatListItem(
             space,
             space: SpaceRowData(
               fold: SpaceFold.none,
-              unreadCount: 0,
+              roomCount: 3,
+              unreadCount: 1,
               mentionCount: 0,
               onToggleFold: () {},
             ),
@@ -281,15 +281,34 @@ void main() {
         ]),
       );
       await _settle(tester);
+      return _separators(tester);
+    }
 
-      final line = (await _separators(tester)).single;
-      final badge = tester.getRect(
-        find.descendant(
-          of: find.byType(AvatarWithKindBadge),
-          matching: find.byType(Icon),
-        ),
+    testWidgets('starts at the left edge of the space name, after the '
+        'avatar', (tester) async {
+      final lines = await pumpChatThenSpace(tester);
+
+      expect(lines, hasLength(2));
+      expect(lines.last.left, tester.getRect(find.text('Team')).left);
+    });
+
+    testWidgets('stops at the same place as the line of a chat row', (
+      tester,
+    ) async {
+      final lines = await pumpChatThenSpace(tester);
+
+      expect(lines, hasLength(2));
+      expect(lines.last.right, lines.first.right);
+    });
+
+    testWidgets('draws exactly one line, under the row', (tester) async {
+      final lines = await pumpChatThenSpace(tester);
+
+      expect(lines, hasLength(2));
+      expect(
+        lines.last.bottom,
+        tester.getRect(find.byType(ChatListItem).last).bottom,
       );
-      expect(badge.bottom, lessThanOrEqualTo(line.top));
     });
   });
 }

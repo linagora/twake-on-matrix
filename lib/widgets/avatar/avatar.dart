@@ -3,6 +3,8 @@ import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar.dart';
+import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
+import 'package:linagora_design_flutter/extensions/string_extension.dart';
 
 class Avatar extends StatelessWidget {
   final Uri? mxContent;
@@ -14,6 +16,9 @@ class Avatar extends StatelessWidget {
   final Color? textColor;
   final bool keepAlive;
 
+  /// The corners of a square avatar, a circle when null.
+  final double? cornerRadius;
+
   const Avatar({
     this.mxContent,
     this.name,
@@ -23,20 +28,22 @@ class Avatar extends StatelessWidget {
     this.boxShadows,
     this.textColor,
     this.keepAlive = false,
+    this.cornerRadius,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(cornerRadius ?? size / 2);
     return Material(
       color: Colors.transparent,
       type: MaterialType.transparency,
       shadowColor: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(size / 2),
+        borderRadius: radius,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(size / 2),
+          borderRadius: radius,
           child: MxcImage(
             key: Key(mxContent.toString()),
             uri: mxContent,
@@ -58,16 +65,33 @@ class Avatar extends StatelessWidget {
 
   Widget _fallbackAvatar() {
     final fallbackLetters = name?.getShortcutNameForAvatar() ?? '@';
+    final textStyle = TextStyle(
+      fontSize: fontSize,
+      color: textColor ?? AvatarStyle.defaultTextColor(_havePicture),
+      fontFamily: AvatarStyle.fontFamily,
+      fontWeight: AvatarStyle.fontWeight,
+    );
+    if (cornerRadius != null) {
+      return Container(
+        width: size,
+        height: size,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: fallbackLetters.avatarColors,
+            stops: RoundAvatarStyle.defaultGradientStops,
+          ),
+        ),
+        child: Text(fallbackLetters, style: textStyle),
+      );
+    }
     return RoundAvatar(
       size: size,
       text: fallbackLetters,
       boxShadows: boxShadows,
-      textStyle: TextStyle(
-        fontSize: fontSize,
-        color: textColor ?? AvatarStyle.defaultTextColor(_havePicture),
-        fontFamily: AvatarStyle.fontFamily,
-        fontWeight: AvatarStyle.fontWeight,
-      ),
+      textStyle: textStyle,
     );
   }
 

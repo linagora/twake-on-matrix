@@ -8,12 +8,13 @@ RoomListEntry _space(
   bool isFavourite = false,
   int unread = 0,
   List<String> parents = const [],
+  bool canAdd = false,
 }) => _room(
   id,
   isFavourite: isFavourite,
   unread: unread,
   parents: parents,
-).copyWith(kind: RoomKind.space);
+).copyWith(kind: RoomKind.space, canAddChildren: canAdd);
 
 RoomListEntry _room(
   String id, {
@@ -47,14 +48,167 @@ String _shape(List<RoomListRow> rows) => rows
         RoomListSpaceRow(:final entry) => '${row.depth}:${entry.id}',
         RoomListJoinableRow(:final subspace) =>
           '${row.depth}:join ${subspace.roomId}',
+        RoomListAddRow(:final spaceId) => '${row.depth}:add $spaceId',
       },
     )
     .join(' ');
+
+RoomListSpaceRow _spaceRow(List<RoomListRow> rows, String id) =>
+    rows.whereType<RoomListSpaceRow>().singleWhere((row) => row.entry.id == id);
 
 void main() {
   _buildRoomListRowsTests();
   _buildRoomListRowsPinnedTests();
   _buildRoomListRowsJoinableTests();
+  _buildRoomListRowsAddRowTests();
+  _buildRoomListRowsRoomCountTests();
+}
+
+void _buildRoomListRowsAddRowTests() {
+  group('buildRoomListRows', () {
+    group('whenTheUserMayAddToAnOpenSpace', () {
+      test('endsTheSpaceWithAnAddRowAfterItsLastRoom', () {
+        final rows = buildRoomListRows([
+          _space('!s', canAdd: true),
+          _room('!c', parents: ['!s']),
+          _room('!d', parents: ['!s']),
+          _dm,
+        ]);
+
+        expect(_shape(rows), '0:!s 1:!c 1:!d 1:add !s 0:!dm');
+      });
+
+      test('putsTheAddRowAfterTheRoomsOfANestedSubSpace', () {
+        final rows = buildRoomListRows([
+          _space('!s', canAdd: true),
+          _space('!sub', parents: ['!s']),
+          _room('!c', parents: ['!sub']),
+        ]);
+
+        expect(_shape(rows), '0:!s 1:!sub 2:!c 1:add !s');
+      });
+
+      test('putsTheAddRowAfterTheSubSpacesToJoin', () {
+        final rows = buildRoomListRows(
+          [_space('!s', canAdd: true)],
+          joinableBySpace: const {
+            '!s': [SpaceChannel(roomId: '!sub', name: 'Sub')],
+          },
+        );
+
+        expect(_shape(rows), '0:!s 1:join !sub 1:add !s');
+      });
+
+      test('offersToAddToASpaceThatHoldsNothing', () {
+        final rows = buildRoomListRows([_space('!s', canAdd: true)]);
+
+        expect(_shape(rows), '0:!s 1:add !s');
+      });
+
+      test('keepsTheAddRowsOfTwoSpacesApart', () {
+        final rows = buildRoomListRows([
+          _space('!s', canAdd: true),
+          _space('!t', canAdd: true),
+        ]);
+
+        expect(_shape(rows), '0:!s 1:add !s 0:!t 1:add !t');
+        expect(rows.map((row) => row.key).toSet(), hasLength(rows.length));
+      });
+
+      test('whenFolded_hasNoAddRow', () {
+        final rows = buildRoomListRows(
+          [
+            _space('!s', canAdd: true),
+            _room('!c', parents: ['!s']),
+          ],
+          foldedSpaceIds: const {'!s'},
+        );
+
+        expect(_shape(rows), '0:!s');
+      });
+    });
+
+    test('whenTheUserMayNotAdd_hasNoAddRow', () {
+      final rows = buildRoomListRows([
+        _space('!s'),
+        _room('!c', parents: ['!s']),
+      ]);
+
+      expect(_shape(rows), '0:!s 1:!c');
+    });
+
+    // The line replaces the « + » of the row, which only a top space had.
+    test('whenTheUserMayAddToASubSpace_offersItOnTheTopSpaceOnly', () {
+      final rows = buildRoomListRows([
+        _space('!s'),
+        _space('!sub', parents: ['!s'], canAdd: true),
+        _room('!c', parents: ['!sub']),
+      ]);
+
+      expect(_shape(rows), '0:!s 1:!sub 2:!c');
+    });
+  });
+}
+
+void _buildRoomListRowsRoomCountTests() {
+  group('buildRoomListRows', () {
+    test('spaceRow_countsTheRoomsOfTheSpace', () {
+      final rows = buildRoomListRows([
+        _space('!s'),
+        _room('!c', parents: ['!s']),
+        _room('!d', parents: ['!s']),
+        _dm,
+      ]);
+
+      expect(_spaceRow(rows, '!s').roomCount, 2);
+    });
+
+    test('spaceRow_whenFolded_countsTheSameRooms', () {
+      final rows = buildRoomListRows(
+        [
+          _space('!s'),
+          _room('!c', parents: ['!s']),
+          _room('!d', parents: ['!s']),
+        ],
+        foldedSpaceIds: const {'!s'},
+      );
+
+      expect(_spaceRow(rows, '!s').roomCount, 2);
+    });
+
+    // As the unread count of a folded space: what its sub-spaces hold is in,
+    // and a sub-space is no room.
+    test('spaceRow_countsTheRoomsOfItsSubSpacesNotTheSubSpaces', () {
+      final rows = buildRoomListRows([
+        _space('!s'),
+        _space('!sub', parents: ['!s']),
+        _room('!c', parents: ['!sub']),
+        _room('!d', parents: ['!s']),
+      ]);
+
+      expect(_spaceRow(rows, '!s').roomCount, 2);
+      expect(_spaceRow(rows, '!sub').roomCount, 1);
+    });
+
+    test('spaceRow_countsAPinnedRoomOfTheSpace', () {
+      final rows = buildRoomListRows(
+        [
+          _space('!s'),
+          _room('!c', parents: ['!s'], isFavourite: true),
+          _room('!d', parents: ['!s']),
+        ],
+        foldedSpaceIds: const {'!s'},
+      );
+
+      expect(_spaceRow(rows, '!s').roomCount, 2);
+    });
+
+    test('spaceRow_whenSpaceHoldsNothing_countsNoRoom', () {
+      final rows = buildRoomListRows([_space('!s')]);
+
+      expect(_spaceRow(rows, '!s').roomCount, 0);
+    });
+  });
 }
 
 void _buildRoomListRowsTests() {
