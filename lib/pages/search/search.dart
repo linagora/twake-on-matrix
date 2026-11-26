@@ -30,7 +30,19 @@ import 'package:matrix/matrix.dart';
 class Search extends ConsumerStatefulWidget {
   final VoidCallback? onCloseSearchPage;
 
-  const Search({super.key, this.onCloseSearchPage});
+  /// The query, when the field is not the page's own (the bottom bar of a
+  /// phone). The page does not dispose it.
+  final TextEditingController? textEditingController;
+
+  /// Under the chat list header: no app bar, no field of its own.
+  final bool embedded;
+
+  const Search({
+    super.key,
+    this.onCloseSearchPage,
+    this.textEditingController,
+    this.embedded = false,
+  });
 
   @override
   SearchScreenState createState() => SearchScreenState();
@@ -51,7 +63,8 @@ class SearchScreenState extends ConsumerState<Search>
   final preSearchRecentContactsNotifier =
       ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
 
-  final TextEditingController textEditingController = TextEditingController();
+  late final TextEditingController textEditingController =
+      widget.textEditingController ?? TextEditingController();
 
   late final publicGroupsSearchTerm = PublicGroupsSearchTerm(
     textEditingController,
@@ -197,7 +210,7 @@ class SearchScreenState extends ConsumerState<Search>
     serverSearchController.dispose();
     preSearchRecentContactsNotifier.dispose();
     publicGroupsSearchTerm.dispose();
-    textEditingController.dispose();
+    if (widget.textEditingController == null) textEditingController.dispose();
     scrollController.dispose();
     super.dispose();
   }
@@ -205,6 +218,6 @@ class SearchScreenState extends ConsumerState<Search>
   @override
   Widget build(BuildContext context) {
     ref.listen(searchResultControllerProvider, _onStateChanged);
-    return SearchView(this);
+    return SearchView(this, embedded: widget.embedded);
   }
 }
