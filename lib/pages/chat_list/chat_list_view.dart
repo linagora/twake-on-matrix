@@ -17,12 +17,19 @@ class ChatListView extends StatefulWidget {
   final VoidCallback? onOpenSearchPageInMultipleColumns;
   final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
 
+  /// On a phone, while true, [searchResults] take the place of the rooms
+  /// under the header: the search of the bottom bar.
+  final ValueNotifier<bool>? searchOpen;
+  final Widget? searchResults;
+
   const ChatListView({
     super.key,
     required this.controller,
     this.bottomNavigationBar,
     this.onOpenSearchPageInMultipleColumns,
     required this.onTapBottomNavigation,
+    this.searchOpen,
+    this.searchResults,
   });
 
   @override
@@ -76,38 +83,75 @@ class _ChatListViewState extends State<ChatListView> {
               }
             },
           ),
-          body: Stack(
-            children: [
-              StreamBuilder<Client>(
-                stream: widget.controller.clientStream,
-                builder: (context, snapshot) {
-                  return ChatListBodyView(
-                    widget.controller,
-                    header: collapsing ? header : null,
-                    // Same as Scaffold for a primary appBar: preferred height + status bar.
-                    headerHeight:
-                        headerSize.height + MediaQuery.paddingOf(context).top,
-                  );
-                },
-              ),
-              // Once the header has scrolled away, rows must not show behind
-              // the status bar. Same colour as the header paints there.
-              if (collapsing)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: MediaQuery.paddingOf(context).top,
-                  child: IgnorePointer(
-                    child: ColoredBox(
-                      color: LinagoraSysColors.material().onPrimary,
+          body: _withSearch(
+            collapsing: collapsing,
+            header: header,
+            // Same as Scaffold for a primary appBar: preferred height + status bar.
+            headerHeight: headerSize.height + MediaQuery.paddingOf(context).top,
+            list: Stack(
+              children: [
+                StreamBuilder<Client>(
+                  stream: widget.controller.clientStream,
+                  builder: (context, snapshot) {
+                    return ChatListBodyView(
+                      widget.controller,
+                      header: collapsing ? header : null,
+                      // Same as Scaffold for a primary appBar: preferred height + status bar.
+                      headerHeight:
+                          headerSize.height + MediaQuery.paddingOf(context).top,
+                    );
+                  },
+                ),
+                // Once the header has scrolled away, rows must not show behind
+                // the status bar. Same colour as the header paints there.
+                if (collapsing)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: MediaQuery.paddingOf(context).top,
+                    child: IgnorePointer(
+                      child: ColoredBox(
+                        color: LinagoraSysColors.material().onPrimary,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  Widget _withSearch({
+    required bool collapsing,
+    required Widget header,
+    required double headerHeight,
+    required Widget list,
+  }) {
+    final searchOpen = widget.searchOpen;
+    final results = widget.searchResults;
+    if (!collapsing || searchOpen == null || results == null) return list;
+    return ValueListenableBuilder<bool>(
+      valueListenable: searchOpen,
+      builder: (context, open, list) => open
+          ? Column(
+              children: [
+                SizedBox(height: headerHeight, child: header),
+                Expanded(
+                  child: Padding(
+                    // Above the floating bottom bar and its field.
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.paddingOf(context).bottom,
+                    ),
+                    child: results,
+                  ),
+                ),
+              ],
+            )
+          : list!,
+      child: list,
     );
   }
 }

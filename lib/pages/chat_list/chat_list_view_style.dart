@@ -25,7 +25,6 @@ class ChatListViewStyle {
     return Size.fromHeight(
       AppConfig.toolbarHeight(context) +
           ChatListHeaderStyle.newChatCapsuleGap +
-          ChatListHeaderStyle.searchBarContainerHeight +
           RoomListFilterStyle.pillsHeight +
           audioPlayer,
     );

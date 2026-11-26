@@ -50,12 +50,18 @@ class ChatList extends StatefulWidget {
 
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
 
+  /// See [ChatListView.searchOpen].
+  final ValueNotifier<bool>? searchOpen;
+  final Widget? searchResults;
+
   const ChatList({
     super.key,
     required this.activeRoomIdNotifier,
     this.bottomNavigationBar,
     this.onOpenSettings,
     this.adaptiveScaffoldBodyArgs,
+    this.searchOpen,
+    this.searchResults,
   });
 
   @override
@@ -722,6 +728,8 @@ class ChatListController extends State<ChatList>
         bottomNavigationBar: widget.bottomNavigationBar,
         onOpenSearchPageInMultipleColumns: onOpenSearchPageInMultipleColumns,
         onTapBottomNavigation: _onTapBottomNavigation,
+        searchOpen: widget.searchOpen,
+        searchResults: widget.searchResults,
       ),
     );
   }

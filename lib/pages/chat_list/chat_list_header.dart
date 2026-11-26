@@ -47,13 +47,15 @@ class ChatListHeader extends StatelessWidget {
           _PhoneAppBar(controller: controller, appBar: appBar)
         else
           appBar,
-        Container(
-          height: ChatListHeaderStyle.searchBarContainerHeight,
-          padding: ChatListHeaderStyle.searchInputPadding,
-          child: PlatformInfos.isDesktop
-              ? _normalModeWidgetWeb(context)
-              : _normalModeWidgetsMobile(context),
-        ),
+        // On a phone the search lives in the bottom bar.
+        if (!isMobile)
+          Container(
+            height: ChatListHeaderStyle.searchBarContainerHeight,
+            padding: ChatListHeaderStyle.searchInputPadding,
+            child: PlatformInfos.isDesktop
+                ? _normalModeWidgetWeb(context)
+                : _normalModeWidgetsMobile(context),
+          ),
         ValueListenableBuilder<SelectMode>(
           valueListenable: controller.selectModeNotifier,
           builder: (context, selectMode, _) => isMobile
