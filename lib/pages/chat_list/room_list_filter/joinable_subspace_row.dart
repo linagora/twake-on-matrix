@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_row_divider.dart';
 import 'package:twake_chat/pages/space_home/open_space_child.dart';
 import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
@@ -26,25 +27,25 @@ class JoinableSubspaceRow extends ConsumerWidget {
           parentSpaceId: row.parentSpaceId,
           child: subspace,
         ),
-        child: TwakeListItem(
-          child: Container(
-            height: ChatListItemStyle.spaceItemHeight,
-            padding: ChatListItemStyle.paddingBody.add(
-              EdgeInsetsDirectional.only(
-                start: row.depth * ChatListItemStyle.depthIndent,
-              ),
+        child: Container(
+          height: ChatListItemStyle.spaceItemHeight,
+          padding: ChatListItemStyle.paddingBody.add(
+            EdgeInsetsDirectional.only(
+              start: row.depth * ChatListItemStyle.depthIndent,
             ),
-            child: Row(
-              children: [
-                Padding(
-                  padding: ChatListItemStyle.paddingAvatar,
-                  child: Avatar(
-                    mxContent: subspace.avatar,
-                    name: subspace.name,
-                    size: ChatListItemStyle.childAvatarSize,
-                  ),
+          ),
+          child: Row(
+            children: [
+              Padding(
+                padding: ChatListItemStyle.paddingAvatar,
+                child: Avatar(
+                  mxContent: subspace.avatar,
+                  name: subspace.name,
+                  size: ChatListItemStyle.childAvatarSize,
                 ),
-                Expanded(
+              ),
+              Expanded(
+                child: ChatListRowDivider(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,8 +62,8 @@ class JoinableSubspaceRow extends ConsumerWidget {
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

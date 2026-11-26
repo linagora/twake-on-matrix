@@ -4,6 +4,7 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_row_divider.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/space_row_actions.dart';
@@ -111,80 +112,87 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
         onTap: () => clickAction(context),
         onSecondaryTapDown: onSecondaryTapDown,
         onLongPress: onLongPress,
-        child: TwakeListItem(
-          child: _HeroUsersLoader(
-            room: room,
-            builder: (context) {
-              final displayName = room.getLocalizedDisplayname(
-                MatrixLocals(L10n.of(context)!),
-              );
-              return Container(
-                height: space != null
-                    ? ChatListItemStyle.spaceItemHeight
-                    : ChatListItemStyle.chatItemHeight,
-                padding: ChatListItemStyle.paddingBody.add(
-                  EdgeInsetsDirectional.only(
-                    start: depth * ChatListItemStyle.depthIndent,
-                  ),
+        child: _HeroUsersLoader(
+          room: room,
+          builder: (context) {
+            final displayName = room.getLocalizedDisplayname(
+              MatrixLocals(L10n.of(context)!),
+            );
+            return Container(
+              height: space != null
+                  ? ChatListItemStyle.spaceItemHeight
+                  : ChatListItemStyle.chatItemHeight,
+              padding: ChatListItemStyle.paddingBody.add(
+                EdgeInsetsDirectional.only(
+                  start: depth * ChatListItemStyle.depthIndent,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
-                    Padding(
-                      padding: isTopSpace
-                          ? ChatListItemStyle.paddingSpaceAvatar
-                          : ChatListItemStyle.paddingAvatar,
-                      child: _ChatListAvatar(
-                        room: room,
-                        name: displayName,
-                        size: isChild
-                            ? ChatListItemStyle.childAvatarSize
-                            : isTopSpace
-                            ? ChatListItemStyle.spaceAvatarSize
-                            : AvatarStyle.defaultSize,
-                        onTap: onTapAvatar,
-                      ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
+                  Padding(
+                    padding: isTopSpace
+                        ? ChatListItemStyle.paddingSpaceAvatar
+                        : ChatListItemStyle.paddingAvatar,
+                    child: _ChatListAvatar(
+                      room: room,
+                      name: displayName,
+                      size: isChild
+                          ? ChatListItemStyle.childAvatarSize
+                          : isTopSpace
+                          ? ChatListItemStyle.spaceAvatarSize
+                          : AvatarStyle.defaultSize,
+                      onTap: onTapAvatar,
                     ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: space != null
-                            ? MainAxisAlignment.center
-                            : MainAxisAlignment.start,
+                  ),
+                  Expanded(
+                    child: ChatListRowDivider(
+                      child: Row(
                         children: [
-                          ChatListItemTitle(
-                            room: room,
-                            originServerTs: switch (previewResult) {
-                              RoomPreviewFound(:final event)
-                                  when space == null =>
-                                event.originServerTs,
-                              _ => null,
-                            },
-                          ),
-                          // A space is no conversation: nothing to preview.
-                          if (space == null)
-                            ChatListItemSubtitle(
-                              room: room,
-                              previewResult: previewResult,
-                            )
-                          else if (room.isInvitation)
-                            Text(
-                              L10n.of(context)!.invited,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: LinagoraSysColors.material().primary,
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: space != null
+                                  ? MainAxisAlignment.center
+                                  : MainAxisAlignment.start,
+                              children: [
+                                ChatListItemTitle(
+                                  room: room,
+                                  originServerTs: switch (previewResult) {
+                                    RoomPreviewFound(:final event)
+                                        when space == null =>
+                                      event.originServerTs,
+                                    _ => null,
+                                  },
+                                ),
+                                // A space is no conversation: nothing to preview.
+                                if (space == null)
+                                  ChatListItemSubtitle(
+                                    room: room,
+                                    previewResult: previewResult,
+                                  )
+                                else if (room.isInvitation)
+                                  Text(
+                                    L10n.of(context)!.invited,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: LinagoraSysColors.material()
+                                              .primary,
+                                        ),
                                   ),
+                              ],
                             ),
+                          ),
+                          if (space case final space?)
+                            SpaceRowActions(name: displayName, space: space),
                         ],
                       ),
                     ),
-                    if (space case final space?)
-                      SpaceRowActions(name: displayName, space: space),
-                  ],
-                ),
-              );
-            },
-          ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
