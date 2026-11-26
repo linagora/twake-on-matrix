@@ -12,12 +12,12 @@ import 'package:twake_chat/presentation/model/contact/presentation_contact.dart'
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 class NewPrivateChat extends ConsumerStatefulWidget {
   const NewPrivateChat({super.key});
@@ -51,14 +51,14 @@ class NewPrivateChatScreenState extends ConsumerState<NewPrivateChat>
       ),
       (_, _) => refreshAllContacts(
         context: context,
-        client: Matrix.of(context).client,
+        client: ref.read(matrixClientProvider),
         matrixLocalizations: MatrixLocals(L10n.of(context)!),
       ),
     );
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
-        final client = Matrix.of(context).client;
+        final client = ref.read(matrixClientProvider);
         initialFetchContacts(
           context: context,
           client: client,
@@ -114,7 +114,7 @@ class NewPrivateChatScreenState extends ConsumerState<NewPrivateChat>
     await handleDidChangeAppLifecycleState(
       state,
       context: context,
-      client: Matrix.of(context).client,
+      client: ref.read(matrixClientProvider),
     );
   }
 

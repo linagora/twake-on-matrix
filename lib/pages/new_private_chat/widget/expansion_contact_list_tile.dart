@@ -14,7 +14,6 @@ import 'package:twake_chat/utils/display_name_widget.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/highlight_text.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,10 +21,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 typedef OnExpansionListTileTap = void Function();
 
-class ExpansionContactListTile extends StatefulWidget {
+class ExpansionContactListTile extends ConsumerStatefulWidget {
   final PresentationContact contact;
   final String highlightKeyword;
   final bool enableInvitation;
@@ -40,11 +40,12 @@ class ExpansionContactListTile extends StatefulWidget {
   });
 
   @override
-  State<ExpansionContactListTile> createState() =>
+  ConsumerState<ExpansionContactListTile> createState() =>
       _ExpansionContactListTileState();
 }
 
-class _ExpansionContactListTileState extends State<ExpansionContactListTile>
+class _ExpansionContactListTileState
+    extends ConsumerState<ExpansionContactListTile>
     with InvitationStatusMixin {
   @override
   void initState() {
@@ -105,7 +106,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
     super.dispose();
   }
 
-  Client get client => Matrix.of(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   @override
   Widget build(BuildContext context) {

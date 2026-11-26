@@ -26,15 +26,17 @@ import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:twake_chat/utils/story_theme_data.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class StoryPage extends StatefulWidget {
+class StoryPage extends ConsumerStatefulWidget {
   const StoryPage({super.key});
 
   @override
   StoryPageController createState() => StoryPageController();
 }
 
-class StoryPageController extends State<StoryPage> {
+class StoryPageController extends ConsumerState<StoryPage> {
   int index = 0;
   int max = 0;
   Duration progress = Duration.zero;
@@ -85,7 +87,7 @@ class StoryPageController extends State<StoryPage> {
       replyLoading = true;
     });
     try {
-      final client = Matrix.of(context).client;
+      final client = ref.read(matrixClientProvider);
       final roomId = await client.startDirectChat(currentEvent.senderId);
       var replyText = L10n.of(context)!.storyFrom(
         currentEvent.originServerTs.localizedTime(context),
@@ -111,7 +113,8 @@ class StoryPageController extends State<StoryPage> {
     final timeline = this.timeline;
     final currentEvent = this.currentEvent;
     if (timeline == null || currentEvent == null) return [];
-    return Matrix.of(context).client
+    return ref
+            .read(matrixClientProvider)
             .getRoomById(roomId)
             ?.getSeenByUsers(timeline, eventId: currentEvent.eventId) ??
         [];
@@ -191,7 +194,7 @@ class StoryPageController extends State<StoryPage> {
   }
 
   bool get isOwnStory {
-    final client = Matrix.of(context).client;
+    final client = ref.read(matrixClientProvider);
     final room = client.getRoomById(roomId);
     if (room == null) return false;
     return room.ownPowerLevel >= PowerLevel(100);
@@ -314,9 +317,9 @@ class StoryPageController extends State<StoryPage> {
     );
     if (reason == null || reason.single.isEmpty) return;
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(
-        context,
-      ).client.reportEvent(roomId, event.eventId, reason: reason.single),
+      future: () => ref
+          .read(matrixClientProvider)
+          .reportEvent(roomId, event.eventId, reason: reason.single),
     );
     _modalOpened = false;
     if (result.error != null) return;
@@ -341,9 +344,10 @@ class StoryPageController extends State<StoryPage> {
       : null;
 
   Event? get roomCreateStateEvent {
-    final event = Matrix.of(
-      context,
-    ).client.getRoomById(roomId)?.getState(EventTypes.RoomCreate);
+    final event = ref
+        .read(matrixClientProvider)
+        .getRoomById(roomId)
+        ?.getState(EventTypes.RoomCreate);
     if (event is Event) return event;
     return null;
   }
@@ -358,7 +362,7 @@ class StoryPageController extends State<StoryPage> {
 
   Future<void> _loadStory() async {
     try {
-      final client = Matrix.of(context).client;
+      final client = ref.read(matrixClientProvider);
       await client.roomsLoading;
       await client.accountDataLoading;
       final room = client.getRoomById(roomId);

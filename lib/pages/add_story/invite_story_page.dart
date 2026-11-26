@@ -9,9 +9,10 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class InviteStoryPage extends StatefulWidget {
+class InviteStoryPage extends ConsumerStatefulWidget {
   final Room? storiesRoom;
   const InviteStoryPage({required this.storiesRoom, super.key});
 
@@ -19,7 +20,7 @@ class InviteStoryPage extends StatefulWidget {
   InviteStoryPageState createState() => InviteStoryPageState();
 }
 
-class InviteStoryPageState extends State<InviteStoryPage> {
+class InviteStoryPageState extends ConsumerState<InviteStoryPage> {
   Set<String> _undecided = {};
   final Set<String> _invite = {};
 
@@ -33,7 +34,7 @@ class InviteStoryPageState extends State<InviteStoryPage> {
     if (confirmed != OkCancelResult.ok) return;
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        final client = Matrix.of(context).client;
+        final client = ref.read(matrixClientProvider);
         var room = await client.getStoriesRoom(context);
         final inviteList = _invite.toList();
         if (room == null) {
@@ -57,15 +58,18 @@ class InviteStoryPageState extends State<InviteStoryPage> {
     Navigator.of(context).pop<bool>(true);
   }
 
-  Future<List<User>>? loadContacts;
+  late final Future<List<User>> loadContacts;
+
+  @override
+  void initState() {
+    super.initState();
+    loadContacts = ref
+        .read(matrixClientProvider)
+        .getUndecidedContactsForStories(widget.storiesRoom);
+  }
 
   @override
   Widget build(BuildContext context) {
-    loadContacts ??= Matrix.of(context).client
-        .getUndecidedContactsForStories(widget.storiesRoom)
-        .then((contacts) {
-          return contacts;
-        });
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
