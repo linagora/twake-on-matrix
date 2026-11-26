@@ -39,7 +39,12 @@ class _ChatListViewState extends State<ChatListView> {
     return ValueListenableBuilder(
       valueListenable: widget.controller.matrixState.voiceMessageEvent,
       builder: (context, hasEvent, child) {
+        // One column: the header scrolls away inside the list (ChatListBodyView),
+        // so the viewport never resizes. Wide layouts keep it in the app bar.
+        final collapsing = responsiveUtils.isMobile(context);
         final headerSize = ChatListViewStyle.preferredSizeAppBar(
+          context,
+          isSingleColumn: collapsing,
           hasAudioEvent: hasEvent != null && PlatformInfos.isMobile,
         );
         final header = ChatListHeader(
@@ -48,10 +53,8 @@ class _ChatListViewState extends State<ChatListView> {
               widget.onOpenSearchPageInMultipleColumns,
           controller: widget.controller,
         );
-        // One column: the header scrolls away inside the list (ChatListBodyView),
-        // so the viewport never resizes. Wide layouts keep it in the app bar.
-        final collapsing = responsiveUtils.isMobile(context);
         return Scaffold(
+          extendBody: true,
           backgroundColor: LinagoraSysColors.material().onPrimary,
           appBar: collapsing
               ? null
@@ -97,7 +100,7 @@ class _ChatListViewState extends State<ChatListView> {
                   height: MediaQuery.paddingOf(context).top,
                   child: IgnorePointer(
                     child: ColoredBox(
-                      color: LinagoraSysColors.material().background,
+                      color: LinagoraSysColors.material().onPrimary,
                     ),
                   ),
                 ),

@@ -6,12 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
-import 'package:provider/provider.dart' as provider;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/device_settings/device_settings.dart';
 import 'package:twake_chat/pages/device_settings/device_settings_view_model.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 
 const _userId = '@me:example.org';
@@ -52,43 +50,30 @@ class _FakeClient extends Fake implements Client {
   }
 }
 
-class _FakeMatrixState extends Fake implements MatrixState {
-  _FakeMatrixState(this.client);
-
-  @override
-  final Client client;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
-      '_FakeMatrixState';
-}
-
 class _FakeViewModel extends Fake implements DevicesSettingsViewModel {}
 
 Future<void> _tapVerify(WidgetTester tester, Client client) async {
   await tester.pumpWidget(
-    provider.Provider<MatrixState>.value(
-      value: _FakeMatrixState(client),
-      child: MaterialApp(
-        navigatorKey: TwakeApp.routerKey,
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          L10n.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: L10n.supportedLocales,
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () => verifyDeviceAction(
-                context,
-                _FakeViewModel(),
-                Device(deviceId: _deviceId),
-              ),
-              child: const Text('verify'),
+    MaterialApp(
+      navigatorKey: TwakeApp.routerKey,
+      locale: const Locale('en'),
+      localizationsDelegates: const [
+        L10n.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: L10n.supportedLocales,
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => verifyDeviceAction(
+              context,
+              client,
+              _FakeViewModel(),
+              Device(deviceId: _deviceId),
             ),
+            child: const Text('verify'),
           ),
         ),
       ),

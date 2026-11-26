@@ -13,6 +13,7 @@ import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -72,26 +73,45 @@ class _FakeMatrix extends Fake implements MatrixState {
 
 /// Drives the real [Settings] screen on top of the fakes above.
 class _SettingsScreen {
-  const _SettingsScreen(this.tester);
+  _SettingsScreen(this.tester);
 
   final WidgetTester tester;
 
+  Client? _active;
+  late MatrixState _matrix;
+
   Future<void> pump(Client client) async {
+    _active = client;
+    _matrix = _FakeMatrix(client);
+    await pumpScreen(const Settings());
+  }
+
+  Future<void> pumpScreen(Settings settings) async {
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [activeMatrixClientProvider.overrideWith((ref) => _active)],
         child: Provider<MatrixState>.value(
-          value: _FakeMatrix(client),
+          value: _matrix,
           child: MaterialApp(
             theme: ThemeData(
               extensions: [LinagoraTextThemeExtension.material()],
             ),
             localizationsDelegates: L10n.localizationsDelegates,
             supportedLocales: L10n.supportedLocales,
-            home: const Settings(),
+            home: settings,
           ),
         ),
       ),
     );
+  }
+
+  /// The last logout drops the client while the screen is still mounted.
+  Future<void> dropClient() async {
+    _active = null;
+    ProviderScope.containerOf(
+      tester.element(find.byType(Settings)),
+    ).invalidate(activeMatrixClientProvider);
+    await tester.pump();
   }
 
   /// Starts a second backup check that waits on the returned completer, and
@@ -240,6 +260,7 @@ class _LogoutFlow {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          activeMatrixClientProvider.overrideWith((ref) => client),
           reportFailureProvider.overrideWithValue(
             (error, _, _) => failures.add(error),
           ),
@@ -328,6 +349,51 @@ void main() {
 
   testWidgets('disposed during a check that ends: no error', (tester) async {
     expect(await _SettingsScreen(tester).closeDuringCheck(), isEmpty);
+  });
+
+  testWidgets('the client dropped while mounted: nothing is shown', (
+    tester,
+  ) async {
+    final screen = _SettingsScreen(tester);
+    await screen.pump(_FakeClient());
+    await tester.pump();
+
+    await screen.dropClient();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SwitchListTile), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('the client dropped while mounted: a check does nothing', (
+    tester,
+  ) async {
+    final screen = _SettingsScreen(tester);
+    await screen.pump(_FakeClient());
+    await tester.pump();
+    await screen.dropClient();
+
+    final errors = <Object>[];
+    runZonedGuarded(
+      tester.state<SettingsController>(find.byType(Settings)).checkBootstrap,
+      (e, _) => errors.add(e),
+    );
+    await tester.pump();
+
+    expect(errors, isEmpty);
+  });
+
+  testWidgets('the client dropped while mounted: a widget update is safe', (
+    tester,
+  ) async {
+    final screen = _SettingsScreen(tester);
+    await screen.pump(_FakeClient());
+    await tester.pump();
+    await screen.dropClient();
+
+    await screen.pumpScreen(Settings(bottomNavigationBar: Container()));
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a check started after dispose does nothing', (tester) async {

@@ -4,6 +4,7 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/utils/exception/save_to_downloads_exception.dart';
 import 'package:matrix/matrix.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:external_path/external_path.dart';
 
@@ -14,15 +15,36 @@ class StorageDirectoryManager {
 
   static StorageDirectoryManager get instance => _instance;
 
-  Future<String> getFileStoreDirectory() async {
+  static const _decryptedFolder = 'decrypted';
+
+  Future<String> getFileStoreDirectory() async =>
+      await _appFileStoreDirectory() ?? (await getDownloadsDirectory())!.path;
+
+  Future<String?> _appFileStoreDirectory() async {
     try {
+      return (await getTemporaryDirectory()).path;
+    } catch (_) {}
+    try {
+      return (await getApplicationDocumentsDirectory()).path;
+    } catch (_) {}
+    return null;
+  }
+
+  /// Only the manager's own folders, never the public Downloads fallback.
+  Future<void> deleteDownloadedFiles() async {
+    final root = await _appFileStoreDirectory();
+    if (root == null) return;
+    final directory = Directory(root);
+    if (!await directory.exists()) return;
+    await for (final entity in directory.list(followLinks: false)) {
+      if (entity is! Directory) continue;
+      final name = p.basename(entity.path);
+      if (name != _decryptedFolder && !name.startsWith(r'$')) continue;
       try {
-        return (await getTemporaryDirectory()).path;
-      } catch (_) {
-        return (await getApplicationDocumentsDirectory()).path;
+        await entity.delete(recursive: true);
+      } on PathNotFoundException {
+        // Two last logouts can run at once.
       }
-    } catch (_) {
-      return (await getDownloadsDirectory())!.path;
     }
   }
 
@@ -83,7 +105,7 @@ class StorageDirectoryManager {
   }) async {
     final fileStoreDirectory = await StorageDirectoryManager.instance
         .getFileStoreDirectory();
-    return '$fileStoreDirectory/decrypted/$eventId/${fileName.safeFileName}';
+    return '$fileStoreDirectory/$_decryptedFolder/$eventId/${fileName.safeFileName}';
   }
 
   String convertFileExtension(String filename, String newExtension) {

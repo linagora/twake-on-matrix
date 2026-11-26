@@ -4,6 +4,7 @@ import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_e
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -15,7 +16,8 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
+class TwakeHeader extends ConsumerStatefulWidget
+    implements PreferredSizeWidget {
   final VoidCallback onClearSelection;
   final ValueNotifier<SelectMode> selectModeNotifier;
   final ValueNotifier<List<ConversationSelectionPresentation>>
@@ -37,14 +39,14 @@ class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
   });
 
   @override
-  State<TwakeHeader> createState() => _TwakeHeaderState();
+  ConsumerState<TwakeHeader> createState() => _TwakeHeaderState();
 
   @override
   Size get preferredSize =>
       const Size.fromHeight(TwakeHeaderStyle.toolbarHeight);
 }
 
-class _TwakeHeaderState extends State<TwakeHeader>
+class _TwakeHeaderState extends ConsumerState<TwakeHeader>
     with ShowDialogMixin, OnProfileChangeMixin {
   final ValueNotifier<Profile> currentProfileNotifier = ValueNotifier(
     Profile(userId: ''),
@@ -72,7 +74,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
       getCurrentProfile(widget.client);
       onAccountDataSubscription?.cancel();
       listenOnProfileChangeStream(
-        client: Matrix.of(context).client,
+        client: ref.read(matrixClientProvider),
         currentProfile: currentProfileNotifier.value,
         onProfileChanged: (newProfile) {
           currentProfileNotifier.value = newProfile;
@@ -95,7 +97,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
   void initState() {
     super.initState();
     listenOnProfileChangeStream(
-      client: Matrix.of(context).client,
+      client: ref.read(matrixClientProvider),
       currentProfile: currentProfileNotifier.value,
       onProfileChanged: (newProfile) {
         currentProfileNotifier.value = newProfile;
@@ -110,6 +112,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
       builder: (context, selectMode, _) {
         return selectMode == SelectMode.normal
             ? TwakeAppBar(
+                backgroundColor: LinagoraSysColors.material().onPrimary,
                 title: L10n.of(context)!.chats,
                 context: context,
                 connectionStatusHeaderWidget:
@@ -117,9 +120,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
                 actions: widget.actions,
               )
             : AppBar(
-                backgroundColor: responsive.isMobile(context)
-                    ? LinagoraSysColors.material().background
-                    : LinagoraSysColors.material().onPrimary,
+                backgroundColor: LinagoraSysColors.material().onPrimary,
                 toolbarHeight: TwakeHeaderStyle.toolbarHeight,
                 automaticallyImplyLeading: false,
                 leadingWidth: TwakeHeaderStyle.leadingWidth,

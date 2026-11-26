@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +12,10 @@ import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/direct_chat/exceptions/create_direct_chat_exception.dart';
 import 'package:twake_chat/data/direct_chat/repositories/direct_chat_repository_impl.provider.dart';
 import 'package:twake_chat/domain/direct_chat/repositories/direct_chat_repository.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/image_file_info.dart';
 import 'package:twake_chat/domain/usecase/room/unblock_user_interactor.dart';
+import 'package:twake_chat/pages/chat/send_media_native_dialog/send_media_native_dialog.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
@@ -19,6 +24,9 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
+// ignore: depend_on_referenced_packages
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 class _StubContacts extends ContactsController {
   @override
@@ -94,6 +102,30 @@ class _FakeUnblock extends Fake implements UnblockUserInteractor {}
 class _FakeUpload extends Fake implements UploadManager {
   @override
   Future<void> failInterruptedUploads(Iterable<Event> events) async {}
+
+  final uploads = <({Room room, List<FileInfo> files, String? caption})>[];
+  Object? error;
+
+  @override
+  Future<void> uploadFileMobile({
+    required Room room,
+    required List<FileInfo> fileInfos,
+    String? caption,
+    Event? inReplyTo,
+    ThreadSendTarget? thread,
+  }) async {
+    uploads.add((room: room, files: fileInfos, caption: caption));
+    if (error != null) throw error!;
+  }
+}
+
+class _FakePathProvider extends PathProviderPlatform {
+  _FakePathProvider(this.path);
+
+  final String path;
+
+  @override
+  Future<String?> getTemporaryPath() async => path;
 }
 
 class _TestDraft extends DraftChat {
@@ -117,7 +149,7 @@ class _Harness {
         activeMatrixClientProvider.overrideWith(
           (ref) => ref.watch(_activeClient),
         ),
-        uploadManagerProvider.overrideWithValue(_FakeUpload()),
+        uploadManagerProvider.overrideWithValue(upload),
         directChatRepositoryProvider.overrideWithValue(repository),
       ],
     );
@@ -125,6 +157,7 @@ class _Harness {
 
   final WidgetTester _tester;
   final repository = _GatedRepository();
+  final upload = _FakeUpload();
   final visited = <String>[];
   late final ProviderContainer container;
   late final DraftChatController controller;
@@ -330,5 +363,171 @@ void main() {
     await harness.settle();
 
     expect(harness.controller.isSendingNotifier.value, isFalse);
+  });
+
+  group('an image pasted into the draft', () {
+    late Directory tempDir;
+    late PathProviderPlatform originalPathProvider;
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('draft_paste_test');
+      originalPathProvider = PathProviderPlatform.instance;
+      PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    });
+
+    tearDown(() {
+      PathProviderPlatform.instance = originalPathProvider;
+      tempDir.deleteSync(recursive: true);
+    });
+
+    final pasted = [
+      MatrixImageFile(
+        bytes: Uint8List.fromList([1, 2, 3]),
+        name: 'copied',
+        mimeType: 'image/png',
+      ),
+    ];
+
+    // Writing the pasted image to a file is real I/O, so the steps run in
+    // `runAsync` and wait on real time.
+    Future<void> waitUntil(bool Function() condition) => Future(() async {
+      while (!condition()) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    }).timeout(const Duration(seconds: 5));
+
+    Future<void> runPaste(
+      WidgetTester tester,
+      _Harness harness, {
+      required void Function() onCreateCall,
+      required bool Function() done,
+    }) => tester.runAsync(() async {
+      unawaited(harness.controller.onPasteImages(pasted));
+      await waitUntil(() => harness.repository.calls.isNotEmpty);
+      expect(harness.controller.sendController.text, isEmpty);
+      onCreateCall();
+      await waitUntil(done);
+    });
+
+    void sendFromPreview(_Harness harness) =>
+        harness.controller.mediaCaptionDialogPresenter =
+            (context, {required files, room, pendingText}) async =>
+                SendMediaNativeResult(files: files, caption: pendingText);
+
+    testWidgets('creates the room and sends the image with the draft text', (
+      tester,
+    ) async {
+      final room = _FakeRoom('!r:s');
+      final harness = await _start(tester, rooms: {'!r:s': room});
+      harness.controller.sendController.text = 'look';
+      sendFromPreview(harness);
+
+      await runPaste(
+        tester,
+        harness,
+        onCreateCall: () => harness.lastCall.complete('!r:s'),
+        done: () => harness.upload.uploads.isNotEmpty,
+      );
+      await harness.settle();
+
+      expect(harness.visited, ['!r:s']);
+      final upload = harness.upload.uploads.single;
+      expect(upload.room, room);
+      expect(upload.caption, 'look');
+      expect(upload.files.single, isA<ImageFileInfo>());
+    });
+
+    testWidgets('a failed upload still opens the room', (tester) async {
+      final harness = await _start(tester, rooms: {'!r:s': _FakeRoom('!r:s')});
+      harness.upload.error = StateError('upload failed');
+      sendFromPreview(harness);
+
+      await runPaste(
+        tester,
+        harness,
+        onCreateCall: () => harness.lastCall.complete('!r:s'),
+        done: () => harness.upload.uploads.isNotEmpty,
+      );
+      await harness.settle();
+
+      expect(tester.takeException(), isNull);
+      expect(harness.visited, ['!r:s']);
+    });
+
+    testWidgets('a failed room creation gives the caption back', (
+      tester,
+    ) async {
+      final harness = await _start(tester);
+      harness.controller.sendController.text = 'look';
+      sendFromPreview(harness);
+
+      await runPaste(
+        tester,
+        harness,
+        onCreateCall: () => harness.lastCall.completeError(
+          const CreateDirectChatForbiddenException(),
+        ),
+        done: () => harness.controller.sendController.text.isNotEmpty,
+      );
+      await tester.pump();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(harness.controller.sendController.text, 'look');
+      expect(harness.controller.inputText.value, 'look');
+      expect(harness.controller.isSendingNotifier.value, isFalse);
+      expect(harness.upload.uploads, isEmpty);
+      expect(harness.visited, isEmpty);
+    });
+
+    testWidgets('creates nothing when the preview is cancelled', (
+      tester,
+    ) async {
+      final harness = await _start(tester);
+      harness.controller.sendController.text = 'look';
+      harness.controller.mediaCaptionDialogPresenter =
+          (context, {required files, room, pendingText}) async => null;
+
+      await tester.runAsync(() => harness.controller.onPasteImages(pasted));
+
+      expect(harness.repository.calls, isEmpty);
+      expect(harness.upload.uploads, isEmpty);
+      expect(harness.controller.sendController.text, 'look');
+    });
+
+    testWidgets('a screen closed during the preview creates nothing', (
+      tester,
+    ) async {
+      final harness = await _start(tester);
+      final previewOpened = Completer<List<FileInfo>>();
+      final previewClosed = Completer<void>();
+      harness.controller.mediaCaptionDialogPresenter =
+          (context, {required files, room, pendingText}) async {
+            previewOpened.complete(files);
+            await previewClosed.future;
+            return SendMediaNativeResult(files: files);
+          };
+      var pasteDone = false;
+
+      unawaited(
+        harness.controller.onPasteImages(pasted).then((_) => pasteDone = true),
+      );
+      // The paste runs in the test zone, so its file I/O needs real time and
+      // a pump to move on.
+      for (var i = 0; !previewOpened.isCompleted; i++) {
+        if (i == 500) fail('The preview never opened');
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+      await harness.unmount();
+      previewClosed.complete();
+      await tester.pump();
+
+      expect(pasteDone, isTrue);
+      expect(tester.takeException(), isNull);
+      expect(harness.repository.calls, isEmpty);
+      expect(harness.upload.uploads, isEmpty);
+    });
   });
 }

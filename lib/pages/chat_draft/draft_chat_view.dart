@@ -242,6 +242,7 @@ class DraftChatView extends StatelessWidget {
                         onDeleteRecorderWeb: controller.discardRecordWeb,
                         recordDurationWebNotifier:
                             controller.recordDurationWebNotifier,
+                        onPasteImages: controller.onPasteImages,
                       ),
                     );
                   },

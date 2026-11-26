@@ -5,6 +5,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/presentation/widget_keys/navigation_keys.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 
 import '../../../pages/activity/activity_test_support.dart';
@@ -51,14 +52,10 @@ void main() {
                           ),
                       ],
                     )
-                  : BottomNavigationBar(
-                      items: [
-                        for (final destination in shown)
-                          destination.getNavigationDestinationForBottomBar(
-                            context,
-                            profile,
-                          ),
-                      ],
+                  : FloatingNavigationBar(
+                      destinations: shown,
+                      selected: AdaptiveDestinationEnum.contacts,
+                      onDestinationSelected: (_) {},
                     ),
             ),
           ),

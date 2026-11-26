@@ -457,3 +457,30 @@ If the marker is still not found, the chat opens at the bottom.
 Opening the chat only marks as read the messages shown on the screen. The
 unread count drops to the messages below, and the room is read once the user
 reaches the bottom, as before.
+
+## D27. Chat list: floating bottom bar, pen capsule and pill chips ahead of the design system (decided by Johann, 2026-11-24)
+
+On a phone (and a tablet, which shares the bottom bar), the tab bar is a
+near-white capsule floating above the content: it hugs its four tabs (Contacts,
+Chats, Activity, Settings, in that order), every tab has the width of the
+widest label, and the selected tab sits in a light grey pill, its icon and label
+in the primary colour. The unread badges of Chats and Activity are unchanged.
+The capsule ignores the system text size, like the old bar; a label that does
+not fit shrinks instead of being cut. Lists behind the bar end with a spacer as
+tall as the bar, so their last row can be reached.
+
+The header keeps the centred title. The new chat pen moves into a small
+floating capsule of the same style, outside the app bar so its shadow is not
+clipped; it is hidden in selection. The title bar, search and filters share one
+white background from the status bar down, with no divider, at rest and
+scrolled.
+
+The filter chips become pills on one row: the selected one filled in the
+primary colour without a check mark, the others light grey without a border.
+They scroll sideways under an edge fade instead of the arrow buttons, and a
+long press opens the menu of a folder (the ⋮ button of the selected chip is
+gone on a phone). Wide layouts keep the design system chips and the arrows.
+
+These three components are local to the app, built from the design system
+tokens: the design runs ahead of the design system, and they are specific to
+Chat. They move to linagora-design-flutter once the designers adopt them.

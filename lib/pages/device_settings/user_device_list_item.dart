@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 import '../../utils/date_time_extension.dart';
 import '../../utils/matrix_sdk_extensions/device_extension.dart';
-import '../../widgets/matrix.dart';
 import 'session_all_actions_dialog.dart';
 import 'session_summary.dart';
 
-class UserDeviceListItem extends StatelessWidget {
+class UserDeviceListItem extends ConsumerWidget {
   final Device userDevice;
   final void Function(Device)? remove;
   final void Function(Device)? rename;
@@ -27,9 +28,9 @@ class UserDeviceListItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
-    final client = Matrix.of(context).client;
+    final client = ref.watch(matrixClientProvider);
     final keys =
         client.userDeviceKeys[client.userID]?.deviceKeys[userDevice.deviceId];
     final isOwnDevice = userDevice.deviceId == client.deviceID;

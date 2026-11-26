@@ -9,14 +9,16 @@ class ActivityNavigationIcon extends ConsumerWidget {
     super.key,
     this.color,
     this.isSelected = false,
+    this.icon = Icons.notifications_outlined,
   });
 
   final Color? color;
   final bool isSelected;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => TwakeNavigationIcon(
-    icon: Icons.notifications_outlined,
+    icon: icon,
     notificationCount: ref.watch(unreadMentionCountProvider).value ?? 0,
     isSelected: isSelected,
     color: color,

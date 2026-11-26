@@ -18,6 +18,8 @@ import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 
@@ -79,11 +81,6 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
 
   MatrixState get matrix => Matrix.of(context);
 
-  String get displayName =>
-      displayNameNotifier.value ??
-      client.mxid(context).localpart ??
-      client.mxid(context);
-
   bool optionSelected(SettingEnum settingEnum) =>
       settingEnum == optionsSelectNotifier.value;
 
@@ -116,16 +113,16 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   Future<void> _tryToUploadKeyBackup() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        await matrix.client.encryption?.keyManager.uploadInboundGroupSessions();
+        await client.encryption?.keyManager.uploadInboundGroupSessions();
       },
     );
 
     return;
   }
 
-  Future<void> _removePushers() => ref
+  Future<void> _removePushers(Client client) => ref
       .read(pushRemovalsControllerProvider.notifier)
-      .removeBeforeLogout(matrix.client);
+      .removeBeforeLogout(client);
 
   Future<void> _logoutActionsOnMobile() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
@@ -136,14 +133,13 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   Future<void> _logoutClientAndLocalData(String action) async {
     // Read before the first await: the screen may be gone when a step fails.
     final report = ref.read(reportFailureProvider);
+    final client = this.client;
+    final twakeSupported = matrix.twakeSupported;
     try {
-      await _removePushers();
+      await _removePushers(client);
       // Clearing the client also removes the recovery key
       // (`TwakeClient.clear`).
-      await logoutAndCleanUp(
-        matrix.client,
-        twakeSupported: matrix.twakeSupported,
-      );
+      await logoutAndCleanUp(client, twakeSupported: twakeSupported);
     } catch (e, s) {
       report(
         e,
@@ -169,7 +165,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     }
   }
 
-  Client get client => Matrix.of(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   void _getCurrentProfile(Client client) async {
     // The client has no user once the last account is logged out.
@@ -216,8 +212,8 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   Future<void> _loadBackupState() async {
     // Read once: the screen can close while the check runs, and `context` is
     // gone by then.
-    final client = this.client;
-    if (!client.encryptionEnabled) return;
+    final client = ref.read(activeMatrixClientProvider);
+    if (client == null || !client.encryptionEnabled) return;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;
     if (client.prevBatch == null) {
@@ -256,7 +252,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
       );
       return;
     }
-    await BootstrapDialog(client: Matrix.of(context).client).show();
+    await BootstrapDialog(client: client).show();
     checkBootstrap();
   }
 
@@ -322,8 +318,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
         logoutAction();
         break;
       case SettingEnum.deleteAccount:
-        final matrix = Matrix.of(context);
-        final userId = matrix.client.userID;
+        final userId = client.userID;
         final commonSettingsInformation = matrix
             .loginHomeserverSummary
             ?.appTwakeInformation
@@ -390,7 +385,8 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
 
   @override
   void didUpdateWidget(Settings oldWidget) {
-    if (oldWidget != widget) {
+    final client = ref.read(activeMatrixClientProvider);
+    if (oldWidget != widget && client != null) {
       _getCurrentProfile(client);
     }
     super.didUpdateWidget(oldWidget);
@@ -407,6 +403,14 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
 
   @override
   Widget build(BuildContext context) {
-    return SettingsView(this, bottomNavigationBar: widget.bottomNavigationBar);
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
+    final mxid = client.mxid(context);
+    return SettingsView(
+      this,
+      mxid: mxid,
+      fallbackDisplayName: mxid.localpart ?? mxid,
+      bottomNavigationBar: widget.bottomNavigationBar,
+    );
   }
 }

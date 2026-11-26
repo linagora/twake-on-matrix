@@ -11,6 +11,10 @@ class DiacriticStripStep extends NormalizationStep {
 
   static final _combiningMarks = RegExp(r'\p{Mn}', unicode: true);
 
+  // Vietnamese đ / Đ are letters of their own, not d plus a combining mark,
+  // so decomposition leaves them as they are.
+  static final _dWithStroke = RegExp('[đĐ]');
+
   @override
   String normalize(String input) {
     // NFD/NFKD leave ASCII untouched and ASCII has no combining marks.
@@ -18,6 +22,8 @@ class DiacriticStripStep extends NormalizationStep {
     final decomposed = decomposition == UnicodeDecomposition.nfkd
         ? unorm.nfkd(input)
         : unorm.nfd(input);
-    return decomposed.replaceAll(_combiningMarks, '');
+    return decomposed
+        .replaceAll(_combiningMarks, '')
+        .replaceAllMapped(_dWithStroke, (m) => m[0] == 'đ' ? 'd' : 'D');
   }
 }

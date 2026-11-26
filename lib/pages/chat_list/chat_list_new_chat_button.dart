@@ -6,17 +6,19 @@ import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view_style.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 
-/// The pen of the app bar: a bare icon, no container. Opens the menu of new
+/// The pen of the app bar. Opens the menu of new
 /// chats on wide layouts (below the pen, flipped to its left by MenuAnchor if
 /// it would leave the screen), the new direct message on a single column.
 class ChatListNewChatButton extends StatelessWidget {
   final ChatListController controller;
   final bool isSingleColumn;
+  final Color? color;
 
   const ChatListNewChatButton({
     super.key,
     required this.controller,
     required this.isSingleColumn,
+    this.color,
   });
 
   @override
@@ -26,6 +28,7 @@ class ChatListNewChatButton extends StatelessWidget {
       key: const Key('new_chat_pen'),
       tooltip: l10n.newChat,
       iconSize: ChatListViewStyle.editIconSize,
+      color: color,
       icon: const Icon(Icons.mode_edit_outline_outlined),
       onPressed: onPressed,
     );

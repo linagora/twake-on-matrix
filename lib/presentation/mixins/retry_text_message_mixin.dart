@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:matrix/matrix.dart';
 
@@ -47,7 +48,9 @@ mixin RetryTextMessageMixin {
         txid: event.transactionId,
         inReplyTo: replyEvent,
         editEventId: editEventId,
-        threadRootEventId: threadRootId,
+        threadRootEventId:
+            threadRootId ??
+            (replyEvent == null ? null : ThreadRules.threadRootOf(replyEvent)),
         threadLastEventId: threadLastEventId,
       );
       if (eventId == null) {

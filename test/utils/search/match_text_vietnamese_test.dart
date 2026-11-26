@@ -72,4 +72,27 @@ void main() {
   test('should fold an accented needle, not just an accented haystack', () {
     expect(_match('Nguyễn', 'nguyen'), isTrue);
   });
+
+  // Issue #3021: đ / Đ are letters of their own, not d plus a combining mark.
+  group('matchesText vietnamese — đ — diacriticSensitive: false', () {
+    test('should match Đặng when searching dang', () {
+      expect(_match('dang', 'Đặng Văn Lâm'), isTrue);
+    });
+
+    test('should match Đỗ when searching DO', () {
+      expect(_match('DO', 'Đỗ Thị Hà'), isTrue);
+    });
+
+    test('should match Đ inside a word', () {
+      expect(_match('dong', 'Hà Đông'), isTrue);
+    });
+
+    test('should match a needle typed with đ', () {
+      expect(_match('Đặng', 'Đặng Văn Lâm'), isTrue);
+    });
+  });
+
+  test('should keep đ distinct from d with the default options', () {
+    expect(_engine.matchesText('dang', 'Đặng Văn Lâm'), isFalse);
+  });
 }

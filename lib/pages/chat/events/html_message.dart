@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
@@ -50,6 +51,9 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
 
     final themeData = Theme.of(context);
 
+    // A link opens on tap up, so a drag that starts on it scrolls instead.
+    var lastTapDown = TapDownDetails();
+
     // `Html` renders through raw `RichText`, which (unlike `Text`/`Text.rich`)
     // does not merge the ambient `DefaultTextStyle`. We merge it in here so the
     // app font family is preserved for styles that don't specify one — the
@@ -78,9 +82,10 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
       linkTypes: const [LinkType.url, LinkType.phone],
       shrinkToFit: true,
       maxLines: maxLines,
-      onTapDownLink: (tapDownDetails, link) => handleOnTappedLinkHtml(
+      onTapDownLink: (details, _) => lastTapDown = details,
+      onTapLink: (link) => handleOnTappedLinkHtml(
         context: context,
-        details: tapDownDetails,
+        details: lastTapDown,
         link: link,
       ),
       linkBuilder: (url, childrenSpan, linkStyle) => filenameLinkAsPlainText(
@@ -159,48 +164,31 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
                   'avatar_url': contact.avatarUrl ?? '',
                 };
               }
-              if (identifier.sigil == '#') {
-                // we have an alias pill
-                for (final r in room.client.rooms) {
-                  final state = r.getState('m.room.canonical_alias');
-                  final altAliases = state?.content['alt_aliases'];
-                  if (state != null &&
-                      ((state.content['alias'] is String &&
-                              state.content['alias'] == identifier) ||
-                          (altAliases is List &&
-                              altAliases.contains(identifier)))) {
-                    // we have a room!
-                    return {
-                      'displayname': r.getLocalizedDisplayname(
-                        MatrixLocals(L10n.of(context)!),
-                      ),
-                      'avatar_url': r.getState('m.room.avatar')?.content['url'],
-                    };
-                  }
-                }
+              final pillRoom = _pillRoom(identifier);
+              if (pillRoom == null) {
                 return {};
               }
-              if (identifier.sigil == '!') {
-                // we have a room ID pill
-                final r = room.client.getRoomById(identifier);
-                if (r == null) {
-                  return {};
-                }
-                return {
-                  'displayname': r.getLocalizedDisplayname(
-                    MatrixLocals(L10n.of(context)!),
-                  ),
-                  'avatar_url': r.getState('m.room.avatar')?.content['url'],
-                };
-              }
-              return {};
+              return {
+                'displayname': pillRoom.getLocalizedDisplayname(
+                  MatrixLocals(L10n.of(context)!),
+                ),
+                'avatar_url': pillRoom
+                    .getState('m.room.avatar')
+                    ?.content['url'],
+              };
             }
           : null,
       pillBuilder: (identifier, url, onTap, getMxcUrl) {
-        final user = room.getUser(identifier);
-        final displayName = user?.displayName ?? identifier;
+        final pillRoom = _pillRoom(identifier);
+        final displayName =
+            pillRoom?.getLocalizedDisplayname(
+              MatrixLocals(L10n.of(context)!),
+            ) ??
+            room.getUser(identifier)?.displayName ??
+            identifier;
+        // A room is named as it is; only a user gets the « @[ ] » mention.
         return MentionedUser(
-          displayName: !room.isDirectChat
+          displayName: !room.isDirectChat && pillRoom == null
               ? displayName.displayMentioned
               : displayName,
           url: url,
@@ -213,5 +201,21 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
         );
       },
     );
+  }
+
+  /// The room a `!id` or `#alias` pill points at, when the user is in it.
+  Room? _pillRoom(String identifier) => switch (identifier.sigil) {
+    '!' => room.client.getRoomById(identifier),
+    '#' => room.client.rooms.firstWhereOrNull(
+      (candidate) => _hasAlias(candidate, identifier),
+    ),
+    _ => null,
+  };
+
+  static bool _hasAlias(Room candidate, String alias) {
+    final content = candidate.getState('m.room.canonical_alias')?.content;
+    final altAliases = content?['alt_aliases'];
+    return content?['alias'] == alias ||
+        (altAliases is List && altAliases.contains(alias));
   }
 }
