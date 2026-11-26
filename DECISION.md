@@ -596,3 +596,17 @@ once if it is a voice message too (#2796). The run stops:
 Events the chat does not show (reactions, edits) do not stop the run. On the
 thread screen, the run plays the replies of that thread only, from its root
 too; in the chat, it skips the thread replies, as the chat does.
+
+## D31. A thread offers the quote reply (decided by Clément, 2026-11-26)
+
+A message of the thread screen offers « Reply » as a message of a chat does:
+in the long-press menu, the web context and hover menus, the selection bar
+and the swipe, to a member allowed to send messages. What is sent while
+replying stays in the thread (`rel_type: m.thread`, the root as `event_id`)
+and quotes the chosen message (`m.in_reply_to`, `is_falling_back: false`).
+Files and Drive links sent while replying quote too. Without a quote, the
+message still follows the last event of the thread.
+
+Twake Space Chat does the same since its D801 (2026-11-25). Replaces the
+earlier rule « a thread has no quote reply » (THR-M-04, written in the tests
+of #3606); no earlier entry of this file said it.
