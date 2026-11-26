@@ -12,6 +12,7 @@ import 'package:twake_chat/data/network/media/cancel_exception.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/utils/exception/logged_out_during_download_exception.dart';
 import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 
@@ -311,7 +312,10 @@ void main() {
         final writing = Future(() => event.writeDecryptedAttachment(file));
 
         // Assert
-        await expectLater(writing, throwsStateError);
+        await expectLater(
+          writing,
+          throwsA(isA<LoggedOutDuringDownloadException>()),
+        );
         expect(
           Directory(p.join(tempDir.path, 'decrypted')).existsSync(),
           isFalse,

@@ -5,6 +5,7 @@ import 'package:twake_chat/pages/chat/events/audio_message/audio_play_extension.
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/utils/exception/logged_out_during_download_exception.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
@@ -193,6 +194,9 @@ class ChatAudioPlayerWidget extends StatelessWidget {
       );
 
       matrix?.currentAudioStatus.value = AudioPlayerStatus.downloaded;
+    } on LoggedOutDuringDownloadException {
+      matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      return;
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
       ScaffoldMessenger.of(

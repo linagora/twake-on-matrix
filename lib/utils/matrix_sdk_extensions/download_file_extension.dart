@@ -9,6 +9,7 @@ import 'package:twake_chat/data/network/exception/dio_duplicate_download_excepti
 import 'package:twake_chat/data/network/media/cancel_exception.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/exception/logged_out_during_download_exception.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
 import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
@@ -43,7 +44,7 @@ extension DownloadFileExtension on Event {
     Future<File> Function(File written)? convert,
   }) {
     if (!room.client.isLogged()) {
-      throw StateError('The client logged out during the download');
+      throw const LoggedOutDuringDownloadException();
     }
     final writing = StorageDirectoryManager.instance
         .writeDecryptedFile(eventId: eventId, file: file)
