@@ -49,6 +49,10 @@ enum NavigationKeys {
     Key('navigation.searchCloseButton'),
     ValueKey('navigation.searchCloseButton'),
   ),
+  collapsingSearchField(
+    Key('navigation.collapsingSearchField'),
+    ValueKey('navigation.collapsingSearchField'),
+  ),
   settingsAvatar(
     Key('navigation.settingsAvatar'),
     ValueKey('navigation.settingsAvatar'),

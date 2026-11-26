@@ -98,24 +98,44 @@ class FloatingNavigationBar extends StatelessWidget {
         onPopInvokedWithResult: (didPop, _) {
           if (!didPop) _closeSearch();
         },
-        child: TweenAnimationBuilder<double>(
-          tween: Tween(end: open ? 1 : 0),
-          duration: MediaQuery.disableAnimationsOf(context)
-              ? Duration.zero
-              : _searchDuration,
-          curve: Curves.easeOutCubic,
-          builder: (context, progress, _) =>
-              _bar(context, open: open, progress: progress),
+        child: _animate(
+          context,
+          open,
+          (progress) => _animate(
+            context,
+            open || FloatingSearchButtonShown.of(context),
+            (buttonShown) => _bar(
+              context,
+              open: open,
+              progress: progress,
+              buttonShown: buttonShown,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  /// [progress] goes from 0 (tabs and search button) to 1 (search field).
+  Widget _animate(
+    BuildContext context,
+    bool on,
+    Widget Function(double value) builder,
+  ) => TweenAnimationBuilder<double>(
+    tween: Tween(end: on ? 1 : 0),
+    duration: MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : _searchDuration,
+    curve: Curves.easeOutCubic,
+    builder: (context, value, _) => builder(value),
+  );
+
+  /// [progress] goes from 0 (tabs and search button) to 1 (search field);
+  /// [buttonShown] from 0 (no search button) to 1.
   Widget _bar(
     BuildContext context, {
     required bool open,
     required double progress,
+    double buttonShown = 1,
   }) {
     final l10n = L10n.of(context)!;
     final tabs = [
@@ -171,28 +191,38 @@ class FloatingNavigationBar extends StatelessWidget {
                     opacity: 1 - progress,
                     child: IgnorePointer(ignoring: open, child: tabsCapsule),
                   ),
-                  SizedBox(width: _searchGap * (1 - progress)),
+                  SizedBox(width: _searchGap * (1 - progress) * buttonShown),
                 ],
-                SizedBox(
-                  width: lerpDouble(height, fieldWidth, progress),
-                  height: height,
-                  child: FloatingCapsule(
-                    child: open
-                        ? OverflowBox(
-                            alignment: AlignmentDirectional.centerStart,
-                            minWidth: fieldWidth,
-                            maxWidth: fieldWidth,
-                            child: _SearchField(
-                              query: searchQuery!,
-                              suffix: searchSuffix,
+                Opacity(
+                  opacity: open ? 1 : buttonShown.clamp(0, 1),
+                  child: SizedBox(
+                    width: lerpDouble(
+                      height * buttonShown,
+                      fieldWidth,
+                      progress,
+                    ),
+                    height: height,
+                    child: FloatingCapsule(
+                      child: open
+                          ? OverflowBox(
+                              alignment: AlignmentDirectional.centerStart,
+                              minWidth: fieldWidth,
+                              maxWidth: fieldWidth,
+                              child: _SearchField(
+                                query: searchQuery!,
+                                suffix: searchSuffix,
+                              ),
+                            )
+                          : IgnorePointer(
+                              ignoring: buttonShown < 1,
+                              child: _RoundButton(
+                                buttonKey: NavigationKeys.searchButton.key,
+                                label: l10n.search,
+                                icon: Icons.search,
+                                onTap: () => searchOpen!.value = true,
+                              ),
                             ),
-                          )
-                        : _RoundButton(
-                            buttonKey: NavigationKeys.searchButton.key,
-                            label: l10n.search,
-                            icon: Icons.search,
-                            onTap: () => searchOpen!.value = true,
-                          ),
+                    ),
                   ),
                 ),
                 if (open) ...[
@@ -218,6 +248,24 @@ class FloatingNavigationBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// While its [notifier] is false, the search button of the
+/// [FloatingNavigationBar] below folds away: the chat list shows a search
+/// field of its own meanwhile.
+class FloatingSearchButtonShown extends InheritedNotifier<ValueNotifier<bool>> {
+  const FloatingSearchButtonShown({
+    super.key,
+    required super.notifier,
+    required super.child,
+  });
+
+  static bool of(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<FloatingSearchButtonShown>()
+          ?.notifier
+          ?.value ??
+      true;
 }
 
 /// [child] laid out at [fullWidth], shown through a [width] wide window from
