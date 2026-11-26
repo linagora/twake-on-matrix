@@ -236,6 +236,16 @@ void main() {
     );
   }
 
+  /// Sends three files with a caption and a reply, cancels the picked one
+  /// before any upload starts, then sends the rest.
+  Future<void> cancelOneOfThree(
+    String Function(List<String> txids) pick,
+  ) async {
+    final txids = await send(['a.txt', 'b.txt', 'c.txt']);
+    await cancel(pick(txids));
+    await runQueuedSends();
+  }
+
   bool hasCaption(Map<String, Object?> content) =>
       '${content['body']}'.endsWith('look');
 
@@ -244,18 +254,20 @@ void main() {
 
   const reply = {'event_id': r'$target'};
 
-  test('cancelling the captioned file before it starts moves the caption to '
-      'the last file still waiting', () async {
-    final txids = await send(['a.txt', 'b.txt', 'c.txt']);
-
-    await cancel(txids.last);
-    await runQueuedSends();
-
-    final sent = sentMessages();
+  /// The two files left: the first carries the reply, the second the caption.
+  void expectReplyThenCaption(List<Map<String, Object?>> sent) {
     expect(sent, hasLength(2));
     expect(replyOf(sent[0]), reply);
     expect(hasCaption(sent[0]), isFalse);
+    expect(replyOf(sent[1]), isNull);
     expect(hasCaption(sent[1]), isTrue);
+  }
+
+  test('cancelling the captioned file before it starts moves the caption to '
+      'the last file still waiting', () async {
+    await cancelOneOfThree((txids) => txids.last);
+
+    expectReplyThenCaption(sentMessages());
   });
 
   test('cancelling the captioned file once the others are sent sends the '
@@ -275,30 +287,15 @@ void main() {
   });
 
   test('cancelling the first file moves the reply to the next one', () async {
-    final txids = await send(['a.txt', 'b.txt', 'c.txt']);
+    await cancelOneOfThree((txids) => txids.first);
 
-    await cancel(txids.first);
-    await runQueuedSends();
-
-    final sent = sentMessages();
-    expect(sent, hasLength(2));
-    expect(replyOf(sent[0]), reply);
-    expect(replyOf(sent[1]), isNull);
-    expect(hasCaption(sent[1]), isTrue);
+    expectReplyThenCaption(sentMessages());
   });
 
   test('cancelling a file without caption nor reply changes nothing', () async {
-    final txids = await send(['a.txt', 'b.txt', 'c.txt']);
+    await cancelOneOfThree((txids) => txids[1]);
 
-    await cancel(txids[1]);
-    await runQueuedSends();
-
-    final sent = sentMessages();
-    expect(sent, hasLength(2));
-    expect(replyOf(sent[0]), reply);
-    expect(hasCaption(sent[0]), isFalse);
-    expect(replyOf(sent[1]), isNull);
-    expect(hasCaption(sent[1]), isTrue);
+    expectReplyThenCaption(sentMessages());
   });
 
   test('cancelling a lone file keeps its caption and reply as a text '

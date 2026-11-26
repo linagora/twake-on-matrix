@@ -202,7 +202,7 @@ class UploadManager {
       return await room.getEventById(eventId);
     } on Exception catch (e) {
       Logs().w(
-        'UploadManager::_replyTarget(): $eventId not found, the '
+        'UploadManager::_replyTarget(): $eventId could not be loaded, the '
         'reply is dropped: $e',
       );
       return null;
