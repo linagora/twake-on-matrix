@@ -33,7 +33,7 @@ class IncomingCallHost extends ConsumerStatefulWidget {
 
   final GlobalKey<NavigatorState> navigatorKey;
   final Widget child;
-  final AudioPlayer Function() createPlayer;
+  final AudioPlayer Function({bool androidApplyAudioAttributes}) createPlayer;
 
   @override
   ConsumerState<IncomingCallHost> createState() => _IncomingCallHostState();
@@ -73,7 +73,11 @@ class _IncomingCallHostState extends ConsumerState<IncomingCallHost> {
 
   Future<void> _startRing() async {
     if (_player != null) return;
-    final player = _player = widget.createPlayer();
+    // Not the shared session attributes: a later configure would replace
+    // the ringtone ones.
+    final player = _player = widget.createPlayer(
+      androidApplyAudioAttributes: false,
+    );
     try {
       await player.setAndroidAudioAttributes(IncomingCallHost.ringAttributes);
       await player.setLoopMode(LoopMode.one);

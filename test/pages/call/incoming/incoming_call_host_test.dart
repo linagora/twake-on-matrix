@@ -28,6 +28,11 @@ final _ring = CallRing(
 );
 
 class _FakePlayer extends Fake implements AudioPlayer {
+  _FakePlayer({required this.appliesSessionAttributes});
+
+  /// Whether the player follows the shared audio session attributes.
+  final bool appliesSessionAttributes;
+
   final calls = <String>[];
 
   @override
@@ -79,7 +84,13 @@ Future<_Host> _pumpHost(WidgetTester tester) async {
         supportedLocales: L10n.supportedLocales,
         builder: (context, child) => IncomingCallHost(
           navigatorKey: navigatorKey,
-          createPlayer: () => (host.players..add(_FakePlayer())).last,
+          createPlayer: ({androidApplyAudioAttributes = true}) =>
+              (host.players..add(
+                    _FakePlayer(
+                      appliesSessionAttributes: androidApplyAudioAttributes,
+                    ),
+                  ))
+                  .last,
           child: child!,
         ),
         home: const Scaffold(body: Text('chats')),
@@ -157,6 +168,7 @@ void _ringtoneTests() {
     await tester.pump();
 
     // Assert
+    expect(host.players.single.appliesSessionAttributes, isFalse);
     expect(host.players.single.calls, [
       'attributes ${AndroidAudioUsage.notificationRingtone}',
       'loop ${LoopMode.one}',
