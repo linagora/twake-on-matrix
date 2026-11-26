@@ -109,11 +109,20 @@ class MentionSuggestionsScenario extends BaseTestScenario {
     if (_groupId.isEmpty) {
       throw StateError('Missing required --dart-define=GroupID');
     }
+    final client = await _loadedClient();
+    final room = await _waitForRoom(client);
+    return (room, await _otherMembers(room, client.userID));
+  }
+
+  Future<Client> _loadedClient() async {
     await $(ChatList).waitUntilVisible(timeout: const Duration(seconds: 60));
     final context = $.tester.element(find.byType(Scaffold).first);
     final client = twake.Matrix.of(context).client;
     await client.roomsLoading;
+    return client;
+  }
 
+  Future<Room> _waitForRoom(Client client) async {
     final deadline = DateTime.now().add(const Duration(seconds: 30));
     var room = client.getRoomById(_groupId);
     while (room == null && DateTime.now().isBefore(deadline)) {
@@ -121,16 +130,17 @@ class MentionSuggestionsScenario extends BaseTestScenario {
       room = client.getRoomById(_groupId);
     }
     if (room == null) throw StateError('Room $_groupId is not loaded.');
+    return room;
+  }
 
-    final others =
-        (await room.requestParticipants([
-            Membership.join,
-          ])).where((member) => member.id != client.userID).toList()
-          ..sort((a, b) => a.id.compareTo(b.id));
+  Future<List<User>> _otherMembers(Room room, String? selfId) async {
+    final joined = await room.requestParticipants([Membership.join]);
+    final others = joined.where((member) => member.id != selfId).toList()
+      ..sort((a, b) => a.id.compareTo(b.id));
     if (others.length < 2) {
       throw StateError('Room $_groupId needs two members besides us.');
     }
-    return (room, others);
+    return others;
   }
 }
 
