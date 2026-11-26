@@ -412,11 +412,8 @@ counts as someone: only the first to join rings.
 - The whole room rings, direct chats and groups alike, as Twake Space Chat
   rings it: `notification_type: ring`, a lifetime of 60 s (decided by Johann,
   2026-11-23: mobile behaves as the web).
-- Unlike matrix-js-sdk 43, the ring mentions nobody (`m.mentions: {}`). With
-  `room: true`, `.m.rule.is_room_mention` takes the push of a caller allowed
-  to mention the room before the ring rule, and the push plays no ring sound
-  (seen on Synapse 1.162, 2026-11-25). Twake Space Chat reads a ring without
-  a mention; a ring that names other people only does not ring.
+- Unlike matrix-js-sdk 43, the ring mentions nobody (`m.mentions: {}`, D29).
+  A ring that names other people only does not ring.
 - The ring is sent in the clear, also in an encrypted room: the push gateway
   and the other devices read it without the keys of the room. It holds no
   message content.
@@ -563,6 +560,24 @@ the first one, crossed, means no colour.
 
 In the Folders list, a folder's colour shows as a tint behind its emoji, under
 a « Your folders » header. Each folder keeps its own delete button.
+
+## D29. Rings carry no mention (decided by Johann, 2026-11-26)
+
+A ring of Twake Chat (MSC4075) sends `m.mentions: {}`, where matrix-js-sdk 43,
+and so Twake Space Chat, sends `room: true`.
+
+With `room: true`, Synapse's default override `.m.rule.is_room_mention` takes
+the push of any caller allowed to mention the room (power level 50 or more)
+before the ring rule of D21, an underride: the push is highlighted but plays no
+ring sound, and a room set to « mentions only » is still notified. With no
+mention, the ring rule takes every ring: the push plays the ring sound whoever
+calls, and a room set to « mentions only » stays silent. Seen on Synapse 1.162,
+2026-11-25. Twake Space Chat rings without reading the mentions of a ring.
+
+Trade-off, accepted: a client that rings only when a ring mentions it or the
+room does not ring for these calls. Twake Chat builds before this one do so,
+through `shouldNotifyUser` of the Dart SDK; the review of #3760 reports the same
+for Element X.
 
 ## D30. Voice messages play one after the other (proposed by Johann, 2026-11-24)
 
