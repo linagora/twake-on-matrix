@@ -1,9 +1,9 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
-import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import '../base/core_robot.dart';
 import 'abstract/abstract_search_robot.dart';
 
@@ -12,16 +12,17 @@ class SearchRobot extends CoreRobot implements AbstractSearchRobot {
 
   L10n get _l10n => L10n.of($.tester.element(find.byType(Scaffold).first))!;
 
+  /// The close button of the search of the bottom bar.
   PatrolFinder getBackIcon() {
-    return $(AppBar).$(TwakeIconButton).$(Icon);
+    return $(NavigationKeys.searchCloseButton.key);
   }
 
-  /// Mobile implementation — waits for `FloatingNavigationBar` after going back.
-  /// Web uses [WebSearchRobot] which skips that wait.
+  /// Mobile implementation — closes the search of the bottom bar, then waits
+  /// for the tabs of `FloatingNavigationBar`.
   @override
   Future<void> backToPreviousScreen() async {
-    await goBack();
-    await $.waitUntilVisible($(FloatingNavigationBar));
+    await getBackIcon().tap();
+    await $.waitUntilVisible($(NavigationKeys.searchButton.key));
   }
 
   PatrolFinder getSearchTextField() {
