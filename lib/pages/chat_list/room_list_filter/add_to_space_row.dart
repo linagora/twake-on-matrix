@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_row_divider.dart';
 
 /// The last line of an open space: a dashed « + » where the avatars are, and
 /// what it adds. A press starts the new room.
@@ -19,37 +20,40 @@ class AddToSpaceRow extends StatelessWidget {
       child: TwakeInkWell(
         isSelected: false,
         onTap: onTap,
-        child: TwakeListItem(
-          child: Container(
-            height: ChatListItemStyle.spaceItemHeight,
-            padding: ChatListItemStyle.paddingBody.add(
-              EdgeInsetsDirectional.only(
-                start: depth * ChatListItemStyle.depthIndent,
+        child: Container(
+          height: ChatListItemStyle.spaceItemHeight,
+          padding: ChatListItemStyle.paddingBody.add(
+            EdgeInsetsDirectional.only(
+              start: depth * ChatListItemStyle.depthIndent,
+            ),
+          ),
+          child: Row(
+            children: [
+              Padding(
+                padding: ChatListItemStyle.paddingAvatar,
+                child: CustomPaint(
+                  painter: _DashedCirclePainter(primary),
+                  child: SizedBox.square(
+                    dimension: ChatListItemStyle.childAvatarSize,
+                    child: Icon(Icons.add, color: primary),
+                  ),
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                Padding(
-                  padding: ChatListItemStyle.paddingAvatar,
-                  child: CustomPaint(
-                    painter: _DashedCirclePainter(primary),
-                    child: SizedBox.square(
-                      dimension: ChatListItemStyle.childAvatarSize,
-                      child: Icon(Icons.add, color: primary),
+              Expanded(
+                child: ChatListRowDivider(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      L10n.of(context)!.spaceAddRoom,
+                      overflow: TextOverflow.ellipsis,
+                      style: ListItemStyle.titleTextStyle().copyWith(
+                        color: primary,
+                      ),
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Text(
-                    L10n.of(context)!.spaceAddRoom,
-                    overflow: TextOverflow.ellipsis,
-                    style: ListItemStyle.titleTextStyle().copyWith(
-                      color: primary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
