@@ -1215,7 +1215,7 @@ void main() {
   });
 
   testWidgets('a restored account with no stored ToM configuration still '
-      'sends the Matrix requests of the app to its homeserver', (tester) async {
+      'sets up the home server and authorization interceptors', (tester) async {
     final authorization = AuthorizationInterceptor();
     _registerToM(
       _FakeToMConfigurationsRepository({}),
@@ -1258,7 +1258,11 @@ void main() {
   testWidgets('switching to an account with no stored ToM configuration does '
       'not keep the one of the account being left', (tester) async {
     final left = _ToMClient('a', userID: '@a:s');
-    final target = _ToMClient('b', userID: '@b:s');
+    final target = _ToMClient(
+      'b',
+      userID: '@b:s',
+      server: Uri.parse('https://hs.b'),
+    );
     final authorization = AuthorizationInterceptor();
     final tomServer = _registerToM(
       _FakeToMConfigurationsRepository({'@a:s': _toM('https://tom.a')}),
@@ -1266,6 +1270,9 @@ void main() {
     );
     final identity = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.identityServerUrlInterceptorName,
+    );
+    final homeServer = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.homeServerUrlInterceptorName,
     );
     final harness = _Harness(
       tester,
@@ -1281,6 +1288,7 @@ void main() {
       // The boot may have set up the active account; start from a clean state.
       tomServer.changeBaseUrl(null);
       identity.changeBaseUrl('https://id.a');
+      homeServer.changeBaseUrl('https://hs.a');
       authorization.accessToken = null;
       harness.container
           .read(accountSwitchEffectsHolderProvider.notifier)
@@ -1295,6 +1303,7 @@ void main() {
     // The target has no configuration: nothing of account `a` stays bound.
     expect(tomServer.baseUrl, isNull);
     expect(identity.baseUrl, isNull);
+    expect(homeServer.baseUrl, 'https://hs.b');
     expect(authorization.accessToken, 'token-b');
   });
 
