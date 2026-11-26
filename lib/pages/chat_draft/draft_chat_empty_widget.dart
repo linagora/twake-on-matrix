@@ -11,40 +11,44 @@ class DraftChatEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        constraints: BoxConstraints(
-          maxWidth: DraftChatEmptyWidgetStyle.maxWidth(context),
-        ),
-        decoration: BoxDecoration(
-          color: DraftChatEmptyWidgetStyle.greetingButtonBackground,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(
-              Assets.images.icMascotNewChat.path,
-              width: DraftChatEmptyWidgetStyle.iconSize(context),
-              height: DraftChatEmptyWidgetStyle.iconSize(context),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              L10n.of(context)!.sendMessageGuide,
-              textAlign: TextAlign.center,
-              style: DraftChatEmptyWidgetStyle.subTitleStyle(context),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              L10n.of(context)!.noMessageHereYet,
-              style: DraftChatEmptyWidgetStyle.titleStyle(context),
-              textAlign: TextAlign.center,
-            ),
-          ],
+    // The keyboard and a multi-line composer can leave less room than the card needs.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          constraints: BoxConstraints(
+            maxWidth: DraftChatEmptyWidgetStyle.maxWidth(context),
+          ),
+          decoration: BoxDecoration(
+            color: DraftChatEmptyWidgetStyle.greetingButtonBackground,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                Assets.images.icMascotNewChat.path,
+                width: DraftChatEmptyWidgetStyle.iconSize(context),
+                height: DraftChatEmptyWidgetStyle.iconSize(context),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                L10n.of(context)!.sendMessageGuide,
+                textAlign: TextAlign.center,
+                style: DraftChatEmptyWidgetStyle.subTitleStyle(context),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                L10n.of(context)!.noMessageHereYet,
+                style: DraftChatEmptyWidgetStyle.titleStyle(context),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
