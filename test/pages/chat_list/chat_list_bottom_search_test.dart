@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
@@ -18,13 +20,19 @@ const _closeButton = Key('navigation.searchCloseButton');
 const _results = Key('search_results');
 
 final _rooms = find.byType(SlidableChatListItem);
+final _pills = find.byType(RoomListFilterPills);
+final _title = find.descendant(of: headerFinder, matching: find.text('Chats'));
 
 /// The Chats tab of a phone as the app builds it: the chat list over the
 /// floating bar, both on the same search.
-Future<HeaderHarness> _pumpChats(WidgetTester tester) {
-  final open = ValueNotifier(false);
+Future<HeaderHarness> _pumpChats(
+  WidgetTester tester, {
+  ChatListSearchStyle style = ChatListSearchStyle.bottomBar,
+  ValueNotifier<bool>? searchOpen,
+}) {
+  final open = searchOpen ?? ValueNotifier(false);
   final query = TextEditingController();
-  addTearDown(open.dispose);
+  if (searchOpen == null) addTearDown(open.dispose);
   addTearDown(query.dispose);
   return HeaderHarness.pump(
     tester,
@@ -32,6 +40,7 @@ Future<HeaderHarness> _pumpChats(WidgetTester tester) {
     buildView: (controller) => ChatListView(
       controller: controller,
       onTapBottomNavigation: (_) {},
+      searchStyle: style,
       searchOpen: open,
       searchResults: ValueListenableBuilder(
         key: _results,
@@ -146,6 +155,58 @@ void main() {
       expect(find.byKey(_searchButton), findsOneWidget);
     });
   });
+
+  // Clément, 2026-11-26: the search screen has no folders; the app bar stays.
+  for (final style in ChatListSearchStyle.values) {
+    group('[ChatList] folder pills and the search (${style.name})', () {
+      testWidgets('GIVEN the search is closed\n'
+          'THEN the folder pills show', (tester) async {
+        await _pumpChats(tester, style: style);
+
+        expect(_pills, findsOneWidget);
+      });
+
+      testWidgets('GIVEN the search is open\n'
+          'THEN the folder pills do not show', (tester) async {
+        final open = ValueNotifier(false);
+        addTearDown(open.dispose);
+        await _pumpChats(tester, style: style, searchOpen: open);
+
+        open.value = true;
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(_results).hitTestable(), findsOneWidget);
+        expect(_pills, findsNothing);
+      });
+
+      testWidgets('GIVEN the search is open\n'
+          'THEN the app bar and its title stay', (tester) async {
+        final open = ValueNotifier(false);
+        addTearDown(open.dispose);
+        await _pumpChats(tester, style: style, searchOpen: open);
+
+        open.value = true;
+        await tester.pumpAndSettle();
+
+        expect(_title.hitTestable(), findsOneWidget);
+      });
+
+      testWidgets('GIVEN the search is open\n'
+          'WHEN it closes\n'
+          'THEN the folder pills come back', (tester) async {
+        final open = ValueNotifier(false);
+        addTearDown(open.dispose);
+        await _pumpChats(tester, style: style, searchOpen: open);
+        open.value = true;
+        await tester.pumpAndSettle();
+
+        open.value = false;
+        await tester.pumpAndSettle();
+
+        expect(_pills.hitTestable(), findsOneWidget);
+      });
+    });
+  }
 
   group('[ChatList] select mode over the bottom bar', () {
     testWidgets('GIVEN conversations are ticked\n'

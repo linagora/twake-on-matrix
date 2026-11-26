@@ -27,11 +27,15 @@ class ChatListHeader extends StatelessWidget {
   /// beyond its own, and folds away with it.
   final VoidCallback? onOpenSearch;
 
+  /// False over the search results: the search screen has no folders.
+  final bool showFilters;
+
   const ChatListHeader({
     super.key,
     required this.controller,
     this.onOpenSearchPageInMultipleColumns,
     this.onOpenSearch,
+    this.showFilters = true,
   });
 
   @override
@@ -66,12 +70,13 @@ class ChatListHeader extends StatelessWidget {
           ),
         if (isMobile && onOpenSearch != null)
           Flexible(child: _CollapsingSearchField(onTap: onOpenSearch!)),
-        ValueListenableBuilder<SelectMode>(
-          valueListenable: controller.selectModeNotifier,
-          builder: (context, selectMode, _) => isMobile
-              ? RoomListFilterPills(enabled: !selectMode.isSelectMode)
-              : RoomListFilterBar(enabled: !selectMode.isSelectMode),
-        ),
+        if (showFilters)
+          ValueListenableBuilder<SelectMode>(
+            valueListenable: controller.selectModeNotifier,
+            builder: (context, selectMode, _) => isMobile
+                ? RoomListFilterPills(enabled: !selectMode.isSelectMode)
+                : RoomListFilterBar(enabled: !selectMode.isSelectMode),
+          ),
         // Only show audio player on actual mobile platforms (not just mobile-sized layouts)
         if (isMobile && PlatformInfos.isMobile)
           ChatAudioPlayerWidget(matrix: controller.matrixState),

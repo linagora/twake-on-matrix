@@ -123,9 +123,6 @@ class _ChatListViewState extends State<ChatListView> {
           ),
           body: _withSearch(
             collapsing: collapsing,
-            header: header,
-            // Same as Scaffold for a primary appBar: preferred height + status bar.
-            headerHeight: headerSize.height + MediaQuery.paddingOf(context).top,
             list: Stack(
               children: [
                 StreamBuilder<Client>(
@@ -170,12 +167,7 @@ class _ChatListViewState extends State<ChatListView> {
     );
   }
 
-  Widget _withSearch({
-    required bool collapsing,
-    required Widget header,
-    required double headerHeight,
-    required Widget list,
-  }) {
+  Widget _withSearch({required bool collapsing, required Widget list}) {
     final searchOpen = widget.searchOpen;
     final results = widget.searchResults;
     if (!collapsing || searchOpen == null || results == null) return list;
@@ -184,7 +176,12 @@ class _ChatListViewState extends State<ChatListView> {
       builder: (context, open, list) => open
           ? Column(
               children: [
-                SizedBox(height: headerHeight, child: header),
+                // The app bar alone: the search screen has no folders.
+                ChatListHeader(
+                  key: _headerKey,
+                  controller: widget.controller,
+                  showFilters: false,
+                ),
                 Expanded(
                   child: Padding(
                     // Above the floating bottom bar and its field.
