@@ -4,12 +4,15 @@ import 'package:twake_chat/pages/chat_list/chat_list_body_view.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view_style.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' hide Notification;
 
 class ChatListView extends StatefulWidget {
   final ChatListController controller;
@@ -22,6 +25,11 @@ class ChatListView extends StatefulWidget {
   final ValueNotifier<bool>? searchOpen;
   final Widget? searchResults;
 
+  /// [ChatListSearchStyle.collapsing]: on a phone with [searchOpen], a thin
+  /// field at the top of the list opens the search; the search button of
+  /// the bar shows only once the list has scrolled.
+  final ChatListSearchStyle searchStyle;
+
   const ChatListView({
     super.key,
     required this.controller,
@@ -30,6 +38,7 @@ class ChatListView extends StatefulWidget {
     required this.onTapBottomNavigation,
     this.searchOpen,
     this.searchResults,
+    this.searchStyle = ChatListSearchStyle.bottomBar,
   });
 
   @override
@@ -40,6 +49,28 @@ class _ChatListViewState extends State<ChatListView> {
   final responsiveUtils = getIt.get<ResponsiveUtils>();
   // Keeps the header State when select mode swaps the sliver that wraps it.
   final _headerKey = GlobalKey();
+
+  /// Collapsing style: whether the list has scrolled its search field away.
+  final _scrolled = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    _scrolled.dispose();
+    super.dispose();
+  }
+
+  bool _onScroll(Notification notification) {
+    // Also on the first layout, when the list comes back at an offset.
+    final metrics = switch (notification) {
+      final ScrollNotification n when n.depth == 0 => n.metrics,
+      final ScrollMetricsNotification n when n.depth == 0 => n.metrics,
+      _ => null,
+    };
+    if (metrics != null && metrics.axis == Axis.vertical) {
+      _scrolled.value = metrics.pixels > 0;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +85,17 @@ class _ChatListViewState extends State<ChatListView> {
           isSingleColumn: collapsing,
           hasAudioEvent: hasEvent != null && PlatformInfos.isMobile,
         );
+        final searchOpen = widget.searchOpen;
+        final searchField =
+            collapsing &&
+            searchOpen != null &&
+            widget.searchStyle == ChatListSearchStyle.collapsing;
         final header = ChatListHeader(
           key: _headerKey,
           onOpenSearchPageInMultipleColumns:
               widget.onOpenSearchPageInMultipleColumns,
           controller: widget.controller,
+          onOpenSearch: searchField ? () => searchOpen.value = true : null,
         );
         return Scaffold(
           extendBody: true,
@@ -78,9 +115,10 @@ class _ChatListViewState extends State<ChatListView> {
                         width: ChatListBottomNavigatorStyle.width,
                       ),
                 );
-              } else {
-                return widget.bottomNavigationBar ?? const SizedBox();
               }
+              final bar = widget.bottomNavigationBar ?? const SizedBox();
+              if (!searchField) return bar;
+              return FloatingSearchButtonShown(notifier: _scrolled, child: bar);
             },
           ),
           body: _withSearch(
@@ -93,12 +131,20 @@ class _ChatListViewState extends State<ChatListView> {
                 StreamBuilder<Client>(
                   stream: widget.controller.clientStream,
                   builder: (context, snapshot) {
-                    return ChatListBodyView(
+                    final body = ChatListBodyView(
                       widget.controller,
                       header: collapsing ? header : null,
                       // Same as Scaffold for a primary appBar: preferred height + status bar.
                       headerHeight:
                           headerSize.height + MediaQuery.paddingOf(context).top,
+                      searchFieldExtent: searchField
+                          ? ChatListHeaderStyle.collapsingSearchExtent
+                          : 0,
+                    );
+                    if (!searchField) return body;
+                    return NotificationListener(
+                      onNotification: _onScroll,
+                      child: body,
                     );
                   },
                 ),

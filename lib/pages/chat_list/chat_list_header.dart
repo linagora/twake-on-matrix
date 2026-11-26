@@ -14,16 +14,24 @@ import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:twake_chat/widgets/twake_components/floating_capsule.dart';
 import 'package:twake_chat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ChatListHeader extends StatelessWidget {
   final ChatListController controller;
   final VoidCallback? onOpenSearchPageInMultipleColumns;
 
+  /// On a phone, the thin search field of the collapsing style, opening the
+  /// search of the bottom bar. It shows in what height the header is given
+  /// beyond its own, and folds away with it.
+  final VoidCallback? onOpenSearch;
+
   const ChatListHeader({
     super.key,
     required this.controller,
     this.onOpenSearchPageInMultipleColumns,
+    this.onOpenSearch,
   });
 
   @override
@@ -56,6 +64,8 @@ class ChatListHeader extends StatelessWidget {
                 ? _normalModeWidgetWeb(context)
                 : _normalModeWidgetsMobile(context),
           ),
+        if (isMobile && onOpenSearch != null)
+          Flexible(child: _CollapsingSearchField(onTap: onOpenSearch!)),
         ValueListenableBuilder<SelectMode>(
           valueListenable: controller.selectModeNotifier,
           builder: (context, selectMode, _) => isMobile
@@ -126,6 +136,65 @@ class ChatListHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Laid out whole, shown through the height it is given, from its bottom: it
+/// slides under the app bar as the list scrolls.
+class _CollapsingSearchField extends StatelessWidget {
+  const _CollapsingSearchField({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      // Folded away: gone, for a screen reader too.
+      builder: (context, box) =>
+          box.maxHeight < 1 ? const SizedBox.shrink() : _field(context),
+    );
+  }
+
+  Widget _field(BuildContext context) {
+    return ClipRect(
+      child: OverflowBox(
+        alignment: Alignment.bottomCenter,
+        minHeight: ChatListHeaderStyle.collapsingSearchExtent,
+        maxHeight: ChatListHeaderStyle.collapsingSearchExtent,
+        child: Padding(
+          padding: ChatListHeaderStyle.searchInputPadding,
+          child: SizedBox(
+            key: NavigationKeys.collapsingSearchField.key,
+            height: ChatListHeaderStyle.collapsingSearchFieldHeight,
+            child: Stack(
+              alignment: AlignmentDirectional.centerEnd,
+              children: [
+                Semantics(
+                  container: true,
+                  button: true,
+                  label: L10n.of(context)!.search,
+                  excludeSemantics: true,
+                  child: GestureDetector(
+                    onTap: onTap,
+                    child: TextField(
+                      enabled: false,
+                      decoration: ChatListHeaderStyle.searchInputDecoration(
+                        context,
+                      ),
+                    ),
+                  ),
+                ),
+                // A disabled TextField ignores pointers, so its suffixIcon can't be tapped.
+                const Padding(
+                  padding: EdgeInsetsDirectional.only(end: 4),
+                  child: BrowsePublicGroupsButton(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

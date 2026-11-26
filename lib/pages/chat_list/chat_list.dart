@@ -1,3 +1,4 @@
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
@@ -54,6 +55,9 @@ class ChatList extends StatefulWidget {
   final ValueNotifier<bool>? searchOpen;
   final Widget? searchResults;
 
+  /// See [ChatListView.searchStyle].
+  final ChatListSearchStyle searchStyle;
+
   const ChatList({
     super.key,
     required this.activeRoomIdNotifier,
@@ -62,6 +66,7 @@ class ChatList extends StatefulWidget {
     this.adaptiveScaffoldBodyArgs,
     this.searchOpen,
     this.searchResults,
+    this.searchStyle = ChatListSearchStyle.bottomBar,
   });
 
   @override
@@ -730,6 +735,7 @@ class ChatListController extends State<ChatList>
         onTapBottomNavigation: _onTapBottomNavigation,
         searchOpen: widget.searchOpen,
         searchResults: widget.searchResults,
+        searchStyle: widget.searchStyle,
       ),
     );
   }
