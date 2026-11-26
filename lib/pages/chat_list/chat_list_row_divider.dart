@@ -18,7 +18,7 @@ class ChatListRowDivider extends StatelessWidget {
       fit: StackFit.expand,
       clipBehavior: Clip.none,
       children: [
-        Center(child: child),
+        child,
         PositionedDirectional(
           start: 0,
           end: ChatListItemStyle.dividerEndInset,
