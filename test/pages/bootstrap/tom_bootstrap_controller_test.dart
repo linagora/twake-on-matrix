@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -263,4 +265,39 @@ void main() {
       );
     },
   );
+
+  test('build_whenDisposedBeforeFirstSync_neverDeletesRecoveryWords', () async {
+    // Arrange
+    final firstSync = Completer<void>();
+    when(client.firstSyncReceived).thenAnswer((_) => firstSync.future);
+    final container = createContainer();
+    container.listen(controllerProvider(wipeRecovery: true), (_, _) {});
+    await pumpEventQueue();
+
+    // Act
+    container.dispose();
+    firstSync.complete();
+    await pumpEventQueue();
+
+    // Assert
+    verifyNever(deleteRecoveryWords.execute());
+  });
+
+  test('build_whenDisposedDuringWipe_neverCreatesBootstrap', () async {
+    // Arrange
+    final deletion = Completer<Either<Failure, Success>>();
+    when(deleteRecoveryWords.execute()).thenAnswer((_) => deletion.future);
+    final container = createContainer();
+    container.listen(controllerProvider(wipeRecovery: true), (_, _) {});
+    await pumpEventQueue();
+    verify(deleteRecoveryWords.execute()).called(1);
+
+    // Act
+    container.dispose();
+    deletion.complete(const Left(DeleteRecoveryWordsFailed()));
+    await pumpEventQueue();
+
+    // Assert
+    verifyNever(client.encryption);
+  });
 }

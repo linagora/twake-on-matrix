@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
@@ -44,17 +45,33 @@ void main() {
     expect(seen, [false, true, false]);
   });
 
-  test(
-    'the same ToM base url twice: watchers are not notified again',
-    () async {
-      interceptor.changeBaseUrl('https://tom.example.com/');
-      final seen = <bool>[];
-      container.listen(twakeSupportedProvider, (_, next) => seen.add(next));
+  test('the same ToM base url again: the provider does not rebuild', () async {
+    final counting = _CountingInterceptor()
+      ..changeBaseUrl('https://tom.example.com/');
+    final countingContainer = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [tomServerUrlInterceptorProvider.overrideWithValue(counting)],
+    );
+    countingContainer.listen(twakeSupportedProvider, (_, _) {});
+    expect(counting.builds, 1);
 
-      interceptor.changeBaseUrl('https://tom.example.com/');
-      await container.pump();
+    counting.changeBaseUrl('https://tom.example.com/');
+    await countingContainer.pump();
+    expect(counting.builds, 1);
 
-      expect(seen, isEmpty);
-    },
-  );
+    counting.changeBaseUrl('https://other.example.com/');
+    await countingContainer.pump();
+    expect(counting.builds, 2);
+  });
+}
+
+/// The provider reads [baseUrlListenable] once per build.
+class _CountingInterceptor extends DynamicUrlInterceptors {
+  int builds = 0;
+
+  @override
+  ValueListenable<String?> get baseUrlListenable {
+    builds++;
+    return super.baseUrlListenable;
+  }
 }

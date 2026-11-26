@@ -56,7 +56,10 @@ class TomBootstrapController extends _$TomBootstrapController {
     if (client.userID != null) {
       DioCacheInterceptorForClient(client.userID!).setup(getIt);
     }
-    _loadInitialData(wipeRecovery: wipeRecovery);
+    _loadInitialData(
+      wipeRecovery: wipeRecovery,
+      twakeSupported: ref.read(twakeSupportedProvider),
+    );
     return const TomBootstrapLoadingState();
   }
 
@@ -71,14 +74,18 @@ class TomBootstrapController extends _$TomBootstrapController {
     state = build(popTick: _popTick);
   }
 
-  Future<void> _loadInitialData({required bool wipeRecovery}) async {
+  Future<void> _loadInitialData({
+    required bool wipeRecovery,
+    required bool twakeSupported,
+  }) async {
     await client.firstSyncReceived;
     await client.userDeviceKeysLoading;
     await client.roomsLoading;
     await client.accountDataLoading;
+    if (!ref.mounted) return;
 
     if (wipeRecovery) {
-      await _wipeRecoveryWord();
+      await _wipeRecoveryWord(twakeSupported: twakeSupported);
       return;
     }
     _refresh(TomBootstrapCheckingRecoveryState.new);
@@ -244,8 +251,7 @@ class TomBootstrapController extends _$TomBootstrapController {
     }
   }
 
-  Future<void> _wipeRecoveryWord() async {
-    final twakeSupported = ref.read(twakeSupportedProvider);
+  Future<void> _wipeRecoveryWord({required bool twakeSupported}) async {
     final either = await _deleteRecoveryWordsInteractor.execute();
     if (!ref.mounted) return;
     _createBootstrap();
