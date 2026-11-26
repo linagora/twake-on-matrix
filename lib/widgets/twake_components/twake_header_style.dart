@@ -14,6 +14,10 @@ class TwakeHeaderStyle {
   static const int flexTitle = 6;
   static const int flexActions = 3;
   static const double avatarSize = 36;
+  static const double accountAvatarTapTarget = 44;
+  static const double accountAvatarLeadingWidth = 56;
+  static const EdgeInsetsDirectional accountAvatarPadding =
+      EdgeInsetsDirectional.only(start: 12);
   static const double titleLineHeightMobile = 24 / 17;
   static const double titleLineHeightWeb = 32 / 24;
 

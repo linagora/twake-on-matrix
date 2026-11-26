@@ -4,12 +4,14 @@ import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_e
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:twake_chat/widgets/mixins/show_dialog_mixin.dart';
+import 'package:twake_chat/widgets/twake_components/twake_header_account_avatar.dart';
 import 'package:twake_chat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -54,16 +56,13 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
 
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  void getCurrentProfile(Client client) async {
+  Future<void> getCurrentProfile() async {
     currentProfileNotifier.value = Profile(userId: '');
-    // SDK access goes through Riverpod (transitional container read).
-    final data = await ProviderScope.containerOf(
-      context,
-      listen: false,
-    ).read(matrixUserProfileProvider(widget.client.userID!).future);
-    final profile = data.toProfile(widget.client.userID!);
-    Logs().d('ChatList::_getCurrentProfile() - currentProfile1: $profile');
-    currentProfileNotifier.value = profile;
+    final userId = ref.read(activeUserIdProvider);
+    if (userId == null) return;
+    final data = await ref.read(matrixUserProfileProvider(userId).future);
+    if (!mounted) return;
+    currentProfileNotifier.value = data.toProfile(userId);
   }
 
   @override
@@ -71,7 +70,7 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
     super.didUpdateWidget(oldWidget);
     if (widget.client != oldWidget.client &&
         Matrix.of(context).isValidActiveClient) {
-      getCurrentProfile(widget.client);
+      getCurrentProfile();
       onAccountDataSubscription?.cancel();
       listenOnProfileChangeStream(
         client: ref.read(matrixClientProvider),
@@ -82,7 +81,7 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
       );
     }
     if (currentProfileNotifier.value.userId.isEmpty) {
-      getCurrentProfile(widget.client);
+      getCurrentProfile();
     }
   }
 
@@ -96,6 +95,7 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
   @override
   void initState() {
     super.initState();
+    getCurrentProfile();
     listenOnProfileChangeStream(
       client: ref.read(matrixClientProvider),
       currentProfile: currentProfileNotifier.value,
@@ -118,6 +118,30 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
                 connectionStatusHeaderWidget:
                     widget.connectionStatusHeaderWidget,
                 actions: widget.actions,
+                // The desktop rail has its own settings destination.
+                leading: responsive.isDesktop(context)
+                    ? null
+                    : Padding(
+                        padding: TwakeHeaderStyle.accountAvatarPadding,
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: ValueListenableBuilder(
+                            valueListenable: currentProfileNotifier,
+                            builder: (context, profile, _) =>
+                                TwakeHeaderAccountAvatar(
+                                  userId: profile.userId,
+                                  name:
+                                      profile.displayName ??
+                                      profile.userId.localpart,
+                                  avatarUrl: profile.avatarUrl,
+                                  onTap: widget.onClickAvatar,
+                                ),
+                          ),
+                        ),
+                      ),
+                leadingWidth: responsive.isDesktop(context)
+                    ? null
+                    : TwakeHeaderStyle.accountAvatarLeadingWidth,
               )
             : AppBar(
                 backgroundColor: LinagoraSysColors.material().onPrimary,

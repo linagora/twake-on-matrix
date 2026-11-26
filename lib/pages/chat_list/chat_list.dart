@@ -594,9 +594,7 @@ class ChatListController extends ConsumerState<ChatList>
     }
   }
 
-  void onClickAvatar() {
-    const ProfileRoute().push(context);
-  }
+  void onClickAvatar() => widget.onOpenSettings?.call();
 
   void _handleRecovery() {
     if (widget.adaptiveScaffoldBodyArgs is LoggedInOtherAccountBodyArgs) {

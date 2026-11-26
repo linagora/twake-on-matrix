@@ -67,6 +67,12 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     AdaptiveDestinationEnum.settings,
   ];
 
+  /// The phone bar: Settings opens from the account avatar of Chats.
+  List<AdaptiveDestinationEnum> get barDestinations => [
+    for (final destination in destinations)
+      if (destination != AdaptiveDestinationEnum.settings) destination,
+  ];
+
   void onDestinationSelected(int index) {
     final destinationType = destinations[index];
     _closeSearch();
@@ -234,6 +240,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   @override
   Widget build(BuildContext context) => AppAdaptiveScaffoldBodyView(
     destinations: destinations,
+    barDestinations: barDestinations,
     activeRoomIdNotifier: activeRoomIdNotifier,
     activeNavigationBarNotifier: activeNavigationBarNotifier,
     pageController: pageController,

@@ -22,6 +22,10 @@ void main() {
   List<AdaptiveDestinationEnum> barTabs() =>
       AppAdaptiveScaffoldBodyController().destinations;
 
+  /// The tabs of the phone bar: Settings opens from the account avatar.
+  List<AdaptiveDestinationEnum> phoneBarTabs() =>
+      AppAdaptiveScaffoldBodyController().barDestinations;
+
   /// The number of pages the tabs of a phone switch between. No page is
   /// built: the page shown is Contacts, while Chats is the tab selected.
   Future<int?> pageCount(WidgetTester tester) async {
@@ -50,6 +54,7 @@ void main() {
           onDestinationSelected: (_) {},
           onClientSelected: (_, _) {},
           destinations: barTabs(),
+          barDestinations: phoneBarTabs(),
           onPopInvoked: (_) {},
           onOpenSettings: () {},
           currentProfile: profile,
@@ -73,6 +78,13 @@ void main() {
       ]);
     });
 
+    test('the phone bar goes Contacts, Chats', () {
+      expect(phoneBarTabs(), [
+        AdaptiveDestinationEnum.contacts,
+        AdaptiveDestinationEnum.rooms,
+      ]);
+    });
+
     testWidgets('there is no Activity page: one page per tab', (tester) async {
       expect(await pageCount(tester), 3);
     });
@@ -87,6 +99,14 @@ void main() {
         AdaptiveDestinationEnum.rooms,
         AdaptiveDestinationEnum.activity,
         AdaptiveDestinationEnum.settings,
+      ]);
+    });
+
+    test('the phone bar goes Contacts, Chats, Activity', () {
+      expect(phoneBarTabs(), [
+        AdaptiveDestinationEnum.contacts,
+        AdaptiveDestinationEnum.rooms,
+        AdaptiveDestinationEnum.activity,
       ]);
     });
 

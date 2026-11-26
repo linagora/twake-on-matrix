@@ -37,12 +37,16 @@ class HomeRobot extends CoreRobot implements AbstractHomeRobot {
     return $(TwakeNavigationIcon).at(1);
   }
 
+  /// The rail's Settings destination on a wide screen, else the account
+  /// avatar of the Chats header.
   Future<PatrolFinder> getSettingTab() async {
-    final byKey = $(find.byKey(NavigationKeys.settingsDestination.key));
-    if (byKey.exists) return byKey;
-    // On web the NavigationRail loses the widget key during
-    // toRailDestination() conversion — fall back to the icon.
-    return $(NavigationRail).$(find.byIcon(Icons.settings_outlined)).first;
+    final railDestination = $(
+      find.byKey(NavigationKeys.settingsDestination.key),
+    );
+    if (railDestination.exists) return railDestination;
+    final avatar = $(find.byKey(NavigationKeys.accountAvatar.key));
+    if (!avatar.exists) await gotoChatListScreen();
+    return avatar;
   }
 
   @override
