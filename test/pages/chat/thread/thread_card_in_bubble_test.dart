@@ -63,6 +63,8 @@ void main() {
     String rootBody = 'the root',
     String sender = '@alice:example.org',
     double screenWidth = 400,
+    VoidCallback? onCardTap,
+    OnSwipe? onSwipe,
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = Size(screenWidth, 900);
@@ -111,6 +113,7 @@ void main() {
                 listAction: const [],
                 maxWidth: screenWidth,
                 selectMode: false,
+                onSwipe: onSwipe,
                 threadCard: ThreadSummaryCard(
                   replyCount: 3,
                   repliers: const [
@@ -125,7 +128,7 @@ void main() {
                   ],
                   // As chat_event_list_item wires it.
                   onOwnBubble: root.isOwnMessage,
-                  onTap: () {},
+                  onTap: onCardTap ?? () {},
                 ),
               ),
             ),
@@ -267,6 +270,67 @@ void main() {
     final long = bubbleRect(tester).width;
 
     expect(short, lessThan(long));
+  });
+
+  /// Report (26/11): "I cannot open my thread on iOS". Hypothesis H4: the
+  /// tap on the row is taken by a gesture of the bubble (swipe to reply,
+  /// long press) and the thread never opens.
+  group('on iOS, a tap on the card of a root that can be swiped to reply', () {
+    late int opened;
+    late int swiped;
+
+    Future<void> pumpOnIos(WidgetTester tester) async {
+      opened = 0;
+      swiped = 0;
+      await pumpRootWithRow(
+        tester,
+        onCardTap: () => opened++,
+        onSwipe: (_) => swiped++,
+      );
+    }
+
+    testWidgets('opens the thread', (tester) async {
+      await pumpOnIos(tester);
+
+      await tester.tap(find.byType(ThreadSummaryCard));
+      await tester.pumpAndSettle();
+
+      expect(opened, 1);
+      expect(swiped, 0);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets(
+      'opens the thread when the finger moves a little',
+      (tester) async {
+        await pumpOnIos(tester);
+
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(ThreadSummaryCard)),
+        );
+        await gesture.moveBy(const Offset(-6, 2));
+        await tester.pump(const Duration(milliseconds: 80));
+        await gesture.up();
+        await tester.pumpAndSettle();
+
+        expect(opened, 1);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
+    testWidgets(
+      'opens the thread with VoiceOver',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pumpOnIos(tester);
+
+        tester.semantics.tap(find.semantics.byLabel(RegExp('3 comments')));
+        await tester.pumpAndSettle();
+
+        expect(opened, 1);
+        semantics.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 
   /// The size a painted text is drawn at, its parents' styles merged in.
