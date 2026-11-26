@@ -1860,7 +1860,7 @@ class MatrixState extends ConsumerState<Matrix>
   ///
   /// This method should be called after setting up a new audio source.
   /// It automatically cleans up the audio player and resets state when playback finishes.
-  void setupAudioPlayerAutoDispose() {
+  void setupAudioPlayerAutoDispose({VoidCallback? onCompleted}) {
     final currentEvent = voiceMessageEvent.value;
     _audioPlayerStateSubscription?.cancel();
     _audioPlayerStateSubscription = audioPlayer.playerStateStream.listen((
@@ -1875,6 +1875,7 @@ class MatrixState extends ConsumerState<Matrix>
         audioPlayer.stop();
         audioPlayer.dispose();
         currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+        onCompleted?.call();
       }
     });
   }

@@ -549,3 +549,21 @@ the first one, crossed, means no colour.
 
 In the Folders list, a folder's colour shows as a tint behind its emoji, under
 a « Your folders » header. Each folder keeps its own delete button.
+
+## D30. Voice messages play one after the other (proposed by Johann, 2026-11-24)
+
+When a voice message plays to its end, the next message of the chat plays at
+once if it is a voice message too (#2796). The run stops:
+
+- at the first message that is not a voice message: a text, an image, or an
+  audio file that was not recorded as a voice message;
+- after the last message the chat has loaded on screen; a message no longer
+  on screen goes on with the messages stored on the device, up to the last one;
+- when the user closes the player, or starts another audio;
+- when the user leaves the chat or covers it (a thread, a dialog, a bottom
+  sheet): the next one does not start. On mobile the voice message that is playing goes on to its end,
+  as before; on desktop, leaving the chat stops it, as before.
+
+Events the chat does not show (reactions, edits) do not stop the run. On the
+thread screen, the run plays the replies of that thread only, from its root
+too; in the chat, it skips the thread replies, as the chat does.

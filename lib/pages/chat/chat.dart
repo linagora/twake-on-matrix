@@ -142,8 +142,11 @@ import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
+import 'package:twake_chat/domain/voice_message/entities/shown_message.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/voice_message_extension.dart';
 
 import 'events/audio_message/audio_player_widget.dart';
+import 'events/audio_message/voice_autoplay_controller.dart';
 import 'sticker_picker_dialog.dart';
 
 part 'chat_scroll_to_event_mixin.dart';
@@ -798,6 +801,8 @@ class ChatController extends ConsumerState<Chat>
   /// Marks on return what arrived while the window was closed or in the
   /// background.
   AppLifecycleListener? _lifecycleListener;
+
+  ProviderSubscription<VoiceAutoplayState>? _voiceAutoplaySubscription;
 
   void _markLatestReadIfAtBottom() {
     // A closed (macOS) or background window shows nothing: no read receipt.
@@ -3501,6 +3506,55 @@ class ChatController extends ConsumerState<Chat>
     matrix?.voiceMessageEvent.value = null;
   }
 
+  /// A screen covered by another one (a thread over its room) or closed does
+  /// not go on with its run.
+  bool get _isFrontScreen =>
+      mounted && (ModalRoute.of(context)?.isCurrent ?? true);
+
+  VoiceAutoplayController get _voiceAutoplay => ref.read(
+    voiceAutoplayControllerProvider(widget.roomId, threadRootId).notifier,
+  );
+
+  void _findNextVoiceMessage(String eventId) {
+    if (!_isFrontScreen) return;
+    final shown = eventsToDisplay.reversed
+        .where(isEventVisible)
+        .map(
+          (event) => ShownMessage(
+            eventId: event.eventId,
+            isVoiceMessage: event.isVoiceMessage,
+          ),
+        )
+        .toList();
+    unawaited(_voiceAutoplay.findNext(eventId, shown: shown));
+  }
+
+  bool _isQueued(String eventId) =>
+      ref.read(voiceAutoplayControllerProvider(widget.roomId, threadRootId)) ==
+      VoiceAutoplayState.next(eventId);
+
+  Future<void> _playNextVoiceMessage(String eventId) async {
+    final autoplay = _voiceAutoplay;
+    try {
+      final event = await room?.getEventById(eventId);
+      final matrix = this.matrix;
+      if (!_isFrontScreen || event == null || matrix == null) return;
+      // A newer run started, or the user started another audio, meanwhile.
+      if (!_isQueued(eventId) || matrix.voiceMessageEvent.value != null) {
+        return;
+      }
+      await playVoiceMessage(
+        context,
+        matrix,
+        event,
+        canStart: () => _isFrontScreen,
+        onEnded: () => autoplay.voiceMessageEnded(event.eventId),
+      );
+    } on Exception catch (e, s) {
+      Logs().e('Chat::_playNextVoiceMessage', e, s);
+    }
+  }
+
   /// Sync playback UI with [MatrixState.audioPlayer] after [matrix] is ready.
   ///
   /// On mobile, if a voice message is already playing (user left another chat
@@ -3582,6 +3636,19 @@ class ChatController extends ConsumerState<Chat>
       // A thread opened over the room must not stop its voice message.
       if (!isThread) initAudioPlayer();
     });
+    _voiceAutoplaySubscription = ref.listenManual(
+      voiceAutoplayControllerProvider(widget.roomId, threadRootId),
+      (_, next) {
+        switch (next) {
+          case VoiceAutoplayEnded(:final eventId):
+            _findNextVoiceMessage(eventId);
+          case VoiceAutoplayNext(:final eventId):
+            unawaited(_playNextVoiceMessage(eventId));
+          case VoiceAutoplayIdle():
+            break;
+        }
+      },
+    );
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
   }
 
@@ -3768,6 +3835,7 @@ class ChatController extends ConsumerState<Chat>
     _threadEvents = null;
     if (!_threadReady.isCompleted) _threadReady.complete();
     _lifecycleListener?.dispose();
+    _voiceAutoplaySubscription?.close();
     timeline?.cancelSubscriptions();
     timeline = null;
 

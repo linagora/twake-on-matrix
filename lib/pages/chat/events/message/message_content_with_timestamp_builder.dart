@@ -706,6 +706,7 @@ class _MessageContentWithTimestampBuilderState
       scrollToEventId: widget.scrollToEventId,
       selectMode: widget.selectMode,
       onRetryTextMessage: widget.onRetryTextMessage,
+      inThread: widget.inThread,
     );
     // With a card, the time goes under it, not over the text.
     final time =
