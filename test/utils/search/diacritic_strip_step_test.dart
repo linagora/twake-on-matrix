@@ -22,6 +22,12 @@ void main() {
       test('should strip Vietnamese diacritics from mixed input', () {
         expect(step.normalize('Tiếng Việt abc'), 'Tieng Viet abc');
       });
+
+      // Issue #3021: đ / Đ are letters of their own, not d plus a mark, so
+      // decomposition leaves them as they are.
+      test('should map Vietnamese đ and Đ to d and D', () {
+        expect(step.normalize('Đặng Đỗ Hà Đông đi'), 'Dang Do Ha Dong di');
+      });
     });
   }
 }
