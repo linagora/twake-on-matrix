@@ -5,8 +5,10 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
-import 'package:twake_chat/providers/matrix_client_provider.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/presence_extension.dart';
+import 'package:twake_chat/domain/presence/entities/person_presence.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/extensions/person_presence_extension.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:flutter/cupertino.dart';
@@ -47,8 +49,7 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
   }
 
   Widget _buildMobileHeader(BuildContext context) {
-    final client = ref.watch(matrixClientProvider);
-    final presence = client.presences[widget.user.id];
+    final presence = ref.watch(personPresenceProvider(widget.user.id)).value;
     final sysColors = LinagoraSysColors.material();
 
     return ValueListenableBuilder(
@@ -115,11 +116,14 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
                         begin: Alignment.center,
                         end: Alignment.centerLeft,
                       ).transform(widget.animationController.value),
-                      child: Text(
-                        presence.getLocalizedStatusMessage(context),
-                        style: presence
-                            .getPresenceTextStyle(context)
-                            ?.copyWith(
+                      child: PresenceSubtitle(
+                        presence: presence,
+                        style:
+                            ProfileInfoBodyViewStyle.presenceTextStyle(
+                              context,
+                              isOnline:
+                                  presence.status == PresenceStatus.online,
+                            )?.copyWith(
                               color: ColorTween(
                                 begin: sysColors.onSurface,
                                 end: sysColors.onPrimary,
@@ -139,8 +143,7 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
   }
 
   Widget _buildNonMobileHeader(BuildContext context) {
-    final client = ref.watch(matrixClientProvider);
-    final presence = client.presences[widget.user.id];
+    final presence = ref.watch(personPresenceProvider(widget.user.id)).value;
 
     return ValueListenableBuilder(
       valueListenable: widget.userInfoNotifier,
@@ -153,10 +156,14 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
           children: [
             Padding(
               padding: ProfileInfoBodyViewStyle.avatarPadding,
-              child: _buildAvatarWidget(
-                context: context,
-                userInfo: userInfo,
-                userInfoModel: userInfoModel,
+              child: LinagoraPresenceBadge(
+                presence: presence?.badge,
+                size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
+                child: _buildAvatarWidget(
+                  context: context,
+                  userInfo: userInfo,
+                  userInfoModel: userInfoModel,
+                ),
               ),
             ),
             Text(
@@ -170,9 +177,12 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
             ),
             if (presence != null) ...[
               const SizedBox(height: 8),
-              Text(
-                presence.getLocalizedStatusMessage(context),
-                style: presence.getPresenceTextStyle(context),
+              PresenceSubtitle(
+                presence: presence,
+                style: ProfileInfoBodyViewStyle.presenceTextStyle(
+                  context,
+                  isOnline: presence.status == PresenceStatus.online,
+                ),
               ),
             ],
           ],
@@ -191,14 +201,14 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
         return Avatar(
           mxContent: widget.user.avatarUrl,
           name: userInfoModel?.displayName ?? widget.user.calcDisplayname(),
-          size: 160,
+          size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
         );
       },
       (success) {
         if (success is GettingUserInfo) {
           return const SizedBox(
-            width: 160,
-            height: 160,
+            width: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
+            height: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
             child: Center(child: CupertinoActivityIndicator(animating: true)),
           );
         }
@@ -208,15 +218,50 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
                 ? Uri.tryParse(userInfoModel?.avatarUrl ?? '')
                 : widget.user.avatarUrl,
             name: userInfoModel?.displayName ?? widget.user.calcDisplayname(),
-            size: 160,
+            size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
           );
         }
         return Avatar(
           mxContent: widget.user.avatarUrl,
           name: userInfoModel?.displayName ?? widget.user.calcDisplayname(),
-          size: 160,
+          size: ProfileInfoBodyViewStyle.nonMobileAvatarSize,
         );
       },
+    );
+  }
+}
+
+@visibleForTesting
+class PresenceSubtitle extends StatelessWidget {
+  const PresenceSubtitle({
+    super.key,
+    required this.presence,
+    required this.style,
+  });
+
+  final PersonPresence presence;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final statusMessage = presence.statusMessage;
+    final presenceText = Text(presence.localizedPresence(l10n), style: style);
+    if (statusMessage == null) return presenceText;
+    // The status gives way first so the presence always stays visible.
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            '$statusMessage$presenceSubtitleSeparator',
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        presenceText,
+      ],
     );
   }
 }

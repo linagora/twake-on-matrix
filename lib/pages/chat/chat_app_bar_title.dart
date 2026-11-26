@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:collection/collection.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
@@ -15,6 +13,9 @@ import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/connection_status_header.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:twake_chat/presentation/extensions/person_presence_extension.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:matrix/matrix.dart';
@@ -30,8 +31,6 @@ class ChatAppBarTitle extends StatelessWidget {
   final Stream<ConnectivityResult> connectivityResultStream;
   final VoidCallback onPushDetails;
   final String? roomName;
-  final ValueNotifier<CachedPresence?> cachedPresenceNotifier;
-  final StreamController<CachedPresence>? cachedPresenceStreamController;
 
   const ChatAppBarTitle({
     super.key,
@@ -43,8 +42,6 @@ class ChatAppBarTitle extends StatelessWidget {
     required this.sendController,
     required this.connectivityResultStream,
     required this.onPushDetails,
-    required this.cachedPresenceNotifier,
-    this.cachedPresenceStreamController,
   });
 
   String _getRoomName(BuildContext context, List<UnifiedContact> contacts) {
@@ -87,8 +84,6 @@ class ChatAppBarTitle extends StatelessWidget {
           connectedWidget: _ChatAppBarStatusContent(
             connectivityResultStream: connectivityResultStream,
             room: room!,
-            cachedPresenceNotifier: cachedPresenceNotifier,
-            cachedPresenceStreamController: cachedPresenceStreamController,
           ),
         ),
         builder: (context, ref, statusContent) {
@@ -100,18 +95,9 @@ class ChatAppBarTitle extends StatelessWidget {
             children: [
               Padding(
                 padding: ChatAppBarTitleStyle.avatarPadding,
-                child: Stack(
-                  children: [
-                    Hero(
-                      tag: 'content_banner',
-                      child: Avatar(
-                        fontSize: ChatAppBarTitleStyle.avatarFontSize,
-                        mxContent: room!.avatar,
-                        name: resolvedRoomName,
-                        size: ChatAppBarTitleStyle.avatarSize(context),
-                      ),
-                    ),
-                  ],
+                child: Hero(
+                  tag: 'content_banner',
+                  child: _ChatAppBarAvatar(room: room!, name: resolvedRoomName),
                 ),
               ),
               Expanded(
@@ -161,23 +147,19 @@ class _ChatAppBarStatusContent extends StatelessWidget {
   const _ChatAppBarStatusContent({
     required this.connectivityResultStream,
     required this.room,
-    required this.cachedPresenceNotifier,
-    this.cachedPresenceStreamController,
   });
 
   final Stream<ConnectivityResult> connectivityResultStream;
   final Room room;
-  final ValueNotifier<CachedPresence?> cachedPresenceNotifier;
-  final StreamController<CachedPresence>? cachedPresenceStreamController;
 
   @override
   Widget build(BuildContext context) {
-    if (room.isDirectChat) {
-      return _DirectChatAppBarStatusContent(
+    final peerId = room.directChatMatrixID;
+    if (peerId != null) {
+      return DirectChatAppBarStatusContent(
         connectivityResultStream: connectivityResultStream,
         room: room,
-        cachedPresenceNotifier: cachedPresenceNotifier,
-        cachedPresenceStreamController: cachedPresenceStreamController!,
+        peerId: peerId,
       );
     }
 
@@ -188,68 +170,89 @@ class _ChatAppBarStatusContent extends StatelessWidget {
   }
 }
 
-class _DirectChatAppBarStatusContent extends StatelessWidget {
-  const _DirectChatAppBarStatusContent({
+class _ChatAppBarAvatar extends StatelessWidget {
+  const _ChatAppBarAvatar({required this.room, required this.name});
+
+  final Room room;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = ChatAppBarTitleStyle.avatarSize(context);
+    final avatar = Avatar(
+      fontSize: ChatAppBarTitleStyle.avatarFontSize,
+      mxContent: room.avatar,
+      name: name,
+      size: size,
+    );
+    final peerId = room.directChatMatrixID;
+    if (peerId == null) return avatar;
+    return ChatAppBarPresenceBadge(peerId: peerId, size: size, child: avatar);
+  }
+}
+
+@visibleForTesting
+class ChatAppBarPresenceBadge extends ConsumerWidget {
+  const ChatAppBarPresenceBadge({
+    super.key,
+    required this.peerId,
+    required this.size,
+    required this.child,
+  });
+
+  final String peerId;
+  final double size;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final presence = ref.watch(personPresenceProvider(peerId)).value;
+    return LinagoraPresenceBadge(
+      presence: presence?.badge,
+      size: size,
+      style: ChatAppBarTitleStyle.presenceBadgeStyle(context),
+      child: child,
+    );
+  }
+}
+
+@visibleForTesting
+class DirectChatAppBarStatusContent extends ConsumerWidget {
+  const DirectChatAppBarStatusContent({
+    super.key,
     required this.connectivityResultStream,
     required this.room,
-    required this.cachedPresenceNotifier,
-    required this.cachedPresenceStreamController,
+    required this.peerId,
   });
 
   final Stream<ConnectivityResult> connectivityResultStream;
   final Room room;
-  final ValueNotifier<CachedPresence?> cachedPresenceNotifier;
-  final StreamController<CachedPresence> cachedPresenceStreamController;
+  final String peerId;
 
   @override
-  Widget build(BuildContext context) {
-    CachedPresence? directChatPresence = room.directChatPresence;
-    return ValueListenableBuilder(
-      valueListenable: cachedPresenceNotifier,
-      builder: (context, directChatCachedPresence, child) {
-        return StreamBuilder(
-          stream: connectivityResultStream,
-          builder: (context, connectivitySnapshot) {
-            return StreamBuilder(
-              stream: cachedPresenceStreamController.stream,
-              builder: (context, cachedPresenceSnapshot) {
-                final connectivityResult = tryCast<ConnectivityResult>(
-                  connectivitySnapshot.data,
-                  fallback: ConnectivityResult.none,
-                );
-                directChatPresence = tryCast<CachedPresence>(
-                  cachedPresenceSnapshot.data,
-                  fallback: directChatCachedPresence,
-                );
-                if (connectivitySnapshot.hasData &&
-                    connectivityResult == ConnectivityResult.none) {
-                  return ChatAppBarTitleText(
-                    text: L10n.of(context)!.noConnection,
-                  );
-                }
-                if (directChatPresence == null) {
-                  return ChatAppBarTitleText(
-                    text: L10n.of(context)!.loadingStatus,
-                  );
-                }
-                return TypingTimerWrapper(
-                  room: room,
-                  l10n: L10n.of(context)!,
-                  typingWidget: _ChatAppBarTitleTyping(
-                    typingText: room.getLocalizedTypingText(L10n.of(context)!),
-                  ),
-                  notTypingWidget: ChatAppBarTitleText(
-                    text: room
-                        .getLocalizedStatus(
-                          context,
-                          presence: directChatPresence,
-                        )
-                        .capitalize(context),
-                  ),
-                );
-              },
-            );
-          },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = L10n.of(context)!;
+    final presence = ref.watch(personPresenceProvider(peerId));
+    return StreamBuilder(
+      stream: connectivityResultStream,
+      builder: (context, connectivitySnapshot) {
+        if (connectivitySnapshot.data == ConnectivityResult.none) {
+          return ChatAppBarTitleText(text: l10n.noConnection);
+        }
+        if (presence.isLoading) {
+          return ChatAppBarTitleText(text: l10n.loadingStatus);
+        }
+        final subtitle =
+            presence.value?.localizedSubtitle(l10n) ?? l10n.offline;
+        return TypingTimerWrapper(
+          room: room,
+          l10n: l10n,
+          typingWidget: _ChatAppBarTitleTyping(
+            typingText: room.getLocalizedTypingText(l10n),
+          ),
+          notTypingWidget: ChatAppBarTitleText(
+            text: subtitle.capitalize(context),
+          ),
         );
       },
     );

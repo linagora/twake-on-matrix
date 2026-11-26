@@ -99,9 +99,6 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
-
-// ignore: implementation_imports
-import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -342,42 +339,6 @@ class MatrixState extends ConsumerState<Matrix>
               },
             );
           }, onDone: _cancelSupportChat);
-    });
-  }
-
-  /// Callback will be called on presence update and return latest value.
-  final CachedStreamController<CachedPresence> onLatestPresenceChanged =
-      CachedStreamController();
-  StreamSubscription? _presenceSubscription;
-
-  @override
-  void listenPresence(Client client) {
-    _presenceSubscription?.cancel();
-    _presenceSubscription = client.onSync.stream.listen((sync) {
-      // Deduplicate per user: keep only the most recent presence per userid
-      // to avoid UI flickering when a sync contains multiple events for the
-      // same user, while still emitting updates for every user in the sync.
-      final latestPerUser = <String, CachedPresence>{};
-
-      for (final newPresence in sync.presence ?? []) {
-        final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
-        final userId = cachedPresence.userid;
-        final existing = latestPerUser[userId];
-        final newTs = cachedPresence.lastActiveTimestamp;
-        final oldTs = existing?.lastActiveTimestamp;
-        if (existing == null ||
-            (newTs != null &&
-                (oldTs == null ||
-                    newTs.isAfter(oldTs) ||
-                    newTs.isAtSameMomentAs(oldTs))) ||
-            (newTs == null && oldTs == null)) {
-          latestPerUser[userId] = cachedPresence;
-        }
-      }
-
-      for (final presence in latestPerUser.values) {
-        onLatestPresenceChanged.add(presence);
-      }
     });
   }
 
@@ -2056,9 +2017,7 @@ class MatrixState extends ConsumerState<Matrix>
     _audioPlayerStateSubscription?.cancel();
     audioPlayer.dispose();
     voiceMessageEvent.dispose();
-    _presenceSubscription?.cancel();
     _cancelSupportChat();
-    onLatestPresenceChanged.close();
     super.dispose();
   }
 

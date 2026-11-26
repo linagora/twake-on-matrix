@@ -52,7 +52,6 @@ class ChatProfileInfoView extends StatelessWidget {
               avatarUri: user?.avatarUrl,
               displayName: user?.calcDisplayname(),
               matrixId: user?.id,
-              getLocalizedStatusMessage: controller.getLocalizedStatusMessage,
               onMessage: controller.handleOnMessage,
               onSearch: controller.handleOnSearch,
             ),

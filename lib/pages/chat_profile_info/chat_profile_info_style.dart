@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ChatProfileInfoStyle {
+  static Color get presenceRingColor =>
+      LinagoraSysColors.material().surfaceVariant;
+
   static const double iconPadding = 8;
   static const double iconSize = 24;
   static const double copyIconSize = 20;

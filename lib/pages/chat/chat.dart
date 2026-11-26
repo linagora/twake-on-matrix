@@ -109,7 +109,6 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/utils/room_draft_storage.dart';
-import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:twake_chat/utils/toggle_reaction.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
@@ -474,44 +473,6 @@ class ChatController extends ConsumerState<Chat>
 
   SuggestionsController<Map<String, String?>> suggestionsController =
       SuggestionsController();
-
-  ValueNotifier<CachedPresence?> cachedPresenceNotifier = ValueNotifier(null);
-
-  StreamController<CachedPresence> cachedPresenceStreamController =
-      StreamController.broadcast();
-  StreamSubscription<CachedPresence>? cachedPresenceStreamSubscription;
-
-  Future<void> initCachedPresence() async {
-    cachedPresenceNotifier.value = room?.directChatPresence;
-    if (room?.directChatMatrixID != null) {
-      cachedPresenceStreamSubscription = Matrix.of(context)
-          .onLatestPresenceChanged
-          .stream
-          .listen((event) {
-            if (event.userid == room!.directChatMatrixID) {
-              Logs().v(
-                'onlatestPresenceChanged: ${event.presence}, ${event.lastActiveTimestamp}',
-              );
-              cachedPresenceStreamController.add(event);
-            }
-          });
-      try {
-        final getPresenceResponse = await client.getPresence(
-          room!.directChatMatrixID!,
-        );
-
-        cachedPresenceNotifier.value = CachedPresence.fromPresenceResponse(
-          getPresenceResponse,
-          room!.directChatMatrixID!,
-        );
-      } catch (e) {
-        Logs().e('Failed to get presence', e);
-        cachedPresenceNotifier.value = CachedPresence.neverSeen(
-          room!.directChatMatrixID!,
-        );
-      }
-    }
-  }
 
   Future<void> _requestParticipants() async {
     if (room == null) return;
@@ -3616,7 +3577,6 @@ class ChatController extends ConsumerState<Chat>
       // The thread screen shows no presence (its app bar is the thread one),
       // but its composer needs the participants (mentions, possibly opened by
       // deep link with no room Chat) and the blocked state of a DM.
-      if (!isThread) initCachedPresence();
       await _requestParticipants();
       listenIgnoredUser();
       // A thread opened over the room must not stop its voice message.
@@ -3860,15 +3820,12 @@ class ChatController extends ConsumerState<Chat>
     onUpdateEventStreamSubcription?.cancel();
     keyboardVisibilitySubscription?.cancel();
     replyEventNotifier.dispose();
-    cachedPresenceStreamController.close();
-    cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
     showEmojiPickerComposerNotifier.removeListener(_emojiPickerListener);
     showEmojiPickerComposerNotifier.dispose();
     disposeUnblockUserSubscription();
     isBlockedUserNotifier.dispose();
     ignoredUsersStreamSub?.cancel();
-    cachedPresenceStreamSubscription?.cancel();
     sendingClient = null;
     showScrollDownButtonNotifier.dispose();
     editEventNotifier.dispose();

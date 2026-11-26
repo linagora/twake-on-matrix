@@ -333,9 +333,6 @@ class _ToMOnlyEffects implements AccountSwitchEffects {
   void createSupportChat(Client client) {}
 
   @override
-  void listenPresence(Client client) {}
-
-  @override
   void configureSentryUser(Client client) {}
 }
 
