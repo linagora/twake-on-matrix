@@ -8,26 +8,32 @@ import 'activity_test_support.dart';
 /// #3812: the filters and the search of the Activity look like the ones of
 /// Chats (#3773).
 void main() {
-  late FakeActivityRepository repository;
+  group('filter pills', _filterPillTests);
+  group('page', _pageTests);
+}
 
-  setUp(() => repository = FakeActivityRepository());
+Future<void> _pumpPage(WidgetTester tester) => pumpActivityPage(
+  tester,
+  ActivityPageSetup(repository: FakeActivityRepository()),
+);
 
-  Material pill(WidgetTester tester, String label) => tester.widget<Material>(
-    find
-        .descendant(
-          of: find.widgetWithText(FilterPill, label),
-          matching: find.byType(Material),
-        )
-        .first,
-  );
+Material _pill(WidgetTester tester, String label) => tester.widget<Material>(
+  find
+      .descendant(
+        of: find.widgetWithText(FilterPill, label),
+        matching: find.byType(Material),
+      )
+      .first,
+);
 
-  Color? labelColor(WidgetTester tester, String label) =>
-      tester.widget<Text>(find.text(label)).style?.color;
+Color? _labelColor(WidgetTester tester, String label) =>
+    tester.widget<Text>(find.text(label)).style?.color;
 
+void _filterPillTests() {
   testWidgets('the filters are pills on one row, from the 16 pt edge', (
     tester,
   ) async {
-    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
+    await _pumpPage(tester);
 
     expect(find.byType(FilterPill), findsNWidgets(4));
     expect(find.byType(ChoiceChip), findsNothing);
@@ -39,42 +45,46 @@ void main() {
   testWidgets('the selected filter is filled in primary, without check mark', (
     tester,
   ) async {
-    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
+    await _pumpPage(tester);
     final colors = LinagoraSysColors.material();
 
-    expect(pill(tester, 'All').color, colors.primary);
-    expect(labelColor(tester, 'All'), colors.onPrimary);
+    expect(_pill(tester, 'All').color, colors.primary);
+    expect(_labelColor(tester, 'All'), colors.onPrimary);
     expect(find.byIcon(Icons.check), findsNothing);
   });
 
   testWidgets('the other filters are light grey, without border', (
     tester,
   ) async {
-    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
+    await _pumpPage(tester);
     final colors = LinagoraSysColors.material();
 
-    expect(pill(tester, 'Unread').color, colors.surface);
-    expect(pill(tester, 'Unread').shape, const StadiumBorder());
-    expect(labelColor(tester, 'Unread'), colors.onSurface);
+    expect(_pill(tester, 'Unread').color, colors.surface);
+    expect(_pill(tester, 'Unread').shape, const StadiumBorder());
+    expect(_labelColor(tester, 'Unread'), colors.onSurface);
   });
 
   testWidgets('a tapped filter becomes the selected one', (tester) async {
-    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
+    await _pumpPage(tester);
 
     await selectFilter(tester, 'Mentions');
 
-    final colors = LinagoraSysColors.material();
-    expect(pill(tester, 'Mentions').color, colors.primary);
+    expect(
+      _pill(tester, 'Mentions').color,
+      LinagoraSysColors.material().primary,
+    );
     final selected = tester
         .widgetList<FilterPill>(find.byType(FilterPill))
         .where((pill) => pill.isSelected);
     expect(selected.map((pill) => pill.label), ['Mentions']);
   });
+}
 
+void _pageTests() {
   testWidgets('the page is white, so the grey pills and search stand out', (
     tester,
   ) async {
-    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
+    await _pumpPage(tester);
 
     final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
     expect(scaffold.backgroundColor, LinagoraSysColors.material().onPrimary);
@@ -83,7 +93,7 @@ void main() {
   testWidgets('the search field is the rounded grey field of Chats', (
     tester,
   ) async {
-    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
+    await _pumpPage(tester);
 
     final decoration = tester
         .widget<TextField>(find.byType(TextField))
