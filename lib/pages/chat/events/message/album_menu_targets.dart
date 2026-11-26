@@ -2,7 +2,7 @@ import 'package:twake_chat/pages/chat/events/message/message_context_menu_action
 
 /// Which events of an album a menu action acts on. An album is one message:
 /// reply and pin go to its first image, copy and edit to its caption (the
-/// last image), Select to the pressed image, and the rest to every image.
+/// last image), Start a thread to the last image, Select to the pressed image, and the rest to every image.
 class AlbumMenuTargets {
   const AlbumMenuTargets();
 
@@ -10,6 +10,7 @@ class AlbumMenuTargets {
   static const Map<MessageContextMenuAction, _Target> _targetOf = {
     MessageContextMenuAction.reply: _Target.first,
     MessageContextMenuAction.pin: _Target.first,
+    MessageContextMenuAction.startThread: _Target.caption,
     MessageContextMenuAction.copy: _Target.caption,
     MessageContextMenuAction.edit: _Target.caption,
     MessageContextMenuAction.select: _Target.pressed,

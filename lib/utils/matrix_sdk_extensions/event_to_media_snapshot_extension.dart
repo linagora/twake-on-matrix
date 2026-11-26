@@ -2,6 +2,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/media_album/entities/media_event_snapshot.dart';
 import 'package:twake_chat/domain/media_album/policy/media_batch_stamp.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 
 extension EventToMediaSnapshotExtension on Event {
   String? get mediaBatchId {
@@ -29,7 +30,9 @@ extension EventToMediaSnapshotExtension on Event {
     isImage: type == EventTypes.Message && messageType == MessageTypes.Image,
     isFailed: status.isError,
     isRedacted: redacted,
-    inThread: relationshipType == RelationshipTypes.thread,
+    inThread:
+        relationshipType == RelationshipTypes.thread ||
+        ThreadSummary.fromRoot(this) != null,
     isReply: isReplyEvent(),
     hasCaption: text.isNotEmpty && isBodyDiffersFromFilename(),
     batchId: mediaBatchId,
