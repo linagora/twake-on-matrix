@@ -71,10 +71,12 @@ void main() {
     values = [];
   });
 
-  Future<StreamSubscription<PersonPresence?>> watch() async {
+  Future<StreamSubscription<PersonPresence?>> watch({
+    bool readFromServer = true,
+  }) async {
     final subscription = PresenceDatasourceImpl(
       client,
-    ).watchPresence(_alice).listen(values.add);
+    ).watchPresence(_alice, readFromServer: readFromServer).listen(values.add);
     addTearDown(subscription.cancel);
     await pumpEventQueue();
     return subscription;
@@ -121,12 +123,34 @@ void main() {
     expect(values, [const PersonPresence(status: PresenceStatus.offline)]);
   });
 
+  test('shows the cached value without asking the server', () async {
+    client.cached = _presence(PresenceType.unavailable);
+    client.server = GetPresenceResponse(presence: PresenceType.online);
+
+    await watch(readFromServer: false);
+
+    expect(client.serverReads, isEmpty);
+    expect(values, [const PersonPresence(status: PresenceStatus.away)]);
+  });
+
+  test(
+    'says offline without asking the server when nothing is cached',
+    () async {
+      client.server = GetPresenceResponse(presence: PresenceType.online);
+
+      await watch(readFromServer: false);
+
+      expect(client.serverReads, isEmpty);
+      expect(values, [const PersonPresence(status: PresenceStatus.offline)]);
+    },
+  );
+
   test('lets a programming error through', () async {
     client.serverError = StateError('bug');
     final errors = <Object>[];
-    final subscription = PresenceDatasourceImpl(
-      client,
-    ).watchPresence(_alice).listen(values.add, onError: errors.add);
+    final subscription = PresenceDatasourceImpl(client)
+        .watchPresence(_alice, readFromServer: true)
+        .listen(values.add, onError: errors.add);
     addTearDown(subscription.cancel);
     await pumpEventQueue();
 
@@ -175,7 +199,7 @@ void main() {
   test('emits null without an active client', () async {
     final values = await const PresenceDatasourceImpl(
       null,
-    ).watchPresence(_alice).toList();
+    ).watchPresence(_alice, readFromServer: true).toList();
 
     expect(values, [null]);
   });
