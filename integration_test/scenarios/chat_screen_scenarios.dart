@@ -8,6 +8,7 @@ import 'package:twake_chat/pages/chat/input_bar/input_bar_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_search/chat_search_view.dart';
 import 'package:twake_chat/widgets/matrix.dart' as twake;
+import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 
 import '../base/base_test_scenario.dart';
 import '../base/mobile_group_fixture.dart';
@@ -88,7 +89,7 @@ class MentionSuggestionsScenario extends BaseTestScenario {
       timeout: const Duration(seconds: 15),
     );
     for (final member in others.where((m) => m.id != picked.id)) {
-      expect(_suggestion(member.id), findsNothing);
+      await chat.waitUntilAbsent($, $(_suggestion(member.id)));
     }
 
     await $.tester.tap(_suggestion(picked.id));
@@ -165,7 +166,11 @@ class SearchAllRelatedMessagesScenario extends BaseTestScenario {
         DateTime.now().isBefore(deadline)) {
       await $.pump(const Duration(milliseconds: 500));
     }
-    await $.pump(const Duration(seconds: 2));
+    await chat.waitUntilAbsent(
+      $,
+      searchView.$(CenterLoadingIndicator),
+      timeout: const Duration(seconds: 30),
+    );
 
     expect(results.evaluate().length, related.length);
     for (final message in related) {
