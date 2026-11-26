@@ -20,8 +20,3 @@ class ThreadSendTarget {
     'm.in_reply_to': {'event_id': lastEventId},
   };
 }
-
-extension ThreadSendTargetQuote on ThreadSendTarget? {
-  /// A message sent to a thread never quotes.
-  Event? withoutQuote(Event? inReplyTo) => this == null ? inReplyTo : null;
-}
