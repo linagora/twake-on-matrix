@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,6 +34,7 @@ Future<void> _pump(
   WidgetTester tester,
   List<Folder> folders, {
   Set<BuiltinFolder> builtinsShown = const {},
+  TextDirection textDirection = TextDirection.ltr,
 }) async {
   tester.view.physicalSize = const Size(900, 1400);
   tester.view.devicePixelRatio = 1;
@@ -52,7 +54,11 @@ Future<void> _pump(
       foldersRepositoryProvider.overrideWithValue(_repository),
     ],
   );
-  await pumpLocalized(tester, container, const FoldersScreen());
+  await pumpLocalized(
+    tester,
+    container,
+    Directionality(textDirection: textDirection, child: const FoldersScreen()),
+  );
   await tester.pump();
   _saved.add([
     for (final kind in BuiltinFolder.values)
@@ -108,6 +114,39 @@ void _foldersScreenTests() {
       ]);
     });
 
+    testWidgets('onDesktop_letsDeleteBeTapped', (tester) async {
+      await _pump(tester, const [Folder.user('Work')]);
+
+      expect(find.byIcon(Icons.drag_handle), findsNothing);
+      await tester.tap(find.byTooltip('Delete folder'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete this folder?'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+    testWidgets('onDesktop_reordersOnALongPressDrag', (tester) async {
+      await _pump(tester, const [Folder.user('Work'), Folder.user('Play')]);
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('Work')),
+      );
+      await tester.pump(kLongPressTimeout + kPressTimeout);
+      final distance =
+          tester.getCenter(find.text('Play')).dy -
+          tester.getCenter(find.text('Work')).dy;
+      for (var step = 0; step < 4; step++) {
+        await gesture.moveBy(Offset(0, distance / 2));
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(_savedFolders().whereType<UserFolder>(), [
+        const Folder.user('Play'),
+        const Folder.user('Work'),
+      ]);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
     testWidgets('whenDeleteIsCancelled_savesNothing', (tester) async {
       await _pump(tester, const [Folder.user('Work')]);
 
@@ -119,9 +158,74 @@ void _foldersScreenTests() {
       verifyNever(_repository.saveFolders(any, changes: anyNamed('changes')));
     });
 
+    testWidgets('whenThereIsNoFolder_showsNoFoldersHeader', (tester) async {
+      await _pump(tester, const []);
+
+      expect(find.text('YOUR FOLDERS'), findsNothing);
+    });
+
+    testWidgets('whenThereAreFolders_headsThemYourFolders', (tester) async {
+      await _pump(tester, const [Folder.user('Work')]);
+
+      expect(find.text('YOUR FOLDERS'), findsOneWidget);
+    });
+
+    testWidgets('always_centresBadgeAndDeleteOnTheRow', (tester) async {
+      await _pump(
+        tester,
+        const [],
+        builtinsShown: {BuiltinFolder.values.first},
+      );
+
+      final row = find.ancestor(
+        of: find.byType(FolderBadge),
+        matching: find.byType(InkWell),
+      );
+      final rowCenter = tester.getCenter(row.first).dy;
+      expect(tester.getSize(find.byType(FolderBadge)), const Size(40, 40));
+      expect(tester.getCenter(find.byType(FolderBadge)).dy, rowCenter);
+      expect(
+        tester.getCenter(find.byKey(const ValueKey('folder_delete'))).dy,
+        rowCenter,
+      );
+    });
+
+    testWidgets('always_centresTheEmojiOnItsBadge', (tester) async {
+      await _pump(tester, const [Folder.user('Work', emoji: '💼')]);
+
+      expect(
+        tester.getCenter(find.text('💼')),
+        tester.getCenter(find.byType(FolderBadge)),
+      );
+    });
+
+    testWidgets('always_endsTheDeleteIconOnTheRightEdge', (tester) async {
+      await _pump(tester, const [Folder.user('Work')]);
+
+      final icon = find.descendant(
+        of: find.byKey(const ValueKey('folder_delete')),
+        matching: find.byIcon(Icons.delete_outline),
+      );
+      expect(tester.getTopRight(icon).dx, tester.view.physicalSize.width - 16);
+    });
+
+    testWidgets('inRightToLeft_mirrorsTheBadgeAndDeleteEdges', (tester) async {
+      await _pump(tester, const [
+        Folder.user('Work'),
+      ], textDirection: TextDirection.rtl);
+
+      final icon = find.descendant(
+        of: find.byKey(const ValueKey('folder_delete')),
+        matching: find.byIcon(Icons.delete_outline),
+      );
+      final width = tester.view.physicalSize.width;
+      expect(tester.getTopRight(find.byType(FolderBadge)).dx, width - 16);
+      expect(tester.getTopLeft(icon).dx, 16);
+    });
+
     testWidgets('whenABuiltinIsMissing_offersToAddItBack', (tester) async {
       await _pump(tester, const [Folder.user('Work')]);
-      expect(find.text('Recommended'), findsOneWidget);
+      expect(find.text('RECOMMENDED'), findsOneWidget);
 
       await tester.tap(find.text('Add').first);
       await tester.pump();

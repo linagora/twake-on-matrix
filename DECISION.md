@@ -484,3 +484,22 @@ gone on a phone). Wide layouts keep the design system chips and the arrows.
 These three components are local to the app, built from the design system
 tokens: the design runs ahead of the design system, and they are specific to
 Chat. They move to linagora-design-flutter once the designers adopt them.
+
+## D28. The folder screens follow one layout (proposed by Johann, 2026-11-18)
+
+Status: proposed, pending the designer's review.
+
+The Folders settings and the folder form share one edge: 16 dp on both sides,
+for every row, header and field. Each section opens with the design system's
+section header, in upper case, and its help text is small and tertiary.
+
+In the folder form, the kinds of chats are ticked with checkboxes, not
+switches: nothing applies before Save. A kind row is 56 dp high and a chat row
+64 dp, with the checkbox on the same right edge. Save stays pinned at the
+bottom, whatever the number of chats. The emoji is picked from the start of
+the name field. It opens a sheet with a handle, a title, 16 dp margins and a
+Clear action once an emoji is set. The colours are one row of nine swatches:
+the first one, crossed, means no colour.
+
+In the Folders list, a folder's colour shows as a tint behind its emoji, under
+a « Your folders » header. Each folder keeps its own delete button.
