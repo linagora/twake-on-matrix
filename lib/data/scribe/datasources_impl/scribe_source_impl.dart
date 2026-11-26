@@ -63,6 +63,13 @@ class ScribeSourceImpl implements ScribeSource {
     } on FormatException {
       Logs().w('ScribeSourceImpl::rewrite: unreadable exchange answer');
       throw const DriveExchangeRejected();
+    } on ScribeException {
+      rethrow;
+    } on DriveException {
+      rethrow;
+    } on Exception catch (e, s) {
+      Logs().e('ScribeSourceImpl::rewrite: unexpected failure', e, s);
+      throw const ScribeRewriteFailed();
     }
   }
 

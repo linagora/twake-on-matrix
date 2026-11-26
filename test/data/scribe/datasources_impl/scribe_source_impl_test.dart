@@ -126,6 +126,13 @@ void main() {
       );
     });
 
+    test('an unexpected failure fails the rewrite', () async {
+      onExchange = (options) => jsonResponse({'error': 'invalid_grant'}, 400);
+      renew = () async => throw Exception('the store broke');
+
+      await expectLater(rewrite(), throwsA(isA<ScribeRewriteFailed>()));
+    });
+
     test('a token refused again after renewal is rejected', () async {
       onExchange = (options) => jsonResponse({'error': 'invalid_grant'}, 400);
 
