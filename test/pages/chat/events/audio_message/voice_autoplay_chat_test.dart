@@ -21,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/data/voice_message/repositories/voice_message_repository.provider.dart';
 import 'package:twake_chat/domain/drive/entities/drive_config.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
@@ -290,6 +291,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          activeMatrixClientProvider.overrideWithValue(client),
           voiceMessageRepositoryProvider.overrideWithValue(_Repository()),
           driveConfigProvider.overrideWithValue(
             const DriveConfig(ssoUrl: '', ssoClientId: ''),

@@ -63,9 +63,18 @@ void main() {
     },
   );
 
+  Event text(String id) => event(id, msgtype: MessageTypes.Text, voice: false);
+
   /// [chronological] oldest first, stored newest first.
   void store(List<Event> chronological) =>
       client.db.newestFirst = chronological.reversed.toList();
+
+  /// Two voice messages, v0 then v1, under [count] newer texts.
+  void storeUnderTexts(int count) => store([
+    event('v0'),
+    event('v1'),
+    for (var i = 0; i < count; i++) text('t$i'),
+  ]);
 
   Future<String?> next(String eventId, {String? threadRootId}) =>
       datasource.nextVoiceMessageId(
@@ -93,11 +102,7 @@ void main() {
   });
 
   test('stops at a message that is not a voice message', () async {
-    store([
-      event('v1'),
-      event('text', msgtype: MessageTypes.Text, voice: false),
-      event('v2'),
-    ]);
+    store([event('v1'), text('text'), event('v2')]);
 
     expect(await next('v1'), isNull);
   });
@@ -132,7 +137,7 @@ void main() {
 
   test('chains the replies of the same thread only', () async {
     store([
-      event('root', msgtype: MessageTypes.Text, voice: false),
+      text('root'),
       event('r1', threadRootId: 'root'),
       event('main'),
       event('other', threadRootId: 'other-root'),
@@ -155,24 +160,14 @@ void main() {
   });
 
   test('stops looking past 3200 stored events', () async {
-    store([
-      event('v0'),
-      event('v1'),
-      for (var i = 0; i < 3300; i++)
-        event('t$i', msgtype: MessageTypes.Text, voice: false),
-    ]);
+    storeUnderTexts(3300);
 
     expect(await next('v0'), isNull);
     expect(client.db.limits, [50, 100, 200, 400, 800, 1600, 3200]);
   });
 
   test('reads older pages until it finds the event', () async {
-    store([
-      event('v0'),
-      event('v1'),
-      for (var i = 0; i < 120; i++)
-        event('t$i', msgtype: MessageTypes.Text, voice: false),
-    ]);
+    storeUnderTexts(120);
 
     expect(await next('v0'), 'v1');
     expect(client.db.limits, [50, 100, 200]);

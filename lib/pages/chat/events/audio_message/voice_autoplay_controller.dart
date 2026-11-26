@@ -37,6 +37,10 @@ class VoiceAutoplayController extends _$VoiceAutoplayController {
     state = VoiceAutoplayState.ended(eventId, ++_run);
   }
 
+  /// The screen is gone, or a message that ended since then started its own
+  /// run.
+  bool _isOver(int run) => !ref.mounted || run != _run;
+
   /// [shown] is what the screen shows, oldest first.
   Future<void> findNext(
     String eventId, {
@@ -54,8 +58,7 @@ class VoiceAutoplayController extends _$VoiceAutoplayController {
             threadRootId: threadRootId,
             shown: shown,
           );
-      // A message that ended since then starts its own run.
-      if (!ref.mounted || run != _run || next == null) return;
+      if (_isOver(run) || next == null) return;
       state = VoiceAutoplayState.next(next);
     } on FindNextVoiceMessageException catch (error, stackTrace) {
       if (!ref.mounted) return;

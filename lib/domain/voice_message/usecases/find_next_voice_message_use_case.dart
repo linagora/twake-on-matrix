@@ -14,7 +14,7 @@ final class FindNextVoiceMessageUseCase {
     required String roomId,
     required String eventId,
     String? threadRootId,
-    List<ShownMessage> shown = const [],
+    required List<ShownMessage> shown,
   }) async {
     final index = shown.indexWhere((message) => message.eventId == eventId);
     if (index >= 0) return _nextShown(shown, index);

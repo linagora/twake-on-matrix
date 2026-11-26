@@ -92,7 +92,7 @@ void main() {
     );
 
     await expectLater(
-      useCase.execute(roomId: '!r', eventId: 'v1'),
+      useCase.execute(roomId: '!r', eventId: 'v1', shown: const []),
       throwsA(isA<FindNextVoiceMessageException>()),
     );
   });
@@ -103,7 +103,7 @@ void main() {
     );
 
     await expectLater(
-      useCase.execute(roomId: '!r', eventId: 'v1'),
+      useCase.execute(roomId: '!r', eventId: 'v1', shown: const []),
       throwsA(isA<StateError>()),
     );
   });
