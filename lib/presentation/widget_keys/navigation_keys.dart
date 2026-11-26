@@ -36,6 +36,22 @@ enum NavigationKeys {
   adaptiveAppBar(
     Key('navigation.adaptiveAppBar'),
     ValueKey('navigation.adaptiveAppBar'),
+  ),
+  searchButton(
+    Key('navigation.searchButton'),
+    ValueKey('navigation.searchButton'),
+  ),
+  searchField(
+    Key('navigation.searchField'),
+    ValueKey('navigation.searchField'),
+  ),
+  searchCloseButton(
+    Key('navigation.searchCloseButton'),
+    ValueKey('navigation.searchCloseButton'),
+  ),
+  settingsAvatar(
+    Key('navigation.settingsAvatar'),
+    ValueKey('navigation.settingsAvatar'),
   );
 
   const NavigationKeys(this.key, this.valueKey);
