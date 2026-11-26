@@ -5,7 +5,7 @@ on:
 
 env:
   FLUTTER_VERSION: 3.47.8
-  XCODE_VERSION: 26.2
+  XCODE_VERSION: 27.2
 
 name: Release
 
@@ -28,7 +28,7 @@ jobs:
           - os: android
             runner: ubuntu-latest
           - os: ios
-            runner: macos-26
+            runner: xcode-27
       fail-fast: false
 
     steps:
@@ -145,7 +145,7 @@ jobs:
   release_macos:
     name: Release on macOS
     if: vars.MACOS_TESTFLIGHT_ENABLED == 'true'
-    runs-on: macos-26
+    runs-on: xcode-27
     environment: prod
 
     env:
