@@ -2,6 +2,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/thread/thread_resolved.dart';
 import 'package:twake_chat/data/datasource/new_group/new_group_datasource.dart';
 import 'package:twake_chat/data/datasource_impl/spaces/space_relations.dart';
+import 'package:twake_chat/data/scribe/datasources_impl/scribe_room_source_impl.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:twake_chat/utils/power_level_manager.dart';
@@ -70,6 +71,7 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
           ...powerLevelManager.getDefaultPowerLevelEventForMember(),
           // Every member may resolve a thread, as on the web.
           threadResolvedStateType: 0,
+          ScribeRoomSourceImpl.scribeStateType: PowerLevel.defaultAdminLevel,
         },
         'invite': powerLevelManager.getAdminPowerLevel(),
         'kick': powerLevelManager.getAdminPowerLevel(),
