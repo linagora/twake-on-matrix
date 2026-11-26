@@ -32,7 +32,7 @@ mixin ChatListItemMixin {
     if (event == null) return const SizedBox.shrink();
     if (event.isAFile && room.membership != Membership.invite) {
       return ChatListFilePreview(
-        event: event,
+        iconPath: event.chatListFileIcon,
         text: event.chatListFileText,
         maxLines: isGroup ? 1 : 2,
         style: ListItemStyle.subtitleTextStyle(),
@@ -109,7 +109,7 @@ mixin ChatListItemMixin {
     );
     if (event.isAFile == true) {
       return ChatListFilePreview(
-        event: event,
+        iconPath: event.chatListFileIcon,
         text: "${user.calcDisplayname()}: ${event.chatListFileText}",
         maxLines: 2,
         style: ChatListSubSubtitleTextStyleView.textStyle.textStyle(

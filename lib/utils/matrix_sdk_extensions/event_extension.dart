@@ -670,13 +670,25 @@ extension FutureEventExtension on Event {
   String callThreadRootText(L10n l10n) =>
       l10n.callStartedAt(DateFormat('HH:mm').format(originServerTs));
 
-  String? get fileCaption =>
-      messageType == MessageTypes.File && isBodyDiffersFromFilename()
-      ? bodyWithoutReplyFallback
+  String? get fileCaption {
+    if (messageType != MessageTypes.File || !isBodyDiffersFromFilename()) {
+      return null;
+    }
+    final caption = _editedBody ?? bodyWithoutReplyFallback;
+    if (caption.trim().isEmpty || caption == content['filename']) return null;
+    return caption;
+  }
+
+  String? get _editedBody => relationshipType == RelationshipTypes.edit
+      ? content
+            .tryGetMap<String, Object?>(MatrixEventFields.newContent)
+            ?.tryGet<String>(MatrixEventFields.body)
       : null;
 
   String get chatListFileText =>
       (fileCaption ?? filename).replaceAll(RegExp(r'\n'), ' ');
+
+  String get chatListFileIcon => mimeType.getIcon(fileType: fileType);
 
   Future<String> calcLocalizedBodyRemoveBreakLine(L10n l10n) async {
     if (isCallThreadRoot) return callThreadRootText(l10n);

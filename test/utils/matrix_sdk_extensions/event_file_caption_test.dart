@@ -22,6 +22,13 @@ void main() {
         room: room,
       );
 
+  Event captionEdit(String caption) => file({
+    'body': '* $caption',
+    'filename': pdf,
+    'm.new_content': {'msgtype': 'm.file', 'body': caption, 'filename': pdf},
+    'm.relates_to': {'rel_type': 'm.replace', 'event_id': '\$file:example.org'},
+  });
+
   setUpAll(() async {
     room = Room(id: '!room:example.org', client: await getClient());
   });
@@ -72,6 +79,26 @@ void main() {
 
     test('is the file name when there is no caption', () {
       expect(file({'body': pdf, 'filename': pdf}).chatListFileText, pdf);
+    });
+
+    test('is the file name for a reply whose body is only the fallback', () {
+      final event = file({
+        'body': '> <@bob:example.org> the report?',
+        'filename': pdf,
+        'm.relates_to': {
+          'm.in_reply_to': {'event_id': '\$question:example.org'},
+        },
+      });
+
+      expect(event.chatListFileText, pdf);
+    });
+
+    test('is the new caption of a caption edit', () {
+      expect(captionEdit('new caption').chatListFileText, 'new caption');
+    });
+
+    test('is the file name when an edit removes the caption', () {
+      expect(captionEdit('').chatListFileText, pdf);
     });
   });
 }
