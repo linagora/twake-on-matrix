@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/direct_chat/exceptions/create_direct_chat_exception.dart';
@@ -128,6 +129,63 @@ class _FakePathProvider extends PathProviderPlatform {
   Future<String?> getTemporaryPath() async => path;
 }
 
+class _FakeProgress extends Fake implements ReadProgress {}
+
+class _FakeFile extends Fake implements DataReaderFile {
+  _FakeFile(this.bytes);
+
+  final Uint8List bytes;
+
+  @override
+  String? get fileName => 'copied.png';
+
+  @override
+  Future<Uint8List> readAll() async => bytes;
+}
+
+/// One clipboard item: a PNG image, or plain text.
+class _FakeClipboardItem extends Fake implements ClipboardDataReader {
+  _FakeClipboardItem.image(Uint8List this.bytes) : text = null;
+
+  _FakeClipboardItem.text(String this.text) : bytes = null;
+
+  final Uint8List? bytes;
+  final String? text;
+
+  DataFormat get _format => bytes != null ? Formats.png : Formats.plainText;
+
+  @override
+  List<DataFormat> getFormats(List<DataFormat> allFormats) =>
+      allFormats.contains(_format) ? [_format] : const [];
+
+  @override
+  bool canProvide(DataFormat format) => format == _format;
+
+  @override
+  ReadProgress? getFile(
+    FileFormat? format,
+    AsyncValueChanged<DataReaderFile> onFile, {
+    ValueChanged<Object>? onError,
+    bool allowVirtualFiles = true,
+    bool synthesizeFilesFromURIs = true,
+  }) {
+    if (format != _format) return null;
+    onFile(_FakeFile(bytes!));
+    return _FakeProgress();
+  }
+
+  @override
+  ReadProgress? getValue<T extends Object>(
+    ValueFormat<T> format,
+    AsyncValueChanged<T?> onValue, {
+    ValueChanged<Object>? onError,
+  }) {
+    if (format != _format) return null;
+    onValue(text as T?);
+    return _FakeProgress();
+  }
+}
+
 class _TestDraft extends DraftChat {
   const _TestDraft({required super.contact});
 
@@ -137,7 +195,8 @@ class _TestDraft extends DraftChat {
 
 class _TestController extends DraftChatController {
   @override
-  Widget build(BuildContext context) => const Scaffold();
+  Widget build(BuildContext context) =>
+      Focus(focusNode: inputFocus, child: const Scaffold());
 }
 
 class _Harness {
@@ -539,5 +598,100 @@ void main() {
     harness.controller.sendController.text = 'pasted';
 
     expect(harness.controller.inputText.value, 'pasted');
+  });
+
+  group('the paste from the iOS menu', () {
+    late Directory tempDir;
+    late PathProviderPlatform originalPathProvider;
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('draft_menu_paste_test');
+      originalPathProvider = PathProviderPlatform.instance;
+      PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    });
+
+    tearDown(() {
+      PathProviderPlatform.instance = originalPathProvider;
+      tempDir.deleteSync(recursive: true);
+    });
+
+    Future<_Harness> startFocused(WidgetTester tester) async {
+      final harness = await _start(tester);
+      harness.controller.inputFocus.requestFocus();
+      await tester.pump();
+      return harness;
+    }
+
+    testWidgets('opens the preview for an image', (tester) async {
+      final harness = await startFocused(tester);
+      List<FileInfo>? previewed;
+      harness.controller.mediaCaptionDialogPresenter =
+          (context, {required files, room, pendingText}) async {
+            previewed = files;
+            return null;
+          };
+
+      await tester.runAsync(
+        () => harness.controller.pasteFromClipboard(
+          () async => ClipboardReader([
+            _FakeClipboardItem.image(Uint8List.fromList([1, 2, 3])),
+          ]),
+        ),
+      );
+
+      expect(previewed, hasLength(1));
+      expect(previewed!.single.mimeType, 'image/png');
+      expect(harness.controller.sendController.text, isEmpty);
+    });
+
+    testWidgets('inserts text and shows the send button', (tester) async {
+      final harness = await startFocused(tester);
+      var previewOpened = false;
+      harness.controller.mediaCaptionDialogPresenter =
+          (context, {required files, room, pendingText}) async {
+            previewOpened = true;
+            return null;
+          };
+
+      await tester.runAsync(
+        () => harness.controller.pasteFromClipboard(
+          () async => ClipboardReader([_FakeClipboardItem.text('hello')]),
+        ),
+      );
+
+      expect(harness.controller.sendController.text, 'hello');
+      expect(harness.controller.inputText.value, 'hello');
+      expect(previewOpened, isFalse);
+    });
+
+    testWidgets('leaves the clipboard alone when the field is not focused', (
+      tester,
+    ) async {
+      final harness = await _start(tester);
+      var read = false;
+
+      await harness.controller.pasteFromClipboard(() async {
+        read = true;
+        return ClipboardReader(const []);
+      });
+
+      expect(read, isFalse);
+      expect(harness.controller.sendController.text, isEmpty);
+    });
+
+    testWidgets('tells the user when the clipboard cannot be read', (
+      tester,
+    ) async {
+      final harness = await startFocused(tester);
+
+      await tester.runAsync(
+        () => harness.controller.pasteFromClipboard(
+          () => Future.error(StateError('clipboard')),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+    });
   });
 }
