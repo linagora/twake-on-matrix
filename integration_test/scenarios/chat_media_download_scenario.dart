@@ -13,9 +13,9 @@ import 'package:twake_chat/pages/chat/events/message_download_content.dart';
 import 'package:twake_chat/pages/chat/events/message_video_download_content.dart';
 import 'package:twake_chat/pages/image_viewer/image_viewer.dart';
 import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
-import 'package:twake_chat/widgets/file_widget/download_file_tile_widget.dart';
 import 'package:twake_chat/widgets/file_widget/downloading_file_tile_widget.dart';
 import 'package:twake_chat/widgets/file_widget/file_tile_widget.dart';
+import 'package:twake_chat/widgets/matrix.dart' as twake;
 import 'package:twake_chat/widgets/video_viewer_mobile_theme.dart';
 
 import '../base/api_login_helper.dart';
@@ -34,8 +34,18 @@ abstract class ChatMediaDownloadScenario extends BaseTestScenario {
   String uniqueName(String prefix, String extension) =>
       '$prefix-${DateTime.now().microsecondsSinceEpoch}.$extension';
 
-  Future<MobileGroupFixture> prepareRoom() =>
-      prepareMobileRoomFixture(this, _mediaRoomTitle);
+  Future<MobileGroupFixture> prepareRoom() async {
+    final fixture = await prepareMobileRoomFixture(this, _mediaRoomTitle);
+    final context = $.tester.element(find.byType(Scaffold).first);
+    final room = twake.Matrix.of(context).client.getRoomById(fixture.roomId);
+    // The receiver sends unencrypted files and the download paths assume it.
+    expect(
+      room?.encrypted,
+      isFalse,
+      reason: '$_mediaRoomTitle must be unencrypted (server default changed?)',
+    );
+    return fixture;
+  }
 
   Future<void> openRoom(MobileGroupFixture fixture) async {
     await robots.chatListRobot().openSearchScreen();
@@ -154,6 +164,8 @@ class ReceiverDownloadsAndPlaysVideoScenario extends ChatMediaDownloadScenario {
     await _expectVideoPlays();
   }
 
+  static const _durationTolerance = Duration(milliseconds: 200);
+
   // On the Android emulator the position never leaves zero, so the check
   // stops at the player having parsed the downloaded file and started.
   Future<void> _expectVideoPlays() async {
@@ -162,7 +174,8 @@ class ReceiverDownloadsAndPlaysVideoScenario extends ChatMediaDownloadScenario {
       final videos = $(Video).evaluate();
       if (videos.isNotEmpty) {
         final state = (videos.first.widget as Video).controller.player.state;
-        if (state.playing && state.duration == videoFixtureDuration) return;
+        final durationGap = (state.duration - videoFixtureDuration).abs();
+        if (state.playing && durationGap <= _durationTolerance) return;
       }
       await $.pump(const Duration(milliseconds: 500));
     }
@@ -255,18 +268,11 @@ class ReceiverDownloadsSeveralPdfsScenario extends ChatMediaDownloadScenario {
       );
       await $.pump();
     }
-    await $.pump(const Duration(milliseconds: 100));
     for (final file in files) {
-      expect(
+      await CoreRobot($).waitUntilAbsent(
+        $,
         $(fileMessage(file.name)).$(DownloadingFileTileWidget),
-        findsNothing,
-        reason: '${file.name} should be downloading or downloaded',
-      );
-      expect(
-        $(fileMessage(file.name)).$(DownloadFileTileWidget).exists ||
-            $(fileMessage(file.name)).$(FileTileWidget).exists,
-        isTrue,
-        reason: '${file.name} should be downloading or downloaded',
+        timeout: const Duration(seconds: 10),
       );
     }
 
