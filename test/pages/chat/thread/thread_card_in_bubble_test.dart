@@ -1,7 +1,6 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,8 +14,10 @@ import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -39,10 +40,10 @@ class _FakeClient extends Client {
   String? get userID => '@alice:example.org';
 }
 
-/// THR-M-02, design correction by Clément (08/11): the card of a thread sits
-/// INSIDE the bubble of its root, between the message and the time of the
-/// bubble, as the web ThreadCard rendered inside MessageBubble
-/// (twake-space-chat src/ui/MessageItem.tsx).
+/// Need (Clément, 2026-11-25, as the web D800 of twake-space-chat): the
+/// thread of a root is ONE row at the very foot of its bubble, under the
+/// time, edge to edge of the bubble, a 1 px line above it; the faces of who
+/// replied are ringed with the colour of the bubble.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final client = _FakeClient();
@@ -57,11 +58,10 @@ void main() {
     await getIt.reset();
   });
 
-  Future<void> pumpRootWithCard(
+  Future<void> pumpRootWithRow(
     WidgetTester tester, {
     String rootBody = 'the root',
-    bool withLastReply = true,
-    String lastReplyText = 'See you tomorrow',
+    String sender = '@alice:example.org',
     double screenWidth = 400,
   }) async {
     tester.view.devicePixelRatio = 1;
@@ -73,7 +73,7 @@ void main() {
       content: {'msgtype': 'm.text', 'body': rootBody},
       type: EventTypes.Message,
       eventId: r'$root:example.org',
-      senderId: '@alice:example.org',
+      senderId: sender,
       originServerTs: DateTime.now().subtract(const Duration(hours: 1)),
       room: room,
     );
@@ -113,13 +113,16 @@ void main() {
                 selectMode: false,
                 threadCard: ThreadSummaryCard(
                   replyCount: 3,
-                  lastReplyAuthor: withLastReply ? 'Bob' : null,
-                  lastReplyText: withLastReply ? lastReplyText : null,
-                  lastReplyTime: withLastReply
-                      ? DateTime.now().subtract(
-                          const Duration(minutes: 5, seconds: 10),
-                        )
-                      : null,
+                  repliers: const [
+                    ThreadReplier(
+                      userId: '@bob:example.org',
+                      displayName: 'Bob',
+                    ),
+                    ThreadReplier(
+                      userId: '@cid:example.org',
+                      displayName: 'Cid',
+                    ),
+                  ],
                   // As chat_event_list_item wires it.
                   onOwnBubble: root.isOwnMessage,
                   onTap: () {},
@@ -133,282 +136,179 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Finder card() => find.textContaining('3 messages', findRichText: true);
+  Rect rowRect(WidgetTester tester) =>
+      tester.getRect(find.byType(ThreadSummaryCard));
+
+  Rect bubbleRect(WidgetTester tester) =>
+      tester.getRect(find.byType(MessageBubble));
 
   /// The time of the bubble, as the user reads it (HH:mm).
   Finder bubbleTime() =>
       find.textContaining(RegExp(r'^\d{2}:\d{2}$'), findRichText: true);
 
-  testWidgets('the card is inside the bubble of the root', (tester) async {
-    await pumpRootWithCard(tester);
+  /// The colour the bubble is painted with.
+  Color bubbleColor(WidgetTester tester) {
+    final bubble = tester.widget<MessageBubble>(find.byType(MessageBubble));
+    return bubble.color ??
+        (bubble.isOwnMessage
+            ? LinagoraRefColors.material().primary[95]!
+            : LinagoraSysColors.material().onPrimary);
+  }
+
+  /// A circle of [ring] around the first face of the row.
+  Finder ringOfFirstFace(Color ring) => find.ancestor(
+    of: find
+        .descendant(
+          of: find.byType(ThreadSummaryCard),
+          matching: find.byType(Avatar),
+        )
+        .first,
+    matching: find.byWidgetPredicate((widget) {
+      final decoration = widget is DecoratedBox ? widget.decoration : null;
+      if (decoration is! BoxDecoration) return false;
+      final border = decoration.border;
+      return (decoration.shape == BoxShape.circle ||
+              decoration.borderRadius != null) &&
+          (decoration.color == ring ||
+              (border is Border && border.top.color == ring));
+    }),
+  );
+
+  testWidgets('the row is inside the bubble of the root', (tester) async {
+    await pumpRootWithRow(tester);
 
     expect(tester.takeException(), isNull);
     expect(
-      find.ancestor(of: card(), matching: find.byType(MessageBubble)),
+      find.ancestor(
+        of: find.byType(ThreadSummaryCard),
+        matching: find.byType(MessageBubble),
+      ),
       findsOneWidget,
     );
   });
 
-  testWidgets('the card comes after the text of the root, and the time of '
-      'the bubble after the card', (tester) async {
-    await pumpRootWithCard(tester);
+  testWidgets('the row comes after the text of the root and under the time '
+      'of the bubble', (tester) async {
+    await pumpRootWithRow(tester);
 
     final text = tester.getRect(
       find.textContaining('the root', findRichText: true).first,
     );
-    final cardRect = tester.getRect(find.byType(ThreadSummaryCard));
     final time = tester.getRect(bubbleTime().first);
-    expect(cardRect.top, greaterThanOrEqualTo(text.bottom));
-    expect(time.top, greaterThanOrEqualTo(cardRect.bottom));
+    final row = rowRect(tester);
+    expect(row.top, greaterThanOrEqualTo(text.bottom));
+    expect(row.top, greaterThanOrEqualTo(time.bottom));
   });
 
-  /// CodeRabbit review 5829198697 (nitpick): the card was built as on a
-  /// received bubble. The root is sent by the user of the client.
-  testWidgets('the card stands out on the bubble of an own message', (
+  testWidgets('the row is the very foot of the bubble', (tester) async {
+    await pumpRootWithRow(tester);
+
+    expect(
+      rowRect(tester).bottom,
+      moreOrLessEquals(bubbleRect(tester).bottom, epsilon: 0.5),
+    );
+  });
+
+  testWidgets('the row runs edge to edge of the bubble', (tester) async {
+    await pumpRootWithRow(tester);
+
+    final row = rowRect(tester);
+    final bubble = bubbleRect(tester);
+    expect(row.left, moreOrLessEquals(bubble.left, epsilon: 0.5));
+    expect(row.right, moreOrLessEquals(bubble.right, epsilon: 0.5));
+  });
+
+  testWidgets('the row runs edge to edge under a root that wraps', (
     tester,
   ) async {
-    await pumpRootWithCard(tester);
-
-    final bubble = tester.widget<MessageBubble>(find.byType(MessageBubble));
-    final bubbleColor =
-        bubble.color ?? LinagoraRefColors.material().primary[95]!;
-    final cardColor = tester
-        .widgetList<DecoratedBox>(
-          find.descendant(
-            of: find.byType(ThreadSummaryCard),
-            matching: find.byType(DecoratedBox),
-          ),
-        )
-        .map((box) => box.decoration)
-        .whereType<BoxDecoration>()
-        .singleWhere((decoration) => decoration.border != null)
-        .color;
-    expect(cardColor, isNotNull);
-    expect(cardColor, isNot(bubbleColor));
-  });
-
-  /// THR-M-02: the web card is `width: 100%` of its bubble; here it was
-  /// as narrow as its own text under a wider root.
-  testWidgets('the card is as wide as the bubble, under a root longer than '
-      'the card', (tester) async {
-    await pumpRootWithCard(
+    await pumpRootWithRow(
       tester,
       rootBody:
           'the root of this thread, long enough to fill the bubble and wrap '
           'onto a second line',
-      // The count alone: narrower than the root.
-      withLastReply: false,
     );
 
-    final text = tester.getRect(
-      find.textContaining('the root of this thread', findRichText: true).first,
-    );
-    final cardRect = tester.getRect(find.byType(ThreadSummaryCard));
-    expect(cardRect.width, greaterThanOrEqualTo(text.width));
+    final row = rowRect(tester);
+    final bubble = bubbleRect(tester);
+    expect(row.left, moreOrLessEquals(bubble.left, epsilon: 0.5));
+    expect(row.right, moreOrLessEquals(bubble.right, epsilon: 0.5));
   });
 
-  /// THR-M-02: the web bubble is `inline-block` (fit-content): short
-  /// content, a short root with a short last reply, makes a narrower bubble
-  /// than a root that wraps at the widest bubble.
+  testWidgets('on an own bubble, the faces are ringed with its colour', (
+    tester,
+  ) async {
+    await pumpRootWithRow(tester);
+
+    expect(ringOfFirstFace(bubbleColor(tester)), findsWidgets);
+  });
+
+  testWidgets('on a received bubble, the faces are ringed with its colour', (
+    tester,
+  ) async {
+    await pumpRootWithRow(tester, sender: '@dan:example.org');
+
+    expect(ringOfFirstFace(bubbleColor(tester)), findsWidgets);
+  });
+
+  /// THR-M-02: the web bubble is `inline-block` (fit-content): the row does
+  /// not stretch a short root to the widest bubble.
   testWidgets('under a short root the bubble stays narrower than under a '
       'long one', (tester) async {
-    await pumpRootWithCard(
-      tester,
-      rootBody: 'hi',
-      lastReplyText: 'See you',
-      screenWidth: 800,
-    );
-    final short = tester.getRect(find.byType(MessageBubble)).width;
+    await pumpRootWithRow(tester, rootBody: 'hi', screenWidth: 800);
+    final short = bubbleRect(tester).width;
 
-    await pumpRootWithCard(
+    await pumpRootWithRow(
       tester,
       rootBody:
           'the root of this thread, long enough to fill the bubble and wrap '
           'onto a second line, and then some more words to be sure it wraps',
-      lastReplyText: 'See you',
       screenWidth: 800,
     );
-    final long = tester.getRect(find.byType(MessageBubble)).width;
+    final long = bubbleRect(tester).width;
 
     expect(short, lessThan(long));
   });
 
-  /// THR-M-02, reference design of the maintainer (09/11, web ThreadCard):
-  /// a short root « echo 5 » whose card shows the whole line « cguyon: test ·
-  /// il y a 2 secondes ». The bubble is fit-content: min(widest bubble,
-  /// max(root, natural width of the card)). The last reply is cut with an
-  /// ellipsis only once the bubble reaches its widest.
-  group('the card under a short root', () {
-    /// The painted line of the last reply.
-    RenderParagraph lastReplyLine(WidgetTester tester) {
-      final text = tester
-          .widgetList<RichText>(
-            find.descendant(
-              of: find.byType(ThreadSummaryCard),
-              matching: find.byType(RichText),
-            ),
-          )
-          .singleWhere((t) => t.text.toPlainText().startsWith('Bob'));
-      return tester.renderObject<RenderParagraph>(find.byWidget(text));
-    }
-
-    double bubbleWidth(WidgetTester tester) =>
-        tester.getRect(find.byType(MessageBubble)).width;
-
-    /// Every painted paragraph of the card.
-    List<RenderParagraph> cardParagraphs(WidgetTester tester) => tester
-        .widgetList<RichText>(
-          find.descendant(
-            of: find.byType(ThreadSummaryCard),
-            matching: find.byType(RichText),
-          ),
-        )
-        .map(
-          (text) => tester.renderObject<RenderParagraph>(find.byWidget(text)),
-        )
-        .toList();
-
-    /// The paragraph of the card that shows [text], whatever else it shows.
-    RenderParagraph paragraphShowing(WidgetTester tester, String text) =>
-        cardParagraphs(tester).firstWhere(
-          (p) => p.text.toPlainText().contains(text),
-          orElse: () => fail('no paragraph of the card shows « $text »'),
-        );
-
-    Rect rectOf(RenderParagraph paragraph) =>
-        paragraph.localToGlobal(Offset.zero) & paragraph.size;
-
-    /// Laid out whole: not cut, not wrapped, inside the bubble.
-    void expectWhole(WidgetTester tester, RenderParagraph paragraph) {
-      final plain = paragraph.text.toPlainText();
-      expect(paragraph.didExceedMaxLines, isFalse, reason: '« $plain » is cut');
-      expect(
-        paragraph.size.width,
-        moreOrLessEquals(
-          paragraph.getMaxIntrinsicWidth(double.infinity),
-          epsilon: 0.5,
-        ),
-        reason: '« $plain » is not on one line',
-      );
-      final bubble = tester.getRect(find.byType(MessageBubble));
-      final rect = rectOf(paragraph);
-      expect(rect.left, greaterThanOrEqualTo(bubble.left));
-      expect(rect.right, lessThanOrEqualTo(bubble.right));
-    }
-
-    testWidgets('a short last reply is shown whole: the card widens the '
-        'bubble to it', (tester) async {
-      await pumpRootWithCard(
-        tester,
-        rootBody: 'ok',
-        withLastReply: false,
-        screenWidth: 800,
-      );
-      final countOnly = bubbleWidth(tester);
-
-      await pumpRootWithCard(
-        tester,
-        rootBody: 'ok',
-        lastReplyText: 'See you',
-        screenWidth: 800,
-      );
-
-      final line = lastReplyLine(tester);
-      expect(tester.takeException(), isNull);
-      expect(line.didExceedMaxLines, isFalse, reason: 'no ellipsis');
-      expect(
-        line.size.width,
-        moreOrLessEquals(line.getMaxIntrinsicWidth(double.infinity)),
-      );
-      expect(bubbleWidth(tester), greaterThan(countOnly));
-    });
-
-    /// THR-M-02, decision of the maintainer (09/11): the relative age stays
-    /// whole; only the text of the reply is cut once the bubble is at its
-    /// widest.
-    testWidgets('a long last reply at the widest bubble keeps its age whole; '
-        'only its text is cut', (tester) async {
-      await pumpRootWithCard(
-        tester,
-        rootBody: List.filled(60, 'word').join(' '),
-        withLastReply: false,
-        screenWidth: 800,
-      );
-      final widest = bubbleWidth(tester);
-
-      const long =
-          'Let us meet on Thursday at the usual place near the station, '
-          'and bring the slides of the review with you please';
-      await pumpRootWithCard(
-        tester,
-        rootBody: 'ok',
-        lastReplyText: long,
-        screenWidth: 800,
-      );
-
-      expect(tester.takeException(), isNull);
-      expect(bubbleWidth(tester), lessThanOrEqualTo(widest));
-      final age = paragraphShowing(tester, '5 minutes ago');
-      expect(
-        age.didExceedMaxLines,
-        isFalse,
-        reason: 'the age is cut with the reply',
-      );
-      expectWhole(tester, age);
-      final reply = paragraphShowing(tester, 'Bob');
-      final plain = reply.text.toPlainText();
-      expect(
-        reply.didExceedMaxLines ||
-            (plain.contains('…') && !plain.contains(long)),
-        isTrue,
-        reason: 'the text of the reply is cut with an ellipsis',
-      );
-    });
-
-    testWidgets('a short last reply: nothing is cut, and the bubble holds the '
-        'whole line, age included', (tester) async {
-      await pumpRootWithCard(
-        tester,
-        rootBody: 'ok',
-        lastReplyText: 'See you',
-        screenWidth: 800,
-      );
-
-      expect(tester.takeException(), isNull);
-      for (final paragraph in cardParagraphs(tester)) {
-        expectWhole(tester, paragraph);
+  /// The size a painted text is drawn at, its parents' styles merged in.
+  double? paintedSize(WidgetTester tester, String text) {
+    for (final element in find.byType(RichText).evaluate()) {
+      double? found;
+      void visit(InlineSpan span, TextStyle inherited) {
+        final style = inherited.merge(span.style);
+        if (span is! TextSpan) return;
+        if ((span.text ?? '').contains(text)) found ??= style.fontSize;
+        for (final child in span.children ?? const <InlineSpan>[]) {
+          visit(child, style);
+        }
       }
-      expect(
-        tester.getRect(find.byType(MessageBubble)).right,
-        greaterThanOrEqualTo(
-          rectOf(paragraphShowing(tester, '5 minutes ago')).right,
-        ),
-      );
-    });
 
-    testWidgets('a last reply made of one long link stops at the widest '
-        'bubble, cut with an ellipsis', (tester) async {
-      await pumpRootWithCard(
-        tester,
-        rootBody: List.filled(60, 'word').join(' '),
-        withLastReply: false,
-        screenWidth: 800,
-      );
-      final widest = bubbleWidth(tester);
+      visit((element.widget as RichText).text, const TextStyle());
+      if (found != null) return found;
+    }
+    return null;
+  }
 
-      await pumpRootWithCard(
-        tester,
-        rootBody: 'ok',
-        // No slash nor dash after the host: nowhere to break the line.
-        lastReplyText:
-            'https://meet.example.org/'
-            'Xk9fQ2mLp7RtZs4WvBn8YcJd3HaGe6UoTi1KqPxMwNrEySb5FlVg0CjDhAzOu',
-        screenWidth: 800,
-      );
+  /// Need (Clément, 2026-11-25): « N comments » is 2 px smaller than the
+  /// text of the message (web: body 15 → label 13).
+  testWidgets('the count is 2 px smaller than the text of the root', (
+    tester,
+  ) async {
+    await pumpRootWithRow(tester);
 
-      expect(tester.takeException(), isNull);
-      expect(bubbleWidth(tester), lessThanOrEqualTo(widest));
-      expect(lastReplyLine(tester).didExceedMaxLines, isTrue);
-    });
+    final body = paintedSize(tester, 'the root');
+    expect(body, isNotNull);
+    expect(paintedSize(tester, '3 comments'), body! - 2);
+  });
+
+  testWidgets('a short root still shows the whole row', (tester) async {
+    await pumpRootWithRow(tester, rootBody: 'ok', screenWidth: 800);
+
+    expect(tester.takeException(), isNull);
+    final label = tester.getRect(
+      find.textContaining('3 comments', findRichText: true),
+    );
+    final bubble = bubbleRect(tester);
+    expect(label.left, greaterThanOrEqualTo(bubble.left));
+    expect(label.right, lessThanOrEqualTo(bubble.right));
   });
 }

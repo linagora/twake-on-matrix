@@ -5,6 +5,7 @@ import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/thread/thread_app_bar_title.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 
 import 'pseudo_l10n.dart';
 
@@ -62,9 +63,9 @@ Widget _header(_Thread thread) => ThreadAppBarTitle(
 
 Widget _card(_Thread thread) => ThreadSummaryCard(
   replyCount: 3,
-  lastReplyAuthor: 'Bob',
-  lastReplyText: 'count me in',
-  lastReplyTime: DateTime.now().subtract(const Duration(minutes: 5)),
+  repliers: const [
+    ThreadReplier(userId: '@bob:example.org', displayName: 'Bob'),
+  ],
   isResolved: thread.isResolved,
   onTap: () {},
 );
@@ -111,10 +112,10 @@ void _cardTests() {
     expect(_resolvedMark, findsNothing);
   });
 
-  testWidgets('the card still says how many messages', (tester) async {
+  testWidgets('the card still says how many comments', (tester) async {
     await _pump(tester, _card(_Thread.resolved));
 
-    expect(find.bySemanticsLabel(RegExp('3 messages')), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('3 comments')), findsOneWidget);
   });
 
   testWidgets('the card says it in the app locale', (tester) async {

@@ -3271,6 +3271,15 @@
       }
     }
   },
+  "threadCommentsCount": "{n, plural, =1{1 comment} other{{n} comments}}",
+  "@threadCommentsCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "threadUnreadMessagesCount": "{n, plural, =1{1 unread message} other{{n} unread messages}}",
   "@threadUnreadMessagesCount": {
     "type": "text",

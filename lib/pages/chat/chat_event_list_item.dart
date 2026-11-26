@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_resolved.dart';
-import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
@@ -12,7 +11,6 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_exten
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -181,22 +179,6 @@ class ChatEventListItem extends StatelessWidget {
     start: start,
   ).push<void>(context);
 
-  /// The edited body of a text reply, else the localized label of the
-  /// reply (a file, a voice message, an undecryptable event).
-  String? _lastReplyText(BuildContext context, ThreadSummary summary) {
-    final reply = summary.lastReply;
-    if (reply == null) return null;
-    if (reply.type == EventTypes.Message &&
-        reply.messageType == MessageTypes.Text) {
-      return summary.lastReplyText;
-    }
-    return reply.calcLocalizedBodyFallback(
-      MatrixLocals(L10n.of(context)!),
-      withSenderNamePrefix: false,
-      hideReply: true,
-    );
-  }
-
   Widget _summaryCard(BuildContext context, ThreadSummary summary) =>
       ListenableBuilder(
         listenable: Listenable.merge([
@@ -205,10 +187,7 @@ class ChatEventListItem extends StatelessWidget {
         ]),
         builder: (context, _) => ThreadSummaryCard(
           replyCount: summary.replyCount,
-          lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
-              .calcDisplayname(),
-          lastReplyText: _lastReplyText(context, summary),
-          lastReplyTime: summary.lastReply?.originServerTs,
+          repliers: summary.repliers,
           unreadCount: controller.threadUnreadCount(event.eventId),
           isResolved: event.room.isThreadResolved(event.eventId),
           onOwnBubble: event.isOwnMessage,
