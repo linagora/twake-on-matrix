@@ -5,11 +5,10 @@ import 'package:twake_chat/pages/activity/activity_page.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
-import 'package:twake_chat/utils/android_utils.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body.dart';
-import 'package:twake_chat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view_style.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import 'package:twake_chat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
@@ -122,7 +121,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                   onOpenSettings: onOpenSettings,
                                   adaptiveScaffoldBodyArgs:
                                       adaptiveScaffoldBodyArgs,
-                                  currentProfile: currentProfile,
                                 );
                               },
                             );
@@ -147,7 +145,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       destinations: destinations,
                       onOpenSettings: onOpenSettings,
                       adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
-                      currentProfile: currentProfile,
                     ),
                   ),
                 ],
@@ -157,17 +154,6 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
         },
       ),
     );
-  }
-
-  List<BottomNavigationBarItem> getNavigationDestinationsForBottomNavigation(
-    BuildContext context,
-  ) {
-    return destinations.map((destination) {
-      return destination.getNavigationDestinationForBottomBar(
-        context,
-        currentProfile,
-      );
-    }).toList();
   }
 
   List<NavigationDestination> getNavigationDestinations(BuildContext context) {
@@ -186,7 +172,6 @@ class _ColumnPageView extends StatelessWidget {
   final ValueNotifier<String?> activeRoomIdNotifier;
   final VoidCallback onOpenSettings;
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
-  final ValueNotifier<Profile?> currentProfile;
 
   const _ColumnPageView({
     required this.activeNavigationBarNotifier,
@@ -197,7 +182,6 @@ class _ColumnPageView extends StatelessWidget {
     required this.destinations,
     required this.onOpenSettings,
     required this.adaptiveScaffoldBodyArgs,
-    required this.currentProfile,
   });
 
   @override
@@ -260,66 +244,14 @@ class _ColumnPageView extends StatelessWidget {
           end: ResponsiveUtils.minDesktopWidth,
         ): SlotLayout.from(
           key: NavigationKeys.bottomNavigation.valueKey,
-          builder: (_) {
-            return Container(
-              decoration: AppAdaptiveScaffoldBodyViewStyle.navBarBorder,
-              height: _bottomNavBarHeight(
-                MediaQuery.systemGestureInsetsOf(context),
-              ),
-              padding: AppAdaptiveScaffoldBodyViewStyle.paddingBottomNavigation,
-              child: ListView(
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  Theme(
-                    data: Theme.of(context).copyWith(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                    ),
-                    child: BottomNavigationBar(
-                      elevation: AppAdaptiveScaffoldBodyViewStyle.elevation,
-                      currentIndex: _getActiveBottomNavigationBarIndex(),
-                      onTap: onDestinationSelected,
-                      items: getNavigationDestinationsForBottomBar(context),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+          builder: (_) => FloatingNavigationBar(
+            destinations: destinations,
+            selected: activeNavigationBarNotifier.value,
+            onDestinationSelected: onDestinationSelected,
+          ),
         ),
       },
     );
-  }
-
-  double _bottomNavBarHeight(EdgeInsets systemGestureInsets) {
-    if (AndroidUtils.isNavigationButtonsEnabled(
-      systemGestureInsets: systemGestureInsets,
-    )) {
-      return ResponsiveUtils
-          .heightBottomNavigationWhenAndroidNavigationButtonsEnabled;
-    }
-    return ResponsiveUtils.heightBottomNavigation;
-  }
-
-  List<NavigationDestination> getNavigationDestinations(BuildContext context) {
-    return destinations.map((destination) {
-      return destination.getNavigationDestination(context, currentProfile);
-    }).toList();
-  }
-
-  List<BottomNavigationBarItem> getNavigationDestinationsForBottomBar(
-    BuildContext context,
-  ) {
-    return destinations.map((destination) {
-      return destination.getNavigationDestinationForBottomBar(
-        context,
-        currentProfile,
-      );
-    }).toList();
-  }
-
-  int _getActiveBottomNavigationBarIndex() {
-    return destinations.indexOf(activeNavigationBarNotifier.value);
   }
 }
 

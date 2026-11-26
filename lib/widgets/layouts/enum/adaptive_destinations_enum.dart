@@ -1,7 +1,6 @@
 import 'package:twake_chat/pages/activity/activity_navigation_icon.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
-import 'package:twake_chat/widgets/avatar/bottom_navigation_avatar.dart';
 import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 import 'package:twake_chat/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
@@ -71,58 +70,41 @@ enum AdaptiveDestinationEnum {
     }
   }
 
-  BottomNavigationBarItem getNavigationDestinationForBottomBar(
-    BuildContext context,
-    ValueNotifier<Profile?> profile,
-  ) {
-    switch (this) {
-      case AdaptiveDestinationEnum.contacts:
-        return BottomNavigationBarItem(
-          icon: TwakeNavigationIcon(
-            color: LinagoraSysColors.material().tertiary,
-            icon: Icons.supervised_user_circle_outlined,
-          ),
-          label: L10n.of(context)!.contacts,
-          activeIcon: const TwakeNavigationIcon(
-            icon: Icons.supervised_user_circle_outlined,
-            isSelected: true,
-          ),
-        );
-      case AdaptiveDestinationEnum.rooms:
-        return BottomNavigationBarItem(
-          icon: UnreadRoomsBadge(
-            color: LinagoraSysColors.material().tertiary,
-            filter: (room) => room.isNotSpaceAndStoryRoom(),
-          ),
-          activeIcon: UnreadRoomsBadge(
-            filter: (room) => room.isNotSpaceAndStoryRoom(),
-            isSelected: true,
-          ),
-          label: L10n.of(context)!.chats,
-        );
-      case AdaptiveDestinationEnum.activity:
-        return BottomNavigationBarItem(
-          icon: ActivityNavigationIcon(
-            key: NavigationKeys.activityDestination.key,
-            color: LinagoraSysColors.material().tertiary,
-          ),
-          activeIcon: const ActivityNavigationIcon(isSelected: true),
-          label: L10n.of(context)!.activity,
-        );
-      case AdaptiveDestinationEnum.settings:
-        return BottomNavigationBarItem(
-          icon: BottomNavigationAvatar(
-            key: NavigationKeys.settingsDestination.key,
-            profile: profile,
-            isSelected: false,
-          ),
-          activeIcon: BottomNavigationAvatar(
-            key: NavigationKeys.settingsDestination.key,
-            profile: profile,
-            isSelected: true,
-          ),
-          label: L10n.of(context)!.settings,
-        );
-    }
-  }
+  Key get navigationKey => switch (this) {
+    AdaptiveDestinationEnum.contacts => NavigationKeys.contactsDestination.key,
+    AdaptiveDestinationEnum.rooms => NavigationKeys.roomsDestination.key,
+    AdaptiveDestinationEnum.activity => NavigationKeys.activityDestination.key,
+    AdaptiveDestinationEnum.settings => NavigationKeys.settingsDestination.key,
+  };
+
+  String label(L10n l10n) => switch (this) {
+    AdaptiveDestinationEnum.contacts => l10n.contacts,
+    AdaptiveDestinationEnum.rooms => l10n.chats,
+    AdaptiveDestinationEnum.activity => l10n.activity,
+    AdaptiveDestinationEnum.settings => l10n.settings,
+  };
+
+  Widget floatingBarIcon({required bool isSelected, required Color color}) =>
+      switch (this) {
+        AdaptiveDestinationEnum.contacts => TwakeNavigationIcon(
+          icon: Icons.people,
+          isSelected: isSelected,
+          color: color,
+        ),
+        AdaptiveDestinationEnum.rooms => UnreadRoomsBadge(
+          filter: (room) => room.isNotSpaceAndStoryRoom(),
+          isSelected: isSelected,
+          color: color,
+        ),
+        AdaptiveDestinationEnum.activity => ActivityNavigationIcon(
+          icon: Icons.notifications,
+          isSelected: isSelected,
+          color: color,
+        ),
+        AdaptiveDestinationEnum.settings => TwakeNavigationIcon(
+          icon: Icons.settings,
+          isSelected: isSelected,
+          color: color,
+        ),
+      };
 }

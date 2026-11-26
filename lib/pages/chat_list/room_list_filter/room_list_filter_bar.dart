@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/domain/spaces/folders.dart';
-import 'package:twake_chat/domain/spaces/room_list_filter.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_item.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_folders/folder_actions.dart';
-import 'package:twake_chat/presentation/extensions/folder_extension.dart';
-import 'package:twake_chat/providers/room_list/folders_controller.dart';
-import 'package:twake_chat/providers/room_list/room_list_providers.dart';
-import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
 
 /// « All », then the folders: what the room list shows.
 class RoomListFilterBar extends ConsumerStatefulWidget {
@@ -78,14 +73,10 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
     });
   }
 
-  void _select(RoomListFilter view) =>
-      ref.read(roomListFilterControllerProvider.notifier).select(view);
-
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    final selected = ref.watch(shownRoomListFilterProvider);
-    final folders = ref.watch(roomListFoldersProvider);
+    final items = ref.watchRoomListFilterItems(l10n, enabled: widget.enabled);
     return SizedBox(
       height: RoomListFilterStyle.height,
       child: Row(
@@ -108,30 +99,13 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
                   controller: _scrollController,
                   scrollDirection: Axis.horizontal,
                   children: [
-                    _FilterChip(
-                      label: l10n.all,
-                      isSelected: selected is RoomListFilterAll,
-                      onSelected: widget.enabled
-                          ? () => _select(const RoomListFilter.all())
-                          : null,
-                    ),
-                    for (final folder in folders)
+                    for (final item in items)
                       _FilterChip(
-                        label: folder.label(l10n),
-                        emoji: folder.emoji,
-                        color: folder.color,
-                        isSelected: selected == RoomListFilter.of(folder),
-                        onSelected: widget.enabled
-                            ? () => _select(RoomListFilter.of(folder))
-                            : null,
-                        onMenu: widget.enabled
-                            ? (context, position) => showFolderMenu(
-                                context,
-                                ref,
-                                folder: folder,
-                                position: position,
-                              )
-                            : null,
+                        label: item.label,
+                        color: item.color,
+                        isSelected: item.isSelected,
+                        onSelected: item.onSelected,
+                        onMenu: item.onMenu,
                       ),
                   ],
                 ),
@@ -188,7 +162,6 @@ class _FilterChip extends StatefulWidget {
     required this.label,
     required this.isSelected,
     required this.onSelected,
-    this.emoji,
     this.color,
     this.onMenu,
   });
@@ -198,7 +171,6 @@ class _FilterChip extends StatefulWidget {
 
   /// Null disables the chip.
   final VoidCallback? onSelected;
-  final String? emoji;
   final FolderColor? color;
   final void Function(BuildContext context, Offset position)? onMenu;
 
@@ -264,7 +236,7 @@ class _FilterChipState extends State<_FilterChip> {
                 maxWidth: RoomListFilterStyle.chipMaxWidth,
               ),
               child: LinagoraFilterChip(
-                label: [?widget.emoji, widget.label].join(' '),
+                label: widget.label,
                 selected: widget.isSelected,
                 onSelected: onSelected == null ? null : (_) => onSelected(),
               ),

@@ -3,6 +3,7 @@ import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import '../base/core_robot.dart';
 import 'abstract/abstract_home_robot.dart';
 import 'chat_list_robot.dart';
@@ -14,7 +15,7 @@ class HomeRobot extends CoreRobot implements AbstractHomeRobot {
 
   @override
   bool isMainNavigationVisible() =>
-      $(BottomNavigationBar).visible || $(NavigationRail).visible;
+      $(FloatingNavigationBar).visible || $(NavigationRail).visible;
 
   @override
   Future<void> waitForMainNavigation({
@@ -22,7 +23,7 @@ class HomeRobot extends CoreRobot implements AbstractHomeRobot {
   }) async {
     await waitForEitherVisible(
       $: $,
-      first: $(BottomNavigationBar),
+      first: $(FloatingNavigationBar),
       second: $(NavigationRail),
       timeout: timeout,
     );

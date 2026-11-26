@@ -46,6 +46,8 @@ class ChatListHeaderStyle {
     );
   }
 
-  static const dividerHeight = 1.0;
-  static const dividerThickness = 1.0;
+  static const double newChatCapsuleSize = 40;
+  static const double newChatCapsuleEnd = 16;
+  static const double newChatCapsuleBottom = 4;
+  static const double newChatCapsuleGap = 8;
 }

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_bar.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 
 import 'chat_list_header_test_harness.dart';
 
@@ -47,7 +47,7 @@ void _insetCases(String name, HeaderView branch) {
     tester.takeException();
 
     final header = tester.getRect(headerFinder);
-    final chips = tester.getRect(find.byType(RoomListFilterBar));
+    final chips = tester.getRect(find.byType(RoomListFilterPills));
     final reserved = tester.getRect(reservedBox);
     expect(chips.top, greaterThanOrEqualTo(header.top - 0.01));
     expect(chips.bottom, lessThanOrEqualTo(header.bottom + 0.01));
@@ -55,8 +55,9 @@ void _insetCases(String name, HeaderView branch) {
   });
 
   testWidgets('GIVEN $name on a phone with a status bar\n'
-      'THEN the block is as high as the old appBar: preferred height '
-      'plus the status bar', (tester) async {
+      'THEN the block is as high as its preferred height plus the status bar', (
+    tester,
+  ) async {
     await _pumpPhone(tester, branch: branch);
     tester.takeException();
 
@@ -67,7 +68,7 @@ void _insetCases(String name, HeaderView branch) {
 
 void _wideScreenBlock() {
   testWidgets('GIVEN a wide screen with the same status bar\n'
-      'THEN its appBar block has the height the phone block must have', (
+      'THEN its appBar block is its preferred height plus the status bar', (
     tester,
   ) async {
     await HeaderHarness.pump(
@@ -75,7 +76,7 @@ void _wideScreenBlock() {
       const HeaderView.wide(topInset: statusBar),
     );
 
-    expect(tester.getSize(headerFinder).height, headerBlockHeight);
+    expect(tester.getSize(headerFinder).height, wideHeaderBlockHeight);
   });
 }
 
@@ -86,11 +87,11 @@ void _filterBarKeepsState() {
     tester,
   ) async {
     final h = await _pumpPhone(tester);
-    final before = tester.state(find.byType(RoomListFilterBar));
+    final before = tester.state(find.byType(RoomListFilterPills));
 
     await h.startSelectMode(tester);
 
-    expect(tester.state(find.byType(RoomListFilterBar)), same(before));
+    expect(tester.state(find.byType(RoomListFilterPills)), same(before));
   });
 }
 

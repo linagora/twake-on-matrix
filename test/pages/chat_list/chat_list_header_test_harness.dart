@@ -14,6 +14,7 @@ import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
@@ -31,7 +32,7 @@ import '../../providers/fake_active_account.dart';
 // Shared by the collapsing header tests and the status bar tests.
 //
 // Contract for the implementer: the whole top block of the room list
-// (TwakeHeader + search + RoomListFilterBar) stays one `ChatListHeader`
+// (TwakeHeader + search + filter chips) stays one `ChatListHeader`
 // widget, whether it sits in the Scaffold appBar (wide layouts) or in a
 // SliverAppBar of the CustomScrollView of ChatListBodyView (one column).
 final headerFinder = find.byType(ChatListHeader);
@@ -42,8 +43,16 @@ const wideSize = Size(1400, 900);
 /// Status bar of an iPhone with a notch, in logical pixels.
 const statusBar = 47.0;
 
-/// What the Scaffold gave the old appBar: preferredSize + the status bar.
-const headerBlockHeight = 120 + RoomListFilterStyle.height + statusBar;
+/// The phone header: app bar, new chat capsule gap, search, pills, status bar.
+const headerBlockHeight =
+    48 +
+    ChatListHeaderStyle.newChatCapsuleGap +
+    ChatListHeaderStyle.searchBarContainerHeight +
+    RoomListFilterStyle.pillsHeight +
+    statusBar;
+
+/// What the Scaffold gives the appBar of a wide layout.
+const wideHeaderBlockHeight = 120 + RoomListFilterStyle.height + statusBar;
 
 /// Same setup before every test of a header file.
 void setUpHeaderTests() {
@@ -71,6 +80,7 @@ class HeaderView {
     this.topInset = 0,
     this.roomCount = 30,
     this.skeleton = false,
+    this.bottomBarHeight = 0,
   });
 
   const HeaderView.phone({int roomCount = 30, bool skeleton = false})
@@ -90,6 +100,9 @@ class HeaderView {
 
   /// No first sync yet: the skeleton is shown.
   final bool skeleton;
+
+  /// A bottom bar this high floats over the list; 0 for none.
+  final double bottomBarHeight;
 }
 
 /// The three views of the one column layout, under a status bar.
@@ -121,6 +134,9 @@ Future<void> scrollUp(WidgetTester tester, double distance) async {
 }
 
 final _screenKey = GlobalKey();
+
+/// The stand-in for the floating bar, when the view has one.
+const bottomBarKey = Key('bottom_bar');
 
 /// Colour really painted at x=100, y=20: inside the status bar band, no text.
 Future<Color> bandColor(WidgetTester tester) => _pixel(tester, 100, 20);
@@ -174,7 +190,9 @@ class HeaderHarness {
     final matrix = FakeMatrixState(client)..waitForFirstSync = skeleton;
     final controller = FakeChatListController(matrix, client);
 
-    await tester.pumpWidget(_screen(matrix, controller, client, rooms));
+    await tester.pumpWidget(
+      _screen(matrix, controller, client, rooms, view.bottomBarHeight),
+    );
     await _settle(tester, skeleton: skeleton);
     // Precondition of every case: without it a "hidden" check would pass on
     // a header that does not exist at all.
@@ -211,6 +229,7 @@ Widget _screen(
   FakeChatListController controller,
   Client client,
   int roomCount,
+  double bottomBarHeight,
 ) {
   return provider.Provider<MatrixState>.value(
     value: matrix,
@@ -228,6 +247,9 @@ Widget _screen(
           home: ChatListView(
             controller: controller,
             onTapBottomNavigation: (_) {},
+            bottomNavigationBar: bottomBarHeight > 0
+                ? SizedBox(key: bottomBarKey, height: bottomBarHeight)
+                : null,
           ),
         ),
       ),

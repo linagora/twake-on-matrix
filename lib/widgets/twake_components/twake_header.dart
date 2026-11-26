@@ -110,6 +110,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
       builder: (context, selectMode, _) {
         return selectMode == SelectMode.normal
             ? TwakeAppBar(
+                backgroundColor: LinagoraSysColors.material().onPrimary,
                 title: L10n.of(context)!.chats,
                 context: context,
                 connectionStatusHeaderWidget:
@@ -117,9 +118,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
                 actions: widget.actions,
               )
             : AppBar(
-                backgroundColor: responsive.isMobile(context)
-                    ? LinagoraSysColors.material().background
-                    : LinagoraSysColors.material().onPrimary,
+                backgroundColor: LinagoraSysColors.material().onPrimary,
                 toolbarHeight: TwakeHeaderStyle.toolbarHeight,
                 automaticallyImplyLeading: false,
                 leadingWidth: TwakeHeaderStyle.leadingWidth,

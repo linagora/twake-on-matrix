@@ -3,6 +3,7 @@ import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import '../base/core_robot.dart';
 import 'abstract/abstract_search_robot.dart';
 
@@ -15,12 +16,12 @@ class SearchRobot extends CoreRobot implements AbstractSearchRobot {
     return $(AppBar).$(TwakeIconButton).$(Icon);
   }
 
-  /// Mobile implementation — waits for `BottomNavigationBar` after going back.
+  /// Mobile implementation — waits for `FloatingNavigationBar` after going back.
   /// Web uses [WebSearchRobot] which skips that wait.
   @override
   Future<void> backToPreviousScreen() async {
     await goBack();
-    await $.waitUntilVisible($(BottomNavigationBar));
+    await $.waitUntilVisible($(FloatingNavigationBar));
   }
 
   PatrolFinder getSearchTextField() {

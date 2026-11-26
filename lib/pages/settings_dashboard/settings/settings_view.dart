@@ -39,6 +39,7 @@ class SettingsView extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: sysColor.onPrimary,
       appBar: TwakeAppBar(
         title: l10n.settings,
