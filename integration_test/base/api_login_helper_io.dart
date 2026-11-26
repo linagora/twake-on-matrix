@@ -394,6 +394,32 @@ Future<void> sendStateAsPrimary({
   body: content,
 );
 
+/// The profile of the primary account as the server holds it.
+Future<Map<String, dynamic>?> fetchProfileAsPrimary() =>
+    _asPrimaryWeb('GET', (userId) => ['profile', userId]);
+
+/// Uploads [file] and sets it as the avatar of the primary account from the
+/// web.
+Future<void> setAvatarAsPrimary(ReceiverMediaFile file) async {
+  final web = await _primaryWeb();
+  final client = HttpClient();
+  try {
+    final contentUri = await _uploadMedia(
+      client: client,
+      session: web.session,
+      bytes: file.bytes,
+      mimeType: file.mimeType,
+    );
+    await _asPrimaryWeb(
+      'PUT',
+      (userId) => ['profile', userId, 'avatar_url'],
+      body: {'avatar_url': contentUri},
+    );
+  } finally {
+    client.close(force: true);
+  }
+}
+
 _MatrixSession? _cachedReceiverSession;
 
 Future<_MatrixSession> _receiverSession(

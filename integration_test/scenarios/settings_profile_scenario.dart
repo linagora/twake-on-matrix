@@ -1,6 +1,9 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_profile_enum.dart';
 
+import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
+import '../base/media_fixture.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/setting/settings_profile_robot.dart';
 
@@ -86,6 +89,57 @@ class SettingsProfileMultipleAccountsScenario extends _SettingsProfileScenario {
     await openProfile();
     await $.waitUntilVisible(profile.multipleAccountsButton());
     await profile.openMultipleAccountsPicker();
+  }
+}
+
+/// Restores the original name at the end so later tests see the fixture.
+class SettingsProfileSaveDisplayNameScenario extends _SettingsProfileScenario {
+  SettingsProfileSaveDisplayNameScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    await openProfile();
+    await profile.waitForCapabilities();
+    final original = await profile.waitForValueOf(
+      SettingsProfileEnum.displayName,
+    );
+    final edited = 'Patrol ${DateTime.now().millisecondsSinceEpoch}';
+
+    await profile.saveDisplayName(edited);
+    await profile.waitUntilValueIs(SettingsProfileEnum.displayName, edited);
+    final saved = await fetchProfileAsPrimary();
+    expect(saved?['displayname'], edited);
+
+    await profile.backToSettings();
+    await profile.openProfile();
+    await profile.waitUntilValueIs(SettingsProfileEnum.displayName, edited);
+
+    await profile.saveDisplayName(original);
+    await profile.waitUntilValueIs(SettingsProfileEnum.displayName, original);
+    final restored = await fetchProfileAsPrimary();
+    expect(restored?['displayname'], original);
+  }
+}
+
+class SettingsProfileRemoveAvatarScenario extends _SettingsProfileScenario {
+  SettingsProfileRemoveAvatarScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    await setAvatarAsPrimary(imageFixture('profile-avatar.png'));
+    await openProfile();
+    await profile.waitForCapabilities();
+    await profile.waitUntilHasAvatar(true);
+
+    await profile.removeAvatar();
+    await profile.waitUntilHasAvatar(false);
+    final saved = await fetchProfileAsPrimary();
+    expect((saved?['avatar_url'] as String?)?.isEmpty ?? true, true);
+
+    await profile.backToSettings();
+    await profile.openProfile();
+    await profile.waitForValueOf(SettingsProfileEnum.displayName);
+    expect(profile.hasAvatar(), false);
   }
 }
 

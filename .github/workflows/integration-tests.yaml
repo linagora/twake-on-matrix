@@ -264,7 +264,7 @@ jobs:
               integration_test/tests/chat/activity_mobile_test.dart
               integration_test/tests/chat/thread_pins_mobile_test.dart
               integration_test/tests/chat/chat_media_download_mobile_test.dart
-          # 14 test cases (~30 min, build included).
+          # 18 test cases (~30 min, build included).
           - shard: shard_5_misc
             targets: >-
               integration_test/tests/contact/contact_test.dart
@@ -277,6 +277,7 @@ jobs:
               integration_test/tests/app_grid/app_grid_mobile_test.dart
               integration_test/tests/setting/settings_profile_test.dart
               integration_test/tests/setting/settings_profile_capabilities_test.dart
+              integration_test/tests/setting/settings_profile_save_mobile_test.dart
               integration_test/tests/setting/settings_chat_test.dart
 
     steps:
