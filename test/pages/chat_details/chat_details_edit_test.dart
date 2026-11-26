@@ -9,6 +9,8 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart' show Provider;
+import 'package:twake_chat/domain/drive/entities/drive_config.dart';
+import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/data/room_access/repositories/room_access_repository.provider.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
@@ -128,6 +130,9 @@ void main() {
       retry: (_, _) => null,
       overrides: [
         roomAccessRepositoryProvider.overrideWithValue(repository),
+        driveConfigProvider.overrideWithValue(
+          const DriveConfig(ssoUrl: '', ssoClientId: ''),
+        ),
         loginHomeserverSummaryProvider.overrideWithBuild(
           (_, _) => summaryWith(isPublicGroupsEnabled: true),
         ),
