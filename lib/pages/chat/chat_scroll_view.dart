@@ -5,6 +5,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/album_timeline_index.dart
 import 'package:twake_chat/pages/chat/chat_event_list_item.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -36,6 +37,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   List<Event> _visibleEvents = const [];
   AlbumTimelineIndex _albums = AlbumTimelineIndex(const []);
   String? _albumBreak;
+  Set<String> _albumThreadRoots = const {};
   // Reused while the items are unchanged, so a height-only relayout (the
   // keyboard opening) does not rebuild every visible message on each frame.
   SliverChildBuilderDelegate? _bottomDelegate, _topDelegate;
@@ -61,7 +63,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
 
     if (widget.events == oldWidget.events) {
       // The first unread can be found after the events: regroup at it.
-      if (_albumBreak != controller.unreadReceivedMessageLocation) {
+      if (_albumBreak != controller.unreadReceivedMessageLocation ||
+          !setEquals(_albumThreadRoots, controller.liveThreadRootIds)) {
         _indexEvents();
         _dropItemDelegates();
       } else if (widget.constraints.maxWidth !=
@@ -152,7 +155,12 @@ class _ChatScrollViewState extends State<ChatScrollView> {
         if (controller.isEventVisible(event)) event,
     ];
     _albumBreak = controller.unreadReceivedMessageLocation;
-    _albums = AlbumTimelineIndex(_visibleEvents, breakBefore: _albumBreak);
+    _albumThreadRoots = controller.liveThreadRootIds;
+    _albums = AlbumTimelineIndex(
+      _visibleEvents,
+      breakBefore: _albumBreak,
+      threadRootIds: _albumThreadRoots,
+    );
   }
 
   @override

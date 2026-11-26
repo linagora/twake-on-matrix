@@ -581,6 +581,10 @@ class ChatController extends ConsumerState<Chat>
 
   Map<String, List<Event>> _threadEventsByRoot = const {};
 
+  /// Roots with at least one live reply: a thread just started here has no
+  /// server summary yet, so the album index needs them.
+  Set<String> get liveThreadRootIds => _threadEventsByRoot.keys.toSet();
+
   /// The thread counters of the account; widgets listen to it themselves.
   ThreadUnreadStore? get threadUnreadStore => client.threadUnread;
 

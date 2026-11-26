@@ -240,4 +240,55 @@ void main() {
       expect(kept.albumLedBy('C')!.map((e) => e.eventId), ['C', 'B', 'A']);
     });
   });
+
+  // Need (iOS report 2026-11-26): a thread just started from mobile has no
+  // server summary in `unsigned` yet, only live replies. The image is a
+  // thread root all the same: it leaves the album so its card is seen.
+  group('an image whose thread is known only from live replies', () {
+    tearDown(() => AppConfig.threadsEnabled = true);
+
+    test('as the last image, leaves the album; the others stay one', () {
+      final split = AlbumTimelineIndex(
+        [newer, a, b, c, older],
+        threadRootIds: {'A'},
+      );
+
+      expect(split.albumLedBy('C')!.map((e) => e.eventId), ['C', 'B']);
+      expect(split.isHiddenMember('A'), isFalse);
+      expect(split.albumLeaderOf('A'), isNull);
+    });
+
+    test('as the first image, leaves the album; the next one leads', () {
+      final split = AlbumTimelineIndex(
+        [newer, a, b, c, older],
+        threadRootIds: {'C'},
+      );
+
+      expect(split.albumLedBy('C'), isNull);
+      expect(split.albumLedBy('B')!.map((e) => e.eventId), ['B', 'A']);
+      expect(split.isHiddenMember('C'), isFalse);
+    });
+
+    test('in the middle, splits the album: each side alone makes none', () {
+      final split = AlbumTimelineIndex(
+        [newer, a, b, c, older],
+        threadRootIds: {'B'},
+      );
+
+      for (final id in ['A', 'B', 'C']) {
+        expect(split.albumLedBy(id), isNull, reason: id);
+        expect(split.isHiddenMember(id), isFalse, reason: id);
+      }
+    });
+
+    test('stays in the album when threads are off', () {
+      AppConfig.threadsEnabled = false;
+      final kept = AlbumTimelineIndex(
+        [newer, a, b, c, older],
+        threadRootIds: {'A'},
+      );
+
+      expect(kept.albumLedBy('C')!.map((e) => e.eventId), ['C', 'B', 'A']);
+    });
+  });
 }
