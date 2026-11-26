@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart' hide State;
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1213,10 +1214,55 @@ void main() {
     expect(identity.baseUrl, isNull);
   });
 
+  testWidgets('a restored account with no stored ToM configuration still '
+      'sets up the home server and authorization interceptors', (tester) async {
+    final authorization = AuthorizationInterceptor();
+    _registerToM(
+      _FakeToMConfigurationsRepository({}),
+      authorization: authorization,
+    );
+    final homeServer = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.homeServerUrlInterceptorName,
+    );
+    final harness = _Harness(
+      tester,
+      [_ToMClient('a', userID: '@a:s', server: Uri.parse('https://hs.a'))],
+      overrides: [
+        phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+      ],
+    );
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+    });
+
+    late RequestOptions sent;
+    final dio = Dio()
+      ..interceptors.addAll([
+        homeServer,
+        authorization,
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            sent = options;
+            handler.resolve(Response(requestOptions: options));
+          },
+        ),
+      ]);
+    await tester.runAsync(() => dio.post<void>('/_matrix/media/v3/upload'));
+
+    expect(sent.uri, Uri.parse('https://hs.a/_matrix/media/v3/upload'));
+    expect(sent.headers[HttpHeaders.authorizationHeader], 'Bearer token-a');
+  });
+
   testWidgets('switching to an account with no stored ToM configuration does '
       'not keep the one of the account being left', (tester) async {
     final left = _ToMClient('a', userID: '@a:s');
-    final target = _ToMClient('b', userID: '@b:s');
+    final target = _ToMClient(
+      'b',
+      userID: '@b:s',
+      server: Uri.parse('https://hs.b'),
+    );
     final authorization = AuthorizationInterceptor();
     final tomServer = _registerToM(
       _FakeToMConfigurationsRepository({'@a:s': _toM('https://tom.a')}),
@@ -1224,6 +1270,9 @@ void main() {
     );
     final identity = getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.identityServerUrlInterceptorName,
+    );
+    final homeServer = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.homeServerUrlInterceptorName,
     );
     final harness = _Harness(
       tester,
@@ -1239,6 +1288,7 @@ void main() {
       // The boot may have set up the active account; start from a clean state.
       tomServer.changeBaseUrl(null);
       identity.changeBaseUrl('https://id.a');
+      homeServer.changeBaseUrl('https://hs.a');
       authorization.accessToken = null;
       harness.container
           .read(accountSwitchEffectsHolderProvider.notifier)
@@ -1253,6 +1303,7 @@ void main() {
     // The target has no configuration: nothing of account `a` stays bound.
     expect(tomServer.baseUrl, isNull);
     expect(identity.baseUrl, isNull);
+    expect(homeServer.baseUrl, 'https://hs.b');
     expect(authorization.accessToken, 'token-b');
   });
 
