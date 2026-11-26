@@ -28,27 +28,15 @@ void main() {
     room: room,
   );
 
-  test('"Reply" is offered on the thread screen', () {
-    expect(ThreadRules.canQuoteReply(message(), inThreadScreen: true), isTrue);
-  });
-
-  test('"Reply" is offered in the room', () {
-    expect(ThreadRules.canQuoteReply(message(), inThreadScreen: false), isTrue);
+  // The same rule on the thread screen and in the room: it does not know
+  // which screen asks.
+  test('"Reply" is offered to a member who can send messages', () {
+    expect(ThreadRules.canQuoteReply(message()), isTrue);
   });
 
   test('"Reply" is not offered to a member who cannot send messages', () {
     when(room.canSendDefaultMessages).thenReturn(false);
 
-    expect(
-      ThreadRules.canQuoteReply(message(), inThreadScreen: false),
-      isFalse,
-    );
-  });
-
-  test('"Reply" is not offered on the thread screen to a member who cannot '
-      'send messages', () {
-    when(room.canSendDefaultMessages).thenReturn(false);
-
-    expect(ThreadRules.canQuoteReply(message(), inThreadScreen: true), isFalse);
+    expect(ThreadRules.canQuoteReply(message()), isFalse);
   });
 }

@@ -513,10 +513,7 @@ class ActionSelectModeWidget extends StatelessWidget {
                     .getDisplayEventWithoutEditEvent(controller.timeline!)
                     .status
                     .isSent &&
-                ThreadRules.canQuoteReply(
-                  controller.selectedEvents.first,
-                  inThreadScreen: controller.isThread,
-                )) ...[
+                ThreadRules.canQuoteReply(controller.selectedEvents.first)) ...[
               SizedBox(
                 height: ChatInputRowStyle.chatInputRowHeight,
                 child: TextButton(

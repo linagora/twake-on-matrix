@@ -60,8 +60,7 @@ abstract final class ThreadRules {
 
   /// The "quote reply" action, in a room and in a thread alike (DECISION.md):
   /// the member must be allowed to send messages.
-  static bool canQuoteReply(Event event, {required bool inThreadScreen}) =>
-      event.room.canSendDefaultMessages;
+  static bool canQuoteReply(Event event) => event.room.canSendDefaultMessages;
 
   /// The event the "unread messages" separator sits above: the oldest
   /// unread message the room shows. [eventsNewestFirst] as the timeline
