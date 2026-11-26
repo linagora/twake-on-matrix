@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/data/drive/sources/workplace_token_exchange.dart';
 import 'package:twake_chat/data/scribe/datasources_impl/scribe_source_impl.dart';
 import 'package:twake_chat/data/scribe/scribe_prompts.dart';
 import 'package:twake_chat/domain/drive/entities/drive_id_token.dart';
@@ -43,7 +44,9 @@ void main() {
         ),
       );
     }
-    return ScribeSourceImpl(dio: dio, requireHttps: true).rewrite(
+    return ScribeSourceImpl(
+      exchange: WorkplaceTokenExchangeImpl(dio: dio, requireHttps: true),
+    ).rewrite(
       session: _session('first'),
       renewSession: renew,
       prompt: ScribePrompt.translateEnglish,
