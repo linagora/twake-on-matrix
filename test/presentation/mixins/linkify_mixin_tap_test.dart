@@ -71,13 +71,13 @@ void main() {
     room: room,
   );
 
-  final messages = <String, Widget Function(String)>{
-    'HtmlMessage': (body) => HtmlMessage(
+  final messages = <Type, Widget Function(String)>{
+    HtmlMessage: (body) => HtmlMessage(
       html: '<p>$body</p>',
       room: room,
       linkStyle: const TextStyle(color: Colors.blue),
     ),
-    'TwakeLinkPreview': (body) => TwakeLinkPreview(
+    TwakeLinkPreview: (body) => TwakeLinkPreview(
       event: textEvent(body),
       localizedBody: body,
       ownMessage: false,
@@ -87,8 +87,9 @@ void main() {
 
   Future<ScrollController> pumpInTimeline(
     WidgetTester tester,
-    Widget message,
-  ) async {
+    Widget message, {
+    VoidCallback? onLongPress,
+  }) async {
     final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -109,7 +110,7 @@ void main() {
                 controller: scrollController,
                 children: [
                   const SizedBox(height: 200),
-                  message,
+                  GestureDetector(onLongPress: onLongPress, child: message),
                   const SizedBox(height: 2000),
                 ],
               ),
@@ -139,8 +140,16 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  for (final MapEntry(key: name, value: build) in messages.entries) {
-    group('$name links', () {
+  Future<void> activateWithScreenReader(
+    WidgetTester tester,
+    String label,
+  ) async {
+    tester.semantics.tap(find.semantics.byLabel(label));
+    await tester.pumpAndSettle();
+  }
+
+  for (final MapEntry(key: type, value: build) in messages.entries) {
+    group('$type links', () {
       testWidgets('a drag that starts on a link scrolls without opening it', (
         tester,
       ) async {
@@ -187,6 +196,85 @@ void main() {
         expect(tester.getRect(copy).top, greaterThan(tap.dy));
         expect(tester.getRect(copy).top, lessThan(tap.dy + 150));
       });
+
+      testWidgets('a long press on a link goes to the message', (tester) async {
+        var longPressed = false;
+        await pumpInTimeline(
+          tester,
+          build(_url),
+          onLongPress: () => longPressed = true,
+        );
+
+        await tester.longPressAt(linkStart(tester, _url));
+        await tester.pumpAndSettle();
+
+        expect(longPressed, isTrue);
+        expect(platform.launches, isEmpty);
+      });
+
+      testWidgets(
+        'a screen-reader activation of a phone number opens its menu at the '
+        'message',
+        (tester) async {
+          onIOS();
+          await pumpInTimeline(tester, build(_phone));
+          final message = tester.getRect(find.byType(type));
+
+          await activateWithScreenReader(tester, _phone);
+
+          final copy = find.text('Copy number');
+          expect(copy, findsOneWidget);
+          expect(tester.getRect(copy).top, greaterThan(message.top));
+          expect(tester.getRect(copy).top, lessThan(message.bottom + 150));
+        },
+      );
+
+      testWidgets(
+        'a screen-reader activation after a tap ignores the old tap position',
+        (tester) async {
+          onIOS();
+          final scrollController = await pumpInTimeline(tester, build(_phone));
+          final tap = linkStart(tester, _phone);
+          await tester.tapAt(tap);
+          await tester.pumpAndSettle();
+          Navigator.of(tester.element(find.text('Copy number'))).pop();
+          await tester.pumpAndSettle();
+          scrollController.jumpTo(150);
+          await tester.pumpAndSettle();
+
+          await activateWithScreenReader(tester, _phone);
+
+          expect(
+            tester.getRect(find.text('Copy number')).top,
+            lessThan(tap.dy - 50),
+          );
+        },
+      );
+
+      testWidgets(
+        'a screen-reader activation after a long press ignores the press '
+        'position',
+        (tester) async {
+          onIOS();
+          final scrollController = await pumpInTimeline(
+            tester,
+            build(_phone),
+            onLongPress: () {},
+          );
+          final press = linkStart(tester, _phone);
+          await tester.longPressAt(press);
+          await tester.pumpAndSettle();
+          scrollController.jumpTo(150);
+          await tester.pumpAndSettle();
+
+          await activateWithScreenReader(tester, _phone);
+
+          expect(
+            tester.getRect(find.text('Copy number')).top,
+            lessThan(press.dy - 50),
+          );
+        },
+      );
     });
   }
 

@@ -36,8 +36,7 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
   @override
   Widget build(BuildContext context) {
     final firstValidUrl = localizedBody.getFirstValidUrl();
-    // A link opens on tap up, so a drag that starts on it scrolls instead.
-    var lastTapDown = TapDownDetails();
+    final linkTap = linkTapHandlers(context);
     return TwakeLinkView(
       key: twakeLinkViewKey,
       firstValidUrl: firstValidUrl,
@@ -47,30 +46,30 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
               linkStyle: linkStyle,
               fontSize: fontSize,
             )
-          : MatrixLinkifyText(
-              text: localizedBody,
-              textStyle: richTextStyle,
-              linkStyle: linkStyle,
-              linkTypes: const [LinkType.url, LinkType.phone, LinkType.date],
-              textAlign: TextAlign.start,
-              onTapDownLink: (details, _) => lastTapDown = details,
-              onTapLink: (link) => handleOnTappedLinkHtml(
-                context: context,
-                details: lastTapDown,
-                link: link,
+          : Listener(
+              onPointerUp: linkTap.onPointerEnd,
+              onPointerCancel: linkTap.onPointerEnd,
+              child: MatrixLinkifyText(
+                text: localizedBody,
+                textStyle: richTextStyle,
+                linkStyle: linkStyle,
+                linkTypes: const [LinkType.url, LinkType.phone, LinkType.date],
+                textAlign: TextAlign.start,
+                onTapDownLink: linkTap.onTapDownLink,
+                onTapLink: linkTap.onTapLink,
+                linkBuilder: (link, style) {
+                  if (link.type != LinkType.url) return null;
+                  final url = link.value;
+                  if (url == null) return null;
+                  // Returning null would still style the span as a link.
+                  return filenameLinkAsPlainText(
+                    url: url,
+                    childrenSpan: TextSpan(text: url),
+                    linkStyle: richTextStyle,
+                    textStyle: richTextStyle,
+                  );
+                },
               ),
-              linkBuilder: (link, style) {
-                if (link.type != LinkType.url) return null;
-                final url = link.value;
-                if (url == null) return null;
-                // Returning null would still style the span as a link.
-                return filenameLinkAsPlainText(
-                  url: url,
-                  childrenSpan: TextSpan(text: url),
-                  linkStyle: richTextStyle,
-                  textStyle: richTextStyle,
-                );
-              },
             ),
       previewItemWidget: TwakeLinkPreviewItem(
         key: twakeLinkPreviewItemKey,
