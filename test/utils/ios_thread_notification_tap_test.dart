@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,13 +25,13 @@ class _FakeMatrixState extends Fake implements MatrixState {
       '_FakeMatrixState';
 }
 
-/// Report (26/11): "I cannot open my thread on iOS". On iOS the tap on a
-/// remote notification hands the app only what the push carries (room and
-/// event ids, no thread root, see AppDelegate didReceive): the app must find
-/// out the reply belongs to a thread. Hypothesis H1: on a cold start or a slow
-/// network the reply takes longer than the wait of the tap, and the user
-/// lands in the room, where a thread reply is not shown, instead of the
-/// thread.
+/// Report (26/11): "I cannot open my thread on iOS". The tap on an iOS
+/// notification hands the app the userInfo of the push (AppDelegate
+/// didReceive). Decision (26/11): the NSE puts the thread root of a thread
+/// reply in it, at top level under `thread_root_id` (the name Android uses):
+/// the tap opens the thread at once, without loading the event, which on a
+/// cold start or a slow network outlasts the 5 s wait and led to the room.
+/// A push without `thread_root_id` (an older NSE) keeps loading the event.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -73,18 +75,23 @@ void main() {
     room: room,
   );
 
-  /// The user taps the iOS notification of the thread reply; the reply
-  /// reaches the app after [loadTime]. Where the user lands once things
-  /// settle.
-  String tapIosNotification(Duration loadTime) {
+  /// The user taps the iOS notification whose userInfo is [userInfo]; the
+  /// event, if the app asks for it, arrives after [loadTime] (never when
+  /// null). Where the user is [after] the tap.
+  String tapIosNotification(
+    Map<String, Object?> userInfo, {
+    Duration? loadTime,
+    required Duration after,
+  }) {
     late String location;
     fakeAsync((async) {
-      when(
-        room.getEventById(replyId),
-      ).thenAnswer((_) => Future.delayed(loadTime, threadReply));
-      // What AppDelegate.didReceive passes: the userInfo of the push.
-      push.iOSUserSelectedNoti({'room_id': roomId, 'event_id': replyId});
-      async.elapse(loadTime + const Duration(seconds: 30));
+      when(room.getEventById(replyId)).thenAnswer(
+        (_) => loadTime == null
+            ? Completer<Event?>().future
+            : Future.delayed(loadTime, threadReply),
+      );
+      push.iOSUserSelectedNoti(userInfo);
+      async.elapse(after);
       location = TwakeApp.router.routeInformationProvider.value.uri.toString();
     });
     return location;
@@ -96,12 +103,60 @@ void main() {
     event: replyId,
   ).location;
 
-  test('a thread reply that loads at once opens its thread', () {
-    expect(tapIosNotification(const Duration(milliseconds: 200)), thread);
+  final roomOnReply = const RoomRoute(roomid: roomId, event: replyId).location;
+
+  group('a push that names its thread root', () {
+    const userInfo = {
+      'room_id': roomId,
+      'event_id': replyId,
+      'thread_root_id': rootId,
+    };
+
+    test('opens the thread before 5 s when the event would take 8 s to '
+        'load', () {
+      expect(
+        tapIosNotification(
+          userInfo,
+          loadTime: const Duration(seconds: 8),
+          after: const Duration(seconds: 2),
+        ),
+        thread,
+      );
+    });
+
+    test('opens the thread before 5 s when the event never loads', () {
+      expect(
+        tapIosNotification(userInfo, after: const Duration(seconds: 2)),
+        thread,
+      );
+    });
+
+    test('opens the thread without loading the event', () {
+      tapIosNotification(userInfo, after: const Duration(seconds: 30));
+
+      verifyNever(room.getEventById(any));
+    });
   });
 
-  test('a thread reply that takes 8 s to load (cold start, slow network) '
-      'still opens its thread, not the room', () {
-    expect(tapIosNotification(const Duration(seconds: 8)), thread);
+  group('a push without thread root (older NSE)', () {
+    const userInfo = {'room_id': roomId, 'event_id': replyId};
+
+    test('opens the thread once the event loads', () {
+      expect(
+        tapIosNotification(
+          userInfo,
+          loadTime: const Duration(milliseconds: 200),
+          after: const Duration(seconds: 30),
+        ),
+        thread,
+      );
+    });
+
+    test('opens the room on the reply when the event never loads', () {
+      expect(
+        tapIosNotification(userInfo, after: const Duration(seconds: 30)),
+        roomOnReply,
+      );
+    });
   });
 }
