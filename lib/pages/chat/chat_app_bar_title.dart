@@ -191,6 +191,7 @@ class _ChatAppBarAvatar extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class ChatAppBarPresenceBadge extends ConsumerWidget {
   const ChatAppBarPresenceBadge({
     super.key,
@@ -215,6 +216,7 @@ class ChatAppBarPresenceBadge extends ConsumerWidget {
   }
 }
 
+@visibleForTesting
 class DirectChatAppBarStatusContent extends ConsumerWidget {
   const DirectChatAppBarStatusContent({
     super.key,

@@ -231,6 +231,7 @@ class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
   }
 }
 
+@visibleForTesting
 class PresenceSubtitle extends StatelessWidget {
   const PresenceSubtitle({
     super.key,

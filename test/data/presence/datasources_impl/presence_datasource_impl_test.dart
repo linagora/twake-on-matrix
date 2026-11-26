@@ -27,6 +27,7 @@ class _FakeClient extends Fake implements Client {
   GetPresenceResponse? server;
   final serverReads = <String>[];
   Completer<void>? serverGate;
+  Error? serverError;
 
   @override
   final _CountedChanges onPresenceChanged = _CountedChanges();
@@ -44,6 +45,8 @@ class _FakeClient extends Fake implements Client {
   Future<GetPresenceResponse> getPresence(String userId) async {
     serverReads.add(userId);
     await serverGate?.future;
+    final serverError = this.serverError;
+    if (serverError != null) throw serverError;
     final server = this.server;
     if (server == null) throw Exception('presence unavailable');
     return server;
@@ -54,11 +57,10 @@ const _alice = '@alice:server';
 
 CachedPresence _presence(
   PresenceType type, {
-  String userId = _alice,
   int? lastActiveAgo,
   String? statusMsg,
   bool? currentlyActive,
-}) => CachedPresence(type, lastActiveAgo, statusMsg, currentlyActive, userId);
+}) => CachedPresence(type, lastActiveAgo, statusMsg, currentlyActive, _alice);
 
 void main() {
   late _FakeClient client;
@@ -119,13 +121,28 @@ void main() {
     expect(values, [const PersonPresence(status: PresenceStatus.offline)]);
   });
 
+  test('lets a programming error through', () async {
+    client.serverError = StateError('bug');
+    final errors = <Object>[];
+    final subscription = PresenceDatasourceImpl(
+      client,
+    ).watchPresence(_alice).listen(values.add, onError: errors.add);
+    addTearDown(subscription.cancel);
+    await pumpEventQueue();
+
+    expect(errors, [isA<StateError>()]);
+    expect(values, isEmpty);
+  });
+
   test('then emits each change of that person only', () async {
     client.server = GetPresenceResponse(presence: PresenceType.offline);
     await watch();
 
     client.onPresenceChanged
       ..add(_presence(PresenceType.unavailable))
-      ..add(_presence(PresenceType.online, userId: '@bob:server'));
+      ..add(
+        CachedPresence(PresenceType.online, null, null, null, '@bob:server'),
+      );
     await pumpEventQueue();
 
     expect(values.map((presence) => presence?.status), [

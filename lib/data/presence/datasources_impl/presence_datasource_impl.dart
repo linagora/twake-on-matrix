@@ -51,7 +51,8 @@ class PresenceDatasourceImpl implements PresenceDatasource {
     try {
       final response = await client.getPresence(userId);
       add(CachedPresence.fromPresenceResponse(response, userId));
-    } catch (_) {
+    } on Exception catch (e) {
+      Logs().w('Failed to read the presence of $userId', e);
       if (!isKnown) add(cached);
     }
   }
