@@ -228,17 +228,15 @@ mixin SendFilesMixin {
     Event? inReplyTo,
     VoidCallback? onSendCallback,
   }) async {
-    if (room == null || images.isEmpty) return;
+    if (room == null) return;
+    final result = await previewPastedImages(
+      context,
+      room: room,
+      images: images,
+      caption: caption,
+    );
+    if (result == null) return;
     try {
-      final fileInfos = await Future.wait(images.map(_writeToTemporaryFile));
-      if (!context.mounted) return;
-      final result = await mediaCaptionDialogPresenter(
-        context,
-        files: fileInfos,
-        room: room,
-        pendingText: caption,
-      );
-      if (result == null || result.files.isEmpty) return;
       await _uploadManager.uploadFileMobile(
         room: room,
         fileInfos: result.files,
@@ -250,6 +248,33 @@ mixin SendFilesMixin {
       Logs().e('SendFilesMixin::sendPastedImagesNative(): $e', e, s);
       if (!context.mounted) return;
       TwakeSnackBar.show(context, L10n.of(context)!.pasteImageFailed);
+    }
+  }
+
+  Future<SendMediaNativeResult?> previewPastedImages(
+    BuildContext context, {
+    Room? room,
+    required List<MatrixFile> images,
+    String? caption,
+  }) async {
+    if (images.isEmpty) return null;
+    try {
+      final fileInfos = await Future.wait(images.map(_writeToTemporaryFile));
+      if (!context.mounted) return null;
+      final result = await mediaCaptionDialogPresenter(
+        context,
+        files: fileInfos,
+        room: room,
+        pendingText: caption,
+      );
+      if (result == null || result.files.isEmpty) return null;
+      return result;
+    } catch (e, s) {
+      Logs().e('SendFilesMixin::previewPastedImages(): $e', e, s);
+      if (context.mounted) {
+        TwakeSnackBar.show(context, L10n.of(context)!.pasteImageFailed);
+      }
+      return null;
     }
   }
 
