@@ -57,56 +57,66 @@ class _FakePlayer extends Fake implements AudioPlayer {
   Future<void> dispose() async => calls.add('dispose');
 }
 
-void main() {
-  late List<_FakePlayer> players;
-  late FakeCallRepository repository;
+class _Host {
+  final repository = FakeCallRepository();
+  final players = <_FakePlayer>[];
+}
 
-  Future<void> pumpHost(WidgetTester tester) async {
-    repository = FakeCallRepository();
-    players = [];
-    final navigatorKey = GlobalKey<NavigatorState>();
-    await tester.pumpWidget(
-      ProviderScope(
-        retry: (_, _) => null,
-        overrides: [
-          callRepositoryProvider.overrideWithValue(repository),
-          activeMatrixClientProvider.overrideWithValue(null),
-        ],
-        child: MaterialApp(
+Future<_Host> _pumpHost(WidgetTester tester) async {
+  final host = _Host();
+  final navigatorKey = GlobalKey<NavigatorState>();
+  await tester.pumpWidget(
+    ProviderScope(
+      retry: (_, _) => null,
+      overrides: [
+        callRepositoryProvider.overrideWithValue(host.repository),
+        activeMatrixClientProvider.overrideWithValue(null),
+      ],
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
+        locale: const Locale('en'),
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        builder: (context, child) => IncomingCallHost(
           navigatorKey: navigatorKey,
-          locale: const Locale('en'),
-          localizationsDelegates: L10n.localizationsDelegates,
-          supportedLocales: L10n.supportedLocales,
-          builder: (context, child) => IncomingCallHost(
-            navigatorKey: navigatorKey,
-            createPlayer: () => (players..add(_FakePlayer())).last,
-            child: child!,
-          ),
-          home: const Scaffold(body: Text('chats')),
+          createPlayer: () => (host.players..add(_FakePlayer())).last,
+          child: child!,
         ),
+        home: const Scaffold(body: Text('chats')),
       ),
-    );
-  }
+    ),
+  );
+  return host;
+}
 
+void main() {
+  group('push rules', _pushRuleTests);
+  group('banner', _bannerTests);
+  group('ringtone', _ringtoneTests);
+}
+
+void _pushRuleTests() {
   testWidgets('mount_setsTheRingPushRulesOnce', (tester) async {
     // Act
-    await pumpHost(tester);
+    final host = await _pumpHost(tester);
     await tester.pump();
 
     // Assert
     expect(
-      repository.calls.where((call) => call == 'ensureCallRingPushRules'),
+      host.repository.calls.where((call) => call == 'ensureCallRingPushRules'),
       hasLength(1),
     );
   });
+}
 
+void _bannerTests() {
   testWidgets('aRing_showsOverTheAppUntilDeclined', (tester) async {
     // Arrange
-    await pumpHost(tester);
+    final host = await _pumpHost(tester);
     expect(find.byKey(const Key('incoming-call')), findsNothing);
 
     // Act
-    repository.rings.add([_ring]);
+    host.repository.rings.add([_ring]);
     await tester.pump();
 
     // Assert
@@ -119,33 +129,35 @@ void main() {
 
     // Assert
     expect(find.byKey(const Key('incoming-call')), findsNothing);
-    expect(repository.calls, contains(r'decline $ring'));
+    expect(host.repository.calls, contains(r'decline $ring'));
   });
 
   testWidgets('aRingThatStopsElsewhere_goes', (tester) async {
     // Arrange
-    await pumpHost(tester);
-    repository.rings.add([_ring]);
+    final host = await _pumpHost(tester);
+    host.repository.rings.add([_ring]);
     await tester.pump();
 
     // Act
-    repository.rings.add([]);
+    host.repository.rings.add([]);
     await tester.pumpAndSettle();
 
     // Assert
     expect(find.byKey(const Key('incoming-call')), findsNothing);
   });
+}
 
+void _ringtoneTests() {
   testWidgets('aRing_ringsALoopedRingtone_untilItStops', (tester) async {
     // Arrange
-    await pumpHost(tester);
+    final host = await _pumpHost(tester);
 
     // Act
-    repository.rings.add([_ring]);
+    host.repository.rings.add([_ring]);
     await tester.pump();
 
     // Assert
-    expect(players.single.calls, [
+    expect(host.players.single.calls, [
       'attributes ${AndroidAudioUsage.notificationRingtone}',
       'loop ${LoopMode.one}',
       'asset ${IncomingCallHost.ringAsset}',
@@ -153,17 +165,17 @@ void main() {
     ]);
 
     // Act
-    repository.rings.add([]);
+    host.repository.rings.add([]);
     await tester.pumpAndSettle();
 
     // Assert
-    expect(players.single.calls.last, 'dispose');
+    expect(host.players.single.calls.last, 'dispose');
   });
 
   testWidgets('aRingDuringAnotherCall_showsWithoutSound', (tester) async {
     // Arrange
-    await pumpHost(tester);
-    repository.othersInCall = true;
+    final host = await _pumpHost(tester);
+    host.repository.othersInCall = true;
     final container = ProviderScope.containerOf(
       tester.element(find.text('chats')),
     );
@@ -182,11 +194,11 @@ void main() {
     await tester.pump();
 
     // Act
-    repository.rings.add([_ring]);
+    host.repository.rings.add([_ring]);
     await tester.pumpAndSettle();
 
     // Assert
     expect(find.byKey(const Key('incoming-call')), findsOneWidget);
-    expect(players, isEmpty);
+    expect(host.players, isEmpty);
   });
 }
