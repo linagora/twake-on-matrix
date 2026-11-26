@@ -44,6 +44,9 @@ class _FakeChatController extends Fake implements ChatController {
   String? unreadReceivedMessageLocation;
 
   @override
+  Set<String> get liveThreadRootIds => const {};
+
+  @override
   bool isInViewPortCondition(
     double deltaTopReversed,
     double deltaBottomReversed,
