@@ -530,4 +530,14 @@ void main() {
       expect(harness.upload.uploads, isEmpty);
     });
   });
+
+  testWidgets('text set without typing, like a paste, shows the send button', (
+    tester,
+  ) async {
+    final harness = await _start(tester);
+
+    harness.controller.sendController.text = 'pasted';
+
+    expect(harness.controller.inputText.value, 'pasted');
+  });
 }
