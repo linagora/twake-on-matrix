@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/add_to_space_row.dart';
 import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -309,6 +310,32 @@ void main() {
         lines.last.bottom,
         tester.getRect(find.byType(ChatListItem).last).bottom,
       );
+    });
+  });
+
+  group('separator of the add-a-room line of a space', () {
+    Future<List<Rect>> pumpChildThenAdd(WidgetTester tester) async {
+      await tester.pumpWidget(
+        _rows([
+          ChatListItem(_chat('General'), depth: 1),
+          AddToSpaceRow(depth: 1, onTap: () {}),
+        ]),
+      );
+      await _settle(tester);
+      return _separators(tester);
+    }
+
+    testWidgets('starts at the left edge of « Add a room » and stops where '
+        'the line of the room above stops', (tester) async {
+      final lines = await pumpChildThenAdd(tester);
+
+      // One line under the room, exactly one under the add line.
+      expect(lines, hasLength(2));
+      final room = lines.first;
+      final add = lines.last;
+      expect(add.left, tester.getRect(find.text('Add a room')).left);
+      expect(add.right, room.right);
+      expect(add.bottom, tester.getRect(find.byType(AddToSpaceRow)).bottom);
     });
   });
 }
