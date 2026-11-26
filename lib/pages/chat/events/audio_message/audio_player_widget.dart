@@ -8,6 +8,7 @@ import 'package:twake_chat/pages/chat/events/audio_message/audio_player_style.da
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
+import 'package:twake_chat/utils/exception/logged_out_during_download_exception.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -25,7 +26,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
-import 'package:path_provider/path_provider.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   final Color color;
@@ -126,19 +126,18 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     try {
       matrixFile = await widget.event.downloadAndDecryptAttachment();
 
-      final tempDir = await getTemporaryDirectory();
-      final fileName = Uri.encodeComponent(
-        widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
+      file = await widget.event.writeDecryptedAttachment(
+        matrixFile,
+        convert:
+            Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg'
+            ? handleOggAudioFileIniOS
+            : null,
       );
-      file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
-
-      await file.writeAsBytes(matrixFile.bytes);
-
-      if (Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-        file = await handleOggAudioFileIniOS(file);
-      }
 
       matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
+    } on LoggedOutDuringDownloadException {
+      matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      return;
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
       ScaffoldMessenger.of(
