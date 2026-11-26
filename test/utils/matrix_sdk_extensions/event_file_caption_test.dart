@@ -22,9 +22,9 @@ void main() {
         room: room,
       );
 
-  Event captionEdit(String caption) => file({
+  Event captionEdit(String caption, {bool outerFilename = true}) => file({
     'body': '* $caption',
-    'filename': pdf,
+    if (outerFilename) 'filename': pdf,
     'm.new_content': {'msgtype': 'm.file', 'body': caption, 'filename': pdf},
     'm.relates_to': {'rel_type': 'm.replace', 'event_id': '\$file:example.org'},
   });
@@ -99,6 +99,16 @@ void main() {
 
     test('is the file name when an edit removes the caption', () {
       expect(captionEdit('').chatListFileText, pdf);
+    });
+
+    test('is the new caption of an edit without a file name outside', () {
+      final edit = captionEdit('new caption', outerFilename: false);
+
+      expect(edit.chatListFileText, 'new caption');
+    });
+
+    test('is the file name of an edit that removes the caption', () {
+      expect(captionEdit('', outerFilename: false).chatListFileText, pdf);
     });
   });
 }

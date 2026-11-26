@@ -671,22 +671,25 @@ extension FutureEventExtension on Event {
       l10n.callStartedAt(DateFormat('HH:mm').format(originServerTs));
 
   String? get fileCaption {
-    if (messageType != MessageTypes.File || !isBodyDiffersFromFilename()) {
-      return null;
-    }
-    final caption = _editedBody ?? bodyWithoutReplyFallback;
-    if (caption.trim().isEmpty || caption == content['filename']) return null;
+    final shownFilename = _shownContent.tryGet<String>('filename');
+    if (messageType != MessageTypes.File || shownFilename == null) return null;
+    final caption = _editContent == null
+        ? bodyWithoutReplyFallback
+        : _editContent!.tryGet<String>(MatrixEventFields.body) ?? '';
+    if (caption.trim().isEmpty || caption == shownFilename) return null;
     return caption;
   }
 
-  String? get _editedBody => relationshipType == RelationshipTypes.edit
-      ? content
-            .tryGetMap<String, Object?>(MatrixEventFields.newContent)
-            ?.tryGet<String>(MatrixEventFields.body)
+  Map<String, Object?>? get _editContent =>
+      relationshipType == RelationshipTypes.edit
+      ? content.tryGetMap<String, Object?>(MatrixEventFields.newContent)
       : null;
 
+  Map<String, Object?> get _shownContent => _editContent ?? content;
+
   String get chatListFileText =>
-      (fileCaption ?? filename).replaceAll(RegExp(r'\n'), ' ');
+      (fileCaption ?? _shownContent.tryGet<String>('filename') ?? filename)
+          .replaceAll(RegExp(r'\n'), ' ');
 
   String get chatListFileIcon => mimeType.getIcon(fileType: fileType);
 
