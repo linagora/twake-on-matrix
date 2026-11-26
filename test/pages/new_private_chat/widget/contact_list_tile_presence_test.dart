@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show ProviderContainer, UncontrolledProviderScope;
@@ -75,8 +77,9 @@ void main() {
   Future<void> pumpTile(
     WidgetTester tester,
     Widget Function(PresentationContact contact) tile,
-    ContactStatus status,
-  ) async {
+    ContactStatus status, {
+    bool profilePending = false,
+  }) async {
     final client = MockClient();
     when(client.userID).thenReturn('@me:server');
     await tester.pumpWidget(
@@ -85,7 +88,9 @@ void main() {
           retry: (_, _) => null,
           overrides: [
             contactDisplayProvider(_alice).overrideWith(
-              (ref) async => const UnifiedContact(matrixId: _alice),
+              (ref) => profilePending
+                  ? Completer<UnifiedContact>().future
+                  : Future.value(const UnifiedContact(matrixId: _alice)),
             ),
             contactAvatarProvider(_alice).overrideWithValue(null),
             syncedPersonPresenceProvider(_alice).overrideWith(
@@ -139,6 +144,19 @@ void main() {
           find.byType(PersonPresenceBadge),
         );
         expect(badge.userId, _alice);
+        expect(find.byKey(const ValueKey('linagora-presence-dot')), findsOne);
+      });
+
+      testWidgets('shows the presence while the contact profile loads', (
+        tester,
+      ) async {
+        await pumpTile(
+          tester,
+          tile,
+          ContactStatus.active,
+          profilePending: true,
+        );
+
         expect(find.byKey(const ValueKey('linagora-presence-dot')), findsOne);
       });
 

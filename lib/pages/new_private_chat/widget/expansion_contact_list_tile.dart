@@ -132,9 +132,10 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                 : null,
             builder: (context, ref, _) {
               final matrixId = widget.contact.matrixId;
-              final profile =
+              final isOnTwake =
                   widget.contact.status == ContactStatus.active &&
-                      matrixId?.isNotEmpty == true
+                  matrixId?.isNotEmpty == true;
+              final profile = isOnTwake
                   ? ref.watch(contactDisplayProvider(matrixId!)).value
                   : null;
               final avatar = profile == null
@@ -150,7 +151,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: IgnorePointer(
-                      child: profile == null
+                      child: !isOnTwake
                           ? avatarImage
                           : PersonPresenceBadge(
                               userId: matrixId!,
