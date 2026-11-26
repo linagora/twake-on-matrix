@@ -428,9 +428,15 @@ void main() {
     /// A finger dragged to the left over a message.
     const swipe = Offset(-300, 0);
 
+    /// Swipes [eventId] and waits until the reply banner has finished
+    /// opening, as the user sees it.
     Future<void> swipeToReply(WidgetTester tester, String eventId) async {
       await tester.drag(bubbleOf(eventId), swipe);
+      // The swipe ends and starts the reply.
       await tester.pump(const Duration(seconds: 1));
+      // The banner starts to open, then is fully open.
+      await tester.pump();
+      await tester.pump(TwakeThemes.animationDuration);
     }
 
     testWidgets('reference: the gesture of these tests is the swipe a '
