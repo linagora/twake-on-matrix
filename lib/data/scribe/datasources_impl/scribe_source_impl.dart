@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:matrix/matrix.dart' show Logs;
+import 'package:twake_chat/data/drive/sources/workplace_token_exchange.dart';
 import 'package:twake_chat/data/scribe/scribe_prompts.dart';
 import 'package:twake_chat/domain/drive/entities/drive_session.dart';
 import 'package:twake_chat/domain/drive/exceptions/drive_exception.dart';
@@ -9,12 +10,10 @@ import 'package:twake_chat/domain/scribe/sources/scribe_source.dart';
 import 'package:twake_drive_picker/core.dart';
 
 class ScribeSourceImpl implements ScribeSource {
-  ScribeSourceImpl({required Dio dio, required bool requireHttps})
-    : _dio = dio,
-      _requireHttps = requireHttps;
+  ScribeSourceImpl({required WorkplaceTokenExchange exchange})
+    : _exchange = exchange;
 
-  final Dio _dio;
-  final bool _requireHttps;
+  final WorkplaceTokenExchange _exchange;
   final _prompts = const ScribePrompts();
 
   @override
@@ -24,31 +23,11 @@ class ScribeSourceImpl implements ScribeSource {
     required ScribePrompt prompt,
     required String draft,
   }) async {
-    var current = session;
-    final config = WorkplaceConfig(dio: _dio, requireHttps: _requireHttps);
-    final executor = WorkplaceRequestExecutor(config: config);
-    final runner = WorkplaceAccessModeRunner(
-      exchangeTokenInteractor: ExchangeDriveTokenInteractor(
-        WorkplaceRepositoryImpl(
-          _ValidatedExchangeDataSource(executor: executor, config: config),
-          WorkplaceDriveDataSourceImpl(executor: executor),
-        ),
-      ),
-      oidcTokenGetter: () => current.idToken.value,
-      oidcRefreshTrigger: () async {
-        final renewed = await renewSession();
-        if (renewed.platformUrl != session.platformUrl) {
-          throw const DriveWorkplaceUnknown();
-        }
-        current = renewed;
-        return current.idToken.value;
-      },
-      isBridgeAvailable: () => false,
-    );
     try {
-      final answer = await runner.run(
-        session.platformUrl,
-        _CompletionCall(
+      final answer = await _exchange.run(
+        session: session,
+        renewSession: renewSession,
+        callOf: (executor, _) => _CompletionCall(
           executor: executor,
           platformUrl: session.platformUrl,
           messages: _prompts.messagesFor(prompt, draft),
@@ -95,29 +74,13 @@ class ScribeSourceImpl implements ScribeSource {
     final status = e.response?.statusCode;
     Logs().w('ScribeSourceImpl::rewrite: ${e.type.name}, status $status');
     if (status == 429) return const DriveRateLimited();
-    if (e.requestOptions.uri.path.endsWith('/auth/token_exchange')) {
-      if (status == 400 && _isChatAppMissing(e)) {
-        return const DriveChatAppMissing();
-      }
-      return _byConnection(e.type) ?? const DriveExchangeRejected();
+    if (_exchange.isExchangeFailure(e)) {
+      if (_exchange.isChatAppMissing(e)) return const DriveChatAppMissing();
+      return _exchange.connectionFailureOf(e.type) ??
+          const DriveExchangeRejected();
     }
-    return _byConnection(e.type) ?? const ScribeRewriteFailed();
+    return _exchange.connectionFailureOf(e.type) ?? const ScribeRewriteFailed();
   }
-
-  bool _isChatAppMissing(DioException e) =>
-      '${e.response?.data}'.toLowerCase().contains('not installed');
-
-  DriveException? _byConnection(DioExceptionType type) => switch (type) {
-    DioExceptionType.connectionTimeout ||
-    DioExceptionType.sendTimeout ||
-    DioExceptionType.receiveTimeout ||
-    DioExceptionType.transformTimeout => const DriveTimedOut(),
-    DioExceptionType.connectionError => const DriveOffline(),
-    DioExceptionType.badCertificate ||
-    DioExceptionType.badResponse ||
-    DioExceptionType.cancel ||
-    DioExceptionType.unknown => null,
-  };
 }
 
 class _CompletionCall extends WorkplaceCall<Object?> {
@@ -148,25 +111,4 @@ class _CompletionCall extends WorkplaceCall<Object?> {
     ),
     body: WorkplaceRequestBody(data: {'messages': _messages}),
   );
-}
-
-class _ValidatedExchangeDataSource extends WorkplaceDataSourceImpl {
-  _ValidatedExchangeDataSource({
-    required super.executor,
-    required super.config,
-  });
-
-  @override
-  Future<String> exchangeToken(Uri platformUrl, String oidcIdToken) async {
-    final String token;
-    try {
-      token = await super.exchangeToken(platformUrl, oidcIdToken);
-    } on TypeError {
-      throw const FormatException('invalid token exchange answer');
-    }
-    if (token.trim().isEmpty) {
-      throw const FormatException('blank token exchange answer');
-    }
-    return token;
-  }
 }
