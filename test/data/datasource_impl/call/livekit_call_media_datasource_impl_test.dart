@@ -69,11 +69,18 @@ class _FakeLocal extends Fake implements lk.LocalParticipant {
   @override
   bool get isSpeaking => false;
 
+  /// What the call asked for, in order.
+  final steps = <String>[];
+
   @override
   Future<lk.LocalTrackPublication?> setMicrophoneEnabled(
     bool enabled, {
     lk.AudioCaptureOptions? audioCaptureOptions,
-  }) async => throw failure!;
+  }) async {
+    steps.add('microphone');
+    if (failure case final failure?) throw failure;
+    return null;
+  }
 
   @override
   Future<lk.LocalTrackPublication?> setCameraEnabled(
@@ -236,16 +243,22 @@ void main() {
     late _FakeRoom room;
     late LiveKitCallMediaDatasourceImpl datasource;
     late _FakeCameraTrack cameraTrack;
+    late Completer<void> bluetoothAnswer;
     late int camerasCreated;
     Completer<void>? captureGate;
 
     setUp(() {
       room = _FakeRoom();
       cameraTrack = _FakeCameraTrack();
+      bluetoothAnswer = Completer<void>();
       camerasCreated = 0;
       captureGate = null;
       datasource = LiveKitCallMediaDatasourceImpl(
         createRoom: (_) => room,
+        askBluetoothConnect: () {
+          room.localParticipant.steps.add('bluetooth');
+          return bluetoothAnswer.future;
+        },
         createCameraTrack: () async {
           camerasCreated++;
           await captureGate?.future;
@@ -281,6 +294,18 @@ void main() {
 
       // Assert
       expect(room.speakerChanges, ['false forced=false']);
+    });
+
+    test('connect_whileBluetoothIsUnanswered_joinsAnyway', () async {
+      // Act
+      await datasource.connect(
+        _server,
+        const CallMediaState(isMicrophoneOn: true, isEncrypted: false),
+      );
+
+      // Assert
+      expect(bluetoothAnswer.isCompleted, isFalse);
+      expect(room.localParticipant.steps, ['microphone', 'bluetooth']);
     });
 
     test('setCamera_inTheCall_turnsTheOwnCameraOn', () async {

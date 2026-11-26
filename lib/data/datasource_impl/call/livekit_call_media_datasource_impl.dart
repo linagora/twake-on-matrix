@@ -25,10 +25,13 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     @visibleForTesting
     Future<lk.LocalVideoTrack> Function() createCameraTrack =
         lk.LocalVideoTrack.createCameraTrack,
+    @visibleForTesting
+    Future<void> Function() askBluetoothConnect = _askBluetoothConnect,
   }) : _createRoom = createRoom,
        _createKeyProvider = createKeyProvider,
        _setSpeakerOutput = setSpeakerOutput,
-       _createCameraTrack = createCameraTrack;
+       _createCameraTrack = createCameraTrack,
+       _askBluetooth = askBluetoothConnect;
 
   static Future<void> _preferSpeaker({
     required bool isOn,
@@ -49,6 +52,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   final Future<void> Function({required bool isOn, required bool isForced})
   _setSpeakerOutput;
   final Future<lk.LocalVideoTrack> Function() _createCameraTrack;
+  final Future<void> Function() _askBluetooth;
   Future<void> _cameraChanges = Future.value();
 
   /// The user of a LiveKit identity: the part before the device id.
@@ -102,7 +106,6 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       // Our own disconnect disposes the listener first: this one is LiveKit
       // giving up.
       ..on<lk.RoomDisconnectedEvent>((event) => onLost(event.reason));
-    await _askBluetoothConnect();
     try {
       // Read by LiveKit when it starts the audio.
       await _setSpeakerOutput(isOn: media.isSpeakerOn, isForced: false);
@@ -127,6 +130,9 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       _rethrowErrors(error, stackTrace);
       throw CallMediaFailedException(cause: error);
     }
+    // Not awaited: its dialog must not hold the call, and comes after the
+    // microphone's.
+    unawaited(_askBluetooth());
     _emit();
   }
 
@@ -231,6 +237,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     try {
       await track.stop();
     } catch (error, stackTrace) {
+      _rethrowErrors(error, stackTrace);
       Logs().w('LiveKitCallMedia: camera not stopped', error, stackTrace);
     }
   }
@@ -240,7 +247,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     if (!Platform.isAndroid) return;
     try {
       await Permission.bluetoothConnect.request();
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Logs().w('LiveKitCallMedia: Bluetooth not asked', error, stackTrace);
     }
   }
