@@ -120,7 +120,7 @@ class TwakeClipboard {
         .map((item) {
           final c = Completer<MatrixFile?>();
           final readableFormats = item.getFormats(allImageFormatsSupported);
-          if (readableFormats.isEmpty != false &&
+          if (readableFormats.isEmpty ||
               readableFormats.first is! SimpleFileFormat) {
             return null;
           }

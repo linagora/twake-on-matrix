@@ -37,6 +37,9 @@ import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/presentation/extensions/text_editting_controller_extension.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
@@ -201,6 +204,39 @@ class DraftChatController extends ConsumerState<DraftChat>
     );
   }
 
+  // iOS routes the native menu's Paste here, before it reaches the field.
+  void _onPasteEvent(ClipboardReadEvent event) =>
+      unawaited(pasteFromClipboard(event.getClipboardReader));
+
+  @visibleForTesting
+  Future<void> pasteFromClipboard(
+    Future<ClipboardReader> Function() readClipboard,
+  ) async {
+    if (!inputFocus.hasFocus) return;
+    var pasted = const <MatrixFile>[];
+    try {
+      final reader = await readClipboard();
+      if (!await TwakeClipboard.instance.isReadableImageFormat(
+        clipboardReader: reader,
+      )) {
+        await sendController.pasteText(clipboardReader: reader);
+        return;
+      }
+      final images = await TwakeClipboard.instance.pasteImagesUsingBytes(
+        reader: reader,
+      );
+      pasted = images?.nonNulls.toList() ?? [];
+    } catch (e, s) {
+      Logs().e('DraftChatController::pasteFromClipboard(): $e', e, s);
+    }
+    if (!mounted) return;
+    if (pasted.isEmpty) {
+      TwakeSnackBar.show(context, L10n.of(context)!.pasteImageFailed);
+      return;
+    }
+    await onPasteImages(pasted);
+  }
+
   void handleDragDone(DropDoneDetails details) async {
     draggingNotifier.value = false;
     final matrixFilesList = await super.onDragDone(details);
@@ -247,6 +283,9 @@ class DraftChatController extends ConsumerState<DraftChat>
     );
     scrollController.addListener(_updateScrollController);
     keyboardVisibilityController.onChange.listen(_keyboardListener);
+    ClipboardEvents.instance?.registerPasteEventListener(_onPasteEvent);
+    // A paste or a clear sets the text without onChanged; the send button reads inputText.
+    sendController.addListener(_syncInputText);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getProfile();
     });
@@ -254,6 +293,7 @@ class DraftChatController extends ConsumerState<DraftChat>
 
   @override
   void dispose() {
+    ClipboardEvents.instance?.unregisterPasteEventListener(_onPasteEvent);
     _contactsSubscription?.close();
     scrollController.dispose();
     sendController.dispose();
@@ -542,6 +582,8 @@ class DraftChatController extends ConsumerState<DraftChat>
   void onInputBarChanged(String text) {
     inputText.value = text;
   }
+
+  void _syncInputText() => inputText.value = sendController.text;
 
   void onSendFileClick(BuildContext context) async {
     if (PlatformInfos.isDesktop) {

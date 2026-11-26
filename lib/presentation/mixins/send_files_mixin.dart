@@ -259,7 +259,11 @@ mixin SendFilesMixin {
   }) async {
     if (images.isEmpty) return null;
     try {
-      final fileInfos = await Future.wait(images.map(_writeToTemporaryFile));
+      final fileInfos = await Future.wait(
+        images.indexed.map(
+          (entry) => _writeToTemporaryFile(entry.$2, entry.$1),
+        ),
+      );
       if (!context.mounted) return null;
       final result = await mediaCaptionDialogPresenter(
         context,
@@ -279,9 +283,9 @@ mixin SendFilesMixin {
   }
 
   // The preview and the upload read media from a path; a pasted image has none.
-  Future<FileInfo> _writeToTemporaryFile(MatrixFile image) async {
+  Future<FileInfo> _writeToTemporaryFile(MatrixFile image, int index) async {
     final name =
-        'pasted_${DateTime.now().microsecondsSinceEpoch}.${_extensionOf(image.mimeType)}';
+        'pasted_${DateTime.now().microsecondsSinceEpoch}_$index.${_extensionOf(image.mimeType)}';
     final file = File('${(await getTemporaryDirectory()).path}/$name');
     await file.writeAsBytes(image.bytes);
     return ImageFileInfo(
