@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart' show Logs;
-import 'package:twake_chat/domain/drive/exceptions/drive_exception.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_prompt.dart';
 import 'package:twake_chat/domain/scribe/entities/scribe_room.dart';
-import 'package:twake_chat/domain/scribe/exceptions/scribe_exception.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_style.dart';
@@ -178,10 +175,7 @@ class _ScribeButtonState extends ConsumerState<ScribeButton> {
         return;
       }
       widget.onRewritten(text);
-    } on Exception catch (e, s) {
-      if (e is! ScribeException && e is! DriveException) {
-        Logs().e('ScribeButton::_rewrite', e, s);
-      }
+    } on Exception catch (e) {
       if (!mounted) return;
       final message = _failureMessage.of(L10n.of(context)!, e);
       if (message != null) TwakeSnackBar.show(context, message);
