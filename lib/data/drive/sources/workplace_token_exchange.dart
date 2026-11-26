@@ -13,12 +13,6 @@ abstract interface class WorkplaceTokenExchange {
     )
     callOf,
   });
-
-  bool isExchangeFailure(DioException e);
-
-  bool isChatAppMissing(DioException e);
-
-  DriveException? connectionFailureOf(DioExceptionType type);
 }
 
 class WorkplaceTokenExchangeImpl implements WorkplaceTokenExchange {
@@ -51,9 +45,7 @@ class WorkplaceTokenExchangeImpl implements WorkplaceTokenExchange {
       oidcTokenGetter: () => current.idToken.value,
       oidcRefreshTrigger: () async {
         final renewed = await renewSession();
-        if (renewed.platformUrl != session.platformUrl) {
-          throw const DriveWorkplaceUnknown();
-        }
+        _refuseTokenForAnotherWorkplace(session, renewed);
         current = renewed;
         return current.idToken.value;
       },
@@ -62,28 +54,14 @@ class WorkplaceTokenExchangeImpl implements WorkplaceTokenExchange {
     return runner.run(session.platformUrl, callOf(executor, repository));
   }
 
-  @override
-  bool isExchangeFailure(DioException e) =>
-      e.requestOptions.uri.path.endsWith('/auth/token_exchange');
-
-  @override
-  bool isChatAppMissing(DioException e) =>
-      e.response?.statusCode == 400 &&
-      isExchangeFailure(e) &&
-      '${e.response?.data}'.toLowerCase().contains('not installed');
-
-  @override
-  DriveException? connectionFailureOf(DioExceptionType type) => switch (type) {
-    DioExceptionType.connectionTimeout ||
-    DioExceptionType.sendTimeout ||
-    DioExceptionType.receiveTimeout ||
-    DioExceptionType.transformTimeout => const DriveTimedOut(),
-    DioExceptionType.connectionError => const DriveOffline(),
-    DioExceptionType.badCertificate ||
-    DioExceptionType.badResponse ||
-    DioExceptionType.cancel ||
-    DioExceptionType.unknown => null,
-  };
+  void _refuseTokenForAnotherWorkplace(
+    DriveSession session,
+    DriveSession renewed,
+  ) {
+    if (renewed.platformUrl != session.platformUrl) {
+      throw const DriveWorkplaceUnknown();
+    }
+  }
 }
 
 class _ValidatedWorkplaceDataSource extends WorkplaceDataSourceImpl {

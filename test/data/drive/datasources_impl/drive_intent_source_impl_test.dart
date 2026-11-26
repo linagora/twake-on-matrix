@@ -173,7 +173,7 @@ void main() {
       ]);
     });
 
-    test('a renewal on another workplace is refused, not followed', () async {
+    test('a token for another workplace is never sent there', () async {
       onExchange = (options) => jsonResponse({'error': 'stale'}, 401);
       renew = () async => DriveSession(
         idToken: DriveIdToken(value: 'second', expiresAt: DateTime.utc(2030)),

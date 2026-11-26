@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:matrix/matrix.dart' show Logs;
+import 'package:twake_chat/data/drive/sources/workplace_failures.dart';
 import 'package:twake_chat/data/drive/sources/workplace_token_exchange.dart';
 import 'package:twake_chat/data/scribe/scribe_prompts.dart';
 import 'package:twake_chat/domain/drive/entities/drive_session.dart';
@@ -14,6 +15,7 @@ class ScribeSourceImpl implements ScribeSource {
     : _exchange = exchange;
 
   final WorkplaceTokenExchange _exchange;
+  final _failures = const WorkplaceFailures();
   final _prompts = const ScribePrompts();
 
   @override
@@ -74,12 +76,12 @@ class ScribeSourceImpl implements ScribeSource {
     final status = e.response?.statusCode;
     Logs().w('ScribeSourceImpl::rewrite: ${e.type.name}, status $status');
     if (status == 429) return const DriveRateLimited();
-    if (_exchange.isExchangeFailure(e)) {
-      if (_exchange.isChatAppMissing(e)) return const DriveChatAppMissing();
-      return _exchange.connectionFailureOf(e.type) ??
+    if (_failures.isExchangeFailure(e)) {
+      if (_failures.isChatAppMissing(e)) return const DriveChatAppMissing();
+      return _failures.connectionFailureOf(e.type) ??
           const DriveExchangeRejected();
     }
-    return _exchange.connectionFailureOf(e.type) ?? const ScribeRewriteFailed();
+    return _failures.connectionFailureOf(e.type) ?? const ScribeRewriteFailed();
   }
 }
 
