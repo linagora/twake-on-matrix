@@ -3568,14 +3568,20 @@ class ChatController extends ConsumerState<Chat>
     unawaited(_voiceAutoplay.findNext(eventId, shown: shown));
   }
 
+  bool _isQueued(String eventId) =>
+      ref.read(voiceAutoplayControllerProvider(widget.roomId, threadRootId)) ==
+      VoiceAutoplayState.next(eventId);
+
   Future<void> _playNextVoiceMessage(String eventId) async {
     final autoplay = _voiceAutoplay;
-    final event = await room?.getEventById(eventId);
-    final matrix = this.matrix;
-    if (!_isFrontScreen || event == null || matrix == null) return;
-    // The user started another audio meanwhile.
-    if (matrix.voiceMessageEvent.value != null) return;
     try {
+      final event = await room?.getEventById(eventId);
+      final matrix = this.matrix;
+      if (!_isFrontScreen || event == null || matrix == null) return;
+      // A newer run started, or the user started another audio, meanwhile.
+      if (!_isQueued(eventId) || matrix.voiceMessageEvent.value != null) {
+        return;
+      }
       await playVoiceMessage(
         context,
         matrix,

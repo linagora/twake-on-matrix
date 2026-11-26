@@ -86,6 +86,10 @@ Future<void> playVoiceMessage(
     return;
   } catch (e, s) {
     Logs().v('Could not download audio file', e, s);
+    if (matrix.voiceMessageEvent.value?.eventId == event.eventId) {
+      matrix.voiceMessageEvent.value = null;
+      matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+    }
     if (context.mounted) {
       ScaffoldMessenger.of(
         context,

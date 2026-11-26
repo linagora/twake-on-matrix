@@ -511,7 +511,8 @@ once if it is a voice message too (#2796). The run stops:
 
 - at the first message that is not a voice message: a text, an image, or an
   audio file that was not recorded as a voice message;
-- after the last message stored on the device;
+- after the last message the chat has loaded on screen; a message no longer
+  on screen goes on with the messages stored on the device, up to the last one;
 - when the user closes the player, or starts another audio;
 - when the user leaves the chat or covers it (a thread, a dialog, a bottom
   sheet): the next one does not start. On mobile the voice message that is playing goes on to its end,

@@ -343,6 +343,7 @@ void main() {
 
   testWidgets('the next voice message starts when one ends', (tester) async {
     final container = await openChat(tester);
+    client.api.media = Completer();
     expect(bubble('v1'), findsOneWidget);
     expect(bubble('v2'), findsOneWidget);
 
@@ -363,6 +364,52 @@ void main() {
       ),
       findsNothing,
     );
+    await closeChat(tester);
+  });
+
+  testWidgets('a failed download leaves the next one ready to retry', (
+    tester,
+  ) async {
+    final container = await openChat(tester);
+
+    await endVoiceMessage(tester, container, 'v1');
+
+    expect(matrix.voiceMessageEvent.value, isNull);
+    expect(matrix.currentAudioStatus.value, AudioPlayerStatus.notDownloaded);
+    await closeChat(tester);
+  });
+
+  testWidgets('a run that starts during the lookup drops the queued one', (
+    tester,
+  ) async {
+    final container = await openChat(tester);
+    client.room.lookup = Completer();
+    client.api.media = Completer();
+    await endVoiceMessage(tester, container, 'v1');
+
+    await endVoiceMessage(tester, container, 'v2');
+    client.room.lookup!.complete();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump();
+
+    expect(matrix.voiceMessageEvent.value, isNull);
+    await closeChat(tester);
+  });
+
+  testWidgets('a failed lookup of the next one plays nothing', (tester) async {
+    final container = await openChat(tester);
+    client.room.lookup = Completer();
+    await endVoiceMessage(tester, container, 'v1');
+
+    client.room.lookup!.completeError(Exception('store closed'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 100)),
+    );
+    await tester.pump();
+
+    expect(matrix.voiceMessageEvent.value, isNull);
     await closeChat(tester);
   });
 
@@ -459,6 +506,7 @@ void main() {
   testWidgets('the store gives the next one of a message the chat does not '
       'show', (tester) async {
     final container = await openChat(tester);
+    client.api.media = Completer();
 
     await endVoiceMessage(tester, container, _notShown);
 

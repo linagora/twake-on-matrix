@@ -3,6 +3,7 @@ import 'package:twake_chat/data/voice_message/datasources/voice_message_datasour
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/voice_message_extension.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
   const VoiceMessageDatasourceImpl(this._client);
@@ -47,11 +48,14 @@ class VoiceMessageDatasourceImpl implements VoiceMessageDatasource {
   ) {
     if (!played.isVoiceMessage) return null;
     final inThread = threadRootId != null;
+    final knownThreadReplyIds =
+        _client.threadUnread?.knownThreadReplyIds(played.room) ?? const {};
     for (final event in newer) {
       if (inThread && event.threadRootId != threadRootId) continue;
       if (!EventVisibilityResolver.isVisibleInTimeline(
         event,
         inThread: inThread,
+        knownThreadReplyIds: knownThreadReplyIds,
       )) {
         continue;
       }

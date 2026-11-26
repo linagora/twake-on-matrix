@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/voice_message/datasources_impl/voice_message_datasource_impl.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../fake_client.dart';
 
@@ -23,10 +25,13 @@ class _Database extends MockDatabase {
   }
 }
 
-class _Client extends Client {
+class _Client extends Client implements ThreadUnreadStoreOwner {
   _Client(this.db) : super('voice-autoplay-test', database: db);
 
   final _Database db;
+
+  @override
+  late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
   late final Room room = Room(id: _roomId, client: this);
 
   @override
@@ -84,6 +89,7 @@ void main() {
       );
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     client = _Client(_Database());
     datasource = VoiceMessageDatasourceImpl(client);
   });
@@ -157,6 +163,25 @@ void main() {
     store([event('root'), event('r1', threadRootId: 'root'), event('main')]);
 
     expect(await next('root'), 'main');
+  });
+
+  test('skips a thread reply deleted since it was seen', () async {
+    final reply = event('reply', threadRootId: 'root');
+    client.threadUnread.rememberThreadReply(reply);
+    final deleted = Event(
+      eventId: 'reply',
+      type: EventTypes.Message,
+      senderId: '@bob:example.org',
+      originServerTs: reply.originServerTs,
+      room: client.room,
+      content: const {},
+      unsigned: {
+        'redacted_because': {'type': EventTypes.Redaction},
+      },
+    );
+    store([event('v1'), deleted, event('v2')]);
+
+    expect(await next('v1'), 'v2');
   });
 
   test('stops looking past 3200 stored events', () async {
