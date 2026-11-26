@@ -10,8 +10,10 @@ import 'send_text_message_interactor_test.mocks.dart';
 
 /// THR-M-05: every text sent from the thread screen (text, mention, emoji,
 /// command) carries the thread relation: the `ThreadSendTarget` root and
-/// last event of the thread, and never `inReplyTo`,
-/// which would make the SDK prepend a quote to the body.
+/// last event of the thread. A message quoted on the thread screen goes
+/// with it as `inReplyTo` (Clément, 2026-11-26, reverses "never inReplyTo");
+/// what the server then receives is in
+/// `send_text_reply_to_thread_event_test.dart`.
 void main() {
   const rootId = r'$root';
   const lastId = r'$last';
@@ -97,7 +99,7 @@ void main() {
   });
 
   test(
-    'a reply quote is dropped in a thread: inReplyTo is never sent',
+    'a message quoted in a thread is sent as inReplyTo, in the thread',
     () async {
       final MockEvent quoted = MockEvent();
 
@@ -114,21 +116,14 @@ void main() {
       verify(
         room.sendTextEvent(
           'hello',
+          inReplyTo: quoted,
+          editEventId: anyNamed('editEventId'),
           parseCommands: false,
           threadRootEventId: rootId,
-          threadLastEventId: lastId,
-        ),
-      ).called(1);
-      verifyNever(
-        room.sendTextEvent(
-          any,
-          inReplyTo: argThat(isNotNull, named: 'inReplyTo'),
-          editEventId: anyNamed('editEventId'),
-          parseCommands: anyNamed('parseCommands'),
-          threadRootEventId: anyNamed('threadRootEventId'),
           threadLastEventId: anyNamed('threadLastEventId'),
         ),
-      );
+      ).called(1);
+      verifyNoOtherSend();
     },
   );
 

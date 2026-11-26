@@ -31,6 +31,11 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_events_controller.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.dart';
+import 'package:twake_chat/pages/chat/events/message/message.dart';
+import 'package:twake_chat/pages/chat/events/message/swipeable_message.dart';
+import 'package:twake_chat/widgets/swipeable.dart';
+import 'package:twake_chat/pages/chat/events/reply_content.dart';
+import 'package:twake_chat/pages/chat/reply_display.dart';
 import 'package:twake_chat/utils/background_push.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
@@ -85,8 +90,13 @@ class _Client extends Client {
   _Watched<Event> get onTimelineEvent => _onTimelineEvent;
 }
 
-/// A text sent, as the room received it.
-typedef _Sent = ({String text, String? rootId, String? lastEventId});
+/// A text sent, as the room received it; [quotedId]: the message it quotes.
+typedef _Sent = ({
+  String text,
+  String? rootId,
+  String? lastEventId,
+  String? quotedId,
+});
 
 /// The room of the thread: its live timeline is [liveEvents], the root comes
 /// from [rootLoad], and the texts sent land in [sent].
@@ -110,9 +120,14 @@ class _Room extends Room {
   @override
   _Watched<String> get onSessionKeyReceived => _onSessionKeyReceived;
 
+  /// The replies the server knows, for a quote that looks its message up.
+  final Map<String, Event> known = {};
+
   @override
   Future<Event?> getEventById(String eventID) {
     if (eventID == _rootId) rootAsked = true;
+    final reply = known[eventID];
+    if (reply != null) return Future.value(reply);
     return rootLoad.future;
   }
 
@@ -153,6 +168,7 @@ class _Room extends Room {
       text: message,
       rootId: threadRootEventId,
       lastEventId: threadLastEventId,
+      quotedId: inReplyTo?.eventId,
     ));
     return r'$sent:example.org';
   }
@@ -218,11 +234,13 @@ class _FakeMatrixState extends Fake implements MatrixState {
 }
 
 /// A text of the thread (or its root, [inThread] false), sent at 10:[minute].
+/// [quotes]: the message of the thread it answers with a quote.
 Event _event(
   Room room,
   String eventId,
   int minute, {
   bool inThread = true,
+  String? quotes,
   EventStatus status = EventStatus.synced,
 }) => Event(
   type: EventTypes.Message,
@@ -233,8 +251,8 @@ Event _event(
       'm.relates_to': {
         'rel_type': RelationshipTypes.thread,
         'event_id': _rootId,
-        'is_falling_back': true,
-        'm.in_reply_to': {'event_id': _rootId},
+        'is_falling_back': quotes == null,
+        'm.in_reply_to': {'event_id': quotes ?? _rootId},
       },
   },
   eventId: eventId,
@@ -360,7 +378,9 @@ void main() {
 
     await sendReply(tester, 'hello');
 
-    expect(room.sent, [(text: 'hello', rootId: _rootId, lastEventId: _r1)]);
+    expect(room.sent, [
+      (text: 'hello', rootId: _rootId, lastEventId: _r1, quotedId: null),
+    ]);
     await leaveTheApp(tester);
   });
 
@@ -371,8 +391,203 @@ void main() {
 
     await sendReply(tester, 'first');
 
-    expect(room.sent, [(text: 'first', rootId: _rootId, lastEventId: _rootId)]);
+    expect(room.sent, [
+      (text: 'first', rootId: _rootId, lastEventId: _rootId, quotedId: null),
+    ]);
     await leaveTheApp(tester);
+  });
+
+  /// Clément, 2026-11-26: on the thread screen a message offers "Reply"
+  /// (quote reply) as in a room. Matrix spec v1.19, "Replies within threads":
+  /// "This flag defaults to `false` when not provided, which also allows a
+  /// threaded message to contain a reply itself."
+  group('quote reply in a thread', () {
+    const r2 = r'$r2:example.org';
+
+    /// The banner above the composer that shows the message being answered.
+    Finder inReplyBanner(String eventId) => find.descendant(
+      of: find.byType(ReplyDisplay),
+      matching: find.text('text of $eventId'),
+    );
+
+    /// The bubble of a message, not a quote of it.
+    Finder bubbleOf(String eventId) => find.byWidgetPredicate(
+      (widget) => widget is Message && widget.event.eventId == eventId,
+    );
+
+    /// A thread of two replies, open.
+    Future<void> openThreadOfTwoReplies(WidgetTester tester) async {
+      room.rootLoad.complete(_event(room, _rootId, 0, inThread: false));
+      threads.page = () async => [_event(room, _r1, 1), _event(room, r2, 2)];
+      await openThread(tester);
+      await tester.pump(const Duration(seconds: 1));
+      expect(bubbleOf(_r1), findsOneWidget, reason: 'the thread is loaded');
+      expect(inReplyBanner(_r1), findsNothing);
+    }
+
+    /// A finger dragged to the left over a message.
+    const swipe = Offset(-300, 0);
+
+    Future<void> swipeToReply(WidgetTester tester, String eventId) async {
+      await tester.drag(bubbleOf(eventId), swipe);
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    testWidgets('reference: the gesture of these tests is the swipe a '
+        'message answers to', (tester) async {
+      final swiped = <SwipeDirection>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SwipeableMessage(
+              event: _event(room, _r1, 1),
+              onSwipe: swiped.add,
+              child: const SizedBox(height: 60, child: Text('a message')),
+            ),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('a message'), swipe);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(swiped, [SwipeDirection.endToStart]);
+    });
+
+    testWidgets('a swipe on a message starts a reply to it: the reply banner '
+        'shows that message above the composer', (tester) async {
+      await openThreadOfTwoReplies(tester);
+
+      await swipeToReply(tester, _r1);
+
+      expect(inReplyBanner(_r1), findsOneWidget);
+      expect(
+        tester.getTopLeft(inReplyBanner(_r1)).dy,
+        lessThan(tester.getTopLeft(find.byType(TextField)).dy),
+        reason: 'the banner sits above the composer',
+      );
+      await leaveTheApp(tester);
+    });
+
+    testWidgets('the "Reply" action on a message shows it in the reply '
+        'banner', (tester) async {
+      await openThreadOfTwoReplies(tester);
+      final controller = tester.state<ChatController>(find.byType(Chat));
+
+      controller.replyAction(
+        replyTo: tester.widget<Message>(bubbleOf(_r1)).event,
+      );
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(inReplyBanner(_r1), findsOneWidget);
+      await leaveTheApp(tester);
+    });
+
+    testWidgets('a message sent while replying stays in the thread and '
+        'quotes the chosen message, then the banner closes', (tester) async {
+      await openThreadOfTwoReplies(tester);
+      await swipeToReply(tester, _r1);
+
+      await sendReply(tester, 'my answer');
+
+      expect(room.sent, hasLength(1));
+      expect(room.sent.single.text, 'my answer');
+      expect(room.sent.single.rootId, _rootId);
+      expect(room.sent.single.quotedId, _r1);
+      expect(inReplyBanner(_r1), findsNothing);
+      await leaveTheApp(tester);
+    });
+
+    testWidgets('a reply cancelled from its banner quotes nothing: the '
+        'message follows the last reply of the thread', (tester) async {
+      await openThreadOfTwoReplies(tester);
+      await swipeToReply(tester, _r1);
+      expect(inReplyBanner(_r1), findsOneWidget);
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(ReplyDisplay),
+          matching: find.byTooltip('Close'),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 1));
+      expect(inReplyBanner(_r1), findsNothing);
+      await sendReply(tester, 'never mind');
+
+      expect(room.sent, [
+        (text: 'never mind', rootId: _rootId, lastEventId: r2, quotedId: null),
+      ]);
+      await leaveTheApp(tester);
+    });
+
+    group('a reply that quotes a message of the thread', () {
+      const quoting = r'$quoting:example.org';
+
+      /// The quote shown in the bubble of [quoting].
+      Finder quoteOf(String eventId) => find.descendant(
+        of: bubbleOf(quoting),
+        matching: find.descendant(
+          of: find.byType(ReplyContent),
+          matching: find.text('text of $eventId'),
+        ),
+      );
+
+      /// A thread long enough to scroll: [_r1] is its oldest reply, and its
+      /// newest one, [quoting], quotes it.
+      Future<void> openLongThread(WidgetTester tester) async {
+        final replies = [
+          _event(room, _r1, 1),
+          for (var minute = 2; minute < 40; minute++)
+            _event(room, '\$filler$minute:example.org', minute),
+          _event(room, quoting, 40, quotes: _r1),
+        ];
+        room.known[_r1] = replies.first;
+        room.rootLoad.complete(_event(room, _rootId, 0, inThread: false));
+        threads.page = () async => replies;
+        await openThread(tester);
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
+      }
+
+      testWidgets('shows its quote above its text', (tester) async {
+        await openLongThread(tester);
+
+        expect(quoteOf(_r1), findsOneWidget);
+        expect(
+          tester.getTopLeft(quoteOf(_r1)).dy,
+          lessThan(
+            tester
+                .getTopLeft(
+                  find.descendant(
+                    of: bubbleOf(quoting),
+                    matching: find.text('text of $quoting'),
+                  ),
+                )
+                .dy,
+          ),
+        );
+        await leaveTheApp(tester);
+      });
+
+      testWidgets('a tap on its quote scrolls the thread to the quoted '
+          'message', (tester) async {
+        await openLongThread(tester);
+        expect(
+          bubbleOf(_r1),
+          findsNothing,
+          reason: 'the quoted message is far above, out of the screen',
+        );
+
+        await tester.tap(quoteOf(_r1));
+        // The scroll goes page by page, one frame each.
+        for (var frame = 0; frame < 40; frame++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+
+        expect(bubbleOf(_r1).hitTestable(), findsOneWidget);
+        await leaveTheApp(tester);
+      });
+    });
   });
 
   testWidgets('closing the thread while its root loads asks no page of '

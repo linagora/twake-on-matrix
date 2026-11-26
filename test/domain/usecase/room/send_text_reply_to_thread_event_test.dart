@@ -9,6 +9,8 @@ import 'package:twake_chat/domain/services/message_splitter.dart';
 import 'package:twake_chat/domain/services/room_send_queue_service.dart';
 import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
 
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
+
 import '../../../fake_client.dart';
 import '../../../lenient_database.dart';
 
@@ -87,11 +89,15 @@ void main() {
   Event mainMessage() => message(mainMessageId);
 
   /// The content of the one message the app sent to the server.
-  Future<Map<String, Object?>> sendAndReadContent({Event? inReplyTo}) async {
+  Future<Map<String, Object?>> sendAndReadContent({
+    Event? inReplyTo,
+    ThreadSendTarget? thread,
+  }) async {
     await interactor.execute(
       room: room,
       text: 'my answer',
       inReplyTo: inReplyTo,
+      thread: thread,
     );
     final sent = [
       for (final entry in FakeMatrixApi.calledEndpoints.entries)
@@ -198,5 +204,63 @@ void main() {
     final content = await sendAndReadContent();
 
     expect(content.containsKey('m.relates_to'), isFalse);
+  });
+
+  /// Clément, 2026-11-26: on the thread screen a message offers "Reply" as
+  /// in a room. The interactor gets the `ThreadSendTarget` of the screen and
+  /// the quoted event.
+  ///
+  /// Matrix spec v1.19, Threading, "Replies within threads": "This flag
+  /// defaults to `false` when not provided, which also allows a threaded
+  /// message to contain a reply itself. Aside from `is_falling_back` being
+  /// `false` (or not specified), the fallback for unthreaded clients is used
+  /// to create a reply within a thread: clients should render the event
+  /// accordingly."
+  /// https://spec.matrix.org/v1.19/client-server-api/#replies-within-threads
+  group('sent from the thread screen', () {
+    const lastId = r'$lastOfThread';
+    const thread = ThreadSendTarget(rootEventId: rootId, lastEventId: lastId);
+
+    test('a reply to a message of the thread stays in the thread and quotes '
+        'that message, not as a fallback', () async {
+      final content = await sendAndReadContent(
+        inReplyTo: threadReply(),
+        thread: thread,
+      );
+
+      expect(content['m.relates_to'], {
+        'rel_type': 'm.thread',
+        'event_id': rootId,
+        'is_falling_back': false,
+        'm.in_reply_to': {'event_id': threadReplyId},
+      });
+    });
+
+    test('a reply to the root of the thread stays in the thread and quotes '
+        'the root', () async {
+      final content = await sendAndReadContent(
+        inReplyTo: threadRoot(),
+        thread: thread,
+      );
+
+      expect(content['m.relates_to'], {
+        'rel_type': 'm.thread',
+        'event_id': rootId,
+        'is_falling_back': false,
+        'm.in_reply_to': {'event_id': rootId},
+      });
+    });
+
+    test('a message that quotes nothing keeps the fallback for clients '
+        'without threads: the last event of the thread', () async {
+      final content = await sendAndReadContent(thread: thread);
+
+      expect(content['m.relates_to'], {
+        'rel_type': 'm.thread',
+        'event_id': rootId,
+        'is_falling_back': true,
+        'm.in_reply_to': {'event_id': lastId},
+      });
+    });
   });
 }
