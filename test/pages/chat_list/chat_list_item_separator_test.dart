@@ -10,7 +10,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
+import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
+import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 
 import 'chat_list_item_test.dart' show buildRoom, wrap;
 import 'chat_list_item_test.mocks.dart';
@@ -254,6 +257,39 @@ void main() {
       expect(lines, hasLength(2));
       expect(lines.first.bottom, tester.getRect(rows.first).bottom);
       expect(lines.last.bottom, tester.getRect(rows.last).bottom);
+    });
+
+    // #3711: the kind badge of a space avatar sat on the line under the row.
+    testWidgets('a space row keeps its kind badge above the line', (
+      tester,
+    ) async {
+      final space = _chat('Team');
+      when(space.isDirectChat).thenReturn(false);
+      when(space.isSpace).thenReturn(true);
+
+      await tester.pumpWidget(
+        _rows([
+          ChatListItem(
+            space,
+            space: SpaceRowData(
+              fold: SpaceFold.none,
+              unreadCount: 0,
+              mentionCount: 0,
+              onToggleFold: () {},
+            ),
+          ),
+        ]),
+      );
+      await _settle(tester);
+
+      final line = (await _separators(tester)).single;
+      final badge = tester.getRect(
+        find.descendant(
+          of: find.byType(AvatarWithKindBadge),
+          matching: find.byType(Icon),
+        ),
+      );
+      expect(badge.bottom, lessThanOrEqualTo(line.top));
     });
   });
 }

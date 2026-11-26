@@ -17,7 +17,7 @@ import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
-    show LinagoraRefColors, TwakeListItem;
+    show LinagoraRefColors;
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -362,27 +362,6 @@ void main() {
 
       // Assert
       expect(shownBadge(tester), isNull);
-    });
-
-    testWidgets('build_whenSpace_keepsTheBadgeAboveTheDivider', (tester) async {
-      // Arrange
-      final room = buildRoom(name: 'Team');
-      when(room.isDirectChat).thenReturn(false);
-      when(room.isSpace).thenReturn(true);
-
-      // Act
-      await tester.pumpWidget(wrap(ChatListItem(room, space: spaceData())));
-      await tester.pump();
-
-      // Assert
-      final row = tester.getRect(find.byType(TwakeListItem));
-      final badge = tester.getRect(
-        find.descendant(
-          of: find.byType(AvatarWithKindBadge),
-          matching: find.byType(Icon),
-        ),
-      );
-      expect(badge.bottom, lessThanOrEqualTo(row.bottom - 1));
     });
 
     testWidgets('build_whenSpace_alignsTheTitleWithTheRooms', (tester) async {
