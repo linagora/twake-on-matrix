@@ -21,8 +21,9 @@ import 'package:matrix/matrix.dart';
 
 class ContactsTab extends ConsumerStatefulWidget {
   final Widget? bottomNavigationBar;
+  final VoidCallback? onOpenSettings;
 
-  const ContactsTab({super.key, this.bottomNavigationBar});
+  const ContactsTab({super.key, this.bottomNavigationBar, this.onOpenSettings});
 
   @override
   ConsumerState<ContactsTab> createState() => ContactsTabController();
@@ -170,6 +171,7 @@ class ContactsTabController extends ConsumerState<ContactsTab>
     return ContactsTabView(
       contactsController: this,
       bottomNavigationBar: widget.bottomNavigationBar,
+      onOpenSettings: widget.onOpenSettings,
     );
   }
 }

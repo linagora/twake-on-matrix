@@ -578,7 +578,7 @@ class ChatListController extends State<ChatList>
   }
 
   void onClickAvatar() {
-    const ProfileRoute().push(context);
+    widget.onOpenSettings?.call();
   }
 
   void _handleRecovery() {
