@@ -70,7 +70,7 @@ Future<List<int>> _pumpBar(
         container: ProviderContainer.test(
           retry: (_, _) => null,
           overrides: [
-            ...activeAccountOverrides(accountClient('@me:example.org')),
+            ...activeAccountOverrides(client),
             activityRepositoryProvider.overrideWithValue(repository),
           ],
         ),
