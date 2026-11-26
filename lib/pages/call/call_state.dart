@@ -14,6 +14,10 @@ sealed class CallState with _$CallState {
     required String roomId,
     required bool isDirect,
     @Default([]) List<CallParticipant> participants,
+    @Default(false) bool isSpeakerOn,
+
+    /// Until then, the speaker follows the camera.
+    @Default(false) bool isSpeakerChosen,
   }) = CallConnected;
 
   const factory CallState.failed({

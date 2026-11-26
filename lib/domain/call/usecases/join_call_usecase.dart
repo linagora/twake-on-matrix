@@ -30,6 +30,7 @@ class JoinCallUseCase {
     final media = CallMediaState(
       isMicrophoneOn: true,
       isCameraOn: join.isVideo,
+      isSpeakerOn: join.isVideo,
       isEncrypted: room.isEncrypted,
     );
     if (!await _connect(server, media, cancel)) return null;

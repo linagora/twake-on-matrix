@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' as rtc;
 import 'package:livekit_client/livekit_client.dart' as lk;
 import 'package:matrix/matrix.dart' show Logs;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_media_key.dart';
@@ -16,8 +18,26 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     lk.Room Function(lk.E2EEOptions? encryption) createRoom = _newRoom,
     @visibleForTesting
     Future<lk.BaseKeyProvider> Function() createKeyProvider = _newKeyProvider,
+    @visibleForTesting
+    Future<void> Function({required bool isOn, required bool isForced})
+        setSpeakerOutput =
+        _preferSpeaker,
+    @visibleForTesting
+    Future<lk.LocalVideoTrack> Function() createCameraTrack =
+        lk.LocalVideoTrack.createCameraTrack,
+    @visibleForTesting
+    Future<void> Function() askBluetoothConnect = _askBluetoothConnect,
   }) : _createRoom = createRoom,
-       _createKeyProvider = createKeyProvider;
+       _createKeyProvider = createKeyProvider,
+       _setSpeakerOutput = setSpeakerOutput,
+       _createCameraTrack = createCameraTrack,
+       _askBluetooth = askBluetoothConnect;
+
+  static Future<void> _preferSpeaker({
+    required bool isOn,
+    required bool isForced,
+  }) =>
+      lk.AudioManager.instance.setSpeakerOutputPreferred(isOn, force: isForced);
 
   static lk.Room _newRoom(lk.E2EEOptions? encryption) => lk.Room(
     roomOptions: lk.RoomOptions(
@@ -29,6 +49,11 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
 
   final lk.Room Function(lk.E2EEOptions? encryption) _createRoom;
   final Future<lk.BaseKeyProvider> Function() _createKeyProvider;
+  final Future<void> Function({required bool isOn, required bool isForced})
+  _setSpeakerOutput;
+  final Future<lk.LocalVideoTrack> Function() _createCameraTrack;
+  final Future<void> Function() _askBluetooth;
+  Future<void> _cameraChanges = Future.value();
 
   /// The user of a LiveKit identity: the part before the device id.
   @visibleForTesting
@@ -82,6 +107,8 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       // giving up.
       ..on<lk.RoomDisconnectedEvent>((event) => onLost(event.reason));
     try {
+      // Read by LiveKit when it starts the audio.
+      await _setSpeakerOutput(isOn: media.isSpeakerOn, isForced: false);
       await room.connect(server.url, server.token);
     } catch (error, stackTrace) {
       await listener.dispose();
@@ -95,12 +122,17 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       if (media.isMicrophoneOn) {
         await room.localParticipant?.setMicrophoneEnabled(true);
       }
-      if (media.isCameraOn) await room.localParticipant?.setCameraEnabled(true);
+      if (room.localParticipant case final local? when media.isCameraOn) {
+        await _turnCameraOn(local);
+      }
     } catch (error, stackTrace) {
       await disconnect();
       _rethrowErrors(error, stackTrace);
       throw CallMediaFailedException(cause: error);
     }
+    // Not awaited: its dialog must not hold the call, and comes after the
+    // microphone's.
+    unawaited(_askBluetooth());
     _emit();
   }
 
@@ -166,6 +198,75 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   Future<void> setMicrophone({required bool isOn}) =>
       _updateLocalParticipant((local) => local.setMicrophoneEnabled(isOn));
 
+  @override
+  Future<void> setCamera({required bool isOn}) {
+    // One change at a time: a second "on" must see the first publication,
+    // and an "off" must find it.
+    final change = _cameraChanges.then(
+      (_) => _updateLocalParticipant(
+        (local) => isOn ? _turnCameraOn(local) : local.setCameraEnabled(false),
+      ),
+    );
+    _cameraChanges = change.then((_) {}, onError: (_) {});
+    return change;
+  }
+
+  /// livekit_client 2.13.2 leaves a new camera track running when its
+  /// publication fails: this one is stopped.
+  Future<void> _turnCameraOn(lk.LocalParticipant local) async {
+    if (local.getTrackPublicationBySource(lk.TrackSource.camera) != null) {
+      await local.setCameraEnabled(true);
+      return;
+    }
+    final track = await _createCameraTrack();
+    if (!identical(_room?.localParticipant, local)) {
+      // Left the call while the camera opened.
+      await _stopQuietly(track);
+      return;
+    }
+    try {
+      await local.publishVideoTrack(track);
+    } catch (_) {
+      await _stopQuietly(track);
+      rethrow;
+    }
+  }
+
+  /// The error that matters is the one before this stop.
+  static Future<void> _stopQuietly(lk.LocalVideoTrack track) async {
+    try {
+      await track.stop();
+    } catch (error, stackTrace) {
+      _rethrowErrors(error, stackTrace);
+      Logs().w('LiveKitCallMedia: camera not stopped', error, stackTrace);
+    }
+  }
+
+  /// Android 12+: without it LiveKit never routes to a Bluetooth headset.
+  static Future<void> _askBluetoothConnect() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await Permission.bluetoothConnect.request();
+    } on Exception catch (error, stackTrace) {
+      Logs().w('LiveKitCallMedia: Bluetooth not asked', error, stackTrace);
+    }
+  }
+
+  /// Best effort: livekit_client 2.13.2 catches and logs the route errors.
+  @override
+  Future<void> setSpeaker({required bool isOn, required bool isForced}) =>
+      _setSpeakerOutput(isOn: isOn, isForced: isForced);
+
+  /// Null until a remote camera is subscribed: its tile shows the avatar.
+  static lk.VideoTrack? _cameraOf(lk.Participant participant) {
+    final publication = participant.getTrackPublicationBySource(
+      lk.TrackSource.camera,
+    );
+    final track = publication?.track;
+    if (publication == null || publication.muted) return null;
+    return track is lk.VideoTrack ? track : null;
+  }
+
   Future<void> _updateLocalParticipant(
     Future<Object?> Function(lk.LocalParticipant local) run,
   ) async {
@@ -205,12 +306,16 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   CallParticipant _toParticipant(
     lk.Participant participant, {
     required bool isLocal,
-  }) => CallParticipant(
-    id: participant.identity,
-    userId: userIdOf(participant.identity),
-    isLocal: isLocal,
-    isMicrophoneOn: participant.isMicrophoneEnabled(),
-    isCameraOn: participant.isCameraEnabled(),
-    isSpeaking: participant.isSpeaking,
-  );
+  }) {
+    final camera = _cameraOf(participant);
+    return CallParticipant(
+      id: participant.identity,
+      userId: userIdOf(participant.identity),
+      isLocal: isLocal,
+      isMicrophoneOn: participant.isMicrophoneEnabled(),
+      isCameraOn: camera != null,
+      isSpeaking: participant.isSpeaking,
+      video: camera == null ? null : CallVideoTrack(camera),
+    );
+  }
 }

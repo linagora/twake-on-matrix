@@ -148,6 +148,14 @@ class _FakeMedia implements CallMediaDatasource {
       calls.add('microphone $isOn');
 
   @override
+  Future<void> setCamera({required bool isOn}) async =>
+      calls.add('camera $isOn');
+
+  @override
+  Future<void> setSpeaker({required bool isOn, required bool isForced}) async =>
+      calls.add('speaker $isOn $isForced');
+
+  @override
   Stream<List<CallParticipant>> watchParticipants() =>
       Stream.value(participants);
 }
@@ -200,12 +208,16 @@ void main() {
       const CallMediaState(isMicrophoneOn: true, isEncrypted: true),
     );
     await repository.setMicrophone(isOn: false);
+    await repository.setCamera(isOn: true);
+    await repository.setSpeaker(isOn: true, isForced: false);
     await repository.disconnectMedia();
 
     // Assert
     expect(media.calls, [
       'connect wss://lk.test true false true',
       'microphone false',
+      'camera true',
+      'speaker true false',
       'disconnect',
     ]);
     expect(rtc.calls, isEmpty);

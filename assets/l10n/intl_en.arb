@@ -3489,6 +3489,21 @@
     "type": "text",
     "placeholders": {}
   },
+  "callCamera": "Camera",
+  "@callCamera": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callSpeaker": "Speaker",
+  "@callSpeaker": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorCameraChange": "The camera could not be changed. Try again.",
+  "@callErrorCameraChange": {
+    "type": "text",
+    "placeholders": {}
+  },
   "callLeave": "Leave the call",
   "@callLeave": {
     "type": "text",

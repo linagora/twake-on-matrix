@@ -458,6 +458,28 @@ Opening the chat only marks as read the messages shown on the screen. The
 unread count drops to the messages below, and the room is read once the user
 reaches the bottom, as before.
 
+## D26. Calls start audio-only; the camera and the speaker are buttons (decided by Johann, 2026-11-23)
+
+A call on mobile starts with the camera off, as D15 decided. Twake Space
+Chat no longer does: since its D778 (2026-11-21) its calls start with the
+camera on, so the « as the calls of Twake Space Chat » of D15 is out of date,
+not its rule. The call screen has a camera button and a speaker button, next
+to the microphone.
+
+- The camera shows the own video in the own tile, and the others see it in
+  theirs. A tile without a video keeps the avatar.
+- An audio call plays on the earpiece, or on the headset (wired or Bluetooth)
+  when one is connected.
+- Until the user taps the speaker button, the speaker follows the camera: on
+  with the camera, off without it. A headset still takes the audio then.
+- The speaker button turns the speaker on even over a headset. Off, the audio
+  goes back to the headset, else to the earpiece.
+
+Not yet: a list of the audio outputs to pick a Bluetooth device by name, and
+the switch between the front and the back camera.
+
+Completes D15, which left the camera and the speaker for later.
+
 ## D27. Chat list: floating bottom bar, pen capsule and pill chips ahead of the design system (decided by Johann, 2026-11-24)
 
 On a phone (and a tablet, which shares the bottom bar), the tab bar is a

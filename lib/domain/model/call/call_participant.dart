@@ -2,6 +2,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'call_participant.freezed.dart';
 
+/// The video of a participant, opaque outside the media datasource.
+extension type const CallVideoTrack(Object handle) {}
+
 /// One device in the media of the call.
 @freezed
 abstract class CallParticipant with _$CallParticipant {
@@ -15,5 +18,6 @@ abstract class CallParticipant with _$CallParticipant {
     required bool isSpeaking,
     String? displayName,
     Uri? avatarUrl,
+    CallVideoTrack? video,
   }) = _CallParticipant;
 }
