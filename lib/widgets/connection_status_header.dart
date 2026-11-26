@@ -26,11 +26,19 @@ class ConnectionStatusHeaderState
   @override
   void initState() {
     super.initState();
-    _onSyncSub = ref
-        .read(activeMatrixClientProvider)
-        ?.onSyncStatus
-        .stream
-        .listen(_onStatusUpdate);
+    _subscribe(ref.read(activeMatrixClientProvider));
+    ref.listenManual(activeMatrixClientProvider, (previous, next) {
+      if (previous == next) return;
+      _debounceTimer?.cancel();
+      _lastStatus = null;
+      _lastHideState = true;
+      _subscribe(next);
+    });
+  }
+
+  void _subscribe(Client? client) {
+    _onSyncSub?.cancel();
+    _onSyncSub = client?.onSyncStatus.stream.listen(_onStatusUpdate);
   }
 
   void _onStatusUpdate(SyncStatusUpdate update) {
