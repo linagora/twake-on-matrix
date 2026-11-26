@@ -107,7 +107,7 @@ void main() {
         child: UncontrolledProviderScope(
           container: ProviderContainer.test(
             retry: (_, _) => null,
-            overrides: activeAccountOverrides(null),
+            overrides: activeAccountOverrides(client),
           ),
           child: MaterialApp(
             theme: ThemeData(
