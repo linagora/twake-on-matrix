@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:html/parser.dart';
 
@@ -89,27 +90,12 @@ Future<void> sendStickerAsReceiver({
   final client = HttpClient()..autoUncompress = true;
   try {
     final session = await _receiverSession(client, endpoints);
-    final uploadUri = _matrixBase(
-      endpoints.matrixURL,
-    ).replace(path: '/_matrix/media/v3/upload');
-    final request = await client.postUrl(uploadUri);
-    request.headers
-      ..set(HttpHeaders.contentTypeHeader, stickerFixtureMimeType)
-      ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
-      ..set(HttpHeaders.userAgentHeader, _userAgent);
-    request.contentLength = stickerFixtureBytes.length;
-    request.add(stickerFixtureBytes);
-    final response = await request.close();
-    final responseBody = await utf8.decoder.bind(response).join();
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'Receiver sticker upload failed [status=${response.statusCode}] '
-        'body=$responseBody',
-      );
-    }
-    final contentUri =
-        (jsonDecode(responseBody) as Map<String, dynamic>)['content_uri']
-            as String;
+    final contentUri = await _uploadMedia(
+      client: client,
+      session: session,
+      bytes: stickerFixtureBytes,
+      mimeType: stickerFixtureMimeType,
+    );
     await _putMatrixEvent(
       client: client,
       session: session,
@@ -120,6 +106,107 @@ Future<void> sendStickerAsReceiver({
   } finally {
     client.close(force: true);
   }
+}
+
+/// Uploads [file] as the configured receiver and sends it to [roomId] as an
+/// `m.room.message` of [msgtype], like a file sent from another client.
+/// Returns the event id.
+Future<String> sendMediaAsReceiver({
+  required String roomId,
+  required String msgtype,
+  required ReceiverMediaFile file,
+}) async {
+  const endpoints = _SsoEndpoints.fromEnvironment();
+  final client = HttpClient()..autoUncompress = true;
+  try {
+    final session = await _receiverSession(client, endpoints);
+    final contentUri = await _uploadMedia(
+      client: client,
+      session: session,
+      bytes: file.bytes,
+      mimeType: file.mimeType,
+    );
+    final thumbnail = file.thumbnail;
+    final thumbnailUri = thumbnail == null
+        ? null
+        : await _uploadMedia(
+            client: client,
+            session: session,
+            bytes: thumbnail.bytes,
+            mimeType: thumbnail.mimeType,
+          );
+    return await _putMatrixEvent(
+      client: client,
+      session: session,
+      groupID: roomId,
+      eventType: 'm.room.message',
+      content: {
+        'msgtype': msgtype,
+        'body': file.name,
+        'filename': file.name,
+        'url': contentUri,
+        'info': {
+          'mimetype': file.mimeType,
+          'size': file.bytes.length,
+          ...file.info,
+          if (thumbnail != null && thumbnailUri != null) ...{
+            'thumbnail_url': thumbnailUri,
+            'thumbnail_info': {
+              'mimetype': thumbnail.mimeType,
+              'size': thumbnail.bytes.length,
+              ...thumbnail.info,
+            },
+          },
+        },
+      },
+    );
+  } finally {
+    client.close(force: true);
+  }
+}
+
+class ReceiverMediaFile {
+  const ReceiverMediaFile({
+    required this.name,
+    required this.bytes,
+    required this.mimeType,
+    this.info = const {},
+    this.thumbnail,
+  });
+
+  final String name;
+  final Uint8List bytes;
+  final String mimeType;
+  final Map<String, Object?> info;
+  final ReceiverMediaFile? thumbnail;
+}
+
+Future<String> _uploadMedia({
+  required HttpClient client,
+  required _MatrixSession session,
+  required Uint8List bytes,
+  required String mimeType,
+}) async {
+  final uploadUri = _matrixBase(
+    session.endpoints.matrixURL,
+  ).replace(path: '/_matrix/media/v3/upload');
+  final request = await client.postUrl(uploadUri);
+  request.headers
+    ..set(HttpHeaders.contentTypeHeader, mimeType)
+    ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
+    ..set(HttpHeaders.userAgentHeader, _userAgent);
+  request.contentLength = bytes.length;
+  request.add(bytes);
+  final response = await request.close();
+  final responseBody = await utf8.decoder.bind(response).join();
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw Exception(
+      'Receiver media upload failed [status=${response.statusCode}] '
+      'body=$responseBody',
+    );
+  }
+  return (jsonDecode(responseBody) as Map<String, dynamic>)['content_uri']
+      as String;
 }
 
 /// Makes the configured receiver join [roomId] after the primary account
