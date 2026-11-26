@@ -5,6 +5,7 @@ import 'package:twake_chat/pages/image_viewer/image_viewer.dart';
 import 'package:twake_chat/pages/media_viewer/media_viewer.dart';
 import 'package:twake_chat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/extension/image_provider_extension.dart';
 import 'package:twake_chat/utils/extension/mime_type_extension.dart';
@@ -18,15 +19,15 @@ import 'package:twake_chat/widgets/hero_page_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_avif/flutter_avif.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/themes.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 
 typedef EventId = String;
 typedef ImageData = Uint8List;
 
-class MxcImage extends StatefulWidget {
+class MxcImage extends ConsumerStatefulWidget {
   final Uri? uri;
   final Event? event;
   final double? width;
@@ -91,10 +92,10 @@ class MxcImage extends StatefulWidget {
   });
 
   @override
-  State<MxcImage> createState() => _MxcImageState();
+  ConsumerState<MxcImage> createState() => _MxcImageState();
 }
 
-class _MxcImageState extends State<MxcImage>
+class _MxcImageState extends ConsumerState<MxcImage>
     with AutomaticKeepAliveClientMixin {
   static const String placeholderKey = 'placeholder';
   ImageData? _imageDataNoCache;
@@ -139,11 +140,12 @@ class _MxcImageState extends State<MxcImage>
     BuildContext context,
   ) async {
     if (!context.mounted) return (imageData: null, filePath: null);
-    final client = Matrix.of(context).client;
+    final client = ref.read(activeMatrixClientProvider);
     final uri = widget.uri;
     final event = widget.event;
 
     if (uri != null) {
+      if (client == null) return (imageData: null, filePath: null);
       final width = widget.width;
       final realWidth = width == null ? null : context.getCacheSize(width);
       final height = widget.height;

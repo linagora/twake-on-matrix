@@ -4,22 +4,24 @@ import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/mixins/search_recent_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/send_files_mixin.dart';
 import 'package:twake_chat/presentation/model/chat/chat_router_input_argument.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-class Share extends StatefulWidget {
+class Share extends ConsumerStatefulWidget {
   const Share({super.key});
 
   @override
-  State<Share> createState() => ShareController();
+  ConsumerState<Share> createState() => ShareController();
 }
 
-class ShareController extends State<Share>
+class ShareController extends ConsumerState<Share>
     with SendFilesMixin, SearchRecentChat {
   final isSearchModeNotifier = ValueNotifier(false);
 
@@ -69,7 +71,7 @@ class ShareController extends State<Share>
   void shareTo(String roomId) async {
     final room = Room(
       id: selectedChatNotifier.value,
-      client: Matrix.of(context).client,
+      client: ref.read(matrixClientProvider),
     );
     final shareContentList = Matrix.of(context).shareContentList;
     final shareContent = Matrix.of(context).shareContent;
@@ -119,7 +121,8 @@ class ShareController extends State<Share>
     }
   }
 
-  List<Room> get filteredRoomsForAll => Matrix.of(context).client.acceptedRooms;
+  List<Room> get filteredRoomsForAll =>
+      ref.read(matrixClientProvider).acceptedRooms;
 
   @override
   Widget build(BuildContext context) {

@@ -4,12 +4,12 @@ import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers
 import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/event/twake_inapp_event_types.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_view.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-class AdaptiveScaffoldPrimaryNavigation extends StatefulWidget {
+class AdaptiveScaffoldPrimaryNavigation extends ConsumerStatefulWidget {
   final List<NavigationRailDestination> getNavigationRailDestinations;
   final int? selectedIndex;
   final Function(int)? onDestinationSelected;
@@ -22,19 +22,19 @@ class AdaptiveScaffoldPrimaryNavigation extends StatefulWidget {
   });
 
   @override
-  State<AdaptiveScaffoldPrimaryNavigation> createState() =>
+  ConsumerState<AdaptiveScaffoldPrimaryNavigation> createState() =>
       _AdaptiveScaffoldPrimaryNavigationState();
 }
 
 class _AdaptiveScaffoldPrimaryNavigationState
-    extends State<AdaptiveScaffoldPrimaryNavigation> {
+    extends ConsumerState<AdaptiveScaffoldPrimaryNavigation> {
   final ValueNotifier<Profile> profileNotifier = ValueNotifier(
     Profile(userId: ''),
   );
 
   StreamSubscription? onAccountDataSubscription;
 
-  Client get client => Matrix.of(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   void _getCurrentProfile(Client client) async {
     // SDK access goes through Riverpod (transitional container read).
