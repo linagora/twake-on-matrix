@@ -670,8 +670,17 @@ extension FutureEventExtension on Event {
   String callThreadRootText(L10n l10n) =>
       l10n.callStartedAt(DateFormat('HH:mm').format(originServerTs));
 
+  /// The caption a file was sent with, null when it has none: the chat list
+  /// shows it instead of « sent a file », like the text of any message.
+  String? get fileCaption =>
+      messageType == MessageTypes.File && isBodyDiffersFromFilename()
+      ? bodyWithoutReplyFallback
+      : null;
+
   Future<String> calcLocalizedBodyRemoveBreakLine(L10n l10n) async {
     if (isCallThreadRoot) return callThreadRootText(l10n);
+    final caption = fileCaption;
+    if (caption != null) return caption.replaceAll(RegExp(r'\n'), ' ');
     final body = await calcLocalizedBody(
       MatrixLocals(l10n),
       hideReply: true,
@@ -685,6 +694,8 @@ extension FutureEventExtension on Event {
 
   String calcLocalizedBodyFallbackRemoveBreakLine(L10n l10n) {
     if (isCallThreadRoot) return callThreadRootText(l10n);
+    final caption = fileCaption;
+    if (caption != null) return caption.replaceAll(RegExp(r'\n'), ' ');
     final body = calcLocalizedBodyFallback(
       MatrixLocals(l10n),
       hideReply: true,
