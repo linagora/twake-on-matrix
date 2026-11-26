@@ -81,7 +81,9 @@ class _IncomingCallHostState extends ConsumerState<IncomingCallHost> {
     try {
       await player.setAndroidAudioAttributes(IncomingCallHost.ringAttributes);
       await player.setLoopMode(LoopMode.one);
-      await player.setAsset(IncomingCallHost.ringAsset);
+      await player.setAudioSource(
+        AudioSource.asset(IncomingCallHost.ringAsset),
+      );
       if (identical(_player, player)) await player.play();
     } on Exception {
       // A ring without sound still shows.

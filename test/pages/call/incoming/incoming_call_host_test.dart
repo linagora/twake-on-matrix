@@ -44,14 +44,13 @@ class _FakePlayer extends Fake implements AudioPlayer {
   Future<void> setLoopMode(LoopMode mode) async => calls.add('loop $mode');
 
   @override
-  Future<Duration?> setAsset(
-    String assetPath, {
-    String? package,
+  Future<Duration?> setAudioSource(
+    AudioSource audioSource, {
     bool preload = true,
+    int? initialIndex,
     Duration? initialPosition,
-    dynamic tag,
   }) async {
-    calls.add('asset $assetPath');
+    calls.add('source ${(audioSource as UriAudioSource).uri}');
     return null;
   }
 
@@ -172,7 +171,7 @@ void _ringtoneTests() {
     expect(host.players.single.calls, [
       'attributes ${AndroidAudioUsage.notificationRingtone}',
       'loop ${LoopMode.one}',
-      'asset ${IncomingCallHost.ringAsset}',
+      'source asset:///${IncomingCallHost.ringAsset}',
       'play',
     ]);
 
