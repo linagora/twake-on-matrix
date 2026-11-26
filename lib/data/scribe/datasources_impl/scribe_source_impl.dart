@@ -55,21 +55,26 @@ class ScribeSourceImpl implements ScribeSource {
         ),
       );
       return _textOf(answer);
-    } on DioException catch (e) {
-      throw _failureOf(e);
-    } on WorkplaceExchangeTokenException {
-      Logs().w('ScribeSourceImpl::rewrite: exchange failed');
-      throw const DriveExchangeRejected();
-    } on FormatException {
-      Logs().w('ScribeSourceImpl::rewrite: unreadable exchange answer');
-      throw const DriveExchangeRejected();
-    } on ScribeException {
-      rethrow;
-    } on DriveException {
-      rethrow;
     } on Exception catch (e, s) {
-      Logs().e('ScribeSourceImpl::rewrite: unexpected failure', e, s);
-      throw const ScribeRewriteFailed();
+      Error.throwWithStackTrace(_failureOfRun(e, s), s);
+    }
+  }
+
+  Exception _failureOfRun(Exception e, StackTrace s) {
+    switch (e) {
+      case ScribeException() || DriveException():
+        return e;
+      case DioException():
+        return _failureOf(e);
+      case WorkplaceExchangeTokenException():
+        Logs().w('ScribeSourceImpl::rewrite: exchange failed');
+        return const DriveExchangeRejected();
+      case FormatException():
+        Logs().w('ScribeSourceImpl::rewrite: unreadable exchange answer');
+        return const DriveExchangeRejected();
+      default:
+        Logs().e('ScribeSourceImpl::rewrite: unexpected failure', e, s);
+        return const ScribeRewriteFailed();
     }
   }
 
