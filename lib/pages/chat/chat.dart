@@ -1579,8 +1579,6 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void replyAction({Event? replyTo}) {
-    // The thread screen has no quote reply.
-    if (isThread) return;
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;

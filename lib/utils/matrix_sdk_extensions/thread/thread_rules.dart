@@ -58,10 +58,10 @@ abstract final class ThreadRules {
         e.relationshipType != RelationshipTypes.reaction,
   );
 
-  /// The "quote reply" action: a thread has no quote reply, and the member
-  /// must be allowed to send messages.
+  /// The "quote reply" action, in a room and in a thread alike (DECISION.md):
+  /// the member must be allowed to send messages.
   static bool canQuoteReply(Event event, {required bool inThreadScreen}) =>
-      !inThreadScreen && event.room.canSendDefaultMessages;
+      event.room.canSendDefaultMessages;
 
   /// The event the "unread messages" separator sits above: the oldest
   /// unread message the room shows. [eventsNewestFirst] as the timeline
