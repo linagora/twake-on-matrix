@@ -115,6 +115,26 @@ class _ChatList {
 
   bool get flowIsOpen => find.byKey(_counter).evaluate().isNotEmpty;
 
+  /// Next through the [total] steps of the open flow, checking on each that
+  /// none of them is the composer.
+  Future<void> expectNoComposerIn(int total) async {
+    final composerChoice = find.byWidgetPredicate(
+      (widget) =>
+          widget.key is ValueKey<String> &&
+          (widget.key! as ValueKey<String>).value.startsWith(
+            'option-composer-',
+          ),
+    );
+    for (var step = 1; step <= total; step++) {
+      expect(counter, _saysStep(step, total));
+      expect(composerChoice, findsNothing, reason: 'step $step of $total');
+      if (step < total) {
+        await tester.tap(find.byKey(const ValueKey('personalize-next')));
+        await settle();
+      }
+    }
+  }
+
   /// The words of the step counter.
   String get counter => (tester.widget<Text>(
     find.descendant(
@@ -148,7 +168,7 @@ void main() {
 // screen when the flow opens, not when the storage was asked.
 void _resizedWhileLoadingTests() {
   group('the screen turned from wide to phone before the storage answered', () {
-    testWidgets('the flow opens with the four phone steps, no composer', (
+    testWidgets('the flow opens with the five phone steps, no composer', (
       tester,
     ) async {
       final chatList = _ChatList(tester);
@@ -162,11 +182,11 @@ void _resizedWhileLoadingTests() {
       await chatList.settle();
 
       expect(chatList.flowIsOpen, isTrue);
-      expect(chatList.counter, _saysStep(1, 4));
+      await chatList.expectNoComposerIn(5);
     });
 
-    testWidgets('a chat on top: waits for the chat list, then the four phone '
-        'steps', (tester) async {
+    testWidgets('a chat on top: waits for the chat list, then the five phone '
+        'steps, no composer', (tester) async {
       final chatList = _ChatList(tester);
       await chatList.show(size: _wide);
       await chatList.openChat();
@@ -183,7 +203,7 @@ void _resizedWhileLoadingTests() {
 
       await chatList.back();
 
-      expect(chatList.counter, _saysStep(1, 4));
+      await chatList.expectNoComposerIn(5);
     });
   });
 }
