@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
+import 'package:twake_chat/domain/personalization/personalize_step.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 
-/// Where this device keeps the display choices. A stored name this version does not know reads as the default.
+/// Where this device keeps the display choices and the personalization steps
+/// it has seen. A stored name this version does not know reads as the default.
 class DisplayPreferencesRepository {
   DisplayPreferencesRepository(this._store);
 
@@ -58,4 +62,12 @@ class DisplayPreferencesRepository {
     );
     await _store.setItem(SettingKeys.bubbleAlign, preferences.bubbleAlign.name);
   }
+
+  /// The ids of the steps seen; ids of a newer version are kept.
+  Future<Set<String>> loadSeenSteps() async => parseSeenSteps(
+    await _store.getItem(SettingKeys.personalizedSteps),
+  ).toSet();
+
+  Future<void> saveSeenSteps(Set<String> steps) =>
+      _store.setItem(SettingKeys.personalizedSteps, jsonEncode(steps.toList()));
 }

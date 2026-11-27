@@ -33,6 +33,7 @@ import 'package:twake_chat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/material.dart';
+import 'package:twake_chat/pages/personalize/personalize_launch.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -357,6 +358,7 @@ class ChatListController extends ConsumerState<ChatList>
 
       // Process cached sharing intents after first sync
       await matrixState.processCachedSharingIntents();
+      await _askPersonalization();
     });
   }
 
@@ -374,6 +376,12 @@ class ChatListController extends ConsumerState<ChatList>
 
     // Process cached sharing intents after first sync
     await matrixState.processCachedSharingIntents();
+    await _askPersonalization();
+  }
+
+  Future<void> _askPersonalization() async {
+    if (!mounted) return;
+    await PersonalizeLaunch.afterFirstSync(context);
   }
 
   void _onTapBottomNavigation(

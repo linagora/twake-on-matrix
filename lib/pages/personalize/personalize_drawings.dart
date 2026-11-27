@@ -10,6 +10,7 @@ import 'package:twake_chat/pages/personalize/personalize_choices.dart';
 import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:twake_chat/widgets/option_cards/option_cards.dart';
 
+part 'personalize_step_body.dart';
 part 'personalize_step_cards.dart';
 
 /// The sections the previews show, in the order of the chat list.

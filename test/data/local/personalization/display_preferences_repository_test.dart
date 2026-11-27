@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,6 +40,7 @@ Future<Map<String, Object?>> _device() async {
 
 void main() {
   _choicesTests();
+  _seenStepsTests();
 }
 
 void _choicesTests() {
@@ -127,5 +130,67 @@ void _choicesTests() {
         expect(await repository.load(), const DisplayPreferencesState());
       },
     );
+  });
+}
+
+void _seenStepsTests() {
+  group('the seen steps', () {
+    test('are stored under « chat.twake.personalized »', () {
+      expect(SettingKeys.personalizedSteps, 'chat.twake.personalized');
+    });
+
+    test('nothing stored: none seen', () async {
+      expect(await _repository({}).loadSeenSteps(), isEmpty);
+    });
+
+    test('reads the stored JSON list of ids, ids of a newer version '
+        'included', () async {
+      final repository = _repository({
+        SettingKeys.personalizedSteps: '["density","wallpaper"]',
+      });
+
+      expect(await repository.loadSeenSteps(), {'density', 'wallpaper'});
+    });
+
+    for (final unreadable in ['oops', '{"density":true}', '', '[1,2]']) {
+      test(
+        'a stored value that cannot be read ($unreadable): none seen',
+        () async {
+          final repository = _repository({
+            SettingKeys.personalizedSteps: unreadable,
+          });
+
+          expect(await repository.loadSeenSteps(), isEmpty);
+        },
+      );
+    }
+
+    test('are saved as a JSON list of ids', () async {
+      final repository = _repository({});
+
+      await repository.saveSeenSteps({'seen-style', 'align'});
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        jsonDecode(prefs.getString(SettingKeys.personalizedSteps)!),
+        unorderedEquals(['seen-style', 'align']),
+      );
+    });
+
+    test('what is saved is what the next load reads', () async {
+      final repository = _repository({});
+
+      await repository.saveSeenSteps({'density', 'wallpaper'});
+
+      expect(await repository.loadSeenSteps(), {'density', 'wallpaper'});
+    });
+
+    test('saving them leaves the display choices alone', () async {
+      final repository = _repository(_allOtherStored);
+
+      await repository.saveSeenSteps({'density'});
+
+      expect(await repository.load(), _allOther);
+    });
   });
 }
