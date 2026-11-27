@@ -15,7 +15,7 @@ final class AccountProfilesDatasourceImpl implements AccountProfilesDatasource {
       return await Future.wait(
         ClientManager.loggedIn(_registry.clients).map(_profileOf),
       );
-    } catch (e, s) {
+    } on Exception catch (e, s) {
       Logs().e('AccountProfilesDatasourceImpl::fetchAccountProfiles', e, s);
       rethrow;
     }

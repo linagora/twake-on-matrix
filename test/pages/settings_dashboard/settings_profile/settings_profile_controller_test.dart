@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/profile/repositories/profile_repository_impl.provider.dart';
+import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/profile/entities/account_profile.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_controller.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
@@ -81,7 +82,7 @@ void main() {
     final load = loadProfile(container);
 
     // Assert
-    await expectLater(load, throwsA(anything));
+    await expectLater(load, throwsA(isA<NoActiveClientException>()));
   });
 
   test('applySaved_afterLoad_showsTheSavedProfile', () async {
