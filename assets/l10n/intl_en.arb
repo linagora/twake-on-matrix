@@ -3612,6 +3612,15 @@
       }
     }
   },
+  "deleteMessagesConfirmationTitle": "{count, plural, other{Are you sure you want to delete these {count} messages?}}",
+  "@deleteMessagesConfirmationTitle": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "cannotJoinRoomEveryoneLeft": "This chat can no longer be joined because everyone in it has left. The invitation was removed.",
   "@cannotJoinRoomEveryoneLeft": {
     "type": "text",

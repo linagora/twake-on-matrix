@@ -117,6 +117,9 @@ extension EventListExtension on List<Event> {
             _fileMessageTypes.contains(event.messageType)),
   ).sortedBy((event) => event.originServerTs);
 
+  bool canDeleteAll({required bool isArchived}) =>
+      !isArchived && isNotEmpty && every((event) => event.canDelete);
+
   Future<void> copyTexts(BuildContext context, Timeline timeline) async {
     final text = copyableEvents
         .map((event) => _copiedMessage(event, context, timeline))
