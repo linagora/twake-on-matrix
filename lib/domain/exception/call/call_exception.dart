@@ -53,3 +53,8 @@ class CallEncryptionTurnedOnException extends CallException {
   const CallEncryptionTurnedOnException()
     : super('Encryption was turned on during the call');
 }
+
+/// The other person of a direct call declined its ring (MSC4310).
+class CallDeclinedException extends CallException {
+  const CallDeclinedException() : super('The call was declined');
+}

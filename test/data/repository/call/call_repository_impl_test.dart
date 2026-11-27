@@ -76,6 +76,9 @@ class _FakeRtc implements MatrixRtcDatasource {
   }) async => calls.add('ring ${join.room.id} $membershipEventId');
 
   @override
+  Stream<void> watchRingDeclined(CallRoom room) => const Stream.empty();
+
+  @override
   Future<void> declineRing(CallRing ring) async =>
       calls.add('decline ${ring.eventId}');
 

@@ -12,6 +12,7 @@ dependencies:
   animations: ^2.0.7
   app_links: ^6.2.0
   async: ^2.11.0
+  audio_session: 0.2.4
   auto_size_text: 3.0.0
   blurhash_dart: ^1.1.0
   byte_converter: 2.0.0

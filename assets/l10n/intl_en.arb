@@ -3603,5 +3603,34 @@
   "@cannotJoinRoomEveryoneLeft": {
     "type": "text",
     "placeholders": {}
+  },
+  "callDeclined": "Call declined",
+  "@callDeclined": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callIsCalling": "is calling you",
+  "@callIsCalling": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callIsCallingIn": "is calling you in {room}",
+  "@callIsCallingIn": {
+    "type": "text",
+    "placeholders": {
+      "room": {
+        "type": "String"
+      }
+    }
+  },
+  "callAnswer": "Answer",
+  "@callAnswer": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callDecline": "Decline",
+  "@callDecline": {
+    "type": "text",
+    "placeholders": {}
   }
 }
