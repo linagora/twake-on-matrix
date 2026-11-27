@@ -158,22 +158,25 @@ void main() {
     expect(values, isEmpty);
   });
 
-  test('then emits each change of that person only', () async {
-    client.server = GetPresenceResponse(presence: PresenceType.offline);
-    await watch();
+  for (final readFromServer in [true, false]) {
+    test('then emits each change of that person only '
+        '(readFromServer: $readFromServer)', () async {
+      client.server = GetPresenceResponse(presence: PresenceType.offline);
+      await watch(readFromServer: readFromServer);
 
-    client.onPresenceChanged
-      ..add(_presence(PresenceType.unavailable))
-      ..add(
-        CachedPresence(PresenceType.online, null, null, null, '@bob:server'),
-      );
-    await pumpEventQueue();
+      client.onPresenceChanged
+        ..add(_presence(PresenceType.unavailable))
+        ..add(
+          CachedPresence(PresenceType.online, null, null, null, '@bob:server'),
+        );
+      await pumpEventQueue();
 
-    expect(values.map((presence) => presence?.status), [
-      PresenceStatus.offline,
-      PresenceStatus.away,
-    ]);
-  });
+      expect(values.map((presence) => presence?.status), [
+        PresenceStatus.offline,
+        PresenceStatus.away,
+      ]);
+    });
+  }
 
   test('keeps a change that lands while the server is read', () async {
     client.serverGate = Completer<void>();
@@ -187,14 +190,17 @@ void main() {
     expect(values.map((presence) => presence?.status), [PresenceStatus.online]);
   });
 
-  test('stops listening to the changes when cancelled', () async {
-    final subscription = await watch();
-    expect(client.onPresenceChanged.listeners, 1);
+  for (final readFromServer in [true, false]) {
+    test('stops listening to the changes when cancelled '
+        '(readFromServer: $readFromServer)', () async {
+      final subscription = await watch(readFromServer: readFromServer);
+      expect(client.onPresenceChanged.listeners, 1);
 
-    await subscription.cancel();
+      await subscription.cancel();
 
-    expect(client.onPresenceChanged.listeners, 0);
-  });
+      expect(client.onPresenceChanged.listeners, 0);
+    });
+  }
 
   test('emits null without an active client', () async {
     final values = await const PresenceDatasourceImpl(

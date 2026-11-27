@@ -11,11 +11,12 @@ import 'fake_active_account.dart';
 const _alice = '@alice:server';
 
 class _Account extends Fake implements Client {
-  _Account(this.userID, this.alicePresence);
+  _Account(this.userID, this.alicePresence, {this.cachedAlicePresence});
 
   @override
   final String userID;
   final PresenceType alicePresence;
+  final PresenceType? cachedAlicePresence;
 
   @override
   final onPresenceChanged = CachedStreamController<CachedPresence>();
@@ -24,7 +25,12 @@ class _Account extends Fake implements Client {
   Future<CachedPresence> fetchCurrentPresence(
     String userId, {
     bool fetchOnlyFromCached = false,
-  }) async => CachedPresence.neverSeen(userId);
+  }) async {
+    final cached = cachedAlicePresence;
+    return cached == null
+        ? CachedPresence.neverSeen(userId)
+        : CachedPresence(cached, null, null, null, userId);
+  }
 
   int serverReads = 0;
 
@@ -56,6 +62,43 @@ void main() {
     container
         .read(fakeActiveAccountProvider.notifier)
         .set(_Account('@me:two', PresenceType.unavailable));
+    await pumpEventQueue();
+
+    expect(values, [null, PresenceStatus.online, PresenceStatus.away]);
+  });
+
+  test('the list presence follows the account that becomes active', () async {
+    final container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: activeAccountOverridesFollowing(),
+    );
+    final values = <PresenceStatus?>[];
+    container.listen(
+      syncedPersonPresenceProvider(_alice),
+      (_, next) => next.whenData((presence) => values.add(presence?.status)),
+      fireImmediately: true,
+    );
+    await pumpEventQueue();
+
+    container
+        .read(fakeActiveAccountProvider.notifier)
+        .set(
+          _Account(
+            '@me:one',
+            PresenceType.offline,
+            cachedAlicePresence: PresenceType.online,
+          ),
+        );
+    await pumpEventQueue();
+    container
+        .read(fakeActiveAccountProvider.notifier)
+        .set(
+          _Account(
+            '@me:two',
+            PresenceType.offline,
+            cachedAlicePresence: PresenceType.unavailable,
+          ),
+        );
     await pumpEventQueue();
 
     expect(values, [null, PresenceStatus.online, PresenceStatus.away]);
