@@ -35,9 +35,9 @@ const _close = ValueKey<String>('personalize-close');
 const _phone = Size(390, 844);
 const _wide = Size(1200, 900);
 
-/// The key of the control that selects [choice] in the step [stepId].
-ValueKey<String> _option(String stepId, String choice) =>
-    ValueKey<String>('option-$stepId-$choice');
+/// The key of the control that selects [choice] in [step].
+ValueKey<String> _option(PersonalizeStep step, String choice) =>
+    ValueKey<String>('option-${step.id}-$choice');
 
 /// What the user sees of each step: its choices in the order shown, the
 /// default (the first one unless said), where the choice is stored and a
@@ -58,10 +58,10 @@ class _Step {
   String get id => step.id;
   String get defaultChoice => byDefault ?? choices.first;
   String get other => choices.lastWhere((choice) => choice != defaultChoice);
-  ValueKey<String> get defaultKey => _option(id, defaultChoice);
-  ValueKey<String> get otherKey => _option(id, other);
+  ValueKey<String> get defaultKey => _option(step, defaultChoice);
+  ValueKey<String> get otherKey => _option(step, other);
   List<ValueKey<String>> get keys => [
-    for (final choice in choices) _option(id, choice),
+    for (final choice in choices) _option(step, choice),
   ];
 }
 
@@ -128,12 +128,10 @@ const _openChatLocation = '/rooms/room';
 /// A device whose storage refuses every write.
 class _FullDisk extends Store {
   @override
-  Future<void> setItem(String key, String? value) async =>
-      throw Exception('disk full');
+  Future<void> setItem(_, _) async => throw Exception('disk full');
 
   @override
-  Future<bool> setItems(String key, List<String> values) async =>
-      throw Exception('disk full');
+  Future<bool> setItems(_, _) async => throw Exception('disk full');
 }
 
 /// The device the flow opens on: a phone unless [size] says otherwise, what
@@ -178,9 +176,10 @@ Widget _launcher(
   ),
 );
 
-/// The pages of the app the flow can open over or lead to, starting at [at].
-GoRouter _router(String at, List<PersonalizeStep> steps) => GoRouter(
-  initialLocation: at,
+/// The pages of the app the flow can open over or lead to, starting at the
+/// page of [device].
+GoRouter _router(_Device device, List<PersonalizeStep> steps) => GoRouter(
+  initialLocation: device.at,
   errorBuilder: (_, state) =>
       Scaffold(body: Text('no such page: ${state.uri}')),
   routes: [
@@ -222,7 +221,7 @@ class _Flow {
       retry: (_, _) => null,
       overrides: [if (store != null) storeProvider.overrideWithValue(store)],
     );
-    final router = _router(device.at, steps);
+    final router = _router(device, steps);
     addTearDown(router.dispose);
     await _pumpApp(router);
     await tester.tap(find.text('start'));
@@ -588,10 +587,22 @@ void _wideFlowTests() {
       await flow.open(const [PersonalizeStep.composer], _onWide);
 
       expect(flow.counter, _saysStep(1, 1));
-      expect(find.byKey(_option('composer', 'compact')), findsOneWidget);
-      expect(find.byKey(_option('composer', 'classic')), findsOneWidget);
-      expect(flow.isChosen(_option('composer', 'classic')), isTrue);
-      expect(flow.isChosen(_option('composer', 'compact')), isFalse);
+      expect(
+        find.byKey(_option(PersonalizeStep.composer, 'compact')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(_option(PersonalizeStep.composer, 'classic')),
+        findsOneWidget,
+      );
+      expect(
+        flow.isChosen(_option(PersonalizeStep.composer, 'classic')),
+        isTrue,
+      );
+      expect(
+        flow.isChosen(_option(PersonalizeStep.composer, 'compact')),
+        isFalse,
+      );
     });
 
     testWidgets('the composer closed without a choice keeps the classic bar', (
@@ -658,7 +669,7 @@ void _fixedStepsTests() {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
 
-      await flow.tap(_option('density', 'compact'));
+      await flow.tap(_option(PersonalizeStep.density, 'compact'));
 
       expect(flow.counter, _saysStep(1, 4));
       flow.expectShows(_of(PersonalizeStep.density));
@@ -700,10 +711,10 @@ void _choiceTests() {
         await flow.open(_wideAll, _onWide);
         await flow.forward(index);
 
-        await flow.tap(_option(step.id, step.other));
+        await flow.tap(_option(step.step, step.other));
 
         expect(flow.current(step.step), step.other);
-        expect(flow.isChosen(_option(step.id, step.other)), isTrue);
+        expect(flow.isChosen(_option(step.step, step.other)), isTrue);
         expect(flow.isChosen(step.defaultKey), isFalse);
         final prefs = await SharedPreferences.getInstance();
         expect(prefs.getString(step.storeKey), step.other);
@@ -717,12 +728,12 @@ void _choiceTests() {
       await flow.open(_phoneAll);
       await flow.forward(2);
 
-      await flow.tap(_option('seen-style', 'avatars'));
+      await flow.tap(_option(PersonalizeStep.seenStyle, 'avatars'));
 
       expect(flow.preferences.seenStyle, SeenStyle.avatars);
       for (final choice in ['ticks', 'avatars', 'names']) {
         expect(
-          flow.isChosen(_option('seen-style', choice)),
+          flow.isChosen(_option(PersonalizeStep.seenStyle, choice)),
           choice == 'avatars',
           reason: choice,
         );
@@ -732,19 +743,22 @@ void _choiceTests() {
     testWidgets('is still there after Next then Back', (tester) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
-      await flow.tap(_option('density', 'compact'));
+      await flow.tap(_option(PersonalizeStep.density, 'compact'));
 
       await flow.tap(_next);
       await flow.tap(_back);
 
-      expect(flow.isChosen(_option('density', 'compact')), isTrue);
+      expect(
+        flow.isChosen(_option(PersonalizeStep.density, 'compact')),
+        isTrue,
+      );
       expect(flow.preferences.density, ChatListDensity.compact);
     });
 
     testWidgets('stays when the flow is closed without Done', (tester) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
-      await flow.tap(_option('density', 'compact'));
+      await flow.tap(_option(PersonalizeStep.density, 'compact'));
 
       await flow.tap(_close);
 
@@ -760,7 +774,7 @@ void _closingTests() {
     ) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
-      await flow.tap(_option('density', 'compact'));
+      await flow.tap(_option(PersonalizeStep.density, 'compact'));
       await flow.forward(3);
 
       expect(await flow.seen, isEmpty);
@@ -960,7 +974,7 @@ void _orderPreviewTests() {
       final flow = _Flow(tester);
       await flow.open(const [PersonalizeStep.order]);
 
-      await flow.tap(_option('order', 'sections'));
+      await flow.tap(_option(PersonalizeStep.order, 'sections'));
 
       final tops = flow.topsOf([_en.unread, _en.groups, _en.directChats]);
       expect(tops, [...tops]..sort(), reason: 'unread, groups, directs');
