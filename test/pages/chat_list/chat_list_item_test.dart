@@ -58,7 +58,13 @@ MockRoom buildRoom({required String name, String id = '!room:server.tld'}) {
 
 class _FakeUser extends Fake implements User {}
 
+/// [child] in the app's theme, under a provider scope (the display
+/// preferences of the device are read through Riverpod).
 Widget wrap(Widget child) {
+  return ProviderScope(child: _themed(child));
+}
+
+Widget _themed(Widget child) {
   return ThemeBuilder(
     builder: (context, themeMode, primaryColor) => MaterialApp(
       locale: const Locale('en'),

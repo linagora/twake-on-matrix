@@ -1,3 +1,5 @@
+import 'package:twake_chat/domain/personalization/display_preferences.dart';
+import 'package:twake_chat/domain/personalization/room_sections.dart';
 import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/domain/spaces/space_models.dart';
 import 'package:twake_chat/domain/spaces/space_tree.dart';
@@ -50,6 +52,14 @@ class RoomListJoinableRow extends RoomListRow {
   final String parentSpaceId;
 }
 
+/// The title of a section of the room order « sections ».
+class RoomListSectionTitleRow extends RoomListRow {
+  RoomListSectionTitleRow(this.kind)
+    : super(key: 'section:${kind.name}', depth: 0);
+
+  final RoomSectionKind kind;
+}
+
 /// The list as it shows: the pinned rooms, then every room by its place in
 /// [visible], each space with its rooms under it, at the place of its most
 /// recent room.
@@ -58,6 +68,51 @@ List<RoomListRow> buildRoomListRows(
   Set<String> foldedSpaceIds = const {},
   Map<String, List<SpaceChannel>> joinableBySpace = const {},
 }) {
+  final (:pinned, :placed) = _arrange(visible, foldedSpaceIds, joinableBySpace);
+  return [...pinned, ...placed];
+}
+
+/// The list in the room order « sections »: the pinned rooms first, as in
+/// [buildRoomListRows], then each section after its title row. The spaces keep
+/// their rooms under them; a room in a space is not listed again.
+List<RoomListRow> buildSectionedRoomListRows(
+  List<RoomListEntry> visible, {
+  Set<String> foldedSpaceIds = const {},
+  Map<String, List<SpaceChannel>> joinableBySpace = const {},
+}) {
+  final byId = {for (final entry in visible) entry.id: entry};
+  bool inSpace(RoomListEntry entry) =>
+      !entry.isSpace && parentSpaceOf(entry, byId) != null;
+  final (:pinned, placed: spaces) = _arrange(
+    [
+      for (final entry in visible)
+        if (entry.isFavourite || entry.isSpace || inSpace(entry)) entry,
+    ],
+    foldedSpaceIds,
+    joinableBySpace,
+  );
+  final sections = roomSections([
+    for (final entry in visible)
+      if (!entry.isFavourite && !inSpace(entry)) entry,
+  ], RoomOrder.sections);
+  return [
+    ...pinned,
+    for (final section in sections) ...[
+      RoomListSectionTitleRow(section.kind!),
+      if (section.kind == RoomSectionKind.spaces)
+        ...spaces
+      else
+        for (final entry in section.entries)
+          RoomListRoomRow(entry, key: entry.id),
+    ],
+  ];
+}
+
+({List<RoomListRow> pinned, List<RoomListRow> placed}) _arrange(
+  List<RoomListEntry> visible,
+  Set<String> foldedSpaceIds,
+  Map<String, List<SpaceChannel>> joinableBySpace,
+) {
   final byId = {for (final entry in visible) entry.id: entry};
   final indexOf = {
     for (final (index, entry) in visible.indexed) entry.id: index,
@@ -94,7 +149,7 @@ List<RoomListRow> buildRoomListRows(
         (indexOf[entry.id]!, [RoomListRoomRow(entry, key: entry.id)]),
   ]..sort((a, b) => a.$1.compareTo(b.$1));
 
-  return [...pinned, ...placed.expand((item) => item.$2)];
+  return (pinned: pinned, placed: [...placed.expand((item) => item.$2)]);
 }
 
 List<RoomListRow> _spaceRows(

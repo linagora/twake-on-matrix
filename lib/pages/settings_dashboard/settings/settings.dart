@@ -56,6 +56,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
 
   final List<SettingEnum> getListSettingItem = [
     SettingEnum.chatSettings,
+    SettingEnum.personalization,
     SettingEnum.privacyAndSecurity,
     SettingEnum.notificationAndSounds,
     SettingEnum.chatFolders,
@@ -270,6 +271,12 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     switch (settingEnum) {
       case SettingEnum.chatSettings:
         final result = await const ChatSettingsRoute().push(context);
+        if (result == null) {
+          optionsSelectNotifier.value = null;
+        }
+        break;
+      case SettingEnum.personalization:
+        final result = await const PersonalizationRoute().push(context);
         if (result == null) {
           optionsSelectNotifier.value = null;
         }

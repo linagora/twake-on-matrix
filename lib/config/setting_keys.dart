@@ -27,6 +27,8 @@ abstract class SettingKeys {
   static const String enableRightAndLeftMessageAlignmentOnWeb =
       'chat.twake.enable_right_and_left_message_alignment_on_web';
   static const String gifAutoplay = 'chat.twake.gif_autoplay';
+  static const String chatListDensity = 'chat.twake.chat_list_density';
+  static const String roomOrder = 'chat.twake.room_order';
 }
 
 /// Maps each current [SettingKeys] value to its legacy `chat.fluffy.*` (or

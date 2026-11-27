@@ -12,6 +12,10 @@ class ChatListViewStyle {
 
   static const double editIconSize = 18.0;
 
+  /// The title of a section of the room order « sections ».
+  static const EdgeInsetsDirectional paddingSectionTitle =
+      EdgeInsetsDirectional.fromSTEB(16, 12, 16, 4);
+
   static const double _audioPlayerHeight = 40;
 
   static Size preferredSizeAppBar(
