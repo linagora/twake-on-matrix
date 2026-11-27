@@ -228,9 +228,11 @@ jobs:
       max-parallel: 5
       matrix:
         include:
-          # 7 test cases (~15 min)
+          # 10 test cases (chat_group_test 7, room_members_mobile_test 3)
           - shard: shard_1_chat_group
-            targets: integration_test/tests/chat/chat_group_test.dart
+            targets: >-
+              integration_test/tests/chat/chat_group_test.dart
+              integration_test/tests/chat/room_members_mobile_test.dart
           # 5 test cases (~29 min with the APK build)
           - shard: shard_2_chat_list
             targets: >-
