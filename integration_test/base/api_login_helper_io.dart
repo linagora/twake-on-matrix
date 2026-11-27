@@ -398,6 +398,13 @@ Future<void> sendStateAsPrimary({
 Future<Map<String, dynamic>?> fetchProfileAsPrimary() =>
     _asPrimaryWeb('GET', (userId) => ['profile', userId]);
 
+/// Sets the display name of the primary account from the web.
+Future<void> setDisplayNameAsPrimary(String? displayName) => _asPrimaryWeb(
+  'PUT',
+  (userId) => ['profile', userId, 'displayname'],
+  body: {'displayname': displayName},
+);
+
 /// Uploads [file] and sets it as the avatar of the primary account from the
 /// web.
 Future<void> setAvatarAsPrimary(ReceiverMediaFile file) async {

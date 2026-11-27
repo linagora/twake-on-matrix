@@ -92,12 +92,16 @@ class SettingsProfileMultipleAccountsScenario extends _SettingsProfileScenario {
   }
 }
 
-/// Restores the original name at the end so later tests see the fixture.
+/// Restores the original name, through the API if the test fails, so later
+/// tests see the fixture.
 class SettingsProfileSaveDisplayNameScenario extends _SettingsProfileScenario {
   SettingsProfileSaveDisplayNameScenario(super.$, super.robots);
 
   @override
   Future<void> runTestLogic() async {
+    final serverName =
+        (await fetchProfileAsPrimary())?['displayname'] as String?;
+    addTearDown(() => setDisplayNameAsPrimary(serverName));
     await openProfile();
     await profile.waitForCapabilities();
     final original = await profile.waitForValueOf(
