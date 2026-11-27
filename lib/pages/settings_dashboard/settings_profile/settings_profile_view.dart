@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
@@ -76,7 +78,7 @@ class SettingsProfileView extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(
                     SettingsProfileViewStyle.borderRadius,
                   ),
-                  onTap: () => controller.onUploadProfileAction(),
+                  onTap: () => unawaited(controller.onUploadProfileAction()),
                   child: Padding(
                     padding: SettingsProfileViewStyle.paddingTextButton,
                     child: Text(

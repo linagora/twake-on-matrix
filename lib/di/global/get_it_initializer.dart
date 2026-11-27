@@ -109,7 +109,6 @@ import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/search/server_search_interactor.dart';
-import 'package:twake_chat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/event/twake_event_dispatcher.dart';
@@ -353,7 +352,6 @@ class GetItInitializer {
     getIt.registerSingleton<TimelineSearchEventInteractor>(
       TimelineSearchEventInteractor(),
     );
-    getIt.registerSingleton<UpdateProfileInteractor>(UpdateProfileInteractor());
     getIt.registerFactory<ChatGetPinnedEventsInteractor>(
       () => ChatGetPinnedEventsInteractor(),
     );

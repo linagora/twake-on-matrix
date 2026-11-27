@@ -1,8 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/contact/datasources/matrix_profile_datasource.dart';
 import 'package:twake_chat/data/profile/datasources/account_profiles_datasource.dart';
+import 'package:twake_chat/data/profile/datasources/own_profile_datasource.dart';
 import 'package:twake_chat/data/profile/repositories/profile_repository_impl.dart';
 import 'package:twake_chat/domain/profile/entities/account_profile.dart';
+import 'package:twake_chat/domain/profile/entities/avatar_upload.dart';
 
 class _FakeMatrixProfileDatasource implements MatrixProfileDatasource {
   _FakeMatrixProfileDatasource(this.profile);
@@ -29,6 +33,26 @@ class _FakeAccountProfilesDatasource implements AccountProfilesDatasource {
   Future<List<AccountProfile>> fetchAccountProfiles() async => accounts;
 }
 
+class _FakeOwnProfileDatasource implements OwnProfileDatasource {
+  final List<Object?> calls = [];
+
+  @override
+  Future<Uri> uploadAvatar(AvatarUpload avatar) async {
+    calls.add(avatar);
+    return Uri.parse('mxc://server/new');
+  }
+
+  @override
+  Future<void> setAvatar(Uri? avatarUrl) async => calls.add(avatarUrl);
+
+  @override
+  Future<void> setDisplayName(String displayName) async =>
+      calls.add(displayName);
+
+  @override
+  void announce(AccountProfile profile) => calls.add(profile);
+}
+
 void main() {
   ProfileRepositoryImpl createRepository(
     MatrixUserProfile? profile, {
@@ -36,6 +60,7 @@ void main() {
   }) => ProfileRepositoryImpl(
     _FakeMatrixProfileDatasource(profile),
     _FakeAccountProfilesDatasource(accounts),
+    _FakeOwnProfileDatasource(),
   );
 
   test('fetchProfile_withMxcAvatar_returnsTheParsedUri', () async {
@@ -79,6 +104,7 @@ void main() {
     final repository = ProfileRepositoryImpl(
       datasource,
       _FakeAccountProfilesDatasource(const []),
+      _FakeOwnProfileDatasource(),
     );
 
     // Act
@@ -98,5 +124,59 @@ void main() {
 
     // Assert
     expect(result, accounts);
+  });
+
+  ProfileRepositoryImpl repositoryWith(_FakeOwnProfileDatasource own) =>
+      ProfileRepositoryImpl(
+        _FakeMatrixProfileDatasource(null),
+        _FakeAccountProfilesDatasource(const []),
+        own,
+      );
+
+  test('uploadAvatar_withBytes_returnsTheDatasourceUri', () async {
+    // Arrange
+    final own = _FakeOwnProfileDatasource();
+    final avatar = AvatarUpload.fromBytes(bytes: Uint8List(1), name: 'a.png');
+
+    // Act
+    final uri = await repositoryWith(own).uploadAvatar(avatar);
+
+    // Assert
+    expect(uri, Uri.parse('mxc://server/new'));
+    expect(own.calls, [avatar]);
+  });
+
+  test('saveOwnAvatar_withNull_forwardsNull', () async {
+    // Arrange
+    final own = _FakeOwnProfileDatasource();
+
+    // Act
+    await repositoryWith(own).saveOwnAvatar(null);
+
+    // Assert
+    expect(own.calls, [null]);
+  });
+
+  test('saveOwnDisplayName_withName_forwardsIt', () async {
+    // Arrange
+    final own = _FakeOwnProfileDatasource();
+
+    // Act
+    await repositoryWith(own).saveOwnDisplayName('Alice');
+
+    // Assert
+    expect(own.calls, ['Alice']);
+  });
+
+  test('announceOwnProfile_withProfile_forwardsIt', () {
+    // Arrange
+    final own = _FakeOwnProfileDatasource();
+    const alice = AccountProfile(userId: '@alice:server');
+
+    // Act
+    repositoryWith(own).announceOwnProfile(alice);
+
+    // Assert
+    expect(own.calls, [alice]);
   });
 }

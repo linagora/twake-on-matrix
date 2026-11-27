@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/profile/repositories/profile_repository_impl.provider.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/profile/entities/account_profile.dart';
+import 'package:twake_chat/domain/profile/exceptions/profile_exception.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_controller.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
 
@@ -85,25 +86,31 @@ void main() {
     await expectLater(load, throwsA(isA<NoActiveClientException>()));
   });
 
-  test('applySaved_afterLoad_showsTheSavedProfile', () async {
+  SettingsProfileController controllerOf(ProviderContainer container) =>
+      container.read(settingsProfileControllerProvider.notifier);
+
+  Future<void> flushRefresh() => Future<void>.delayed(Duration.zero);
+
+  test('save_withNewName_showsTheSavedProfile', () async {
     // Arrange
     final container = createContainer();
     await loadProfile(container);
+
+    // Act
+    await controllerOf(container).save(displayName: 'Alicia');
+    await flushRefresh();
+
+    // Assert
     const renamed = AccountProfile(
       userId: '@alice:server',
       displayName: 'Alicia',
     );
-
-    // Act
-    container
-        .read(settingsProfileControllerProvider.notifier)
-        .applySaved(renamed);
-
-    // Assert
+    expect(repository.writes, ['Alicia']);
+    expect(repository.announced, [renamed]);
     expect(shownProfile(container), renamed);
   });
 
-  test('refresh_whenTheServerAnswers_showsTheServerProfile', () async {
+  test('save_thenTheServerAnswers_showsTheServerProfile', () async {
     // Arrange
     final container = createContainer();
     await loadProfile(container);
@@ -111,44 +118,127 @@ void main() {
     repository.freshProfile = fresh;
 
     // Act
-    await container.read(settingsProfileControllerProvider.notifier).refresh();
+    await controllerOf(container).save(displayName: 'Alicia');
+    await flushRefresh();
 
     // Assert
     expect(repository.profileCalls.last, ('@alice:server', true));
     expect(shownProfile(container), fresh);
   });
 
-  test('refresh_whenTheServerDoesNotAnswer_keepsTheProfile', () async {
+  test('save_whileAnOlderRefreshIsPending_keepsTheNewerSave', () async {
     // Arrange
     final container = createContainer();
     await loadProfile(container);
-    repository.freshProfile = null;
+    const first = AccountProfile(userId: '@alice:server', displayName: 'A1');
+    const second = AccountProfile(userId: '@alice:server', displayName: 'A2');
+    final staleRead = Completer<void>();
+    repository
+      ..freshProfile = first
+      ..pendingFresh = staleRead;
+    await controllerOf(container).save(displayName: 'A1');
+    repository
+      ..freshProfile = second
+      ..pendingFresh = null;
+    await controllerOf(container).save(displayName: 'A2');
+    await flushRefresh();
 
     // Act
-    await container.read(settingsProfileControllerProvider.notifier).refresh();
+    staleRead.complete();
+    await flushRefresh();
 
     // Assert
+    expect(shownProfile(container), second);
+  });
+
+  test('save_whenTheServerRejects_throwsAndKeepsTheProfile', () async {
+    // Arrange
+    final container = createContainer();
+    await loadProfile(container);
+    repository.writeError = Exception('M_FORBIDDEN');
+
+    // Act
+    final save = controllerOf(container).save(displayName: 'Alicia');
+
+    // Assert
+    await expectLater(save, throwsA(isA<SaveOwnProfileException>()));
     expect(shownProfile(container), alice);
   });
 
-  test('refresh_afterDispose_completesWithoutError', () async {
+  test('save_whenAWriteFails_showsWhatTheServerHas', () async {
+    // Arrange
+    final container = createContainer();
+    await loadProfile(container);
+    const partlySaved = AccountProfile(
+      userId: '@alice:server',
+      displayName: 'Alice',
+      avatarUrl: null,
+    );
+    repository
+      ..writeError = Exception('M_FORBIDDEN')
+      ..freshProfile = partlySaved.copyWith(
+        avatarUrl: Uri.parse('mxc://server/new'),
+      );
+
+    // Act
+    await expectLater(
+      controllerOf(container).save(displayName: 'Alicia'),
+      throwsA(isA<SaveOwnProfileException>()),
+    );
+    await flushRefresh();
+
+    // Assert
+    expect(repository.profileCalls.last, ('@alice:server', true));
+    expect(shownProfile(container)?.avatarUrl, Uri.parse('mxc://server/new'));
+  });
+
+  test('save_afterDispose_completesWithoutError', () async {
     // Arrange
     final container = createContainer();
     await loadProfile(container);
     final pending = Completer<void>();
-    repository
-      ..freshProfile = bob
-      ..pendingFresh = pending;
-    final refresh = container
-        .read(settingsProfileControllerProvider.notifier)
-        .refresh();
+    repository.pendingWrite = pending;
+    final save = controllerOf(container).save(displayName: 'Alicia');
 
     // Act
     container.dispose();
     pending.complete();
 
     // Assert
-    await expectLater(refresh, completes);
+    await expectLater(save, completes);
+  });
+
+  test('removeAvatar_withAvatar_showsTheProfileWithoutAvatar', () async {
+    // Arrange
+    repository.profile = alice.copyWith(
+      avatarUrl: Uri.parse('mxc://server/old'),
+    );
+    final container = createContainer();
+    await loadProfile(container);
+
+    // Act
+    await controllerOf(container).removeAvatar();
+    await flushRefresh();
+
+    // Assert
+    expect(repository.writes, [null]);
+    expect(shownProfile(container), alice);
+  });
+
+  test('removeAvatar_whenTheServerFails_throwsAndKeepsTheAvatar', () async {
+    // Arrange
+    final withAvatar = alice.copyWith(avatarUrl: Uri.parse('mxc://server/old'));
+    repository.profile = withAvatar;
+    final container = createContainer();
+    await loadProfile(container);
+    repository.writeError = Exception('network');
+
+    // Act
+    final remove = controllerOf(container).removeAvatar();
+
+    // Assert
+    await expectLater(remove, throwsA(isA<RemoveOwnAvatarException>()));
+    expect(shownProfile(container), withAvatar);
   });
 
   test('settingsProfileAccounts_withAccounts_returnsThem', () async {
