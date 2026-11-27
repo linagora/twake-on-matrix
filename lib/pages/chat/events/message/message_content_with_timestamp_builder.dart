@@ -3,7 +3,6 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:twake_chat/pages/chat/events/message/reply_content_widget.dart';
-import 'package:twake_chat/pages/chat/events/reply_content_style.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
@@ -791,65 +790,47 @@ class _MessageContentWithTimestampBuilderState
           )
         : null;
 
-    final isReply = widget.event.isReplyEvent();
-    final bubble = isDisplayOnlyEmoji
-        ? MessageBubble.plain(
-            key: key,
-            constraints: bubbleConstraints,
-            isAlignedToEnd: alignOwnMessageRight,
-            reactions: reactions,
-            child: bubbleContent,
-          )
-        : MessageBubble(
-            key: key,
-            isOwnMessage: widget.event.isOwnMessage,
-            tailDirection: tailDirection,
-            contentType: bubbleContentType,
-            padding: card != null ? EdgeInsets.zero : null,
-            shadows: isReply ? _cutOutShadows : kBubbleShadow,
-            constraints: bubbleConstraints,
-            isAlignedToEnd: alignOwnMessageRight,
-            reactions: reactions,
-            child: bubbleContent,
-          );
-    if (!isReply) return bubble;
+    if (isDisplayOnlyEmoji) {
+      return MessageBubble.plain(
+        key: key,
+        constraints: bubbleConstraints,
+        isAlignedToEnd: alignOwnMessageRight,
+        reactions: reactions,
+        child: bubbleContent,
+      );
+    }
+    final bubble = MessageBubble(
+      key: key,
+      isOwnMessage: widget.event.isOwnMessage,
+      tailDirection: tailDirection,
+      contentType: bubbleContentType,
+      padding: card != null ? EdgeInsets.zero : null,
+      constraints: bubbleConstraints,
+      isAlignedToEnd: alignOwnMessageRight,
+      reactions: reactions,
+      child: bubbleContent,
+    );
+    if (!widget.event.isReplyEvent()) return bubble;
 
     final alignment = alignOwnMessageRight
         ? CrossAxisAlignment.end
         : CrossAxisAlignment.start;
-    // The mask changes nothing: it gives the quote and the bubble their own
-    // layer, so the gap is cut out of the quote only, not out of the row.
-    return ShaderMask(
-      blendMode: BlendMode.modulate,
-      shaderCallback: (bounds) => const LinearGradient(
-        colors: [Colors.white, Colors.white],
-      ).createShader(bounds),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        // The side of the bubble is physical, in right-to-left languages too.
-        textDirection: TextDirection.ltr,
-        crossAxisAlignment: alignment,
-        children: [
-          ConstrainedBox(
-            constraints: bubbleConstraints,
-            child: ReplyContentWidget(
-              event: widget.event,
-              timeline: widget.timeline,
-              scrollToEventId: widget.scrollToEventId,
-              alignment: alignment,
-              overlap: isDisplayOnlyEmoji ? 0 : ReplyContentStyle.quoteOverlap,
-            ),
+    return ReplyColumn(
+      crossAxisAlignment: alignment,
+      children: [
+        ConstrainedBox(
+          constraints: bubbleConstraints,
+          child: ReplyContentWidget(
+            event: widget.event,
+            timeline: widget.timeline,
+            scrollToEventId: widget.scrollToEventId,
+            alignment: alignment,
           ),
-          bubble,
-        ],
-      ),
+        ),
+        bubble,
+      ],
     );
   }
-
-  static const List<BoxShadow> _cutOutShadows = [
-    _CutOutShadow(spreadRadius: ReplyContentStyle.quoteRingWidth),
-    ...kBubbleShadow,
-  ];
 
   /// The events of this bubble that have reactions: every image of an album,
   /// so that a reaction on any of them is drawn.
@@ -993,12 +974,4 @@ class _MessageContentWithTimestampBuilderState
           )
         : null;
   }
-}
-
-/// Erases what was painted around a shape, instead of casting a colour on it.
-class _CutOutShadow extends BoxShadow {
-  const _CutOutShadow({super.spreadRadius});
-
-  @override
-  Paint toPaint() => super.toPaint()..blendMode = BlendMode.dstOut;
 }
