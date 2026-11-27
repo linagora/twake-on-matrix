@@ -15,6 +15,10 @@ enum RoomOrder { recent, sections }
 /// What an own message shows of who read it.
 enum SeenStyle { ticks, avatars, names }
 
+/// The message field of a wide screen: tools under the text (« modern »), or
+/// around it as before (the default).
+enum ComposerStyle { compact, classic }
+
 /// Where the bubbles go: own messages on the right, or every one on the left.
 enum BubbleAlign { ownRight, left }
 
@@ -26,6 +30,7 @@ abstract class DisplayPreferencesState with _$DisplayPreferencesState {
     @Default(ChatListDensity.comfortable) ChatListDensity density,
     @Default(RoomOrder.recent) RoomOrder roomOrder,
     @Default(SeenStyle.ticks) SeenStyle seenStyle,
+    @Default(ComposerStyle.classic) ComposerStyle composerStyle,
     @Default(BubbleAlign.ownRight) BubbleAlign bubbleAlign,
   }) = _DisplayPreferencesState;
 }

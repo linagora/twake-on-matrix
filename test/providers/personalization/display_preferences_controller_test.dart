@@ -50,6 +50,13 @@ final _options = [
     withOther: (p) => p.copyWith(seenStyle: SeenStyle.avatars),
   ),
   _Option(
+    'composer style',
+    other: 'compact',
+    choose: (controller) => controller.setComposerStyle(ComposerStyle.compact),
+    read: (preferences) => preferences.composerStyle.name,
+    withOther: (p) => p.copyWith(composerStyle: ComposerStyle.compact),
+  ),
+  _Option(
     'bubble alignment',
     other: 'left',
     choose: (controller) => controller.setBubbleAlign(BubbleAlign.left),
@@ -119,6 +126,15 @@ void _loadingTests() {
 
       expect(app.preferences, const DisplayPreferencesState());
     });
+
+    test(
+      'nothing stored: the classic composer, the bar the user knows',
+      () async {
+        final app = await _App.loaded(FakeDisplayPreferencesRepository());
+
+        expect(app.preferences.composerStyle, ComposerStyle.classic);
+      },
+    );
 
     test('what the device stored is what the app shows', () async {
       final app = await _App.loaded(

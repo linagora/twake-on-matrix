@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:twake_chat/pages/chat/chat_input_row_style.dart';
 import 'package:twake_chat/domain/personalization/personalize_step.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/personalize/personalize_question.dart';
@@ -14,6 +15,8 @@ class SettingsPersonalization extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
+    // A phone keeps its own message field: no choice of it there.
+    final isWide = !ChatInputRowStyle.responsiveUtils.isMobile(context);
     return Scaffold(
       appBar: TwakeAppBar(
         title: l10n.personalization,
@@ -31,20 +34,21 @@ class SettingsPersonalization extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           for (final step in PersonalizeStep.values)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 12,
-                children: [
-                  Text(
-                    personalizeQuestion(l10n, step),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  PersonalizeStepCards(step: step),
-                ],
+            if (isWide || !step.isWideOnly)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 12,
+                  children: [
+                    Text(
+                      personalizeQuestion(l10n, step),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    PersonalizeStepCards(step: step),
+                  ],
+                ),
               ),
-            ),
         ],
       ),
     );

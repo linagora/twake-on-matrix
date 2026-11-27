@@ -239,3 +239,79 @@ class _MiniSeen extends StatelessWidget {
     ),
   );
 }
+
+/// A drawn message field: tools under the text (compact) or around it.
+class _MiniComposer extends StatelessWidget {
+  const _MiniComposer({required this.style});
+
+  final ComposerStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final hint = Text(
+      L10n.of(context)!.message,
+      textScaler: TextScaler.noScaling,
+      style: LinagoraTextStyle.material().bodySmall.copyWith(
+        color: scheme.onSurfaceVariant,
+      ),
+    );
+    final border = BoxDecoration(
+      color: scheme.surface,
+      borderRadius: const BorderRadius.all(Radius.circular(14)),
+      border: Border.all(color: scheme.outline),
+    );
+    Widget tool(IconData icon) =>
+        Icon(icon, size: 16, color: scheme.onSurfaceVariant);
+    final send = Icon(Icons.send, size: 16, color: scheme.primary);
+    if (style == ComposerStyle.compact) {
+      return Container(
+        width: 280,
+        padding: const EdgeInsets.fromLTRB(10, 8, 8, 6),
+        decoration: border,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 6,
+          children: [
+            hint,
+            Row(
+              spacing: 8,
+              children: [
+                tool(Icons.add_circle_outline),
+                tool(Icons.tag_faces),
+                const Spacer(),
+                send,
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+    return SizedBox(
+      width: 280,
+      child: Row(
+        spacing: 6,
+        children: [
+          tool(Icons.add_circle_outline),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: border,
+              child: Row(
+                children: [
+                  Expanded(child: hint),
+                  tool(Icons.tag_faces),
+                ],
+              ),
+            ),
+          ),
+          CircleAvatar(
+            radius: 14,
+            backgroundColor: scheme.primary,
+            child: Icon(Icons.send, size: 14, color: scheme.onPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+}

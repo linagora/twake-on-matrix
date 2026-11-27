@@ -22,6 +22,7 @@ class PersonalizeStepCards extends ConsumerWidget {
         PersonalizeStep.density ||
         PersonalizeStep.order => OptionCardsLayout.sideBySide,
         PersonalizeStep.seenStyle => OptionCardsLayout.stacked,
+        PersonalizeStep.composer => OptionCardsLayout.stacked,
         PersonalizeStep.align => OptionCardsLayout.stacked,
       },
       onChanged: (choice) => choice.onSelected(),
@@ -49,6 +50,9 @@ class PersonalizeStepCards extends ConsumerWidget {
         ),
         PersonalizeStep.seenStyle => _MiniSeen(
           style: SeenStyle.values.byName(name),
+        ),
+        PersonalizeStep.composer => _MiniComposer(
+          style: ComposerStyle.values.byName(name),
         ),
         PersonalizeStep.align => _MiniBubbles(
           ownRight: name == BubbleAlign.ownRight.name,

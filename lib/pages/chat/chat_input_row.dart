@@ -17,6 +17,8 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/domain/personalization/display_preferences.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -48,127 +50,137 @@ class ChatInputRow extends StatelessWidget {
                 context: context,
                 isKeyboardVisible: isKeyboardVisible,
               ),
-              child: Row(
-                crossAxisAlignment:
-                    ChatInputRowStyle.responsiveUtils.isMobile(context)
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: controller.selectMode
-                    ? [ActionSelectModeWidget(controller: controller)]
-                    : <Widget>[
-                        if (ChatInputRowStyle.responsiveUtils.isMobile(context))
-                          ValueListenableBuilder(
-                            valueListenable:
-                                controller.audioRecordStateNotifier,
-                            builder: (context, audioState, _) {
-                              if (PlatformInfos.isDesktop &&
-                                  audioState != AudioRecordState.initial) {
-                                return const SizedBox.shrink();
-                              }
+              // The modern composer of a wide screen holds its send button.
+              child: Consumer(
+                builder: (context, ref, _) {
+                  final modern = _isModern(context, ref);
+                  return Row(
+                    crossAxisAlignment:
+                        ChatInputRowStyle.responsiveUtils.isMobile(context)
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: controller.selectMode
+                        ? [ActionSelectModeWidget(controller: controller)]
+                        : <Widget>[
+                            if (ChatInputRowStyle.responsiveUtils.isMobile(
+                              context,
+                            ))
+                              ValueListenableBuilder(
+                                valueListenable:
+                                    controller.audioRecordStateNotifier,
+                                builder: (context, audioState, _) {
+                                  if (PlatformInfos.isDesktop &&
+                                      audioState != AudioRecordState.initial) {
+                                    return const SizedBox.shrink();
+                                  }
 
-                              // The enclosing block is gated on
-                              // responsiveUtils.isMobile (viewport-based), so on a
-                              // narrow web viewport it still renders. The native
-                              // picker + popup actions feed the mobile upload
-                              // pipeline (dart:io), which breaks on web — so when
-                              // the actual platform is not mobile, fall back to the
-                              // single "+" button routed through onSendFileClick's
-                              // platform-aware path.
-                              if (!PlatformInfos.isMobile) {
-                                return SizedBox(
-                                  height: ChatInputRowStyle.chatInputRowHeight,
-                                  child: TwakeIconButton(
-                                    size: ChatInputRowStyle
-                                        .chatInputRowMoreBtnSize,
-                                    tooltip: L10n.of(context)!.more,
-                                    icon: Icons.add_circle_outline,
-                                    onTap: () =>
-                                        controller.onSendFileClick(context),
-                                  ),
-                                );
-                              }
-
-                              // Single "+" button. Gallery, Documents and Camera
-                              // all live inside its popup menu now.
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    height:
-                                        ChatInputRowStyle.chatInputRowHeight,
-                                    child: AttachmentMenuButton(
-                                      onSelected: (action) =>
-                                          controller.onAttachmentMenuSelected(
-                                            context,
-                                            action,
-                                          ),
-                                    ),
-                                  ),
-                                  ScribeButton(
-                                    roomId: controller.room!.id,
-                                    draft: controller.sendController,
-                                    onRewritten: controller.replaceDraft,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ValueListenableBuilder(
-                          valueListenable: controller.audioRecordStateNotifier,
-                          builder: (context, audioState, _) {
-                            if (PlatformInfos.isDesktop &&
-                                audioState != AudioRecordState.initial) {
-                              return Expanded(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    minHeight:
-                                        ChatInputRowStyle.chatInputRowHeight,
-                                  ),
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    padding: ChatInputRowStyle
-                                        .chatInputRowPaddingMobile,
-                                    decoration: BoxDecoration(
-                                      borderRadius: ChatInputRowStyle
-                                          .chatInputRowBorderRadius,
-                                      color: LinagoraSysColors.material()
-                                          .onPrimary,
-                                      border: Border.all(
-                                        color: LinagoraRefColors.material()
-                                            .tertiary,
-                                        width: 1,
+                                  // The enclosing block is gated on
+                                  // responsiveUtils.isMobile (viewport-based), so on a
+                                  // narrow web viewport it still renders. The native
+                                  // picker + popup actions feed the mobile upload
+                                  // pipeline (dart:io), which breaks on web — so when
+                                  // the actual platform is not mobile, fall back to the
+                                  // single "+" button routed through onSendFileClick's
+                                  // platform-aware path.
+                                  if (!PlatformInfos.isMobile) {
+                                    return SizedBox(
+                                      height:
+                                          ChatInputRowStyle.chatInputRowHeight,
+                                      child: TwakeIconButton(
+                                        size: ChatInputRowStyle
+                                            .chatInputRowMoreBtnSize,
+                                        tooltip: L10n.of(context)!.more,
+                                        icon: Icons.add_circle_outline,
+                                        onTap: () =>
+                                            controller.onSendFileClick(context),
                                       ),
+                                    );
+                                  }
+
+                                  // Single "+" button. Gallery, Documents and Camera
+                                  // all live inside its popup menu now.
+                                  return Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(
+                                        height: ChatInputRowStyle
+                                            .chatInputRowHeight,
+                                        child: AttachmentMenuButton(
+                                          onSelected: (action) => controller
+                                              .onAttachmentMenuSelected(
+                                                context,
+                                                action,
+                                              ),
+                                        ),
+                                      ),
+                                      ScribeButton(
+                                        roomId: controller.room!.id,
+                                        draft: controller.sendController,
+                                        onRewritten: controller.replaceDraft,
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ValueListenableBuilder(
+                              valueListenable:
+                                  controller.audioRecordStateNotifier,
+                              builder: (context, audioState, _) {
+                                if (PlatformInfos.isDesktop &&
+                                    audioState != AudioRecordState.initial) {
+                                  final counter = ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      minHeight:
+                                          ChatInputRowStyle.chatInputRowHeight,
                                     ),
-                                    child: _counterAudioWeb(context: context),
-                                  ),
-                                ),
-                              );
-                            }
-                            return Expanded(
-                              child:
-                                  ChatInputRowStyle.responsiveUtils.isMobile(
-                                    context,
-                                  )
-                                  ? _buildMobileInputRow(context)
-                                  : _buildWebInputRow(context),
-                            );
-                          },
-                        ),
-                        ScribeSendHold(
-                          roomId: controller.room!.id,
-                          child: ChatInputRowSendBtn(
-                            inputText: controller.inputText,
-                            onTap: controller.onInputBarSubmitted,
-                            onTapRecorderWeb: () =>
-                                controller.onTapRecorderWeb(context: context),
-                            audioRecordStateNotifier:
-                                controller.audioRecordStateNotifier,
-                            onDeleteRecorderWeb: controller.discardRecordWeb,
-                            onFinishRecorderWeb: controller.sendVoiceMessageWeb,
-                          ),
-                        ),
-                      ],
+                                    child: Container(
+                                      alignment: Alignment.center,
+                                      padding: ChatInputRowStyle
+                                          .chatInputRowPaddingMobile,
+                                      decoration: BoxDecoration(
+                                        borderRadius: ChatInputRowStyle
+                                            .chatInputRowBorderRadius,
+                                        color: LinagoraSysColors.material()
+                                            .onPrimary,
+                                        border: Border.all(
+                                          color: LinagoraRefColors.material()
+                                              .tertiary,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: _counterAudioWeb(context: context),
+                                    ),
+                                  );
+                                  return Expanded(
+                                    child: modern
+                                        ? Row(
+                                            children: [
+                                              Expanded(child: counter),
+                                              _sendButton(context),
+                                            ],
+                                          )
+                                        : counter,
+                                  );
+                                }
+                                return Expanded(
+                                  child:
+                                      ChatInputRowStyle.responsiveUtils
+                                          .isMobile(context)
+                                      ? _buildMobileInputRow(context)
+                                      : _buildWebInputRow(
+                                          context,
+                                          sendButton: modern
+                                              ? _sendButton(context)
+                                              : null,
+                                        ),
+                                );
+                              },
+                            ),
+                            if (!modern) _sendButton(context),
+                          ],
+                  );
+                },
               ),
             ),
             if (PlatformInfos.isMobile && controller.selectMode == false)
@@ -436,9 +448,33 @@ class ChatInputRow extends StatelessWidget {
     );
   }
 
-  Widget _buildWebInputRow(BuildContext context) {
+  /// The « modern » composer: a wide screen with the compact style. A phone
+  /// keeps its own field.
+  bool _isModern(BuildContext context, WidgetRef ref) =>
+      !ChatInputRowStyle.responsiveUtils.isMobile(context) &&
+      ref.watch(
+        displayPreferencesProvider.select(
+          (preferences) => preferences.composerStyle == ComposerStyle.compact,
+        ),
+      );
+
+  Widget _sendButton(BuildContext context) => ScribeSendHold(
+    roomId: controller.room!.id,
+    child: ChatInputRowSendBtn(
+      inputText: controller.inputText,
+      onTap: controller.onInputBarSubmitted,
+      onTapRecorderWeb: () => controller.onTapRecorderWeb(context: context),
+      audioRecordStateNotifier: controller.audioRecordStateNotifier,
+      onDeleteRecorderWeb: controller.discardRecordWeb,
+      onFinishRecorderWeb: controller.sendVoiceMessageWeb,
+    ),
+  );
+
+  /// [sendButton], when given, goes in the row of tools under the text.
+  Widget _buildWebInputRow(BuildContext context, {Widget? sendButton}) {
     return Consumer(
       builder: (context, ref, _) => ChatInputRowWeb(
+        sendButton: sendButton,
         editEventNotifier: controller.editEventNotifier,
         onCloseEditAction: controller.cancelEditEventAction,
         inputBar: Column(

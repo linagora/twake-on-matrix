@@ -68,6 +68,18 @@ class PersonalizeChoices {
           },
         ),
     ],
+    PersonalizeStep.composer => [
+      for (final style in ComposerStyle.values)
+        _choice(
+          style,
+          preferences.composerStyle,
+          controller.setComposerStyle,
+          switch (style) {
+            ComposerStyle.compact => l10n.composerCompact,
+            ComposerStyle.classic => l10n.composerClassic,
+          },
+        ),
+    ],
     PersonalizeStep.align => [
       for (final align in BubbleAlign.values)
         _choice(

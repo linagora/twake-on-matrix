@@ -24,24 +24,26 @@ const _phone = Size(390, 6000);
 const _wide = Size(1200, 6000);
 
 /// Each option of the screen: its step id, its choices in the order shown,
-/// the default (the first one), where it is stored and how its cards are laid
-/// out on a phone.
+/// the default (the first one unless said), where it is stored and how its
+/// cards are laid out on a phone.
 class _Section {
   const _Section(
     this.id,
     this.choices, {
     required this.storeKey,
     required this.sideBySide,
+    this.byDefault,
   });
 
   final String id;
   final List<String> choices;
   final String storeKey;
+  final String? byDefault;
 
   /// A tall preview: the cards share one row. Otherwise they are stacked.
   final bool sideBySide;
 
-  String get defaultChoice => choices.first;
+  String get defaultChoice => byDefault ?? choices.first;
   String get other => choices.lastWhere((choice) => choice != defaultChoice);
   ValueKey<String> get defaultCard => _card(id, defaultChoice);
   ValueKey<String> get otherCard => _card(id, other);
@@ -49,6 +51,16 @@ class _Section {
     for (final choice in choices) _card(id, choice),
   ];
 }
+
+// « compact » (the Modern composer) is shown first; « classic », today's bar,
+// is the default.
+const _composer = _Section(
+  'composer',
+  ['compact', 'classic'],
+  storeKey: SettingKeys.composerStyle,
+  sideBySide: false,
+  byDefault: 'classic',
+);
 
 /// The options of a wide screen, in the order of the start flow.
 const _wideSections = [
@@ -70,6 +82,7 @@ const _wideSections = [
     storeKey: SettingKeys.seenStyle,
     sideBySide: false,
   ),
+  _composer,
   _Section(
     'align',
     ['ownRight', 'left'],
@@ -78,8 +91,11 @@ const _wideSections = [
   ),
 ];
 
-/// The options of a phone: the same.
-const _phoneSections = _wideSections;
+/// The options of a phone: no composer, the phone keeps today's input bar.
+final _phoneSections = [
+  for (final section in _wideSections)
+    if (section != _composer) section,
+];
 
 /// Settings › Personalization on a screen of [size].
 Future<ProviderContainer> _pump(
@@ -142,6 +158,7 @@ String _current(ProviderContainer container, String id) {
     'density' => preferences.density.name,
     'order' => preferences.roomOrder.name,
     'seen-style' => preferences.seenStyle.name,
+    'composer' => preferences.composerStyle.name,
     'align' => preferences.bubbleAlign.name,
     _ => throw ArgumentError(id),
   };
@@ -217,6 +234,7 @@ void main() {
     _screenTests(name, size, sections);
     _screenChoiceTests(name, size, sections);
   }
+  _composerTests();
   _choicesTests();
   _phoneLayoutTests();
   _orderPreviewTests();
@@ -313,6 +331,45 @@ void _screenChoiceTests(String name, Size size, List<_Section> sections) {
   });
 }
 
+void _composerTests() {
+  group('Settings › Personalization, the composer', () {
+    testWidgets('a phone has no composer option', (tester) async {
+      await _pump(tester);
+
+      expect(_anyCardOf('composer'), findsNothing);
+    });
+
+    testWidgets('a wide screen places the composer between the seen style '
+        'and the align', (tester) async {
+      await _pump(tester, size: _wide);
+
+      final seenStyle = tester.getRect(
+        find.byKey(_card('seen-style', 'ticks')),
+      );
+      final composer = tester.getRect(find.byKey(_card('composer', 'compact')));
+      final align = tester.getRect(find.byKey(_card('align', 'ownRight')));
+      expect(seenStyle.top, lessThan(composer.top));
+      expect(composer.top, lessThan(align.top));
+    });
+
+    testWidgets('a wide screen shows « compact » first, « classic » chosen on '
+        'arrival', (tester) async {
+      await _pump(tester, size: _wide);
+
+      final compact = tester.getRect(find.byKey(_card('composer', 'compact')));
+      final classic = tester.getRect(find.byKey(_card('composer', 'classic')));
+      expect(
+        compact.top < classic.top ||
+            (compact.top == classic.top && compact.left < classic.left),
+        isTrue,
+        reason: 'compact $compact, classic $classic',
+      );
+      expect(_chosen(tester, _card('composer', 'classic')), isTrue);
+      expect(_chosen(tester, _card('composer', 'compact')), isFalse);
+    });
+  });
+}
+
 void _choicesTests() {
   group('Settings › Personalization, choices', () {
     testWidgets('a choice can be taken back', (tester) async {
@@ -331,13 +388,18 @@ void _choicesTests() {
     testWidgets('choosing one option leaves the others as they were', (
       tester,
     ) async {
-      const others = {'align': 'left', 'seen-style': 'names'};
+      const others = {
+        'align': 'left',
+        'seen-style': 'names',
+        'composer': 'compact',
+      };
       final container = await _pump(
         tester,
         size: _wide,
         stored: {
           SettingKeys.bubbleAlign: 'left',
           SettingKeys.seenStyle: 'names',
+          SettingKeys.composerStyle: 'compact',
         },
       );
 
@@ -418,5 +480,21 @@ void _everyStepLayoutTests() {
         );
       });
     }
+
+    // Wide only, so the phone layout cases above never see it.
+    testWidgets('on a wide screen, the composer cards are stacked, one per '
+        'row, in order', (tester) async {
+      await _pump(tester, size: _wide);
+
+      // _expectStacked holds the cards to the width of a phone: not here.
+      final rects = _rectsOf(tester, _composer);
+      for (final rect in rects) {
+        expect(rect.left, rects.first.left);
+      }
+      for (final (before, after) in _neighbours(rects)) {
+        expect(before.bottom, lessThanOrEqualTo(after.top));
+      }
+      expect(tester.takeException(), isNull);
+    });
   });
 }
