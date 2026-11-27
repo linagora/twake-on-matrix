@@ -723,7 +723,9 @@ class BackgroundPush {
     String? roomId = noti['room_id'];
     var eventId = noti['event_id'] as String?;
     // Set by the NSE from the relation of the event, which stays in clear.
-    final pushedThreadRootId = noti['thread_root_id'] as String?;
+    final pushedThreadRootId = AppConfig.threadsEnabled
+        ? noti['thread_root_id'] as String?
+        : null;
     String? threadRootId = pushedThreadRootId;
     String? receiverId = noti['receiver_id'] as String?;
 

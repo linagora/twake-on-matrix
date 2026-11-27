@@ -299,38 +299,32 @@ void main() {
       expect(swiped, 0);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgets(
-      'opens the thread when the finger moves a little',
-      (tester) async {
-        await pumpOnIos(tester);
+    testWidgets('opens the thread when the finger moves a little', (
+      tester,
+    ) async {
+      await pumpOnIos(tester);
 
-        final gesture = await tester.startGesture(
-          tester.getCenter(find.byType(ThreadSummaryCard)),
-        );
-        await gesture.moveBy(const Offset(-6, 2));
-        await tester.pump(const Duration(milliseconds: 80));
-        await gesture.up();
-        await tester.pumpAndSettle();
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(ThreadSummaryCard)),
+      );
+      await gesture.moveBy(const Offset(-6, 2));
+      await tester.pump(const Duration(milliseconds: 80));
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-        expect(opened, 1);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
+      expect(opened, 1);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgets(
-      'opens the thread with VoiceOver',
-      (tester) async {
-        final semantics = tester.ensureSemantics();
-        await pumpOnIos(tester);
+    testWidgets('opens the thread with VoiceOver', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpOnIos(tester);
 
-        tester.semantics.tap(find.semantics.byLabel(RegExp('3 comments')));
-        await tester.pumpAndSettle();
+      tester.semantics.tap(find.semantics.byLabel(RegExp('3 comments')));
+      await tester.pumpAndSettle();
 
-        expect(opened, 1);
-        semantics.dispose();
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
+      expect(opened, 1);
+      semantics.dispose();
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 
   /// The size a painted text is drawn at, its parents' styles merged in.
