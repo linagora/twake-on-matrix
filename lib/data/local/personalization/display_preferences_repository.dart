@@ -26,6 +26,11 @@ class DisplayPreferencesRepository {
         SeenStyle.values,
         defaults.seenStyle,
       ),
+      composerStyle: await _read(
+        SettingKeys.composerStyle,
+        ComposerStyle.values,
+        defaults.composerStyle,
+      ),
       bubbleAlign: await _read(
         SettingKeys.bubbleAlign,
         BubbleAlign.values,
@@ -47,6 +52,10 @@ class DisplayPreferencesRepository {
     await _store.setItem(SettingKeys.chatListDensity, preferences.density.name);
     await _store.setItem(SettingKeys.roomOrder, preferences.roomOrder.name);
     await _store.setItem(SettingKeys.seenStyle, preferences.seenStyle.name);
+    await _store.setItem(
+      SettingKeys.composerStyle,
+      preferences.composerStyle.name,
+    );
     await _store.setItem(SettingKeys.bubbleAlign, preferences.bubbleAlign.name);
   }
 }

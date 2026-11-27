@@ -23,6 +23,7 @@ class ChatInputRowWeb extends StatelessWidget {
     this.editEventNotifier,
     this.onCloseEditAction,
     this.timeline,
+    this.sendButton,
   });
 
   final Widget inputBar;
@@ -36,6 +37,11 @@ class ChatInputRowWeb extends StatelessWidget {
   final void Function()? onCloseEditAction;
   final Timeline? timeline;
 
+  /// The « modern » composer (React D675): the field, then one row of small
+  /// tools under the text, with this button at the far right. Null keeps the
+  /// tools around the field.
+  final Widget? sendButton;
+
   final responsive = getIt.get<ResponsiveUtils>();
 
   @override
@@ -43,7 +49,9 @@ class ChatInputRowWeb extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        borderRadius: ChatInputRowStyle.chatInputRowBorderRadius,
+        borderRadius: sendButton == null
+            ? ChatInputRowStyle.chatInputRowBorderRadius
+            : ChatInputRowStyle.modernComposerBorderRadius,
         color: LinagoraSysColors.material().onPrimary,
         border: Border.all(
           color: LinagoraRefColors.material().tertiary,
@@ -101,54 +109,73 @@ class ChatInputRowWeb extends StatelessWidget {
                   );
                 },
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  moreButton ??
-                      TwakeIconButton(
-                        tooltip: L10n.of(context)!.more,
-                        paddingAll: 0.0,
-                        margin: const EdgeInsets.all(10.0),
-                        iconColor: LinagoraSysColors.material().tertiary,
-                        icon: Icons.add_circle_outline,
-                        size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                        onTap: onTapMoreBtn,
-                      ),
-                  Expanded(child: inputBar),
-                  InkWell(
-                    onTapDown: onEmojiAction,
-                    hoverColor: Colors.transparent,
-                    child: PageTransitionSwitcher(
-                      transitionBuilder:
-                          (
-                            Widget child,
-                            Animation<double> primaryAnimation,
-                            Animation<double> secondaryAnimation,
-                          ) {
-                            return SharedAxisTransition(
-                              animation: primaryAnimation,
-                              secondaryAnimation: secondaryAnimation,
-                              transitionType: SharedAxisTransitionType.scaled,
-                              fillColor: Colors.transparent,
-                              child: child,
-                            );
-                          },
-                      child: TwakeIconButton(
-                        iconColor: LinagoraSysColors.material().tertiary,
-                        paddingAll: ChatInputRowStyle.chatInputRowPaddingBtnWeb,
-                        tooltip: L10n.of(context)!.emojis,
-                        onTapDown: (details) => onEmojiAction.call(details),
-                        icon: Icons.tag_faces,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              if (sendButton case final sendButton?) ...[
+                Padding(
+                  padding: ChatInputRowStyle.modernComposerFieldPadding,
+                  child: inputBar,
+                ),
+                Row(
+                  children: [
+                    _moreButton(context),
+                    _emojiButton(context),
+                    const Spacer(),
+                    sendButton,
+                  ],
+                ),
+              ] else
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _moreButton(context),
+                    Expanded(child: inputBar),
+                    _emojiButton(context),
+                  ],
+                ),
             ],
           );
         },
       ),
     );
   }
+
+  Widget _moreButton(BuildContext context) =>
+      moreButton ??
+      TwakeIconButton(
+        tooltip: L10n.of(context)!.more,
+        paddingAll: 0.0,
+        margin: const EdgeInsets.all(10.0),
+        iconColor: LinagoraSysColors.material().tertiary,
+        icon: Icons.add_circle_outline,
+        size: ChatInputRowStyle.chatInputRowMoreBtnSize,
+        onTap: onTapMoreBtn,
+      );
+
+  Widget _emojiButton(BuildContext context) => InkWell(
+    onTapDown: onEmojiAction,
+    hoverColor: Colors.transparent,
+    child: PageTransitionSwitcher(
+      transitionBuilder:
+          (
+            Widget child,
+            Animation<double> primaryAnimation,
+            Animation<double> secondaryAnimation,
+          ) {
+            return SharedAxisTransition(
+              animation: primaryAnimation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.scaled,
+              fillColor: Colors.transparent,
+              child: child,
+            );
+          },
+      child: TwakeIconButton(
+        iconColor: LinagoraSysColors.material().tertiary,
+        paddingAll: ChatInputRowStyle.chatInputRowPaddingBtnWeb,
+        tooltip: L10n.of(context)!.emojis,
+        onTapDown: (details) => onEmojiAction.call(details),
+        icon: Icons.tag_faces,
+      ),
+    ),
+  );
 }

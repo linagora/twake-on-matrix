@@ -50,6 +50,9 @@ class PersonalizeStepCards extends ConsumerWidget {
         PersonalizeStep.seenStyle => _MiniSeen(
           style: SeenStyle.values.byName(name),
         ),
+        PersonalizeStep.composer => _MiniComposer(
+          style: ComposerStyle.values.byName(name),
+        ),
         PersonalizeStep.align => _MiniBubbles(
           ownRight: name == BubbleAlign.ownRight.name,
         ),

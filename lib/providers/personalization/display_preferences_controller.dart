@@ -58,6 +58,9 @@ class DisplayPreferencesController extends _$DisplayPreferencesController {
   void setSeenStyle(SeenStyle style) =>
       _choose((p) => p.copyWith(seenStyle: style));
 
+  void setComposerStyle(ComposerStyle style) =>
+      _choose((p) => p.copyWith(composerStyle: style));
+
   void setBubbleAlign(BubbleAlign align) =>
       _choose((p) => p.copyWith(bubbleAlign: align));
 }
