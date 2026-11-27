@@ -9,8 +9,8 @@ import '../robots/group_information_robot.dart';
 
 const _timeout = Duration(seconds: 30);
 
-/// Opens Group info of a group made for the test, then leaves the group
-/// whatever happens, so the shared account keeps no trace of it.
+/// Opens Group info of a group made for the test, then retracts its pending
+/// invites and leaves it whatever happens, so no account keeps a trace of it.
 abstract class _ThrowawayGroupScenario extends BaseTestScenario {
   _ThrowawayGroupScenario(super.$, super.robots);
 
@@ -23,11 +23,15 @@ abstract class _ThrowawayGroupScenario extends BaseTestScenario {
   Client get _client =>
       twake.Matrix.of($.tester.element(find.byType(Scaffold).first)).client;
 
+  /// Users the test may leave invited: their invites are retracted at the end.
+  List<String> get invitedUserIds => const [_memberMatrixId];
+
   @override
   Future<void> runTestLogic() async {
     await $(ChatList).waitUntilVisible(timeout: const Duration(seconds: 60));
+    final client = _client;
     final title = '$_titlePrefix ${DateTime.now().millisecondsSinceEpoch}';
-    final roomId = await _client.createRoom(
+    final roomId = await client.createRoom(
       name: title,
       invite: [_memberMatrixId],
       preset: CreateRoomPreset.privateChat,
@@ -41,8 +45,33 @@ abstract class _ThrowawayGroupScenario extends BaseTestScenario {
       await robots.chatGroupDetailRobot().tapOnChatBarTitle();
       await runOnGroupInfo(room, GroupInformationRobot($));
     } finally {
-      await _client.getRoomById(roomId)?.leave();
+      try {
+        for (final userId in invitedUserIds) {
+          await _retractInvite(client, roomId, userId);
+        }
+      } finally {
+        await client.leaveRoom(roomId);
+      }
     }
+  }
+
+  Future<void> _retractInvite(
+    Client client,
+    String roomId,
+    String userId,
+  ) async {
+    final Map<String, Object?> member;
+    try {
+      member = await client.getRoomStateWithKey(
+        roomId,
+        EventTypes.RoomMember,
+        userId,
+      );
+    } on MatrixException catch (e) {
+      if (e.error == MatrixError.M_NOT_FOUND) return;
+      rethrow;
+    }
+    if (member['membership'] == 'invite') await client.kick(roomId, userId);
   }
 
   Future<Room> _waitForRoom(String roomId) async {
@@ -108,6 +137,12 @@ class RoomMembersInviteAndRemoveScenario extends _ThrowawayGroupScenario {
 
   @override
   String get _titlePrefix => 'Members invite';
+
+  @override
+  List<String> get invitedUserIds => const [
+    _ThrowawayGroupScenario._memberMatrixId,
+    _inviteeMatrixId,
+  ];
 
   Object? _inviteeMembership(Room room) => room
       .getState(EventTypes.RoomMember, _inviteeMatrixId)
