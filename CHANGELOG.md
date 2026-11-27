@@ -1,3 +1,45 @@
+## [2.29.0] - 2026-11-26
+### Added
+- #3606: Threads on mobile
+- #3619: Ring the others when a call starts
+- #3770: Camera and speaker buttons in the call screen
+- #3767: Presence dot in direct chats, contact info and member profiles
+- #3773: Floating bottom bar, pen capsule and pill filters in the chat list
+
+### Changed
+- #3733, #3789, #3804: Read the Matrix client and ToM support from Riverpod
+- #3716, #3718, #3719: Lighter chat list, chat keyboard and background push
+- #3725: Remove the Flutter web target and its build pipeline
+- #3761, #3768, #3769, #3775, #3778, #3781: Xcode 27, macOS release workflow
+- #3704: Enable the avoid_final_parameters lint
+- #3755: Follow-ups on the mention badge, SDK retries and search
+
+### Fixed
+- #3741: Open an unread chat on its first unread message
+- #3753: Show uploads cut by a restart as failed when their chat opens
+- #3693: Preview clear messages in iOS notifications, label encrypted ones
+- #3750: Open web app room links in the app
+- #3717: Cancel the timelines left listening after a screen closes
+- #3759, #3786: Ignore a second video call tap, key its spinner by account
+- #3746, #3785: Delete downloaded, decrypted and played voice files on logout
+- #3772: Open message links on tap up so a drag scrolls
+- #3747, #3774, #3795: Search empty state, two-line contacts, Vietnamese đ
+- #3784: Photo library and media usage descriptions on macOS
+- #3783: Keep a reply to a thread message in its thread
+- #3793: Show a file's caption in the chat list preview
+- #3792: Show the room name in a mention of a room
+- #3756, #3796: Paste an image, also copied from Safari, into a new chat
+- #3797: Fit the new chat empty state above the keyboard
+- #3787: Open the phone menu at the message on screen-reader activation
+- #3700: Align the folder screens on one edge and the design system
+- #3776: Keep the caption and reply when an upload of the batch is cancelled
+
+### Tests
+- #3788, #3794: Recent contacts at the largest text size, Cyrillic search
+- #3798: Matrix network set-up without a ToM configuration
+- #3802: Receiving and downloading images, videos and PDFs
+- #3807: Bottom bar tests get an active client with a sync stream
+
 ## [2.28.0] - 2026-11-23
 ### Added
 - #3680: Tap a broken image to retry its download
