@@ -9,8 +9,8 @@ import 'base_test_scenario.dart';
 const _timeout = Duration(seconds: 30);
 
 /// Runs [body] in a private group made for the test with [invite] invited,
-/// opened on Group info. Whatever happens, the invites still pending are
-/// retracted, the bans lifted, then the group is left.
+/// opened on Group info. Whatever happens, every invite still pending is
+/// retracted and every ban lifted, then the group is left.
 Future<void> runInThrowawayGroup(
   BaseTestScenario scenario, {
   required String titlePrefix,
@@ -28,6 +28,7 @@ Future<void> runInThrowawayGroup(
     invite: invite,
     preset: CreateRoomPreset.privateChat,
   );
+  var passed = false;
   try {
     final room = await _waitForRoom(scenario, client, roomId);
     await scenario.robots.chatListRobot().openSearchScreen();
@@ -36,13 +37,20 @@ Future<void> runInThrowawayGroup(
     }
     await scenario.robots.chatGroupDetailRobot().tapOnChatBarTitle();
     await body(room);
+    passed = true;
   } finally {
-    try {
-      for (final userId in invite) {
+    (Object, StackTrace)? cleanupError;
+    for (final userId in invite) {
+      try {
         await _undoMembership(client, roomId, userId);
+      } catch (error, stackTrace) {
+        cleanupError ??= (error, stackTrace);
       }
-    } finally {
-      await client.leaveRoom(roomId);
+    }
+    await client.leaveRoom(roomId);
+    // A failed test keeps its own error: a cleanup one would hide it.
+    if (passed && cleanupError != null) {
+      Error.throwWithStackTrace(cleanupError.$1, cleanupError.$2);
     }
   }
 }
