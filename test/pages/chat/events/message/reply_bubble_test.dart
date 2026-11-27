@@ -1,6 +1,8 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +12,8 @@ import 'package:matrix/src/models/timeline_chunk.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat/chat_view_body_style.dart';
+import 'package:twake_chat/pages/chat/events/message/message_container.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:twake_chat/pages/chat/events/reply_content.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
@@ -146,34 +150,34 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// Pumps the row of [event]; returns the ids it asked to scroll to.
+  /// Pumps the row of [event]; returns the ids it asked to scroll to. [wrap]
+  /// puts the row in what the chat draws around it.
   Future<List<String>> pumpRow(
     WidgetTester tester,
     Event event, {
     Event? quotedEvent,
     Locale locale = const Locale('en'),
+    Widget Function(Widget row)? wrap,
   }) async {
     final isHoverNotifier = ValueNotifier<String?>(null);
     addTearDown(isHoverNotifier.dispose);
     final jumps = <String>[];
 
-    await pumpApp(
-      tester,
-      MessageContentWithTimestampBuilder(
-        event: event,
-        timeline: Timeline(
-          room: room,
-          chunk: TimelineChunk(events: [event, ?quotedEvent]),
-        ),
-        isHoverNotifier: isHoverNotifier,
-        listHorizontalActionMenu: const [],
-        maxWidth: 400,
-        listActions: const [],
-        selectMode: false,
-        scrollToEventId: jumps.add,
+    final row = MessageContentWithTimestampBuilder(
+      event: event,
+      timeline: Timeline(
+        room: room,
+        chunk: TimelineChunk(events: [event, ?quotedEvent]),
       ),
-      locale: locale,
+      isHoverNotifier: isHoverNotifier,
+      listHorizontalActionMenu: const [],
+      maxWidth: 400,
+      listActions: const [],
+      selectMode: false,
+      scrollToEventId: jumps.add,
     );
+
+    await pumpApp(tester, wrap?.call(row) ?? row, locale: locale);
     return jumps;
   }
 
@@ -379,27 +383,38 @@ void main() {
     expect(text(_quotedBody), findsNothing);
   });
 
-  for (final (language, generic) in [
-    ('en', RegExp('^￼?Reply\$')),
-    ('fr', RegExp('^￼?Répon(dre|se)\$')),
+  for (final (kind, thread) in [
+    ('an ordinary reply', null),
+    ('a thread reply', r'$root:example.org'),
   ]) {
-    testWidgets('a quote not loaded is captioned "Reply" with no name '
-        '($language)', (tester) async {
-      // Only a reply carrying `m.relates_to.event_id`, as in a thread, gets
-      // the "..." placeholder.
-      await pumpRow(
-        tester,
-        reply(thread: r'$root:example.org'),
-        locale: Locale(language),
-      );
+    for (final (language, generic) in [
+      ('en', RegExp('^\uFFFC?Reply\$')),
+      ('fr', RegExp('^\uFFFC?Répon(dre|se)\$')),
+    ]) {
+      testWidgets('on $kind, a quote not loaded shows "..." captioned "Reply" '
+          'with no name ($language)', (tester) async {
+        await pumpRow(tester, reply(thread: thread), locale: Locale(language));
 
+        expect(text('...'), findsOneWidget);
+        expectOutsideAndAbove(tester, text('...'));
+        // Bob wrote the reply: his name is the sender one, in his bubble only.
+        expect(text('Bob'), findsOneWidget);
+        expectOutsideAndAbove(
+          tester,
+          find.textContaining(generic, findRichText: true),
+        );
+      });
+    }
+
+    testWidgets('on $kind, a tap on a quote not loaded jumps to the quoted '
+        'message', (tester) async {
+      final jumps = await pumpRow(tester, reply(thread: thread));
       expect(text('...'), findsOneWidget);
-      // Bob wrote the reply: his name is the sender one, in his bubble only.
-      expect(text('Bob'), findsOneWidget);
-      expectOutsideAndAbove(
-        tester,
-        find.textContaining(generic, findRichText: true),
-      );
+
+      await tester.tap(text('...'));
+      await tester.pumpAndSettle();
+
+      expect(jumps, [_quotedId]);
     });
   }
 
@@ -476,6 +491,125 @@ void main() {
     expect(text('Reply to'), findsNothing);
     expect(text(_quotedBody), findsNothing);
   });
+
+  /// Pumps the reply in its chat row, over the chat page colour, and returns a
+  /// reader of the colour painted at a point of the screen.
+  Future<Color Function(Offset)> paintRow(
+    WidgetTester tester, {
+    bool selected = false,
+    bool highlighted = false,
+  }) async {
+    const screen = Key('screen');
+    final event = reply();
+    final highlightedId = ValueNotifier<String?>(
+      highlighted ? event.eventId : null,
+    );
+    addTearDown(highlightedId.dispose);
+
+    await pumpRow(
+      tester,
+      event,
+      quotedEvent: quoted(),
+      wrap: (row) => RepaintBoundary(
+        key: screen,
+        child: ColoredBox(
+          color: ChatViewBodyStyle.backgroundColor,
+          child: MessageContainer(
+            event: event,
+            row: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: row,
+            ),
+            selected: selected,
+            selectMode: false,
+            highlightedEventIdNotifier: highlightedId,
+          ),
+        ),
+      ),
+    );
+
+    final boundary = tester.renderObject<RenderRepaintBoundary>(
+      find.byKey(screen),
+    );
+    final origin = tester.getTopLeft(find.byKey(screen));
+    late final int width;
+    late final ByteData pixels;
+    await tester.runAsync(() async {
+      final image = await boundary.toImage();
+      width = image.width;
+      pixels = (await image.toByteData())!;
+      image.dispose();
+    });
+    return (point) {
+      final local = point - origin;
+      final i = (local.dy.floor() * width + local.dx.floor()) * 4;
+      return Color.fromARGB(
+        255,
+        pixels.getUint8(i),
+        pixels.getUint8(i + 1),
+        pixels.getUint8(i + 2),
+      );
+    };
+  }
+
+  /// The same colour, give or take rounding and the faint bubble shadow.
+  Matcher looksLike(Color expected) => predicate<Color>(
+    (actual) => [
+      actual.r - expected.r,
+      actual.g - expected.g,
+      actual.b - expected.b,
+    ].every((delta) => delta.abs() * 255 <= 3),
+    'looks like $expected',
+  );
+
+  for (final (state, selected, highlighted) in [
+    ('a plain', false, false),
+    ('a selected', true, false),
+    ('a highlighted', false, true),
+  ]) {
+    testWidgets('on $state row, the bubble of a reply has no outline of '
+        'another colour beside it', (tester) async {
+      final colorAt = await paintRow(
+        tester,
+        selected: selected,
+        highlighted: highlighted,
+      );
+      final bubble = tester.getRect(bubbleOf(_replyBody));
+      final y = bubble.center.dy;
+      // The row itself, clear of the bubble and of its quote.
+      final row = colorAt(Offset(398, y));
+      if (selected || highlighted) {
+        expect(row, isNot(looksLike(ChatViewBodyStyle.backgroundColor)));
+      }
+
+      // Second pixel out, where only the 2px ring could paint.
+      for (final x in [bubble.left - 1.5, bubble.right + 1.5]) {
+        expect(colorAt(Offset(x, y)), looksLike(row), reason: 'at x = $x');
+      }
+    });
+
+    testWidgets('on $state row, a gap still parts the bubble from its quote', (
+      tester,
+    ) async {
+      final colorAt = await paintRow(
+        tester,
+        selected: selected,
+        highlighted: highlighted,
+      );
+      final bubble = tester.getRect(bubbleOf(_replyBody));
+      final quote = tester.getRect(quotedBubble());
+      final overlap = bubble.intersect(quote);
+      final x = overlap.center.dx;
+
+      final ring = colorAt(Offset(x, bubble.top - 1.5));
+      // Same column, higher in the padding of the quote: its own colour.
+      final quoteColor = colorAt(Offset(x, bubble.top - 5));
+      expect(ring, isNot(looksLike(quoteColor)));
+      if (!selected && !highlighted) {
+        expect(ring, looksLike(ChatViewBodyStyle.backgroundColor));
+      }
+    });
+  }
 
   testWidgets('the composer preview keeps the name and text, no caption', (
     tester,
