@@ -249,6 +249,21 @@ void main() {
     );
   });
 
+  testWidgets('the quoted bubble is opaque and pale, to hide the wallpaper', (
+    tester,
+  ) async {
+    await pumpRow(tester, reply(), quotedEvent: quoted());
+
+    final box = tester.widget<DecoratedBox>(quotedBubble());
+    final color = (box.decoration as BoxDecoration).color!;
+    final primary = Theme.of(
+      tester.element(text(_quotedBody).first),
+    ).colorScheme.primary;
+    expect(color.a, 1.0, reason: 'the wallpaper shows through');
+    expect(color.computeLuminance(), greaterThan(0.7), reason: 'not pale');
+    expect(color, isNot(primary));
+  });
+
   testWidgets('the quoted name appears in the caption only, never in blue', (
     tester,
   ) async {

@@ -72,7 +72,11 @@ class ReplyContentStyle {
   );
 
   static BoxDecoration get quoteBubbleDecoration => BoxDecoration(
-    color: LinagoraSysColors.material().onSurface.withValues(alpha: 0.06),
+    // Opaque, or the wallpaper shows through behind the quoted text
+    color: Color.alphaBlend(
+      LinagoraSysColors.material().onSurface.withValues(alpha: 0.06),
+      LinagoraSysColors.material().surface,
+    ),
     borderRadius: BorderRadius.circular(16),
   );
 
