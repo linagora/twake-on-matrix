@@ -2599,6 +2599,7 @@
       "reason": {}
     }
   },
+  "reportChat": "Report chat",
   "sendReport": "Send Report",
   "addComment": "Add comment",
   "spam": "Spam",

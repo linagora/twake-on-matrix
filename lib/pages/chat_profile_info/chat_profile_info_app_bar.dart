@@ -35,6 +35,7 @@ class ChatProfileInfoAppBar extends StatefulWidget {
   final void Function()? onBlockUser;
   final ValueNotifier<bool?> blockUserLoadingNotifier;
   final void Function(BuildContext context, Room? room)? onLeaveChat;
+  final VoidCallback? onReportChat;
   final bool innerBoxIsScrolled;
   final VoidCallback onMessage;
   final VoidCallback onSearch;
@@ -56,6 +57,7 @@ class ChatProfileInfoAppBar extends StatefulWidget {
     this.onBlockUser,
     required this.blockUserLoadingNotifier,
     this.onLeaveChat,
+    this.onReportChat,
     required this.innerBoxIsScrolled,
     required this.onMessage,
     required this.onSearch,
@@ -193,6 +195,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                                 context,
                                 widget.room,
                               ),
+                              onReportChat: widget.onReportChat,
                               onChatInfoTap: _handleGroupInfoTap,
                               animationController: animationController,
                               onSearch: widget.onSearch,
@@ -219,6 +222,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                                 context,
                                 widget.room,
                               ),
+                              onReportChat: widget.onReportChat,
                               onChatInfoTap: _handleGroupInfoTap,
                               animationController: animationController,
                               avatarUri: widget.avatarUri,
@@ -243,6 +247,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                             room: widget.room,
                             onLeaveChat: () =>
                                 widget.onLeaveChat?.call(context, widget.room),
+                            onReportChat: widget.onReportChat,
                             onChatInfoTap: _handleGroupInfoTap,
                             animationController: animationController,
                             onSearch: widget.onSearch,

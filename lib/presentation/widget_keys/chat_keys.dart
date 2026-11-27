@@ -5,6 +5,10 @@ enum ChatKeys {
     Key('chat.leaveChatButton'),
     ValueKey('chat.leaveChatButton'),
   ),
+  reportChatButton(
+    Key('chat.reportChatButton'),
+    ValueKey('chat.reportChatButton'),
+  ),
   actionsMobileAndTablet(
     Key('chat.actionsMobileAndTablet'),
     ValueKey('chat.actionsMobileAndTablet'),

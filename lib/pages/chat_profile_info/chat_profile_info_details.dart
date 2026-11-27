@@ -24,6 +24,8 @@ import 'package:matrix/matrix.dart' hide Contact;
 class ChatProfileInfoDetails extends StatelessWidget {
   static Key get leaveChatButtonKey => ChatKeys.leaveChatButton.key;
 
+  static Key get reportChatButtonKey => ChatKeys.reportChatButton.key;
+
   const ChatProfileInfoDetails({
     super.key,
     this.displayName,
@@ -35,6 +37,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
     required this.blockUserLoadingNotifier,
     this.room,
     this.onLeaveChat,
+    this.onReportChat,
   });
 
   final String? displayName;
@@ -46,6 +49,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
   final ValueNotifier<bool?> blockUserLoadingNotifier;
   final Room? room;
   final void Function()? onLeaveChat;
+  final VoidCallback? onReportChat;
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +110,20 @@ class ChatProfileInfoDetails extends StatelessWidget {
                   },
                 ),
                 if (room?.isDirectChat == true) ...[
+                  const SizedBox(height: ChatProfileInfoStyle.textSpacing),
+                  InkWell(
+                    key: reportChatButtonKey,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap: onReportChat,
+                    child: _CopiableRow(
+                      materialIcon: Icons.flag_outlined,
+                      text: L10n.of(context)!.reportChat,
+                      enableCopy: false,
+                    ),
+                  ),
                   const SizedBox(height: ChatProfileInfoStyle.textSpacing),
                   InkWell(
                     key: leaveChatButtonKey,
