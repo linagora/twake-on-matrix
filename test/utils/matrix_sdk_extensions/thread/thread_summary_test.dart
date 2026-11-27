@@ -227,6 +227,50 @@ void main() {
       expect(summary.lastReplyText, 'second');
     });
 
+    /// Report (26/11): "I cannot open my thread on iOS". Hypothesis H2: the
+    /// root has no card, so no way to open its thread, while replies exist
+    /// locally but the server summary of the root is stale or missing.
+    test('a stale server summary of zero replies with a reply received live '
+        'still makes a card', () {
+      final summary = ThreadSummary.fromRoot(
+        root(count: 0),
+        liveEvents: [reply(eventId: r'$r1', body: 'first', minute: 1)],
+      );
+
+      expect(summary?.replyCount, 1);
+    });
+
+    test('a reply not decrypted yet on a root without aggregation still '
+        'makes a card', () {
+      final encrypted = Event(
+        type: EventTypes.Encrypted,
+        content: {
+          'algorithm': AlgorithmTypes.megolmV1AesSha2,
+          'ciphertext': 'opaque',
+          'session_id': 'unknown-session',
+          'm.relates_to': threadRelation(rootId),
+        },
+        eventId: r'$r1',
+        senderId: bob,
+        originServerTs: at(1),
+        room: room,
+      );
+
+      final summary = ThreadSummary.fromRoot(root(), liveEvents: [encrypted]);
+
+      expect(summary?.replyCount, 1);
+    });
+
+    test('a reply received live whose clock is behind the server latest '
+        'reply (federation) keeps the card', () {
+      final summary = ThreadSummary.fromRoot(
+        root(count: 1, latest: serverLatest),
+        liveEvents: [reply(eventId: r'$r9', body: 'late clock', minute: 1)],
+      );
+
+      expect(summary, isNotNull);
+    });
+
     test('the server latest reply received again is not counted twice', () {
       final summary = ThreadSummary.fromRoot(
         root(count: 2, latest: serverLatest),

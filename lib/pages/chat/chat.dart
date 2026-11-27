@@ -667,7 +667,10 @@ class ChatController extends ConsumerState<Chat>
     final room = this.room;
     if (room == null) return;
     try {
-      _threadRootEvent = await room.getEventById(threadRootId!);
+      // Bounded: a root that never arrives must not hold the replies back.
+      _threadRootEvent = await room
+          .getEventById(threadRootId!)
+          .timeout(const Duration(seconds: 10));
     } catch (e, s) {
       Logs().w('Unable to load the root of the thread', e, s);
     }

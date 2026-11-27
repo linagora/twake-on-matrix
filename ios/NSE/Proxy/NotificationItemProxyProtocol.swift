@@ -47,9 +47,15 @@ protocol NotificationItemProxyProtocol {
 
     /// The room is end-to-end encrypted: its notifications never show message content.
     var isRoomEncrypted: Bool { get }
+
+    /// The thread the event replies in, so that a tap opens the thread without loading the event.
+    var threadRootID: String? { get }
 }
 
 extension NotificationItemProxyProtocol {
+    // The SDK item does not expose the relation of its event.
+    var threadRootID: String? { nil }
+
     var isDM: Bool {
         isRoomDirect && roomJoinedMembers <= 2
     }
