@@ -8,16 +8,18 @@ import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
 import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
+import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
+import 'package:twake_chat/widgets/twake_components/unread_count_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
-    show LinagoraRefColors;
+    show LinagoraRefColors, LinagoraSysColors;
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -175,11 +177,18 @@ void main() {
     verify(room.loadHeroUsers()).called(2);
   });
 
-  SpaceRowData spaceData({int mentionCount = 0}) => SpaceRowData(
-    fold: SpaceFold.none,
-    unreadCount: 0,
+  SpaceRowData spaceData({
+    SpaceFold fold = SpaceFold.none,
+    int roomCount = 0,
+    int unreadCount = 0,
+    int mentionCount = 0,
+    VoidCallback? onToggleFold,
+  }) => SpaceRowData(
+    fold: fold,
+    roomCount: roomCount,
+    unreadCount: unreadCount,
     mentionCount: mentionCount,
-    onToggleFold: () {},
+    onToggleFold: onToggleFold ?? () {},
   );
 
   testWidgets('says an invited space is an invitation', (tester) async {
@@ -199,26 +208,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('Invited'), findsNothing);
-  });
-
-  testWidgets('names the mention badge of a space for a screen reader', (
-    tester,
-  ) async {
-    final room = buildRoom(name: 'Team');
-
-    await tester.pumpWidget(
-      wrap(ChatListItem(room, space: spaceData(mentionCount: 1))),
-    );
-    await tester.pump();
-
-    expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is Semantics &&
-            widget.properties.label == 'You were mentioned',
-      ),
-      findsOneWidget,
-    );
   });
 
   testWidgets('shows the seen status computed with the preview', (
@@ -251,6 +240,293 @@ void main() {
       find.descendant(of: find.byType(SeenByRow), matching: find.byType(Icon)),
     );
     expect(icon.color, MessageTimeStyle.seenByRowIconPrimaryColor(false));
+  });
+
+  group('space row', () {
+    MockRoom buildSpace({String name = 'Team'}) {
+      final room = buildRoom(name: name, id: '!space:server.tld');
+      when(room.isDirectChat).thenReturn(false);
+      when(room.isSpace).thenReturn(true);
+      return room;
+    }
+
+    Future<void> pumpSpace(
+      WidgetTester tester,
+      SpaceRowData space, {
+      MockRoom? room,
+    }) async {
+      await tester.pumpWidget(
+        wrap(ChatListItem(room ?? buildSpace(), space: space)),
+      );
+      await tester.pump();
+    }
+
+    /// The style [text] is painted with, alone or inside a longer text.
+    TextStyle? paintedStyleOf(WidgetTester tester, String text) {
+      TextStyle? found;
+      void visit(InlineSpan span, TextStyle? inherited) {
+        if (span is! TextSpan) return;
+        final style = inherited?.merge(span.style) ?? span.style;
+        if (span.text?.contains(text) ?? false) found = style;
+        for (final child in span.children ?? const <InlineSpan>[]) {
+          visit(child, style);
+        }
+      }
+
+      for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+        visit(rich.text, null);
+      }
+      return found;
+    }
+
+    Finder says(String text) => find.textContaining(text, findRichText: true);
+
+    const downChevrons = [
+      Icons.expand_more,
+      Icons.expand_more_rounded,
+      Icons.expand_more_outlined,
+      Icons.keyboard_arrow_down,
+      Icons.keyboard_arrow_down_rounded,
+      Icons.keyboard_arrow_down_outlined,
+    ];
+    const upChevrons = [
+      Icons.expand_less,
+      Icons.expand_less_rounded,
+      Icons.expand_less_outlined,
+      Icons.keyboard_arrow_up,
+      Icons.keyboard_arrow_up_rounded,
+      Icons.keyboard_arrow_up_outlined,
+    ];
+    const sideChevrons = [
+      Icons.chevron_right,
+      Icons.chevron_left,
+      Icons.arrow_drop_down,
+      Icons.arrow_drop_up,
+      Icons.arrow_right,
+    ];
+
+    List<IconData?> chevronsShown(WidgetTester tester) => [
+      for (final icon in tester.widgetList<Icon>(find.byType(Icon)))
+        if ([
+          ...downChevrons,
+          ...upChevrons,
+          ...sideChevrons,
+        ].contains(icon.icon))
+          icon.icon,
+    ];
+
+    testWidgets('a space with nothing unread says how many rooms it holds', (
+      tester,
+    ) async {
+      await pumpSpace(tester, spaceData(fold: SpaceFold.folded, roomCount: 4));
+
+      expect(says('4 rooms'), findsOneWidget);
+      expect(says('unread'), findsNothing);
+      expect(says('·'), findsNothing);
+    });
+
+    testWidgets('a space with one room says « 1 room »', (tester) async {
+      await pumpSpace(tester, spaceData(fold: SpaceFold.folded, roomCount: 1));
+
+      expect(says('1 room'), findsOneWidget);
+      expect(says('1 rooms'), findsNothing);
+    });
+
+    testWidgets('a space with unread messages says « 4 rooms · 2 unread »', (
+      tester,
+    ) async {
+      await pumpSpace(
+        tester,
+        spaceData(fold: SpaceFold.folded, roomCount: 4, unreadCount: 2),
+      );
+
+      expect(says('4 rooms'), findsOneWidget);
+      expect(says('·'), findsOneWidget);
+      expect(says('2 unread'), findsOneWidget);
+    });
+
+    testWidgets('only the unread part is in the primary colour, semi-bold', (
+      tester,
+    ) async {
+      await pumpSpace(
+        tester,
+        spaceData(fold: SpaceFold.folded, roomCount: 4, unreadCount: 2),
+      );
+
+      final primary = LinagoraSysColors.material().primary;
+      final unread = paintedStyleOf(tester, '2 unread');
+      expect(unread?.color, primary);
+      expect(unread?.fontWeight, FontWeight.w600);
+      final rooms = paintedStyleOf(tester, '4 rooms');
+      expect(rooms, isNotNull);
+      expect(rooms?.color, isNot(primary));
+    });
+
+    testWidgets('the summary is smaller than the name', (tester) async {
+      await pumpSpace(tester, spaceData(fold: SpaceFold.folded, roomCount: 4));
+
+      expect(says('4 rooms'), findsOneWidget);
+      expect(
+        tester.getSize(says('4 rooms')).height,
+        lessThan(tester.getSize(find.text('Team')).height),
+      );
+      expect(
+        tester.getTopLeft(says('4 rooms')).dy,
+        greaterThan(tester.getTopLeft(find.text('Team')).dy),
+      );
+    });
+
+    testWidgets('a space shows no date', (tester) async {
+      await pumpSpace(tester, spaceData(fold: SpaceFold.folded, roomCount: 4));
+
+      final date = DateTime(
+        2020,
+        1,
+        1,
+      ).localizedTimeShort(tester.element(find.byType(ChatListItem)));
+      expect(date, isNotEmpty);
+      expect(says(date), findsNothing);
+    });
+
+    testWidgets('a muted space shows no mute icon', (tester) async {
+      final room = buildSpace();
+      when(room.pushRuleState).thenReturn(PushRuleState.dontNotify);
+
+      await pumpSpace(
+        tester,
+        spaceData(fold: SpaceFold.folded, roomCount: 4),
+        room: room,
+      );
+
+      expect(find.byIcon(Icons.volume_off_outlined), findsNothing);
+      expect(find.byIcon(Icons.volume_off), findsNothing);
+      expect(find.byIcon(Icons.notifications_off_outlined), findsNothing);
+    });
+
+    testWidgets('a space with unread messages and a mention shows no badge', (
+      tester,
+    ) async {
+      await pumpSpace(
+        tester,
+        spaceData(
+          fold: SpaceFold.folded,
+          roomCount: 4,
+          unreadCount: 28,
+          mentionCount: 1,
+        ),
+      );
+
+      expect(find.byType(UnreadCountBadge), findsNothing);
+      expect(find.text('28'), findsNothing);
+      expect(find.text('@'), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Semantics &&
+              widget.properties.label == 'You were mentioned',
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('a space row holds no « + » button', (tester) async {
+      await pumpSpace(tester, spaceData(fold: SpaceFold.open, roomCount: 4));
+
+      expect(find.byIcon(Icons.add), findsNothing);
+      expect(find.byTooltip('Add subspace to Team'), findsNothing);
+    });
+
+    testWidgets('a closed space ends with one chevron down that shows its '
+        'rooms', (tester) async {
+      await pumpSpace(
+        tester,
+        spaceData(fold: SpaceFold.folded, roomCount: 4, unreadCount: 2),
+      );
+
+      expect(find.byTooltip('Show the rooms of Team'), findsOneWidget);
+      final chevrons = chevronsShown(tester);
+      expect(chevrons, hasLength(1));
+      expect(downChevrons, contains(chevrons.single));
+      expect(
+        tester.getCenter(find.byTooltip('Show the rooms of Team')).dx,
+        greaterThan(tester.getTopRight(says('4 rooms')).dx),
+      );
+    });
+
+    testWidgets('an open space ends with one chevron up that hides its '
+        'rooms', (tester) async {
+      await pumpSpace(tester, spaceData(fold: SpaceFold.open, roomCount: 4));
+
+      expect(find.byTooltip('Hide the rooms of Team'), findsOneWidget);
+      final chevrons = chevronsShown(tester);
+      expect(chevrons, hasLength(1));
+      expect(upChevrons, contains(chevrons.single));
+    });
+
+    for (final (fold, tooltip) in [
+      (SpaceFold.folded, 'Show the rooms of Team'),
+      (SpaceFold.open, 'Hide the rooms of Team'),
+    ]) {
+      testWidgets('a tap on the chevron of a ${fold.name} space toggles the '
+          'fold', (tester) async {
+        var toggled = 0;
+        await pumpSpace(
+          tester,
+          spaceData(fold: fold, roomCount: 4, onToggleFold: () => toggled++),
+        );
+
+        await tester.tap(find.byTooltip(tooltip));
+
+        expect(toggled, 1);
+      });
+    }
+
+    testWidgets('a space has no kind badge on its avatar', (tester) async {
+      await pumpSpace(tester, spaceData(roomCount: 4));
+
+      expect(find.byType(AvatarWithKindBadge), findsNothing);
+    });
+
+    testWidgets('the avatar of a space is a rounded square, not a circle', (
+      tester,
+    ) async {
+      await pumpSpace(tester, spaceData(roomCount: 4));
+
+      // Every square box of the row that clips or paints a shape: the avatar.
+      // Each gives its corner radius as a share of its side: 0.5 is a circle.
+      final corners = <double>[];
+      final row = find.byType(ChatListItem);
+      for (final element
+          in find
+              .descendant(
+                of: row,
+                matching: find.byWidgetPredicate(
+                  (w) => w is ClipRRect || w is ClipOval || w is DecoratedBox,
+                ),
+              )
+              .evaluate()) {
+        final size = (element.renderObject! as RenderBox).size;
+        if (size.width != size.height || size.width < 24) continue;
+        final widget = element.widget;
+        final decoration = widget is DecoratedBox ? widget.decoration : null;
+        if (widget is ClipOval ||
+            (decoration is BoxDecoration &&
+                decoration.shape == BoxShape.circle)) {
+          corners.add(0.5);
+        } else if (widget is ClipRRect) {
+          final radius = widget.borderRadius.resolve(TextDirection.ltr);
+          corners.add(radius.topLeft.x / size.width);
+        } else if (decoration is BoxDecoration &&
+            decoration.borderRadius != null) {
+          final radius = decoration.borderRadius!.resolve(TextDirection.ltr);
+          corners.add(radius.topLeft.x / size.width);
+        }
+      }
+
+      expect(corners, isNotEmpty);
+      // The corner is rounded, well short of the half side of a circle.
+      expect(corners, everyElement(allOf(greaterThan(0), lessThan(0.4))));
+    });
   });
 
   group('mention badge', () {

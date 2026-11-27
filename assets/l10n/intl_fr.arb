@@ -2740,5 +2740,28 @@
         "type": "int"
       }
     }
+  },
+  "spaceRoomCount": "{count, plural, =1{1 salon} other{{count} salons}}",
+  "@spaceRoomCount": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spaceUnreadCount": "{count, plural, =1{1 non lu} other{{count} non lus}}",
+  "@spaceUnreadCount": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spaceAddRoom": "Ajouter un salon",
+  "@spaceAddRoom": {
+    "type": "text",
+    "placeholders": {}
   }
 }
