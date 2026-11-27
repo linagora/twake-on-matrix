@@ -13,8 +13,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 class InvitationSelection extends ConsumerStatefulWidget {
   final String roomId;
@@ -35,7 +35,7 @@ class InvitationSelectionController
     extends ContactsSelectionController<InvitationSelection> {
   String? get _roomId => widget.roomId;
 
-  Room get _room => Matrix.of(context).client.getRoomById(_roomId!)!;
+  Room get _room => ref.read(matrixClientProvider).getRoomById(_roomId!)!;
 
   @override
   bool get isFullScreen => widget.isFullScreen == true;
@@ -51,7 +51,8 @@ class InvitationSelectionController
   }
 
   @override
-  List<String> get disabledContactIds => Matrix.of(context).client
+  List<String> get disabledContactIds => ref
+      .read(matrixClientProvider)
       .getRoomById(_roomId!)!
       // Someone who knocked can still be invited.
       .getParticipants([Membership.join, Membership.invite])

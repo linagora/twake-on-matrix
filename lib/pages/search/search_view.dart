@@ -20,93 +20,103 @@ import 'package:twake_chat/providers/matrix_client_provider.dart';
 class SearchView extends StatelessWidget {
   final SearchScreenState searchController;
 
-  const SearchView(this.searchController, {super.key});
+  /// Under the chat list header of a phone, driven by the field of the bottom
+  /// bar: no app bar, no field, no back arrow.
+  final bool embedded;
+
+  const SearchView(this.searchController, {super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = L10n.of(context)!;
+    final results = _results(context);
+    if (embedded) return results;
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(SearchViewStyle.toolbarHeightSearch),
         child: _buildAppBarSearch(context),
       ),
-      body: CustomScrollView(
-        physics: const ClampingScrollPhysics(),
-        controller: searchController.scrollController,
-        slivers: [
-          ValueListenableBuilder(
-            valueListenable: searchController.preSearchRecentContactsNotifier,
-            builder: (context, value, emptyChild) =>
-                value.fold((failure) => emptyChild!, (success) {
-                  switch (success) {
-                    case final PreSearchRecentContactsSuccess data:
-                      return ValueListenableBuilder(
-                        valueListenable: searchController.textEditingController,
-                        builder: (context, textEditingValue, child) {
-                          if (textEditingValue.text.isNotEmpty) {
-                            return emptyChild!;
-                          }
-                          return SliverToBoxAdapter(
-                            child: PreSearchRecentContactsContainer(
-                              searchController: searchController,
-                              recentRooms: data.rooms,
-                            ),
-                          );
-                        },
-                      );
-                    default:
-                      return emptyChild!;
-                  }
-                }),
-            child: const SliverToBoxAdapter(),
+      body: results,
+    );
+  }
+
+  Widget _results(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    return CustomScrollView(
+      physics: const ClampingScrollPhysics(),
+      controller: searchController.scrollController,
+      slivers: [
+        ValueListenableBuilder(
+          valueListenable: searchController.preSearchRecentContactsNotifier,
+          builder: (context, value, emptyChild) =>
+              value.fold((failure) => emptyChild!, (success) {
+                switch (success) {
+                  case final PreSearchRecentContactsSuccess data:
+                    return ValueListenableBuilder(
+                      valueListenable: searchController.textEditingController,
+                      builder: (context, textEditingValue, child) {
+                        if (textEditingValue.text.isNotEmpty) {
+                          return emptyChild!;
+                        }
+                        return SliverToBoxAdapter(
+                          child: PreSearchRecentContactsContainer(
+                            searchController: searchController,
+                            recentRooms: data.rooms,
+                          ),
+                        );
+                      },
+                    );
+                  default:
+                    return emptyChild!;
+                }
+              }),
+          child: const SliverToBoxAdapter(),
+        ),
+        _RecentChatAndContactsHeader(searchController: searchController),
+        _recentChatsWidget(),
+        PublicGroupsSearchSection(
+          searchTerm: searchController.publicGroupsSearchTerm,
+          header: _SearchHeader(
+            header: l10n.publicGroupsYouCanJoin,
+            searchController: searchController,
+            needShowMore: false,
           ),
-          _RecentChatAndContactsHeader(searchController: searchController),
-          _recentChatsWidget(),
-          PublicGroupsSearchSection(
-            searchTerm: searchController.publicGroupsSearchTerm,
-            header: _SearchHeader(
-              header: l10n.publicGroupsYouCanJoin,
-              searchController: searchController,
-              needShowMore: false,
-            ),
-          ),
-          ValueListenableBuilder(
-            valueListenable:
-                searchController.serverSearchController.searchResultsNotifier,
-            builder: ((context, searchResults, child) {
-              if (searchResults is PresentationServerSideEmptySearch) {
+        ),
+        ValueListenableBuilder(
+          valueListenable:
+              searchController.serverSearchController.searchResultsNotifier,
+          builder: ((context, searchResults, child) {
+            if (searchResults is PresentationServerSideEmptySearch) {
+              return child!;
+            }
+
+            if (searchResults is PresentationServerSideSearch) {
+              if (searchResults.searchResults.isEmpty) {
                 return child!;
               }
-
-              if (searchResults is PresentationServerSideSearch) {
-                if (searchResults.searchResults.isEmpty) {
-                  return child!;
-                }
-                return _SearchHeader(
-                  header: l10n.messages,
-                  searchController: searchController,
-                  needShowMore: false,
-                );
-              }
-              return child!;
-            }),
-            child: _EmptySliverBox(),
-          ),
-          ServerSearchMessagesList(searchController: searchController),
-          ValueListenableBuilder(
-            valueListenable:
-                searchController.serverSearchController.isLoadingMoreNotifier,
-            builder: (context, isLoadingMore, _) {
-              return SliverToBoxAdapter(
-                child: isLoadingMore
-                    ? const CenterLoadingIndicator()
-                    : const SizedBox(),
+              return _SearchHeader(
+                header: l10n.messages,
+                searchController: searchController,
+                needShowMore: false,
               );
-            },
-          ),
-        ],
-      ),
+            }
+            return child!;
+          }),
+          child: _EmptySliverBox(),
+        ),
+        ServerSearchMessagesList(searchController: searchController),
+        ValueListenableBuilder(
+          valueListenable:
+              searchController.serverSearchController.isLoadingMoreNotifier,
+          builder: (context, isLoadingMore, _) {
+            return SliverToBoxAdapter(
+              child: isLoadingMore
+                  ? const CenterLoadingIndicator()
+                  : const SizedBox(),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -251,17 +261,10 @@ class _SearchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverAppBar(
-      toolbarHeight: SearchViewStyle.toolbarHeightOfSliverAppBar,
-      flexibleSpace: FlexibleSpaceBar(
-        title: _chatsHeaders(context, header, needShowMore: needShowMore),
-        titlePadding: SearchViewStyle.appbarPadding,
-      ),
-      backgroundColor: Colors.transparent,
-      foregroundColor: Colors.transparent,
-      surfaceTintColor: Colors.transparent,
-      automaticallyImplyLeading: false,
-      pinned: true,
+    // No SliverAppBar: under the chat list header it would add the status
+    // bar again, and the header is no app bar.
+    return PinnedHeaderSliver(
+      child: _chatsHeaders(context, header, needShowMore: needShowMore),
     );
   }
 

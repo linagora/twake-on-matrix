@@ -2,6 +2,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/media_album/entities/media_event_snapshot.dart';
 import 'package:twake_chat/domain/media_album/policy/media_batch_stamp.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 
 extension EventToMediaSnapshotExtension on Event {
   String? get mediaBatchId {
@@ -13,25 +14,31 @@ extension EventToMediaSnapshotExtension on Event {
   /// the full snapshot, everything else just ends a run.
   /// A deleted event has no batch key left; it keeps [redacted] so that it
   /// can hide inside an album or collapse with the deleted events beside it.
-  MediaEventSnapshot toMediaSnapshotIfBatched() => mediaBatchId == null
+  MediaEventSnapshot toMediaSnapshotIfBatched({bool isThreadRoot = false}) =>
+      mediaBatchId == null
       ? MediaEventSnapshot(
           eventId: eventId,
           senderId: senderId,
           originServerTs: originServerTs,
           isRedacted: redacted,
         )
-      : toMediaSnapshot();
+      : toMediaSnapshot(isThreadRoot: isThreadRoot);
 
-  MediaEventSnapshot toMediaSnapshot() => MediaEventSnapshot(
-    eventId: eventId,
-    senderId: senderId,
-    originServerTs: originServerTs,
-    isImage: type == EventTypes.Message && messageType == MessageTypes.Image,
-    isFailed: status.isError,
-    isRedacted: redacted,
-    inThread: relationshipType == RelationshipTypes.thread,
-    isReply: isReplyEvent(),
-    hasCaption: text.isNotEmpty && isBodyDiffersFromFilename(),
-    batchId: mediaBatchId,
-  );
+  MediaEventSnapshot toMediaSnapshot({bool isThreadRoot = false}) =>
+      MediaEventSnapshot(
+        eventId: eventId,
+        senderId: senderId,
+        originServerTs: originServerTs,
+        isImage:
+            type == EventTypes.Message && messageType == MessageTypes.Image,
+        isFailed: status.isError,
+        isRedacted: redacted,
+        inThread:
+            relationshipType == RelationshipTypes.thread ||
+            isThreadRoot ||
+            ThreadSummary.fromRoot(this) != null,
+        isReply: isReplyEvent(),
+        hasCaption: text.isNotEmpty && isBodyDiffersFromFilename(),
+        batchId: mediaBatchId,
+      );
 }

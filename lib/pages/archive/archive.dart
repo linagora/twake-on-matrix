@@ -7,22 +7,23 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:twake_chat/pages/archive/archive_view.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class Archive extends StatefulWidget {
+class Archive extends ConsumerStatefulWidget {
   const Archive({super.key});
 
   @override
   ArchiveController createState() => ArchiveController();
 }
 
-class ArchiveController extends State<Archive> {
+class ArchiveController extends ConsumerState<Archive> {
   List<Room>? archive;
 
   Future<List<Room>> getArchive(BuildContext context) async {
     final archive = this.archive;
     if (archive != null) return archive;
-    final client = Matrix.of(context).client;
+    final client = ref.read(matrixClientProvider);
     final syncedById = {
       for (final room in client.rooms)
         if (room.membership == Membership.leave) room.id: room,

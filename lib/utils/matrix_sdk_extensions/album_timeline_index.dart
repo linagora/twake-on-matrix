@@ -1,4 +1,5 @@
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/media_album/entities/media_album.dart';
 import 'package:twake_chat/domain/media_album/policy/group_media_events_policy.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_to_media_snapshot_extension.dart';
@@ -28,15 +29,22 @@ class AlbumTimelineIndex {
   ) : _position = _positions(_visibleNewestFirst);
 
   /// [visibleNewestFirst] is the visible events, newest first; [breakBefore]
-  /// is the first unread event, which starts a new album.
+  /// is the first unread event, which starts a new album. [threadRootIds]
+  /// are the images known as thread roots only from live replies (no server
+  /// summary yet): like any thread root, they leave the album.
   factory AlbumTimelineIndex(
     List<Event> visibleNewestFirst, {
     String? breakBefore,
+    Set<String> threadRootIds = const {},
   }) {
     final oldestFirst = visibleNewestFirst.reversed.toList();
     final byId = {for (final e in oldestFirst) e.eventId: e};
     final snapshots = [
-      for (final e in oldestFirst) e.toMediaSnapshotIfBatched(),
+      for (final e in oldestFirst)
+        e.toMediaSnapshotIfBatched(
+          isThreadRoot:
+              AppConfig.threadsEnabled && threadRootIds.contains(e.eventId),
+        ),
     ];
     final albums = const GroupMediaEventsPolicy().execute(
       snapshots,

@@ -47,6 +47,7 @@ String _shape(List<RoomListRow> rows) => rows
         RoomListSpaceRow(:final entry) => '${row.depth}:${entry.id}',
         RoomListJoinableRow(:final subspace) =>
           '${row.depth}:join ${subspace.roomId}',
+        RoomListSectionTitleRow(:final kind) => '# ${kind.name}',
       },
     )
     .join(' ');
@@ -55,6 +56,9 @@ void main() {
   _buildRoomListRowsTests();
   _buildRoomListRowsPinnedTests();
   _buildRoomListRowsJoinableTests();
+  _buildSectionedRoomListRowsTests();
+  _buildSectionedRoomListRowsSpacesTests();
+  _buildSectionedRoomListRowsDirectsTests();
 }
 
 void _buildRoomListRowsTests() {
@@ -213,5 +217,168 @@ void _buildRoomListRowsJoinableTests() {
         expect(_shape(rows), '0:!s 1:!sub');
       });
     });
+  });
+}
+
+// The order « sections »: the pinned rooms first under no title, then
+// unread, spaces, groups and direct chats, each under its title. A space keeps
+// its rooms under it, read or not, pinned or not.
+void _buildSectionedRoomListRowsTests() {
+  group('buildSectionedRoomListRows', () {
+    test('whenNothingIsListed_showsNoRowNorTitle', () {
+      expect(buildSectionedRoomListRows([]), isEmpty);
+    });
+
+    test('showsUnreadSpacesGroupsThenDirects_eachUnderItsTitle', () {
+      final rows = buildSectionedRoomListRows([
+        _dm,
+        _room('!team'),
+        _space('!s'),
+        const RoomListEntry(
+          id: '!alice',
+          kind: RoomKind.direct,
+          unreadCount: 1,
+        ),
+        _room('!ops'),
+      ]);
+
+      expect(
+        _shape(rows),
+        '# unread 0:!alice # spaces 0:!s # groups 0:!team 0:!ops # directs 0:!dm',
+      );
+    });
+
+    test('leavesOutTheTitleOfAnEmptySection', () {
+      final rows = buildSectionedRoomListRows([_room('!team'), _dm]);
+
+      expect(_shape(rows), '# groups 0:!team # directs 0:!dm');
+    });
+
+    test('whenARoomIsPinned_showsItOnTopUnderNoTitle_andNotInItsSection', () {
+      final rows = buildSectionedRoomListRows([
+        _room('!g'),
+        _room('!p', isFavourite: true),
+        _dm,
+      ]);
+
+      expect(_shape(rows), '0:!p # groups 0:!g # directs 0:!dm');
+    });
+
+    test('givesEachRowItsOwnKey', () {
+      final rows = buildSectionedRoomListRows([
+        _space('!s'),
+        _room('!c', parents: ['!s'], isFavourite: true),
+        _room('!u', unread: 1),
+        _room('!g'),
+        _dm,
+      ]);
+
+      final keys = rows.map((row) => row.key).toList();
+      expect(keys.toSet().length, keys.length, reason: '$keys');
+    });
+  });
+}
+
+void _buildSectionedRoomListRowsSpacesTests() {
+  group('buildSectionedRoomListRows', () {
+    test('whenARoomInASpaceIsPinned_showsItOnTopAndInItsSpace', () {
+      final rows = buildSectionedRoomListRows([
+        _space('!s'),
+        _room('!c', parents: ['!s'], isFavourite: true),
+        _room('!g'),
+      ]);
+
+      expect(_shape(rows), '0:!c # spaces 0:!s 1:!c # groups 0:!g');
+    });
+
+    test(
+      'whenEverySpaceIsPinned_showsThemOnTopWithTheirRooms_andNoSpacesTitle',
+      () {
+        final rows = buildSectionedRoomListRows([
+          _space('!s1', isFavourite: true),
+          _room('!c', parents: ['!s1']),
+          _space('!s2', isFavourite: true),
+          _room('!g'),
+        ]);
+
+        expect(_shape(rows), '0:!s1 1:!c 0:!s2 # groups 0:!g');
+      },
+    );
+
+    test('whenARoomInASpaceIsUnread_keepsItUnderItsSpace_notInUnread', () {
+      final rows = buildSectionedRoomListRows([
+        _room('!c', parents: ['!s'], unread: 3),
+        _space('!s'),
+        _room('!u', unread: 1),
+      ]);
+
+      expect(_shape(rows), '# unread 0:!u # spaces 0:!s 1:!c');
+    });
+
+    test('whenTheOnlyUnreadRoomIsInASpace_showsNoUnreadTitle', () {
+      final rows = buildSectionedRoomListRows([
+        _room('!c', parents: ['!s'], unread: 3),
+        _space('!s'),
+        _room('!g'),
+      ]);
+
+      expect(_shape(rows), '# spaces 0:!s 1:!c # groups 0:!g');
+    });
+
+    test('whenASpaceIsUnread_keepsItUnderSpaces', () {
+      final rows = buildSectionedRoomListRows([
+        _space('!s', unread: 2),
+        _room('!g'),
+      ]);
+
+      expect(_shape(rows), '# spaces 0:!s # groups 0:!g');
+    });
+
+    // A sub-space shows under its space: once that space is pinned, nothing
+    // is left for a « spaces » section (review of #3825).
+    test('whenAPinnedSpaceHoldsASubSpace_showsNoEmptySpacesTitle', () {
+      final rows = buildSectionedRoomListRows([
+        _space('!s', isFavourite: true),
+        _space('!sub', parents: ['!s']),
+        _room('!g'),
+      ]);
+
+      expect(_shape(rows), '0:!s 1:!sub # groups 0:!g');
+    });
+  });
+}
+
+// A direct chat (a person or a bot) is never put under a space, even when it
+// names one: it stays in the direct chats, in the order of the sections, and
+// never drops out of the list (review of #3825).
+void _buildSectionedRoomListRowsDirectsTests() {
+  group('buildSectionedRoomListRows', () {
+    for (final (kind, name) in [
+      (RoomKind.direct, 'Direct'),
+      (RoomKind.bot, 'Bot'),
+    ]) {
+      RoomListEntry chatIn(String spaceId) =>
+          RoomListEntry(id: '!dm', kind: kind, parentSpaceIds: [spaceId]);
+
+      test('whenA${name}ChatNamesAPinnedSpace_keepsItInDirects', () {
+        final rows = buildSectionedRoomListRows([
+          _space('!s', isFavourite: true),
+          chatIn('!s'),
+          _room('!g'),
+        ]);
+
+        expect(_shape(rows), '0:!s # groups 0:!g # directs 0:!dm');
+      });
+
+      test('whenA${name}ChatNamesASpace_keepsItInDirects_notUnderIt', () {
+        final rows = buildSectionedRoomListRows([
+          chatIn('!s'),
+          _space('!s'),
+          _room('!g'),
+        ]);
+
+        expect(_shape(rows), '# spaces 0:!s # groups 0:!g # directs 0:!dm');
+      });
+    }
   });
 }

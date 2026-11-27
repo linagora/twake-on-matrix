@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ProviderContainer, UncontrolledProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/new_group/new_group.dart';
@@ -43,9 +45,15 @@ void main() {
     required NewGroupKind kind,
     String? parentSpaceId,
   }) async {
-    final matrix = _FakeMatrix(MockClient());
+    final client = MockClient();
+    final matrix = _FakeMatrix(client);
+    final container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [matrixClientProvider.overrideWithValue(client)],
+    );
     await tester.pumpWidget(
-      ProviderScope(
+      UncontrolledProviderScope(
+        container: container,
         child: Provider<MatrixState>.value(
           value: matrix,
           child: MaterialApp(

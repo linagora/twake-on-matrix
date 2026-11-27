@@ -50,14 +50,16 @@ void _comesBackOnScrollUp() {
       'WHEN the user scrolls back up a little\n'
       'THEN the header comes back and ends fully visible', (tester) async {
     await HeaderHarness.pump(tester, const HeaderView.phone());
+    final atTop = tester.getRect(headerFinder);
     await scrollDown(tester, 400);
     expect(headerVisible(tester), isFalse);
 
     await scrollUp(tester, 60);
 
+    // Fully back: where it sits at the top of the list, whatever its height.
     expect(headerVisible(tester), isTrue);
-    expect(tester.getTopLeft(headerFinder).dy, greaterThanOrEqualTo(0));
-    expect(tester.getRect(headerFinder).bottom, greaterThan(100));
+    expect(tester.getTopLeft(headerFinder).dy, moreOrLessEquals(atTop.top));
+    expect(tester.getRect(headerFinder).bottom, moreOrLessEquals(atTop.bottom));
   });
 }
 

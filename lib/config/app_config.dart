@@ -114,7 +114,6 @@ abstract class AppConfig {
   static bool experimentalVoip = false;
   static bool threadsEnabled = true;
   static bool appGridDashboardAvailable = true;
-  static bool enableRightAndLeftMessageAlignmentOnWeb = false;
   static bool gifAutoplay = true;
   static const bool hideTypingUsernames = false;
   static const bool hideAllStateEvents = false;

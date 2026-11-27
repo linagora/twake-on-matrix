@@ -12,11 +12,12 @@ import 'package:twake_chat/utils/search/keyword_matcher_cache.dart';
 import 'package:twake_chat/utils/search/search_options.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/scroll_controller_extension.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class ChatSearch extends StatefulWidget {
+class ChatSearch extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
   final String roomId;
   final bool isInStack;
@@ -31,14 +32,14 @@ class ChatSearch extends StatefulWidget {
   });
 
   @override
-  State<ChatSearch> createState() => ChatSearchController();
+  ConsumerState<ChatSearch> createState() => ChatSearchController();
 }
 
-class ChatSearchController extends State<ChatSearch> {
+class ChatSearchController extends ConsumerState<ChatSearch> {
   static const _pageLimit = 20;
   late final _timelineLoader = SharedTimelineLoader(() => room!.getTimeline());
 
-  Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
+  Room? get room => ref.read(matrixClientProvider).getRoomById(widget.roomId);
 
   Future<Timeline> getTimeline() => _timelineLoader.get();
 

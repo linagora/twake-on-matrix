@@ -3,6 +3,7 @@ import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:twake_chat/pages/chat/context_item_chat_action.dart';
+import 'package:twake_chat/pages/chat/events/call_line_bubble.dart';
 import 'package:twake_chat/pages/chat/events/message/message_container.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
@@ -21,6 +22,8 @@ import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -48,7 +51,7 @@ typedef OnTapAvatar = void Function(Event);
 
 typedef OnScrollToEventId = void Function(String);
 
-class Message extends StatefulWidget {
+class Message extends ConsumerStatefulWidget {
   final Event event;
   final MatrixState? matrixState;
   final Event? previousEvent;
@@ -63,6 +66,9 @@ class Message extends StatefulWidget {
   final ValueNotifier<String?>? highlightedEventIdNotifier;
   final bool selected;
   final Timeline timeline;
+
+  /// Who stopped reading at this own message.
+  final List<User> readers;
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
   final bool selectMode;
@@ -122,6 +128,7 @@ class Message extends StatefulWidget {
     this.hideKeyboardChatScreen,
     this.selectMode = true,
     required this.timeline,
+    this.readers = const [],
     required this.isHoverNotifier,
     this.highlightedEventIdNotifier,
     required this.listHorizontalActionMenu,
@@ -173,10 +180,10 @@ class Message extends StatefulWidget {
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   @override
-  State<Message> createState() => _MessageState();
+  ConsumerState<Message> createState() => _MessageState();
 }
 
-class _MessageState extends State<Message> with MessageAvatarMixin {
+class _MessageState extends ConsumerState<Message> with MessageAvatarMixin {
   InViewState? inViewState;
 
   final inviewNotifier = ValueNotifier(false);
@@ -243,6 +250,24 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
 
   @override
   Widget build(BuildContext context) {
+    final displayTime =
+        widget.event.type == EventTypes.RoomCreate ||
+        widget.nextEvent == null ||
+        !widget.event.originServerTs.sameEnvironment(
+          widget.nextEvent!.originServerTs,
+        );
+    if (widget.event.callLine case final line?) {
+      return VisibilityDetector(
+        key: Key('visibility_${widget.event.eventId}'),
+        onVisibilityChanged: _onVisibilityChangedForMarkAsRead,
+        child: Column(
+          children: [
+            ..._separators(displayTime),
+            CallLineBubble(line: line, sentAt: widget.event.originServerTs),
+          ],
+        ),
+      );
+    }
     if (!EventTypeRules.userContentTypes.contains(widget.event.type)) {
       if (widget.event.isJoinedByRoomCreator()) {
         return const SizedBox.shrink();
@@ -264,21 +289,17 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       );
     }
 
-    final displayTime =
-        widget.event.type == EventTypes.RoomCreate ||
-        widget.nextEvent == null ||
-        !widget.event.originServerTs.sameEnvironment(
-          widget.nextEvent!.originServerTs,
-        );
-    final rowMainAxisAlignment = widget.event.isOwnMessage
-        ? MainAxisAlignment.end
-        : MainAxisAlignment.start;
+    final alignOwnRight = ref.watch(alignOwnMessagesRightProvider);
+    final rowMainAxisAlignment = MessageStyle.messageAlignment(
+      widget.event,
+      alignOwnRight,
+    );
 
     final hasReactionEvent = context
         .albumEventsOf(widget.event)
         .any((event) => event.hasReactionEvent(timeline: widget.timeline));
     final rowChildren = <Widget>[
-      if (!widget.event.shouldAlignOwnMessageInDifferentSide)
+      if (!widget.event.shouldAlignOwnMessageInDifferentSide(alignOwnRight))
         Padding(
           // Reactions hang below the bubble (overflowing by
           // kMessageReactionsOverlayHeight). Lift the avatar by that amount so
@@ -292,7 +313,6 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               widget.onAvatarTap,
               event: widget.event,
               sameSender: widget.event.isSameSenderWith(widget.previousEvent),
-              ownMessage: widget.event.isOwnMessage,
               context: context,
               selectMode: widget.selectMode,
             ),
@@ -309,6 +329,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           selected: widget.selected,
           selectMode: widget.selectMode,
           timeline: widget.timeline,
+          readers: widget.readers,
           isHoverNotifier: widget.isHoverNotifier,
           listHorizontalActionMenu: widget.listHorizontalActionMenu,
           onMenuAction: widget.onMenuAction,
@@ -355,41 +376,10 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
     final column = Column(
       crossAxisAlignment: MessageStyle.messageCrossAxisAlignment(
         widget.event,
-        context,
+        alignOwnRight,
       ),
       children: [
-        if (displayTime)
-          ValueListenableBuilder(
-            valueListenable: inviewNotifier,
-            builder: (context, inView, _) {
-              return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isDesktop,
-                child: StickyTimestampWidget(
-                  content: !inView
-                      ? widget.event.originServerTs.relativeTime(context)
-                      : '',
-                ),
-              );
-            },
-          ),
-        if (widget.markedUnreadLocation != null &&
-            widget.markedUnreadLocation == widget.event.eventId) ...[
-          Padding(
-            padding: MessageStyle.paddingDividerUnreadMessage,
-            child: Divider(
-              height: MessageStyle.heightDivider,
-              color: LinagoraStateLayer(
-                LinagoraSysColors.material().surfaceTint,
-              ).opacityLayer3,
-            ),
-          ),
-          OptionalSelectionContainerDisabled(
-            isEnabled: PlatformInfos.isDesktop,
-            child: StickyTimestampWidget(
-              content: L10n.of(context)!.unreadMessages,
-            ),
-          ),
-        ],
+        ..._separators(displayTime),
         MessageContainer(
           event: widget.event,
           row: row,
@@ -412,4 +402,37 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       child: column,
     );
   }
+
+  List<Widget> _separators(bool displayTime) => [
+    if (displayTime)
+      ValueListenableBuilder(
+        valueListenable: inviewNotifier,
+        builder: (context, inView, _) {
+          return OptionalSelectionContainerDisabled(
+            isEnabled: PlatformInfos.isDesktop,
+            child: StickyTimestampWidget(
+              content: !inView
+                  ? widget.event.originServerTs.relativeTime(context)
+                  : '',
+            ),
+          );
+        },
+      ),
+    if (widget.markedUnreadLocation != null &&
+        widget.markedUnreadLocation == widget.event.eventId) ...[
+      Padding(
+        padding: MessageStyle.paddingDividerUnreadMessage,
+        child: Divider(
+          height: MessageStyle.heightDivider,
+          color: LinagoraStateLayer(
+            LinagoraSysColors.material().surfaceTint,
+          ).opacityLayer3,
+        ),
+      ),
+      OptionalSelectionContainerDisabled(
+        isEnabled: PlatformInfos.isDesktop,
+        child: StickyTimestampWidget(content: L10n.of(context)!.unreadMessages),
+      ),
+    ],
+  ];
 }

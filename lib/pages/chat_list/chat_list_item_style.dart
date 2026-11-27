@@ -13,13 +13,19 @@ class ChatListItemStyle {
 
   static const double chatItemHeight = 72;
 
+  /// The compact density: shorter rows, the last message kept.
+  static const double compactChatItemHeight = 56;
+
+  static const double compactAvatarSize = 40;
+
+  static const EdgeInsetsDirectional compactPaddingBody =
+      EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 2);
+
   static const double spaceItemHeight = 56;
 
   static const double depthIndent = 24;
 
   static const double childAvatarSize = 32;
-
-  static const double spaceAvatarSize = 48;
 
   static double unreadBadgeSize(
     bool unread,
@@ -40,10 +46,6 @@ class ChatListItemStyle {
   static const EdgeInsetsDirectional paddingAvatar = EdgeInsetsDirectional.only(
     end: 8,
   );
-
-  // Keeps the title of a space aligned with the titles of the rooms.
-  static const EdgeInsetsDirectional paddingSpaceAvatar =
-      EdgeInsetsDirectional.only(end: 16);
 
   static const EdgeInsetsDirectional paddingBody =
       EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4);

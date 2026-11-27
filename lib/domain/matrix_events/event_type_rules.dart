@@ -127,6 +127,10 @@ abstract final class EventTypeRules {
     EventTypes.CallInvite: EventTypeRule(
       group: EventVisibilityGroup.alwaysVisible,
     ),
+    CallEventTypes.callLine: EventTypeRule(
+      group: EventVisibilityGroup.alwaysVisible,
+      showInChatList: true,
+    ),
   };
 
   /// Returns the visibility group for [type], or [EventVisibilityGroup.unknown]

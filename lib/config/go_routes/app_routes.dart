@@ -43,7 +43,7 @@ import 'package:twake_chat/pages/settings_dashboard/settings_notifications/setti
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_stories/settings_stories.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_style/settings_style.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_personalization/settings_personalization.dart';
 import 'package:twake_chat/pages/share/share.dart';
 import 'package:twake_chat/pages/sign_up/signup.dart';
 import 'package:twake_chat/pages/splash/splash.dart';
@@ -337,6 +337,7 @@ class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
             TypedGoRoute<BuiltinFolderEditRoute>(path: 'builtin'),
           ],
         ),
+        TypedGoRoute<PersonalizationRoute>(path: 'personalization'),
         TypedGoRoute<DraftChatRoute>(path: 'draftChat'),
         TypedGoRoute<ForwardRoute>(path: 'forward'),
         TypedGoRoute<ShareRoute>(path: 'share'),
@@ -346,7 +347,6 @@ class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
         ),
         TypedGoRoute<NotificationsRoute>(path: 'notifications'),
         TypedGoRoute<PublicRoomsRoute>(path: 'publicgroups'),
-        TypedGoRoute<StyleRoute>(path: 'style'),
         TypedGoRoute<DevicesRoute>(path: 'devices'),
         TypedGoRoute<AppLanguageRoute>(path: 'appLanguage'),
         TypedGoRoute<DataAndStorageRoute>(path: 'dataAndStorage'),
@@ -635,6 +635,18 @@ class FoldersRoute extends GoRouteData with $FoldersRoute {
       _defaultPage(context, const FoldersScreen());
 }
 
+class PersonalizationRoute extends GoRouteData with $PersonalizationRoute {
+  const PersonalizationRoute();
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
+      _loggedOutRedirect(context, state);
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, const SettingsPersonalization());
+}
+
 class FolderEditRoute extends GoRouteData with $FolderEditRoute {
   const FolderEditRoute({this.name});
 
@@ -778,18 +790,6 @@ class PublicRoomsRoute extends GoRouteData with $PublicRoomsRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
       _defaultPage(context, const PublicRoomsPage());
-}
-
-class StyleRoute extends GoRouteData with $StyleRoute {
-  const StyleRoute();
-
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
-      _loggedOutRedirect(context, state);
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const SettingsStyle());
 }
 
 class DevicesRoute extends GoRouteData with $DevicesRoute {

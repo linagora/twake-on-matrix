@@ -156,7 +156,9 @@ class TwakeClient extends Client
 
     // The SDK adds call events after the given set: a call would mark the
     // room unread.
-    roomPreviewLastEvents.removeWhere(CallEventTypes.isCallEvent);
+    roomPreviewLastEvents
+      ..removeWhere(CallEventTypes.isCallEvent)
+      ..add(CallEventTypes.callLine);
   }
 
   static bool _hasThreadPrefs(SyncUpdate update) =>

@@ -21,18 +21,23 @@ class ChatListBodyView extends StatelessWidget {
   final Widget? header;
   final double headerHeight;
 
+  /// Room the [header] gets above [headerHeight] at the top of the list for
+  /// its search field, which then scrolls away while the rest stays pinned.
+  final double searchFieldExtent;
+
   const ChatListBodyView(
     this.controller, {
     super.key,
     this.header,
     this.headerHeight = 0,
+    this.searchFieldExtent = 0,
   });
 
   Widget _withHeader(Widget content) => header == null
       ? content
       : Column(
           children: [
-            SizedBox(height: headerHeight, child: header),
+            SizedBox(height: headerHeight + searchFieldExtent, child: header),
             Expanded(child: content),
           ],
         );
@@ -131,12 +136,16 @@ class ChatListBodyView extends StatelessWidget {
                       ValueListenableBuilder(
                         valueListenable: controller.selectModeNotifier,
                         builder: (context, selectMode, _) => SliverAppBar(
-                          floating: true,
-                          snap: true,
-                          pinned: selectMode.isSelectMode,
+                          floating: searchFieldExtent == 0,
+                          snap: searchFieldExtent == 0,
+                          pinned:
+                              selectMode.isSelectMode || searchFieldExtent > 0,
                           primary: false,
                           automaticallyImplyLeading: false,
                           toolbarHeight: headerHeight,
+                          expandedHeight:
+                              headerHeight +
+                              (selectMode.isSelectMode ? 0 : searchFieldExtent),
                           titleSpacing: 0,
                           elevation: 0,
                           scrolledUnderElevation: 0,

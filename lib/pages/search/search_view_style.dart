@@ -21,9 +21,6 @@ class SearchViewStyle {
 
   static final BorderRadius borderRadiusTextField = BorderRadius.circular(24);
 
-  static EdgeInsetsGeometry get appbarPadding =>
-      const EdgeInsetsDirectional.only(bottom: 0.0, top: 0.0);
-
   static TextStyle? headerTextStyle(BuildContext context) => Theme.of(context)
       .textTheme
       .labelLarge

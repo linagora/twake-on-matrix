@@ -14,8 +14,8 @@ Cutting the release (CHANGELOG, bump, tag, CI) is the `release` skill; reference
 
 ## Steps
 
-1. **Find the release.** Tag `vX.Y.Z` and its CI run: `gh run list --workflow=release.yaml --limit 5`. The Android and iOS jobs must be green before the note says a store got the build. A release tag is cut on a `chore/release-x.y.z` branch and is not on `main`.
-2. **Collect what ships.** Read the `## [X.Y.Z]` section of `CHANGELOG.md` (lines are `#PR: description`, with a `### Tests` section to skip). Check the PRs with `gh pr view <n>` when a line is not enough. Do not use `git describe --tags` on `main`: the tags are not on it, so it returns an old tag and lists shipped releases again.
+1. **Find the release.** Tag `vX.Y.Z` and its CI runs: `gh run list --workflow=release.yaml --limit 5` (Android, iOS) and `gh run list --workflow=macos-testflight.yaml --limit 5` (macOS, started by hand). If the build to announce is not listed, raise `--limit`. The note says a store got the build when the job log shows its upload succeeded, even if a later step turned the job red; tell the deployer about the failure. One note per build that reached a store, a macOS build alone included. A release tag is cut on a `chore/release-x.y.z` branch and is not on `main`.
+2. **Collect what ships.** For Android and iOS, read the `## [X.Y.Z]` section of `CHANGELOG.md` (lines are `#PR: description`, with a `### Tests` section to skip). Check the PRs with `gh pr view <n>` when a line is not enough. For macOS, take the changes only from the last announced macOS build to the built commit, not from the whole section: that build can be older or newer than the last announced tag. List the PRs of `git log <commit of that build>..<built commit> --oneline` (both commits are in the checkout step logs). If no macOS build was announced yet, ask the deployer which build the macOS testers had before and count from it. Do not use `git describe --tags` on `main`: the tags are not on it, so it returns an old tag and lists shipped releases again.
 3. **Draft the note** (below), and the video for big features.
 4. **Hand over.** Give the person who deployed: tag, CI run links, stores reached, the note text, and the video files. Tell them it must be posted; until then the deploy is not complete.
 
@@ -26,7 +26,7 @@ Markdown, English, written for non-technical readers.
 ```
 ## Twake Chat mobile X.Y.Z: what's new
 
-**Available on:** TestFlight (iOS) · Play Store internal (Android)
+**Available on:** TestFlight (iOS) · Play Store internal (Android) · TestFlight (macOS)
 
 ### What changes for you
 - One plain sentence per visible change: what the user sees or can now do.

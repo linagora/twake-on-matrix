@@ -8,8 +8,13 @@ class WatchPresenceUseCase {
 
   /// Emits the presence of [userId] now and on every change; a blank id has
   /// none.
-  Stream<PersonPresence?> execute(String userId) {
+  Stream<PersonPresence?> execute(
+    String userId, {
+    required bool readFromServer,
+  }) {
     if (userId.isEmpty) return Stream.value(null);
-    return _repository.watchPresence(userId).distinct();
+    return _repository
+        .watchPresence(userId, readFromServer: readFromServer)
+        .distinct();
   }
 }
