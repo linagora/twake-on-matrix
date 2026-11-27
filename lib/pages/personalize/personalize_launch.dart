@@ -46,11 +46,10 @@ abstract final class PersonalizeLaunch {
     if (covering == null) return;
     final onTop = Completer<void>();
     void listener(AnimationStatus status) {
-      if (status == AnimationStatus.dismissed &&
-          route.isCurrent &&
-          !onTop.isCompleted) {
-        onTop.complete();
-      }
+      final coverGone = status == AnimationStatus.dismissed;
+      final isTop = route.isCurrent;
+      final waiting = !onTop.isCompleted;
+      if (coverGone && isTop && waiting) onTop.complete();
     }
 
     covering.addStatusListener(listener);
