@@ -94,6 +94,19 @@ class _WatchedController<T> extends CachedStreamController<T> {
   }
 }
 
+/// Tells whether something still listens to its stream.
+class _ListenedController<T> extends CachedStreamController<T> {
+  final _controller = StreamController<T>.broadcast();
+
+  bool get hasListener => _controller.hasListener;
+
+  @override
+  Stream<T> get stream => _controller.stream;
+
+  @override
+  void add(T value) => _controller.add(value);
+}
+
 class _CountingToMDatabase implements HiveCollectionToMDatabase {
   int clears = 0;
 
@@ -112,7 +125,7 @@ class _BootClient extends FakeAccountClient {
   final _onKeyVerificationRequest = CachedStreamController<KeyVerification>();
   final _onLoginStateChanged = _WatchedController<LoginState>();
   final _onUiaRequest = CachedStreamController<UiaRequest>();
-  final _onSyncStatus = CachedStreamController<SyncStatusUpdate>();
+  final _onSyncStatus = _ListenedController<SyncStatusUpdate>();
   final _onToDeviceEvent = CachedStreamController<ToDeviceEvent>();
   final _onSync = CachedStreamController<SyncUpdate>();
   final _httpClient = http.Client();
@@ -146,7 +159,7 @@ class _BootClient extends FakeAccountClient {
   CachedStreamController<UiaRequest> get onUiaRequest => _onUiaRequest;
 
   @override
-  CachedStreamController<SyncStatusUpdate> get onSyncStatus => _onSyncStatus;
+  _ListenedController<SyncStatusUpdate> get onSyncStatus => _onSyncStatus;
 
   @override
   CachedStreamController<ToDeviceEvent> get onToDeviceEvent => _onToDeviceEvent;
@@ -980,11 +993,14 @@ void main() {
     await harness.run(() async {
       await harness.mount();
       await harness.settle();
+      expect(client.onSyncStatus.hasListener, isTrue);
       await harness.unmount();
 
       client.onSyncStatus.add(const SyncStatusUpdate(SyncStatus.finished));
       await harness.settle();
     });
+
+    expect(client.onSyncStatus.hasListener, isFalse);
   });
 
   testWidgets('a cancel that fails at the unmount is reported, not thrown', (
