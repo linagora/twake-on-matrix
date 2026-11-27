@@ -2,7 +2,6 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart'
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
-import 'package:twake_chat/pages/chat/chat_view_body_style.dart';
 import 'package:twake_chat/pages/chat/events/message/reply_content_widget.dart';
 import 'package:twake_chat/pages/chat/events/reply_content_style.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
@@ -102,9 +101,6 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   /// The summary of the thread of this message, inside its bubble.
   final Widget? threadCard;
 
-  /// The colour behind the messages, which rings the bubble of a reply.
-  final Color pageColor;
-
   static const Key dialogSafeAreaKey = Key(
     'message_context_menu_dialog_safe_area',
   );
@@ -155,7 +151,6 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.recentEmojiFuture,
     this.onRetryTextMessage,
     this.threadCard,
-    this.pageColor = ChatViewBodyStyle.backgroundColor,
   });
 
   /// [members] when every one of them is sent; else null, so the album menu
@@ -811,7 +806,7 @@ class _MessageContentWithTimestampBuilderState
             tailDirection: tailDirection,
             contentType: bubbleContentType,
             padding: card != null ? EdgeInsets.zero : null,
-            shadows: isReply ? _ringedShadows : kBubbleShadow,
+            shadows: isReply ? _cutOutShadows : kBubbleShadow,
             constraints: bubbleConstraints,
             isAlignedToEnd: alignOwnMessageRight,
             reactions: reactions,
@@ -822,32 +817,37 @@ class _MessageContentWithTimestampBuilderState
     final alignment = alignOwnMessageRight
         ? CrossAxisAlignment.end
         : CrossAxisAlignment.start;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      // The side of the bubble is physical, in right-to-left languages too.
-      textDirection: TextDirection.ltr,
-      crossAxisAlignment: alignment,
-      children: [
-        ConstrainedBox(
-          constraints: bubbleConstraints,
-          child: ReplyContentWidget(
-            event: widget.event,
-            timeline: widget.timeline,
-            scrollToEventId: widget.scrollToEventId,
-            alignment: alignment,
-            overlap: isDisplayOnlyEmoji ? 0 : ReplyContentStyle.quoteOverlap,
+    // The mask changes nothing: it gives the quote and the bubble their own
+    // layer, so the gap is cut out of the quote only, not out of the row.
+    return ShaderMask(
+      blendMode: BlendMode.modulate,
+      shaderCallback: (bounds) => const LinearGradient(
+        colors: [Colors.white, Colors.white],
+      ).createShader(bounds),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        // The side of the bubble is physical, in right-to-left languages too.
+        textDirection: TextDirection.ltr,
+        crossAxisAlignment: alignment,
+        children: [
+          ConstrainedBox(
+            constraints: bubbleConstraints,
+            child: ReplyContentWidget(
+              event: widget.event,
+              timeline: widget.timeline,
+              scrollToEventId: widget.scrollToEventId,
+              alignment: alignment,
+              overlap: isDisplayOnlyEmoji ? 0 : ReplyContentStyle.quoteOverlap,
+            ),
           ),
-        ),
-        bubble,
-      ],
+          bubble,
+        ],
+      ),
     );
   }
 
-  List<BoxShadow> get _ringedShadows => [
-    BoxShadow(
-      color: widget.pageColor,
-      spreadRadius: ReplyContentStyle.quoteRingWidth,
-    ),
+  static const List<BoxShadow> _cutOutShadows = [
+    _CutOutShadow(spreadRadius: ReplyContentStyle.quoteRingWidth),
     ...kBubbleShadow,
   ];
 
@@ -993,4 +993,12 @@ class _MessageContentWithTimestampBuilderState
           )
         : null;
   }
+}
+
+/// Erases what was painted around a shape, instead of casting a colour on it.
+class _CutOutShadow extends BoxShadow {
+  const _CutOutShadow({super.spreadRadius});
+
+  @override
+  Paint toPaint() => super.toPaint()..blendMode = BlendMode.dstOut;
 }

@@ -56,7 +56,7 @@ class ReplyContentStyle {
   /// How far a message bubble covers the bubble quoted above it.
   static const double quoteOverlap = 12;
 
-  /// Width of the page-coloured ring that parts the two bubbles.
+  /// Width of the gap that parts the two bubbles.
   static const double quoteRingWidth = 2;
 
   static const double quoteCaptionIconSize = 14;

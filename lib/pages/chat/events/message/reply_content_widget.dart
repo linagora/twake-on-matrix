@@ -27,12 +27,13 @@ class ReplyContentWidget extends StatelessWidget {
     return FutureBuilder<Event?>(
       future: event.getReplyEvent(timeline),
       builder: (context, snapshot) {
+        final quotedId = event.inReplyToEventId();
         Event? replyEvent;
         if (snapshot.data != null) {
           replyEvent = snapshot.data;
-        } else if (event.relationshipEventId != null) {
+        } else if (quotedId != null) {
           replyEvent = Event(
-            eventId: event.relationshipEventId!,
+            eventId: quotedId,
             content: {'msgtype': 'm.text', 'body': '...'},
             senderId: event.senderId,
             type: 'm.room.message',

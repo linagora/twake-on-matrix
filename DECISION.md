@@ -604,9 +604,10 @@ shows:
 
 - a caption, "Reply to {name}", naming the author of the quoted message;
 - the quoted message in a pale bubble;
-- the message bubble, which overlaps the quoted bubble by 12 and has a 2px
-  ring.
+- the message bubble, which overlaps the quoted bubble by 12, with a 2px gap
+  cut out of the quoted bubble around it.
 
 When the quoted message is not loaded, the caption is "Reply", with no name.
 
-Known limit: the ring has the flat background colour of the chat.
+The gap shows what is behind the message: the chat background, or the colour of
+a selected or highlighted row.
