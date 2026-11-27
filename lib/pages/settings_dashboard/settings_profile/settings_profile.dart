@@ -503,7 +503,7 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
     }
   }
 
-  // TODO: [transitional] MultipleAccountsPickerController still takes Clients.
+  // TODO: [transitional] #3828 MultipleAccountsPickerController still takes Clients.
   void onBottomButtonTap(List<AccountProfile> accounts) {
     final profile = _profile;
     final clients = ClientManager.loggedIn(

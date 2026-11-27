@@ -27,8 +27,7 @@ class SettingsProfileController extends _$SettingsProfileController {
     );
   }
 
-  // TODO: [transitional] the save moves into this controller once a Patrol
-  // scenario covers it; the screen then stops pushing the saved profile.
+  // TODO: [transitional] #3827 The screen pushes the saved profile until the save moves here.
   void applySaved(AccountProfile profile) {
     if (!state.hasValue) return;
     state = AsyncData(SettingsProfileState(profile: profile));
