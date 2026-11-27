@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:matrix/matrix.dart' show Profile;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
@@ -11,28 +9,31 @@ import 'package:twake_chat/widgets/avatar/avatar.dart';
 /// The avatar of the user at the start of the phone app bars: it opens
 /// Settings, which is no tab of the bottom bar.
 class SettingsAvatarButton extends ConsumerWidget {
-  const SettingsAvatarButton({super.key, required this.onTap, this.profile});
+  /// Reads the profile of the active account.
+  const SettingsAvatarButton({super.key, required this.onTap})
+    : _given = false,
+      avatarUrl = null,
+      name = null;
+
+  /// The profile the app bar already follows.
+  const SettingsAvatarButton.of({
+    super.key,
+    required this.onTap,
+    required this.avatarUrl,
+    required this.name,
+  }) : _given = true;
 
   final VoidCallback? onTap;
-
-  /// The profile of the user when the app bar already follows it; read from
-  /// the active account otherwise.
-  final ValueListenable<Profile>? profile;
+  final Uri? avatarUrl;
+  final String? name;
+  final bool _given;
 
   static const double size = 32;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = this.profile;
-    if (profile != null) {
-      return ValueListenableBuilder(
-        valueListenable: profile,
-        builder: (context, profile, _) => _button(
-          context,
-          avatarUrl: profile.avatarUrl,
-          name: profile.displayName ?? profile.userId,
-        ),
-      );
+    if (_given) {
+      return _button(context, avatarUrl: this.avatarUrl, name: name);
     }
     final userId = ref.watch(activeUserIdProvider);
     final fetched = userId == null

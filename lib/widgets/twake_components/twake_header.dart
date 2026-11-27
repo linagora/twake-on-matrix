@@ -119,9 +119,14 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
                 // Wherever the floating bar shows, which has no Settings tab.
                 leading: !responsive.isDesktop(context)
                     ? Center(
-                        child: SettingsAvatarButton(
-                          onTap: widget.onClickAvatar,
-                          profile: currentProfileNotifier,
+                        child: ValueListenableBuilder(
+                          valueListenable: currentProfileNotifier,
+                          builder: (context, profile, _) =>
+                              SettingsAvatarButton.of(
+                                onTap: widget.onClickAvatar,
+                                avatarUrl: profile.avatarUrl,
+                                name: profile.displayName ?? profile.userId,
+                              ),
                         ),
                       )
                     : null,

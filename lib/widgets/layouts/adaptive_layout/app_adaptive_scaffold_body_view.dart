@@ -275,8 +275,7 @@ class _ColumnPageView extends StatelessWidget {
           builder: (context) {
             // The search of the bar is the phone's: wider, the header keeps
             // its field.
-            final search =
-                withSearch && getIt.get<ResponsiveUtils>().isMobile(context);
+            final search = withSearch && ResponsiveUtils().isMobile(context);
             return FloatingNavigationBar(
               destinations: destinations,
               selected: activeNavigationBarNotifier.value,
