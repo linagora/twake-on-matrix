@@ -7,6 +7,7 @@ import 'package:http/testing.dart' as http_testing;
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/twake_client.dart';
@@ -395,6 +396,12 @@ void main() {
       client.roomPreviewLastEvents,
       isNot(contains(EventTypes.GroupCallMember)),
     );
+  });
+
+  test('the line of a call is a room preview', () {
+    final client = TwakeClient('testclient', database: MockDatabase());
+
+    expect(client.roomPreviewLastEvents, contains(CallEventTypes.callLine));
   });
 
   group('logout and the HTTP session in the keychain', () {

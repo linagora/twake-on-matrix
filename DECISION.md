@@ -596,3 +596,40 @@ once if it is a voice message too (#2796). The run stops:
 Events the chat does not show (reactions, edits) do not stop the run. On the
 thread screen, the run plays the replies of that thread only, from its root
 too; in the chat, it skips the thread replies, as the chat does.
+
+## D31. Every call leaves one line in the chat, written by its caller (proposed, 2026-11-26; the event of Twake Space Chat adopted as is: decided by Johann, 2026-11-23)
+
+The device that rang a call (D21) writes one `app.twake.chat.call` event when
+it leaves it, exactly as Twake Space Chat writes it (its D682): `intent`
+(`audio` or `video`), `started_ts`, `answered_ts` when another user joined,
+`ended_ts`, and an `m.reference` to its ring. It goes out in the clear, like
+the ring. The other devices never write it. Every client of the room reads
+the same line:
+
+- one bubble per call, with nothing to act on: a phone or camera icon,
+  « Incoming call » or « Outgoing call » (« … video call »), then the outcome
+  and the time; own calls on the right, received ones on the left;
+- the caller reads its duration in green when someone answered, else
+  « Canceled » in red; the others read the duration, or « Missed » in red;
+- in the chat list: « Missed call » (« Missed video call »), else the title of
+  the bubble.
+
+The duration is the time the caller stayed after the answer, as on the web,
+shown `mm:ss` (`h:mm:ss` past an hour) like a voice message, where the web
+writes « 1 min 5 s ».
+
+Deviations from Twake Space Chat, to keep this first version small:
+
+- A group call that someone else answered reads as answered, with its
+  duration, for a member who never joined it; the web reads it « Missed » for
+  them. The web also hides an unanswered line for a member who declined or
+  was not rung; mobile shows « Missed ».
+- The line counts whatever ring it names: the web ignores a line whose ring is
+  not in the room or has another sender (forged lines).
+- A ring with no line (an older call, or a caller whose app was killed) shows
+  nothing; the web shows it as a missed call. A missed call does not make the
+  room unread, nor show in a notification of its own: the ring already
+  notified.
+- The card of a call thread root (the web's D806) is not drawn.
+
+Completes D12, which showed a call only while it went on.

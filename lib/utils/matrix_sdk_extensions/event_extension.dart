@@ -4,8 +4,10 @@ import 'package:collection/collection.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/domain/model/call/call_line.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/presentation/extensions/call_line_extension.dart';
 import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
@@ -670,6 +672,10 @@ extension FutureEventExtension on Event {
   String callThreadRootText(L10n l10n) =>
       l10n.callStartedAt(DateFormat('HH:mm').format(originServerTs));
 
+  CallLine? get callLine => type == CallEventTypes.callLine && !redacted
+      ? CallLine.fromContent(content, isOwn: senderId == room.client.userID)
+      : null;
+
   String? get fileCaption {
     final shownFilename = _shownContent.tryGet<String>('filename');
     if (messageType != MessageTypes.File || shownFilename == null) return null;
@@ -695,6 +701,7 @@ extension FutureEventExtension on Event {
 
   Future<String> calcLocalizedBodyRemoveBreakLine(L10n l10n) async {
     if (isCallThreadRoot) return callThreadRootText(l10n);
+    if (callLine case final line?) return line.previewText(l10n);
     final body = await calcLocalizedBody(
       MatrixLocals(l10n),
       hideReply: true,
@@ -708,6 +715,7 @@ extension FutureEventExtension on Event {
 
   String calcLocalizedBodyFallbackRemoveBreakLine(L10n l10n) {
     if (isCallThreadRoot) return callThreadRootText(l10n);
+    if (callLine case final line?) return line.previewText(l10n);
     final body = calcLocalizedBodyFallback(
       MatrixLocals(l10n),
       hideReply: true,

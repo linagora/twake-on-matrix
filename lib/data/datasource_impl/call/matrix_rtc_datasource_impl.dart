@@ -6,6 +6,7 @@ import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/data/datasource_impl/call/call_membership_extender.dart';
 import 'package:twake_chat/data/datasource_impl/call/call_ring_tracker.dart';
 import 'package:twake_chat/data/datasource_impl/call/matrix_rtc_media_keys.dart';
+import 'package:twake_chat/data/datasource_impl/call/outgoing_calls.dart';
 import 'package:twake_chat/data/model/call/call_member_content.dart';
 import 'package:twake_chat/data/model/call/sfu_token_request.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
@@ -72,8 +73,9 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   Timer? _restartTimer;
   CallMembershipExtender? _extender;
   final _trackers = <CallRingTracker>{};
-  final _sentRings = <String, String>{};
   final _disposed = Completer<void>();
+  final _outgoing = OutgoingCalls();
+  StreamSubscription<SyncUpdate>? _answerWatch;
 
   Client get _client => _maybeClient ?? (throw const CallNoClientException());
 
@@ -168,6 +170,8 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     }
     final slot = _ownSlot(room);
     final device = _device;
+    // A ring of an earlier call that left no line must not end this one.
+    _outgoing.forget(room.id);
     await _scheduleDelayedLeave(slot);
     final String eventId;
     try {
@@ -286,7 +290,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
 
   @override
   Future<void> leaveMembership(CallRoom call) async {
-    _sentRings.remove(call.id);
+    _outgoing.close(call.id, DateTime.now());
     final (:delayId, :extended) = _endSession();
     // A write still in flight would otherwise land after the leave.
     final restarting = _restarting;
@@ -323,29 +327,69 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   /// No room mention: `.m.rule.is_room_mention` would take the push of a
   /// caller allowed to mention the room, without the ring sound.
   @override
-  Future<void> sendRing(CallJoin join, {required String membershipEventId}) =>
-      _logged('ring not sent', () async {
-        final session = _session;
-        // The slot of the room, as the web client sends it.
-        final ringId = await _send(
-          join.room,
-          RtcNotificationContent.eventType,
-          {
-            'slot_id': 'm.call#ROOM',
-            'notification_type': 'ring',
-            'sender_ts': DateTime.now().millisecondsSinceEpoch,
-            'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
-            'm.mentions': <String, Object?>{},
-            'm.relates_to': {
-              'rel_type': 'm.reference',
-              'event_id': membershipEventId,
-            },
-            'm.call.intent': join.isVideo ? 'video' : 'audio',
-          },
-        );
-        // Left during the send: the ring belongs to an ended call.
-        if (session == _session) _sentRings[join.room.id] = ringId;
+  Future<void> sendRing(
+    CallJoin join, {
+    required String membershipEventId,
+  }) async {
+    final sentAt = DateTime.now();
+    final outgoing = _outgoing.start(
+      join.room.id,
+      isVideo: join.isVideo,
+      startedAt: sentAt,
+    );
+    _answerWatch ??= _client.onSync.stream.listen((_) => _watchAnswers());
+    late final String ringId;
+    // The slot of the room, as the web client sends it.
+    await _logged('ring not sent', () async {
+      ringId = await _send(join.room, RtcNotificationContent.eventType, {
+        'slot_id': 'm.call#ROOM',
+        'notification_type': 'ring',
+        'sender_ts': sentAt.millisecondsSinceEpoch,
+        'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
+        'm.mentions': <String, Object?>{},
+        'm.relates_to': {
+          'rel_type': 'm.reference',
+          'event_id': membershipEventId,
+        },
+        'm.call.intent': join.isVideo ? 'video' : 'audio',
       });
+    }, onError: () => _outgoing.dropRing(join.room.id, outgoing));
+    // The caller hung up while the ring was being sent.
+    await _publishLine(join.room, _outgoing.rang(outgoing, ringId));
+  }
+
+  void _watchAnswers() {
+    final now = DateTime.now();
+    for (final roomId in _outgoing.roomIds.toList()) {
+      final members = _client.getRoomById(roomId)?.states[memberEventType];
+      final answered = members?.values.any(
+        (member) =>
+            member.senderId != _client.userID &&
+            CallRingTracker.isLiveMembership(member),
+      );
+      if (answered ?? false) _outgoing.answer(roomId, now);
+    }
+  }
+
+  @override
+  void closeCall(CallRoom call, {required DateTime endedAt}) =>
+      _outgoing.close(call.id, endedAt);
+
+  @override
+  Future<void> sendCallLine(CallRoom call) async {
+    await _publishLine(call, _outgoing.end(call.id));
+  }
+
+  Future<void> _publishLine(
+    CallRoom call,
+    Map<String, Object?>? content,
+  ) async {
+    if (content == null) return;
+    await _logged(
+      'call line not sent',
+      () => _send(call, CallEventTypes.callLine, content),
+    );
+  }
 
   @override
   Stream<void> watchRingDeclined(CallRoom call) {
@@ -357,16 +401,23 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
               event.roomId == call.id &&
               event.senderId != client.userID &&
               CallRingTracker.isDecline(event) &&
-              _sentRings[call.id] != null &&
-              CallRingTracker.ringIdOf(event) == _sentRings[call.id],
+              _isLiveRing(call, CallRingTracker.ringIdOf(event)),
         )
         .map((_) {});
   }
 
-  Future<void> _logged(String what, Future<void> Function() action) async {
+  bool _isLiveRing(CallRoom call, String? ringId) =>
+      ringId != null && ringId == _outgoing.ringIdOf(call.id);
+
+  Future<void> _logged(
+    String what,
+    Future<void> Function() action, {
+    void Function()? onError,
+  }) async {
     try {
       await action();
     } on Exception catch (error, stackTrace) {
+      onError?.call();
       Logs().w('MatrixRtcDatasource: $what', error, stackTrace);
       rethrow;
     }
@@ -497,6 +548,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   void dispose() {
     if (!_disposed.isCompleted) _disposed.complete();
     _endSession().extended.ignore();
+    _answerWatch?.cancel().ignore();
     _trackers.toList().forEach((tracker) => tracker.dispose());
   }
 }

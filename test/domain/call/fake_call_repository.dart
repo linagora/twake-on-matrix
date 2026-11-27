@@ -41,6 +41,8 @@ class FakeCallRepository implements CallRepository {
   CallException? leaveError;
   CallException? mediaError;
   CallException? declineError;
+  CallException? lineError;
+  DateTime? closedAt;
   Object? staleError;
   Object? ringError;
   Object? pushRulesError;
@@ -140,6 +142,16 @@ class FakeCallRepository implements CallRepository {
   Future<void> ensureCallRingPushRules() async {
     calls.add('ensureCallRingPushRules');
     if (pushRulesError case final error?) throw error;
+  }
+
+  @override
+  void closeCall(CallRoom room, {required DateTime endedAt}) =>
+      closedAt = endedAt;
+
+  @override
+  Future<void> sendCallLine(CallRoom room) async {
+    calls.add('line ${room.id}');
+    if (lineError case final error?) throw error;
   }
 
   @override
