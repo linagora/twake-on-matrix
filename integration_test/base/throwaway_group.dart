@@ -47,10 +47,15 @@ Future<void> runInThrowawayGroup(
         cleanupError ??= (error, stackTrace);
       }
     }
-    await client.leaveRoom(roomId);
-    // A failed test keeps its own error: a cleanup one would hide it.
-    if (passed && cleanupError != null) {
-      Error.throwWithStackTrace(cleanupError.$1, cleanupError.$2);
+    try {
+      await client.leaveRoom(roomId);
+    } catch (error, stackTrace) {
+      cleanupError ??= (error, stackTrace);
+    }
+    if (cleanupError != null) {
+      // A failed test keeps its own error: a cleanup one would hide it.
+      if (passed) Error.throwWithStackTrace(cleanupError.$1, cleanupError.$2);
+      Logs().w('Cleanup of $roomId failed', cleanupError.$1, cleanupError.$2);
     }
   }
 }
