@@ -22,4 +22,18 @@ class ReportDatasourceImpl implements ReportDatasource {
       throw ReportRoomFailedException(roomId: roomId, cause: exception);
     }
   }
+
+  @override
+  Future<void> reportUser({
+    required String userId,
+    required String reason,
+  }) async {
+    final client = _client;
+    try {
+      await client.reportUser(userId, reason);
+    } on Exception catch (exception, stackTrace) {
+      Logs().e('ReportDatasourceImpl::reportUser', exception, stackTrace);
+      throw ReportUserFailedException(userId: userId, cause: exception);
+    }
+  }
 }

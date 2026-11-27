@@ -20,3 +20,12 @@ class ReportRoomFailedException extends ReportException {
 
   final String roomId;
 }
+
+class ReportUserFailedException extends ReportException {
+  const ReportUserFailedException({
+    required this.userId,
+    required Object super.cause,
+  }) : super('Failed to report the user');
+
+  final String userId;
+}

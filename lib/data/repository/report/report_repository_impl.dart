@@ -9,4 +9,8 @@ class ReportRepositoryImpl implements ReportRepository {
   @override
   Future<void> reportRoom({required String roomId, required String reason}) =>
       _datasource.reportRoom(roomId: roomId, reason: reason);
+
+  @override
+  Future<void> reportUser({required String userId, required String reason}) =>
+      _datasource.reportUser(userId: userId, reason: reason);
 }

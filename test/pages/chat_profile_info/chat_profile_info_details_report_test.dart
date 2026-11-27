@@ -23,11 +23,13 @@ class _NoContacts extends ContactsController {
 @GenerateNiceMocks([MockSpec<Room>()])
 void main() {
   late int reportTaps;
+  late int reportUserTaps;
   late int leaveTaps;
   late int blockTaps;
 
   setUp(() {
     reportTaps = 0;
+    reportUserTaps = 0;
     leaveTaps = 0;
     blockTaps = 0;
   });
@@ -57,6 +59,7 @@ void main() {
                 blockUserLoadingNotifier: ValueNotifier(null),
                 room: room,
                 onReportChat: () => reportTaps++,
+                onReportUser: () => reportUserTaps++,
                 onLeaveChat: () => leaveTaps++,
                 onBlockUser: () => blockTaps++,
               ),
@@ -98,5 +101,24 @@ void main() {
       find.byKey(ChatProfileInfoDetails.reportChatButtonKey),
       findsNothing,
     );
+    expect(
+      find.byKey(ChatProfileInfoDetails.reportUserButtonKey),
+      findsNothing,
+    );
   });
+
+  testWidgets(
+    'reportUser_whenTapped_reportsWithoutReportingTheChatOrBlocking',
+    (tester) async {
+      await pumpDetails(tester, roomWith(isDirectChat: true));
+
+      expect(find.text('Report user'), findsOneWidget);
+      await tester.tap(find.byKey(ChatProfileInfoDetails.reportUserButtonKey));
+      await tester.pumpAndSettle();
+
+      expect(reportUserTaps, 1);
+      expect(reportTaps, 0);
+      expect(blockTaps, 0);
+    },
+  );
 }

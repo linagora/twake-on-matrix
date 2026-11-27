@@ -32,6 +32,7 @@ class ChatProfileInfoAppBarView extends ConsumerWidget {
     this.room,
     this.onLeaveChat,
     this.onReportChat,
+    this.onReportUser,
     required this.groupInfoHeight,
     required this.maxGroupInfoHeight,
     required this.onChatInfoTap,
@@ -51,6 +52,7 @@ class ChatProfileInfoAppBarView extends ConsumerWidget {
   final Room? room;
   final void Function()? onLeaveChat;
   final VoidCallback? onReportChat;
+  final VoidCallback? onReportUser;
   final double groupInfoHeight;
   final double maxGroupInfoHeight;
   final VoidCallback onChatInfoTap;
@@ -125,6 +127,7 @@ class ChatProfileInfoAppBarView extends ConsumerWidget {
               room: room,
               onLeaveChat: onLeaveChat,
               onReportChat: onReportChat,
+              onReportUser: onReportUser,
             ),
           ],
         );

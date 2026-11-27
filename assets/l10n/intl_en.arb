@@ -2600,6 +2600,8 @@
     }
   },
   "reportChat": "Report chat",
+  "reportUser": "Report user",
+  "reportUserDesc": "What’s the issue with this user?",
   "sendReport": "Send Report",
   "addComment": "Add comment",
   "spam": "Spam",

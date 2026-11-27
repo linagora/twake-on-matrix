@@ -10,6 +10,8 @@ class _FakeReportDatasource implements ReportDatasource {
 
   final List<({String roomId, String reason})> roomReports = [];
 
+  final List<({String userId, String reason})> userReports = [];
+
   @override
   Future<void> reportRoom({
     required String roomId,
@@ -18,6 +20,16 @@ class _FakeReportDatasource implements ReportDatasource {
     final error = this.error;
     if (error != null) throw error;
     roomReports.add((roomId: roomId, reason: reason));
+  }
+
+  @override
+  Future<void> reportUser({
+    required String userId,
+    required String reason,
+  }) async {
+    final error = this.error;
+    if (error != null) throw error;
+    userReports.add((userId: userId, reason: reason));
   }
 }
 
@@ -48,5 +60,33 @@ void main() {
     ).reportRoom(roomId: '!room:hs', reason: 'Spam');
 
     await expectLater(result, throwsA(isA<ReportRoomFailedException>()));
+  });
+
+  test(
+    'reportUser_whenTheDatasourceSucceeds_forwardsUserIdAndReason',
+    () async {
+      final datasource = _FakeReportDatasource();
+
+      await ReportRepositoryImpl(
+        datasource,
+      ).reportUser(userId: '@bob:hs', reason: 'Spam');
+
+      expect(datasource.userReports, [(userId: '@bob:hs', reason: 'Spam')]);
+    },
+  );
+
+  test('reportUser_whenTheDatasourceFails_keepsTheExceptionType', () async {
+    final datasource = _FakeReportDatasource(
+      error: ReportUserFailedException(
+        userId: '@bob:hs',
+        cause: Exception('forbidden'),
+      ),
+    );
+
+    final result = ReportRepositoryImpl(
+      datasource,
+    ).reportUser(userId: '@bob:hs', reason: 'Spam');
+
+    await expectLater(result, throwsA(isA<ReportUserFailedException>()));
   });
 }

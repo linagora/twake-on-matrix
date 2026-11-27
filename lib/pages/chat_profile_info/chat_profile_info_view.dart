@@ -49,6 +49,7 @@ class ChatProfileInfoView extends StatelessWidget {
               blockUserLoadingNotifier: controller.blockUserLoadingNotifier,
               onLeaveChat: controller.leaveChat,
               onReportChat: controller.onReportChat,
+              onReportUser: controller.onReportUser,
               innerBoxIsScrolled: innerBoxIsScrolled,
               avatarUri: user?.avatarUrl,
               displayName: user?.calcDisplayname(),

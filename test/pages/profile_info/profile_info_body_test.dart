@@ -7,11 +7,16 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/report/usecases/report_user_usecase.dart';
+import 'package:twake_chat/domain/report/usecases/report_user_usecase.provider.dart';
 import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
+
+import '../../domain/report/fake_report_repository.dart';
 
 class _FakeGetUserInfoInteractor extends Fake implements GetUserInfoInteractor {
   @override
@@ -45,19 +50,19 @@ class _FakeRoom extends Fake implements Room {
 }
 
 class _FakeUser extends Fake implements User {
-  _FakeUser(this.membership);
+  _FakeUser(this.membership, {this.id = '@member:example.com'});
 
   @override
   final Membership membership;
+
+  @override
+  final String id;
 
   @override
   final Room room = _FakeRoom();
 
   @override
   PowerLevel get powerLevel => PowerLevel(0);
-
-  @override
-  String get id => '@member:example.com';
 
   @override
   bool get canBan => room.canBan && powerLevel < room.ownPowerLevel;
@@ -118,5 +123,75 @@ void main() {
         );
       });
     }
+  });
+
+  group('ProfileInfoBody report user action', () {
+    const reportUserKey = Key('profile_action_reportUser');
+    late FakeReportRepository repository;
+
+    setUp(() => repository = FakeReportRepository());
+
+    Future<void> pumpBody(WidgetTester tester, User user) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            matrixClientProvider.overrideWithValue(_FakeClient()),
+            reportUserUseCaseProvider.overrideWithValue(
+              ReportUserUseCase(repository),
+            ),
+          ],
+          child: MaterialApp(
+            navigatorKey: TwakeApp.routerKey = GlobalKey<NavigatorState>(),
+            theme: ThemeData(
+              extensions: [LinagoraTextThemeExtension.material()],
+            ),
+            locale: const Locale('en'),
+            localizationsDelegates: L10n.localizationsDelegates,
+            supportedLocales: L10n.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(child: ProfileInfoBody(user: user)),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
+    Future<void> tapAndSettle(WidgetTester tester, Finder finder) async {
+      await tester.ensureVisible(finder);
+      await tester.tap(finder);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('is offered on another member profile', (tester) async {
+      await pumpBody(tester, _FakeUser(Membership.join));
+
+      expect(find.byKey(reportUserKey), findsOneWidget);
+    });
+
+    testWidgets('is not offered on the own profile', (tester) async {
+      await pumpBody(tester, _FakeUser(Membership.join, id: '@me:example.com'));
+
+      expect(find.byKey(reportUserKey), findsNothing);
+    });
+
+    testWidgets('sends a user report only after confirmation', (tester) async {
+      await pumpBody(tester, _FakeUser(Membership.join));
+
+      await tapAndSettle(tester, find.byKey(reportUserKey));
+      expect(find.text('What’s the issue with this user?'), findsOneWidget);
+      await tapAndSettle(tester, find.text('Spam'));
+      expect(repository.userReports, isEmpty);
+      await tapAndSettle(tester, find.text('Send Report'));
+
+      expect(repository.userReports, [
+        (userId: '@member:example.com', reason: 'Spam'),
+      ]);
+      expect(repository.roomReports, isEmpty);
+      expect(
+        find.text('The content has been reported to the server admins'),
+        findsOneWidget,
+      );
+    });
   });
 }

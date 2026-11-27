@@ -53,4 +53,44 @@ void main() {
 
     await expectLater(result, throwsA(isA<ReportNoClientException>()));
   });
+
+  test('reportUser_whenTheServerAccepts_sendsTheUserIdAndReason', () async {
+    when(client.reportUser(any, any)).thenAnswer((_) async => {});
+
+    await ReportDatasourceImpl(
+      client,
+    ).reportUser(userId: '@bob:hs', reason: 'Spam');
+
+    verify(client.reportUser('@bob:hs', 'Spam')).called(1);
+    verifyNever(client.ignoreUser(any));
+  });
+
+  test('reportUser_whenTheServerFails_throwsReportUserFailed', () async {
+    when(
+      client.reportUser(any, any),
+    ).thenThrow(MatrixException.fromJson({'errcode': 'M_UNRECOGNIZED'}));
+
+    final result = ReportDatasourceImpl(
+      client,
+    ).reportUser(userId: '@bob:hs', reason: 'Spam');
+
+    await expectLater(
+      result,
+      throwsA(
+        isA<ReportUserFailedException>().having(
+          (exception) => exception.userId,
+          'userId',
+          '@bob:hs',
+        ),
+      ),
+    );
+  });
+
+  test('reportUser_whenNobodyIsSignedIn_throwsReportNoClient', () async {
+    final result = const ReportDatasourceImpl(
+      null,
+    ).reportUser(userId: '@bob:hs', reason: 'Spam');
+
+    await expectLater(result, throwsA(isA<ReportNoClientException>()));
+  });
 }

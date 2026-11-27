@@ -36,6 +36,7 @@ class ChatProfileInfoAppBar extends StatefulWidget {
   final ValueNotifier<bool?> blockUserLoadingNotifier;
   final void Function(BuildContext context, Room? room)? onLeaveChat;
   final VoidCallback? onReportChat;
+  final VoidCallback? onReportUser;
   final bool innerBoxIsScrolled;
   final VoidCallback onMessage;
   final VoidCallback onSearch;
@@ -58,6 +59,7 @@ class ChatProfileInfoAppBar extends StatefulWidget {
     required this.blockUserLoadingNotifier,
     this.onLeaveChat,
     this.onReportChat,
+    this.onReportUser,
     required this.innerBoxIsScrolled,
     required this.onMessage,
     required this.onSearch,
@@ -196,6 +198,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                                 widget.room,
                               ),
                               onReportChat: widget.onReportChat,
+                              onReportUser: widget.onReportUser,
                               onChatInfoTap: _handleGroupInfoTap,
                               animationController: animationController,
                               onSearch: widget.onSearch,
@@ -223,6 +226,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                                 widget.room,
                               ),
                               onReportChat: widget.onReportChat,
+                              onReportUser: widget.onReportUser,
                               onChatInfoTap: _handleGroupInfoTap,
                               animationController: animationController,
                               avatarUri: widget.avatarUri,
@@ -248,6 +252,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                             onLeaveChat: () =>
                                 widget.onLeaveChat?.call(context, widget.room),
                             onReportChat: widget.onReportChat,
+                            onReportUser: widget.onReportUser,
                             onChatInfoTap: _handleGroupInfoTap,
                             animationController: animationController,
                             onSearch: widget.onSearch,

@@ -26,6 +26,8 @@ class ChatProfileInfoDetails extends StatelessWidget {
 
   static Key get reportChatButtonKey => ChatKeys.reportChatButton.key;
 
+  static Key get reportUserButtonKey => ChatKeys.reportUserButton.key;
+
   const ChatProfileInfoDetails({
     super.key,
     this.displayName,
@@ -38,6 +40,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
     this.room,
     this.onLeaveChat,
     this.onReportChat,
+    this.onReportUser,
   });
 
   final String? displayName;
@@ -50,6 +53,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
   final Room? room;
   final void Function()? onLeaveChat;
   final VoidCallback? onReportChat;
+  final VoidCallback? onReportUser;
 
   @override
   Widget build(BuildContext context) {
@@ -121,6 +125,20 @@ class ChatProfileInfoDetails extends StatelessWidget {
                     child: _CopiableRow(
                       materialIcon: Icons.flag_outlined,
                       text: L10n.of(context)!.reportChat,
+                      enableCopy: false,
+                    ),
+                  ),
+                  const SizedBox(height: ChatProfileInfoStyle.textSpacing),
+                  InkWell(
+                    key: reportUserButtonKey,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap: onReportUser,
+                    child: _CopiableRow(
+                      materialIcon: Icons.person_off_outlined,
+                      text: L10n.of(context)!.reportUser,
                       enableCopy: false,
                     ),
                   ),
