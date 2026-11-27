@@ -42,17 +42,28 @@ const _me = '@alice:example.org';
 
 final _avatar = find.byKey(NavigationKeys.accountAvatar.key);
 
+class _Header {
+  const _Header({
+    this.width = 400,
+    this.displayName = 'Alice Martin',
+    this.presence,
+    this.mode = SelectMode.normal,
+  });
+
+  final double width;
+  final String? displayName;
+  final PersonPresence? presence;
+  final SelectMode mode;
+}
+
 Future<List<String>> _pumpHeader(
-  WidgetTester tester, {
-  double width = 400,
-  String? displayName = 'Alice Martin',
-  PersonPresence? presence,
-  SelectMode mode = SelectMode.normal,
-}) async {
-  tester.view.physicalSize = Size(width, 900);
+  WidgetTester tester, [
+  _Header header = const _Header(),
+]) async {
+  tester.view.physicalSize = Size(header.width, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final selectMode = ValueNotifier(mode);
+  final selectMode = ValueNotifier(header.mode);
   final selection = ValueNotifier<List<ConversationSelectionPresentation>>(
     const [],
   );
@@ -68,11 +79,11 @@ Future<List<String>> _pumpHeader(
         activeUserIdProvider.overrideWithValue(_me),
         matrixUserProfileProvider(_me).overrideWith(
           (ref) async =>
-              MatrixUserProfile(matrixId: _me, displayName: displayName),
+              MatrixUserProfile(matrixId: _me, displayName: header.displayName),
         ),
         personPresenceProvider(
           _me,
-        ).overrideWith((ref) => Stream.value(presence)),
+        ).overrideWith((ref) => Stream.value(header.presence)),
       ],
       child: Provider<MatrixState>.value(
         value: _FakeMatrix(client),
@@ -103,86 +114,88 @@ void main() {
   tearDown(() => GetIt.instance.reset());
 
   group('account avatar in the Chats header', () {
-    testWidgets('shows the initials of the active account, left of the '
-        'centred title', (tester) async {
-      await _pumpHeader(tester);
+    _lookAndActionTests();
+    _stateTests();
+  });
+}
 
-      expect(find.byType(TwakeHeaderAccountAvatar), findsOneWidget);
-      expect(
-        find.descendant(of: _avatar, matching: find.text('AM')),
-        findsOneWidget,
-      );
-      final avatar = tester.getRect(_avatar);
-      expect(
-        avatar.center.dx,
-        lessThan(tester.getCenter(find.text('Chats')).dx),
-      );
-      expect(tester.getCenter(find.text('Chats')).dx, moreOrLessEquals(200));
-    });
+void _lookAndActionTests() {
+  testWidgets('shows the initials of the active account, left of the '
+      'centred title', (tester) async {
+    await _pumpHeader(tester);
 
-    testWidgets('without a display name, the initials come from the user id', (
+    expect(find.byType(TwakeHeaderAccountAvatar), findsOneWidget);
+    expect(
+      find.descendant(of: _avatar, matching: find.text('AM')),
+      findsOneWidget,
+    );
+    final avatar = tester.getRect(_avatar);
+    expect(avatar.center.dx, lessThan(tester.getCenter(find.text('Chats')).dx));
+    expect(tester.getCenter(find.text('Chats')).dx, moreOrLessEquals(200));
+  });
+
+  testWidgets('without a display name, the initials come from the user id', (
+    tester,
+  ) async {
+    await _pumpHeader(tester, const _Header(displayName: null));
+
+    expect(
+      find.descendant(of: _avatar, matching: find.text('A')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a tap opens the settings', (tester) async {
+    final taps = await _pumpHeader(tester);
+
+    await tester.tap(_avatar);
+
+    expect(taps, ['settings']);
+  });
+
+  testWidgets('is a 44 pt button labelled Settings', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await _pumpHeader(tester);
+
+    expect(tester.getSize(_avatar), const Size.square(44));
+    expect(
+      tester.getSemantics(_avatar),
+      matchesSemantics(
+        label: 'Settings',
+        isButton: true,
+        hasTapAction: true,
+        isFocusable: true,
+        hasFocusAction: true,
+      ),
+    );
+    semantics.dispose();
+  });
+}
+
+void _stateTests() {
+  testWidgets('carries the presence dot of the account', (tester) async {
+    await _pumpHeader(
       tester,
-    ) async {
-      await _pumpHeader(tester, displayName: null);
+      const _Header(presence: PersonPresence(status: PresenceStatus.online)),
+    );
 
-      expect(
-        find.descendant(of: _avatar, matching: find.text('A')),
-        findsOneWidget,
-      );
-    });
+    expect(
+      tester
+          .widget<LinagoraPresenceBadge>(find.byType(LinagoraPresenceBadge))
+          .presence,
+      LinagoraPresence.online,
+    );
+  });
 
-    testWidgets('a tap opens the settings', (tester) async {
-      final taps = await _pumpHeader(tester);
+  testWidgets('is not in the select mode app bar', (tester) async {
+    await _pumpHeader(tester, const _Header(mode: SelectMode.select));
 
-      await tester.tap(_avatar);
+    expect(_avatar, findsNothing);
+  });
 
-      expect(taps, ['settings']);
-    });
+  testWidgets('is not on desktop, where the rail has Settings', (tester) async {
+    await _pumpHeader(tester, const _Header(width: 1400));
 
-    testWidgets('is a 44 pt button labelled Settings', (tester) async {
-      final semantics = tester.ensureSemantics();
-      await _pumpHeader(tester);
-
-      expect(tester.getSize(_avatar), const Size.square(44));
-      expect(
-        tester.getSemantics(_avatar),
-        matchesSemantics(
-          label: 'Settings',
-          isButton: true,
-          hasTapAction: true,
-          isFocusable: true,
-          hasFocusAction: true,
-        ),
-      );
-      semantics.dispose();
-    });
-
-    testWidgets('carries the presence dot of the account', (tester) async {
-      await _pumpHeader(
-        tester,
-        presence: const PersonPresence(status: PresenceStatus.online),
-      );
-
-      expect(
-        tester
-            .widget<LinagoraPresenceBadge>(find.byType(LinagoraPresenceBadge))
-            .presence,
-        LinagoraPresence.online,
-      );
-    });
-
-    testWidgets('is not in the select mode app bar', (tester) async {
-      await _pumpHeader(tester, mode: SelectMode.select);
-
-      expect(_avatar, findsNothing);
-    });
-
-    testWidgets('is not on desktop, where the rail has Settings', (
-      tester,
-    ) async {
-      await _pumpHeader(tester, width: 1400);
-
-      expect(_avatar, findsNothing);
-    });
+    expect(_avatar, findsNothing);
   });
 }
