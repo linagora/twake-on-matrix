@@ -35,6 +35,8 @@ import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:twake_chat/domain/personalization/display_preferences.dart';
+import 'package:twake_chat/pages/chat/seen_readers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
@@ -59,6 +61,8 @@ class MessageContentWithTimestampBuilder extends ConsumerStatefulWidget {
   final bool selected;
   final Timeline timeline;
 
+  /// Who stopped reading at this own message, from the list of the chat.
+  final List<User> readers;
   final List<ContextMenuItemAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
   final bool selectMode;
@@ -120,6 +124,7 @@ class MessageContentWithTimestampBuilder extends ConsumerStatefulWidget {
     this.selected = false,
     this.selectMode = true,
     required this.timeline,
+    this.readers = const [],
     required this.isHoverNotifier,
     required this.listHorizontalActionMenu,
     required this.maxWidth,
@@ -283,6 +288,9 @@ class _MessageContentWithTimestampBuilderState
   Widget build(BuildContext context) {
     // The helpers read these: some also build the preview of a dialog.
     ref.watch(alignOwnMessagesRightProvider);
+    ref.watch(
+      displayPreferencesProvider.select((preferences) => preferences.seenStyle),
+    );
     final displayTime =
         widget.event.type == EventTypes.RoomCreate ||
         widget.nextEvent == null ||
@@ -802,24 +810,30 @@ class _MessageContentWithTimestampBuilderState
         : null;
 
     if (isDisplayOnlyEmoji) {
-      return MessageBubble.plain(
+      return _withReaders(
+        MessageBubble.plain(
+          key: key,
+          constraints: bubbleConstraints,
+          isAlignedToEnd: alignOwnMessageRight,
+          reactions: reactions,
+          child: bubbleContent,
+        ),
+        alignEnd: alignOwnMessageRight,
+      );
+    }
+    final bubble = _withReaders(
+      MessageBubble(
         key: key,
+        isOwnMessage: widget.event.isOwnMessage,
+        tailDirection: tailDirection,
+        contentType: bubbleContentType,
+        padding: card != null ? EdgeInsets.zero : null,
         constraints: bubbleConstraints,
         isAlignedToEnd: alignOwnMessageRight,
         reactions: reactions,
         child: bubbleContent,
-      );
-    }
-    final bubble = MessageBubble(
-      key: key,
-      isOwnMessage: widget.event.isOwnMessage,
-      tailDirection: tailDirection,
-      contentType: bubbleContentType,
-      padding: card != null ? EdgeInsets.zero : null,
-      constraints: bubbleConstraints,
-      isAlignedToEnd: alignOwnMessageRight,
-      reactions: reactions,
-      child: bubbleContent,
+      ),
+      alignEnd: alignOwnMessageRight,
     );
     if (!widget.event.isReplyEvent()) return bubble;
 
@@ -839,6 +853,36 @@ class _MessageContentWithTimestampBuilderState
           ),
         ),
         bubble,
+      ],
+    );
+  }
+
+  /// [bubble], with under it who stopped reading at this own message, in the
+  /// seen style chosen (the ticks are in the time of the bubble).
+  Widget _withReaders(Widget bubble, {required bool alignEnd}) {
+    final style = ref.read(
+      displayPreferencesProvider.select((preferences) => preferences.seenStyle),
+    );
+    if (style == SeenStyle.ticks || !widget.event.isOwnMessage) return bubble;
+    final readers = widget.readers;
+    if (readers.isEmpty) return bubble;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        bubble,
+        Padding(
+          padding: MessageStyle.paddingSeenReaders,
+          child: SeenReaders(
+            style: style,
+            readers: [
+              for (final user in readers)
+                (name: user.calcDisplayname(), avatar: user.avatarUrl),
+            ],
+          ),
+        ),
       ],
     );
   }

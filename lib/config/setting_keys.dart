@@ -29,6 +29,7 @@ abstract class SettingKeys {
   static const String gifAutoplay = 'chat.twake.gif_autoplay';
   static const String chatListDensity = 'chat.twake.chat_list_density';
   static const String roomOrder = 'chat.twake.room_order';
+  static const String seenStyle = 'chat.twake.seen_style';
   static const String bubbleAlign = 'chat.twake.bubble_align';
 }
 

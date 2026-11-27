@@ -26,6 +26,7 @@ class ChatEventListItem extends StatelessWidget {
     this.nextEvent,
     this.albumMembers,
     this.hiddenAlbumMember = false,
+    this.readers = const [],
   });
 
   final ChatController controller;
@@ -40,6 +41,9 @@ class ChatEventListItem extends StatelessWidget {
   /// image can be selected on its own.
   final List<Event>? albumMembers;
   final bool hiddenAlbumMember;
+
+  /// Who stopped reading at [event], when it is an own message.
+  final List<User> readers;
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +107,7 @@ class ChatEventListItem extends StatelessWidget {
         (e) => e.eventId == event.eventId,
       ),
       timeline: controller.timeline!,
+      readers: readers,
       previousEvent: previousEvent,
       nextEvent: nextEvent,
       onHover: (isHover, event) => controller.onHover(isHover, event),

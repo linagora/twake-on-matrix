@@ -46,6 +46,9 @@ class PersonalizeStepCards extends ConsumerWidget {
           compact: preferences.density == ChatListDensity.compact,
           sections: name == RoomOrder.sections.name,
         ),
+        PersonalizeStep.seenStyle => _MiniSeen(
+          style: SeenStyle.values.byName(name),
+        ),
         PersonalizeStep.align => _MiniBubbles(
           ownRight: name == BubbleAlign.ownRight.name,
         ),

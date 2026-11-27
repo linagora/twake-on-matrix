@@ -16,11 +16,16 @@ class ChatScrollView extends StatefulWidget {
     required this.events,
     required this.controller,
     required this.constraints,
+    this.readersByEvent = const {},
   });
 
   final List<Event> events;
   final ChatController controller;
   final BoxConstraints constraints;
+
+  /// Who stopped reading at each own message, computed once per update of the
+  /// chat: a bubble looks its readers up.
+  final Map<String, List<User>> readersByEvent;
 
   @override
   State<ChatScrollView> createState() => _ChatScrollViewState();
@@ -216,6 +221,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                 nextEvent: nextEvent,
                 albumMembers: _albums.albumLedBy(currentEvent.eventId),
                 hiddenAlbumMember: _albums.isHiddenMember(currentEvent.eventId),
+                readers:
+                    widget.readersByEvent[currentEvent.eventId] ?? const [],
               );
             }, childCount: _bottom.length + 1),
           ),
@@ -262,6 +269,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                 nextEvent: nextEvent,
                 albumMembers: _albums.albumLedBy(currentEvent.eventId),
                 hiddenAlbumMember: _albums.isHiddenMember(currentEvent.eventId),
+                readers:
+                    widget.readersByEvent[currentEvent.eventId] ?? const [],
               );
             }, childCount: _top.length + 1),
           ),

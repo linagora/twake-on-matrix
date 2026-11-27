@@ -6,6 +6,7 @@ import 'package:twake_chat/pages/chat/group_chat_empty_view.dart';
 import 'package:twake_chat/pages/chat/optional_selection_area.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -66,6 +67,13 @@ class ChatEventList extends StatelessWidget {
     );
   }
 
+  /// Who stopped reading at each own message, for the whole timeline at once.
+  Map<String, List<User>> _readersByEvent() {
+    final timeline = controller.timeline;
+    if (timeline == null) return const {};
+    return controller.room?.readersStoppedAtByEvent(timeline) ?? const {};
+  }
+
   Widget _buildScrollArea(
     BuildContext context,
     ChatController chatController,
@@ -81,6 +89,7 @@ class ChatEventList extends StatelessWidget {
         events: events,
         controller: chatController,
         constraints: constraints,
+        readersByEvent: _readersByEvent(),
       ),
     );
 
