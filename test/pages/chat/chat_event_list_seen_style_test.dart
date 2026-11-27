@@ -85,6 +85,9 @@ class _Chat extends Fake implements ChatController {
   List<Event> get eventsToDisplay => const [];
 
   @override
+  Set<String> get liveThreadRootIds => const {};
+
+  @override
   bool get isEmptySupportChat => false;
 
   @override
