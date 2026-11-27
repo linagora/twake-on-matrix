@@ -504,6 +504,50 @@ void main() {
       await leaveTheApp(tester);
     });
 
+    /// Bug seen on the iOS simulator, 2026-11-26: on the thread screen of a
+    /// phone, the reply banner reported "A RenderFlex overflowed by 16 px on
+    /// the bottom" at each frame of its opening and of its closing after a
+    /// quoted reply is sent. The user must see it open and close cleanly.
+    testWidgets('on a phone, the reply banner opens and closes without '
+        'overflowing at any frame', (tester) async {
+      // An iPhone in portrait: the thread screen is narrow.
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await openThreadOfTwoReplies(tester);
+
+      /// Pumps the frames of one run of the banner animation, and checks
+      /// that none of them reports a layout error.
+      Future<void> everyFrameOfTheAnimation(String step) async {
+        const frame = Duration(milliseconds: 16);
+        final frames =
+            TwakeThemes.animationDuration.inMilliseconds ~/
+                frame.inMilliseconds +
+            2;
+        for (var i = 0; i < frames; i++) {
+          await tester.pump(frame);
+          expect(tester.takeException(), isNull, reason: '$step, frame $i');
+        }
+      }
+
+      await tester.drag(bubbleOf(_r1), swipe);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.takeException(), isNull, reason: 'the swipe');
+      await everyFrameOfTheAnimation('the banner opens');
+      expect(inReplyBanner(_r1), findsOneWidget, reason: 'the banner is open');
+
+      await tester.enterText(find.byType(TextField), 'my answer');
+      await tester.pump();
+      await tester.tap(find.byTooltip('Send'));
+      await tester.pump();
+      expect(tester.takeException(), isNull, reason: 'the send');
+      await everyFrameOfTheAnimation('the banner closes');
+
+      expect(room.sent.single.quotedId, _r1);
+      expect(inReplyBanner(_r1), findsNothing, reason: 'the banner is closed');
+      await leaveTheApp(tester);
+    });
+
     testWidgets('a reply cancelled from its banner quotes nothing: the '
         'message follows the last reply of the thread', (tester) async {
       await openThreadOfTwoReplies(tester);
