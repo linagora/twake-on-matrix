@@ -1455,9 +1455,7 @@ class ChatController extends ConsumerState<Chat>
   }
 
   bool get canDeleteSelectedEvents =>
-      !isArchived &&
-      selectedEvents.isNotEmpty &&
-      selectedEvents.every((event) => event.canDelete);
+      selectedEvents.canDeleteAll(isArchived: isArchived);
 
   bool get canEditSelectedEvents {
     if (isArchived ||
