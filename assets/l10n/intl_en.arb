@@ -3804,5 +3804,45 @@
   "@scribeResultDroppedClosed": {
     "type": "text",
     "placeholders": {}
+  },
+  "callLineIncoming": "Incoming call",
+  "@callLineIncoming": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineIncomingVideo": "Incoming video call",
+  "@callLineIncomingVideo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineOutgoing": "Outgoing call",
+  "@callLineOutgoing": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineOutgoingVideo": "Outgoing video call",
+  "@callLineOutgoingVideo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineMissed": "Missed",
+  "@callLineMissed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineCanceled": "Canceled",
+  "@callLineCanceled": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineMissedCall": "Missed call",
+  "@callLineMissedCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineMissedVideoCall": "Missed video call",
+  "@callLineMissedVideoCall": {
+    "type": "text",
+    "placeholders": {}
   }
 }

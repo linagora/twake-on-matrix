@@ -10,6 +10,9 @@ abstract final class CallEventTypes {
   /// sends it when a call starts.
   static const String callThreadKey = 'app.twake.chat.call_thread';
 
+  /// The line a caller writes when leaving a call it rang (DECISION.md D31).
+  static const String callLine = 'app.twake.chat.call';
+
   static const _prefixes = ['m.call.', 'org.matrix.call.', 'com.famedly.call.'];
 
   /// Call signalling and MatrixRTC events, legacy ones included.
