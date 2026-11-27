@@ -639,6 +639,22 @@ Deviations from Twake Space Chat, to keep this first version small:
 
 Completes D12, which showed a call only while it went on.
 
+## D34. A reply shows its quote above the message bubble (decided by Clément, 2026-11-27)
+
+The quoted message moves out of the message bubble. From top to bottom, a reply
+shows:
+
+- a caption, "Reply to {name}", naming the author of the quoted message;
+- the quoted message in a pale bubble;
+- the message bubble, which overlaps the quoted bubble by 12, with a 2px gap
+  cut out of the quoted bubble around it.
+
+While the quoted message is looked up, nothing shows above the bubble. When it
+cannot be found, the caption is "Reply", with no name.
+
+The gap shows what is behind the message: the chat background, or the colour of
+a selected or highlighted row.
+
 ## D36. Every store build gets a release note, and a built tag never moves (decided by Clément, 2026-11-25)
 
 Every build that reaches a store (TestFlight for iOS or macOS, Play Store
