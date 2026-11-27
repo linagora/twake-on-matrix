@@ -171,7 +171,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     final slot = _ownSlot(room);
     final device = _device;
     // A ring of an earlier call that left no line must not end this one.
-    _outgoing.forget(room.id);
+    _outgoing.forget(join.room);
     await _scheduleDelayedLeave(slot);
     final String eventId;
     try {
@@ -290,7 +290,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
 
   @override
   Future<void> leaveMembership(CallRoom call) async {
-    _outgoing.close(call.id, DateTime.now());
+    _outgoing.close(call, DateTime.now());
     final (:delayId, :extended) = _endSession();
     // A write still in flight would otherwise land after the leave.
     final restarting = _restarting;
@@ -333,7 +333,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }) async {
     final sentAt = DateTime.now();
     final outgoing = _outgoing.start(
-      join.room.id,
+      join.room,
       isVideo: join.isVideo,
       startedAt: sentAt,
     );
@@ -353,31 +353,31 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         },
         'm.call.intent': join.isVideo ? 'video' : 'audio',
       });
-    }, onError: () => _outgoing.dropRing(join.room.id, outgoing));
+    }, onError: () => _outgoing.dropRing(join.room, outgoing));
     // The caller hung up while the ring was being sent.
     await _publishLine(join.room, _outgoing.rang(outgoing, ringId));
   }
 
   void _watchAnswers() {
     final now = DateTime.now();
-    for (final roomId in _outgoing.roomIds.toList()) {
-      final members = _client.getRoomById(roomId)?.states[memberEventType];
+    for (final room in _outgoing.rooms.toList()) {
+      final members = _client.getRoomById(room.id)?.states[memberEventType];
       final answered = members?.values.any(
         (member) =>
             member.senderId != _client.userID &&
             CallRingTracker.isLiveMembership(member),
       );
-      if (answered ?? false) _outgoing.answer(roomId, now);
+      if (answered ?? false) _outgoing.answer(room, now);
     }
   }
 
   @override
   void closeCall(CallRoom call, {required DateTime endedAt}) =>
-      _outgoing.close(call.id, endedAt);
+      _outgoing.close(call, endedAt);
 
   @override
   Future<void> sendCallLine(CallRoom call) async {
-    await _publishLine(call, _outgoing.end(call.id));
+    await _publishLine(call, _outgoing.end(call));
   }
 
   Future<void> _publishLine(
@@ -407,7 +407,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   bool _isLiveRing(CallRoom call, String? ringId) =>
-      ringId != null && ringId == _outgoing.ringIdOf(call.id);
+      ringId != null && ringId == _outgoing.ringIdOf(call);
 
   Future<void> _logged(
     String what,

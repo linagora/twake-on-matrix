@@ -1,3 +1,5 @@
+import 'package:twake_chat/domain/model/call/call_models.dart';
+
 /// One call this device rang; its ring result touches this call only.
 final class OutgoingCall {
   OutgoingCall._(this._isVideo, this._startedAt);
@@ -23,17 +25,17 @@ final class OutgoingCall {
 /// `app.twake.chat.call` event written at their end says, as Twake Space
 /// Chat writes it.
 class OutgoingCalls {
-  final _calls = <String, OutgoingCall>{};
+  final _calls = <CallRoom, OutgoingCall>{};
 
   /// Calls hung up while their ring was still being sent.
   final _endedWhileRinging = <OutgoingCall>{};
 
   /// Before the ring is sent, so that a hang-up during the send is kept.
   OutgoingCall start(
-    String roomId, {
+    CallRoom room, {
     required bool isVideo,
     required DateTime startedAt,
-  }) => _calls[roomId] = OutgoingCall._(isVideo, startedAt);
+  }) => _calls[room] = OutgoingCall._(isVideo, startedAt);
 
   /// The content of the call event when [call] already ended.
   Map<String, Object?>? rang(OutgoingCall call, String ringId) {
@@ -43,41 +45,41 @@ class OutgoingCalls {
   }
 
   /// The ring of [call] was not sent: it has no line.
-  void dropRing(String roomId, OutgoingCall call) {
+  void dropRing(CallRoom room, OutgoingCall call) {
     _endedWhileRinging.remove(call);
-    if (_calls[roomId] == call) _calls.remove(roomId);
+    if (_calls[room] == call) _calls.remove(room);
   }
 
-  bool isRinging(String roomId) => _calls.containsKey(roomId);
+  bool isRinging(CallRoom room) => _calls.containsKey(room);
 
-  Iterable<String> get roomIds => _calls.keys;
+  Iterable<CallRoom> get rooms => _calls.keys;
 
   /// The ring of the call still going in the room.
-  String? ringIdOf(String roomId) {
-    final call = _calls[roomId];
+  String? ringIdOf(CallRoom room) {
+    final call = _calls[room];
     return call != null && call._isOpen ? call._ringId : null;
   }
 
   /// The first other user in the call answers it.
-  void answer(String roomId, DateTime at) {
-    final call = _calls[roomId];
+  void answer(CallRoom room, DateTime at) {
+    final call = _calls[room];
     if (call == null || !call._isOpen) return;
     call._answeredAt ??= at;
   }
 
   /// At hang-up: no answer counts after [at], however long leaving takes.
-  void close(String roomId, DateTime at) {
-    final call = _calls[roomId];
+  void close(CallRoom room, DateTime at) {
+    final call = _calls[room];
     if (call == null || !call._isOpen) return;
     call._endedAt = at;
   }
 
-  void forget(String roomId) => _calls.remove(roomId);
+  void forget(CallRoom room) => _calls.remove(room);
 
   /// The content of the call event, null when no call of the room rang here,
   /// it already ended, or its ring is still being sent.
-  Map<String, Object?>? end(String roomId) {
-    final call = _calls.remove(roomId);
+  Map<String, Object?>? end(CallRoom room) {
+    final call = _calls.remove(room);
     if (call == null) return null;
     final endedAt = call._endedAt ??= DateTime.now();
     final ringId = call._ringId;
