@@ -24,29 +24,34 @@ class ReplyDisplay extends StatelessWidget {
             : 0,
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: controller.replyEventNotifier.value != null
-                  ? ReplyContent(
-                      controller.replyEventNotifier.value!,
-                      timeline: controller.timeline!,
-                    )
-                  : const SizedBox.shrink(),
-            ),
-            Padding(
-              padding: ReplyDisplayStyle.iconClosePadding,
-              child: IconButton(
-                tooltip: L10n.of(context)!.close,
-                icon: Icon(
-                  Icons.close,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                onPressed: onPressedAction,
+        child: OverflowBox(
+          alignment: AlignmentDirectional.topStart,
+          minHeight: ReplyDisplayStyle.replyContainerHeight,
+          maxHeight: ReplyDisplayStyle.replyContainerHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: controller.replyEventNotifier.value != null
+                    ? ReplyContent(
+                        controller.replyEventNotifier.value!,
+                        timeline: controller.timeline!,
+                      )
+                    : const SizedBox.shrink(),
               ),
-            ),
-          ],
+              Padding(
+                padding: ReplyDisplayStyle.iconClosePadding,
+                child: IconButton(
+                  tooltip: L10n.of(context)!.close,
+                  icon: Icon(
+                    Icons.close,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  onPressed: onPressedAction,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

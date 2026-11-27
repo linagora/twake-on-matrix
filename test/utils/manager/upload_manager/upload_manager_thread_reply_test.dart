@@ -110,7 +110,9 @@ void main() {
   late Room room;
   late Event replyTarget;
   late Event threadReply;
-  late Event inReplyTo;
+
+  /// The message the user is replying to; null: no reply banner.
+  Event? inReplyTo;
   late _RecordingQueue queue;
   late _FakeMediaApi mediaApi;
   late UploadManager manager;
@@ -310,7 +312,10 @@ void main() {
     });
   }
 
-  group('a file sent to a thread never quotes the message it replies to', () {
+  group('a file sent to a thread without replying to a message keeps the '
+      'fallback for clients without threads', () {
+    setUp(() => inReplyTo = null);
+
     for (final entry in threadEntryPoints) {
       test('${entry.name}: the message sent to the server has the thread '
           'relation and no quote', () async {
@@ -371,6 +376,28 @@ void main() {
       test(entry.name, () async {
         inReplyTo = threadReply;
         await entry.upload(null);
+        await runQueuedSends();
+
+        final sent = sentMessages();
+        expect(sent, isNotEmpty, reason: 'the file message reached the server');
+        expect(sent.single['m.relates_to'], intoTheThread);
+      });
+    }
+  });
+
+  /// Clément, 2026-11-26 (reverses "a file sent to a thread never quotes"):
+  /// the thread screen offers "Reply" as a room does, and a message sent
+  /// while replying stays in the thread and quotes the chosen message. A file
+  /// is such a message, as in the room (group above "keeps its reply").
+  /// Matrix spec v1.19, "Replies within threads": `is_falling_back` false
+  /// "allows a threaded message to contain a reply itself".
+  group('a file sent from the thread screen while replying to a message of '
+      'the thread stays in the thread and quotes that message', () {
+    setUp(() => inReplyTo = threadReply);
+
+    for (final entry in threadEntryPoints) {
+      test('${entry.name}: the message sent to the server', () async {
+        await entry.upload(_thread);
         await runQueuedSends();
 
         final sent = sentMessages();

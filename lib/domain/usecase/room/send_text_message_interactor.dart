@@ -48,8 +48,6 @@ final class SendTextMessageInteractor {
     Event? editEvent,
     ThreadSendTarget? thread,
   }) async {
-    // A quote in a thread would be prepended to the body by the SDK.
-    inReplyTo = thread.withoutQuote(inReplyTo);
     if (editEvent != null && editEvent.hasAttachment) {
       await room.sendEvent(
         _captionEditContent(room, editEvent, text),

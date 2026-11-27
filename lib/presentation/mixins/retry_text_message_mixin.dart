@@ -26,8 +26,8 @@ mixin RetryTextMessageMixin {
     String? editEventId;
 
     final threadRootId = event.threadRootId;
-    // A thread reply keeps its relation; its in_reply_to is only the
-    // fallback to the last event of the thread, not a quote.
+    // A thread reply keeps its relation; its in_reply_to is a quote unless
+    // it is only the fallback to the last event of the thread.
     final threadLastEventId = threadRootId == null
         ? null
         : event.content
@@ -35,8 +35,9 @@ mixin RetryTextMessageMixin {
               ?.tryGetMap<String, Object?>('m.in_reply_to')
               ?.tryGet<String>('event_id');
 
-    if (threadRootId == null && event.inReplyToEventId() != null) {
-      replyEvent = await room.getEventById(event.inReplyToEventId()!);
+    final quotedEventId = event.inReplyToEventId(includingFallback: false);
+    if (quotedEventId != null) {
+      replyEvent = await room.getEventById(quotedEventId);
     } else if (event.relationshipType == RelationshipTypes.edit &&
         event.relationshipEventId != null) {
       editEventId = event.relationshipEventId;

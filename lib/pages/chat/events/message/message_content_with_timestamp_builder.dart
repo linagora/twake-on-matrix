@@ -71,7 +71,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   /// Null when "Start a thread" is not offered on this message.
   final void Function(Event)? onStartThread;
 
-  /// On the thread screen there is no quote reply.
+  /// On the thread screen: the voice playlist stays in the thread.
   final bool inThread;
   final void Function(Event)? onEdit;
   final void Function(BuildContext, Event)? onDelete;
@@ -223,16 +223,14 @@ class _MessageContentWithTimestampBuilderState
     if (album == null) return _singleMessageContextMenu(event);
     return MessageContentWithTimestampBuilder.albumContextMenuOf(
       album,
-      canReply: event.room.canSendDefaultMessages,
+      canReply: ThreadRules.canQuoteReply(event),
       canReport: event.room.canReportContent,
       canEditCaption: album.last.canEditEvents(widget.matrixState),
     );
   }
 
   List<MessageContextMenuAction> _singleMessageContextMenu(Event event) => [
-    if (ThreadRules.canQuoteReply(event, inThreadScreen: widget.inThread)) ...[
-      MessageContextMenuAction.reply,
-    ],
+    if (ThreadRules.canQuoteReply(event)) ...[MessageContextMenuAction.reply],
     if (widget.onStartThread != null) MessageContextMenuAction.startThread,
     MessageContextMenuAction.forward,
     MessageContextMenuAction.copy,

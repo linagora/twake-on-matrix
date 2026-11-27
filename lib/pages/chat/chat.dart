@@ -1580,8 +1580,6 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void replyAction({Event? replyTo}) {
-    // The thread screen has no quote reply.
-    if (isThread) return;
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
@@ -2419,8 +2417,7 @@ class ChatController extends ConsumerState<Chat>
     Event event,
   ) => [
     if (event.room.canSendReactions) ChatHorizontalActionMenu.reaction,
-    if (ThreadRules.canQuoteReply(event, inThreadScreen: isThread))
-      ChatHorizontalActionMenu.reply,
+    if (ThreadRules.canQuoteReply(event)) ChatHorizontalActionMenu.reply,
     ChatHorizontalActionMenu.more,
   ];
 
@@ -3267,8 +3264,7 @@ class ChatController extends ConsumerState<Chat>
     showFullEmojiPickerOnWebNotifier.value = false;
     final listPopupMenuActions = [
       ChatContextMenuActions.select,
-      if (ThreadRules.canQuoteReply(event, inThreadScreen: isThread))
-        ChatContextMenuActions.reply,
+      if (ThreadRules.canQuoteReply(event)) ChatContextMenuActions.reply,
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,

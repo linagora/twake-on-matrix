@@ -5,11 +5,11 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart'
 
 import '../../../domain/model/room/room_extension_test.mocks.dart';
 
-/// THR-M-04, CodeRabbit 4515288050: the thread screen has no quote reply.
-/// One rule for every place that offers "Reply": the button of the
-/// selection row (chat_input_row), the web context menu (chat.dart), and
-/// the three that already filter inline (horizontal menu, swipe, mobile
-/// context menu).
+/// Clément, 2026-11-26 (reverses THR-M-04, "the thread screen has no quote
+/// reply"): a message of a thread offers "Reply" as a message of the room
+/// does, to a member allowed to send messages. One rule for every place that
+/// offers "Reply": the button of the selection row (chat_input_row), the web
+/// context menu and the hover menu (chat.dart), the mobile context menu.
 void main() {
   late MockRoom room;
 
@@ -28,20 +28,15 @@ void main() {
     room: room,
   );
 
-  test('"Reply" is not offered on the thread screen', () {
-    expect(ThreadRules.canQuoteReply(message(), inThreadScreen: true), isFalse);
-  });
-
-  test('"Reply" is offered in the room', () {
-    expect(ThreadRules.canQuoteReply(message(), inThreadScreen: false), isTrue);
+  // The same rule on the thread screen and in the room: it does not know
+  // which screen asks.
+  test('"Reply" is offered to a member who can send messages', () {
+    expect(ThreadRules.canQuoteReply(message()), isTrue);
   });
 
   test('"Reply" is not offered to a member who cannot send messages', () {
     when(room.canSendDefaultMessages).thenReturn(false);
 
-    expect(
-      ThreadRules.canQuoteReply(message(), inThreadScreen: false),
-      isFalse,
-    );
+    expect(ThreadRules.canQuoteReply(message()), isFalse);
   });
 }
