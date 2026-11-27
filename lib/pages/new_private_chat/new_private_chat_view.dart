@@ -30,45 +30,52 @@ class NewPrivateChatView extends StatelessWidget {
           focusNode: controller.searchFocusNode,
         ),
       ),
-      body: SingleChildScrollView(
+      body: CustomScrollView(
         keyboardDismissBehavior: PlatformInfos.isMobile
             ? ScrollViewKeyboardDismissBehavior.manual
             : ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: NewPrivateChatStyle.paddingBody,
         controller: controller.scrollController,
-        child: Column(
-          children: [
-            Padding(
-              padding: NewPrivateChatStyle.paddingWarningBanner,
-              child: ContactsWarningBannerView(
-                warningBannerNotifier: controller.warningBannerNotifier,
-                closeContactsWarningBanner:
-                    controller.closeContactsWarningBanner,
-                goToSettingsForPermissionActions: () =>
-                    controller.displayContactPermissionDialog(context),
-                isShowMargin: false,
-              ),
+        slivers: [
+          SliverPadding(
+            padding: NewPrivateChatStyle.paddingBody,
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverPadding(
+                  padding: NewPrivateChatStyle.paddingWarningBanner,
+                  sliver: SliverToBoxAdapter(
+                    child: ContactsWarningBannerView(
+                      warningBannerNotifier: controller.warningBannerNotifier,
+                      closeContactsWarningBanner:
+                          controller.closeContactsWarningBanner,
+                      goToSettingsForPermissionActions: () =>
+                          controller.displayContactPermissionDialog(context),
+                      isShowMargin: false,
+                    ),
+                  ),
+                ),
+                ExpansionList(
+                  presentationContactsNotifier:
+                      controller.presentationContactNotifier,
+                  presentationPhonebookContactNotifier:
+                      controller.presentationPhonebookContactNotifier,
+                  goToNewGroupChat: () => controller.goToNewGroupChat(context),
+                  goToNewFeed: () => controller.goToNewFeed(context),
+                  goToNewSpace: () => controller.goToNewSpace(context),
+                  onContactTap: controller.onContactAction,
+                  onExternalContactTap: controller.onExternalContactAction,
+                  textEditingController: controller.textEditingController,
+                  warningBannerNotifier: controller.warningBannerNotifier,
+                  closeContactsWarningBanner:
+                      controller.closeContactsWarningBanner,
+                  goToSettingsForPermissionActions: () =>
+                      controller.displayContactPermissionDialog(context),
+                  goToCreateContact: () => showAddContactDialog(context),
+                  phoneBookFilterSuccess: controller.phoneBookFilterSuccess,
+                ),
+              ],
             ),
-            ExpansionList(
-              presentationContactsNotifier:
-                  controller.presentationContactNotifier,
-              presentationPhonebookContactNotifier:
-                  controller.presentationPhonebookContactNotifier,
-              goToNewGroupChat: () => controller.goToNewGroupChat(context),
-              goToNewFeed: () => controller.goToNewFeed(context),
-              goToNewSpace: () => controller.goToNewSpace(context),
-              onContactTap: controller.onContactAction,
-              onExternalContactTap: controller.onExternalContactAction,
-              textEditingController: controller.textEditingController,
-              warningBannerNotifier: controller.warningBannerNotifier,
-              closeContactsWarningBanner: controller.closeContactsWarningBanner,
-              goToSettingsForPermissionActions: () =>
-                  controller.displayContactPermissionDialog(context),
-              goToCreateContact: () => showAddContactDialog(context),
-              phoneBookFilterSuccess: controller.phoneBookFilterSuccess,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
