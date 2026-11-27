@@ -18,12 +18,18 @@ class PersonalizeStepsController extends _$PersonalizeStepsController {
   DisplayPreferencesRepository get _repository =>
       ref.read(displayPreferencesRepositoryProvider);
 
+  // True while the device's seen steps could not be read: saving would
+  // replace them with what this run alone has seen.
+  bool _loadFailed = false;
+
   @override
   Future<PersonalizeStepsState> build() async {
     try {
+      _loadFailed = false;
       return PersonalizeStepsState(seen: await _repository.loadSeenSteps());
     } on Exception catch (exception, stackTrace) {
       Logs().w('PersonalizeStepsController::build', exception, stackTrace);
+      _loadFailed = true;
       return const PersonalizeStepsState();
     }
   }
@@ -35,12 +41,36 @@ class PersonalizeStepsController extends _$PersonalizeStepsController {
 
   /// Remembers [shown] as seen, with what the device had seen before.
   Future<void> markSeen(Iterable<PersonalizeStep> shown) async {
-    final next = PersonalizeStepsState(
-      seen: mergeSeenSteps((await future).seen, shown).toSet(),
-    );
+    await future;
+    await _retryFailedLoad();
     if (!ref.mounted) return;
+    // No await between reading the state and assigning it: two calls at the
+    // same time each keep the steps of the other.
+    final next = PersonalizeStepsState(
+      seen: mergeSeenSteps(state.requireValue.seen, shown).toSet(),
+    );
     // Nothing new: the state stays equal and nobody is told.
     if (state.value != next) state = AsyncData(next);
+    // Still unread: the device keeps what it stored, asked again next start.
+    if (_loadFailed) return;
+    await _save(next);
+  }
+
+  Future<void> _retryFailedLoad() async {
+    if (!_loadFailed) return;
+    try {
+      final stored = await _repository.loadSeenSteps();
+      if (!ref.mounted) return;
+      _loadFailed = false;
+      state = AsyncData(
+        PersonalizeStepsState(seen: {...state.requireValue.seen, ...stored}),
+      );
+    } on Exception catch (exception, stackTrace) {
+      Logs().w('PersonalizeStepsController::retry', exception, stackTrace);
+    }
+  }
+
+  Future<void> _save(PersonalizeStepsState next) async {
     try {
       await _repository.saveSeenSteps(next.seen);
     } on Exception catch (exception, stackTrace) {

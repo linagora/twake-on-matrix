@@ -19,10 +19,15 @@ abstract final class PersonalizeLaunch {
   static Future<void> afterFirstSync(BuildContext context) async {
     if (_asked) return;
     _asked = true;
+    final controller = ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(personalizeStepsControllerProvider.notifier);
+    // The width is read once the storage has answered: it may have changed.
+    await controller.pending(isWide: true);
+    if (!context.mounted) return;
     final isMobile = ChatInputRowStyle.responsiveUtils.isMobile(context);
-    final steps = await ProviderScope.containerOf(context, listen: false)
-        .read(personalizeStepsControllerProvider.notifier)
-        .pending(isWide: !isMobile);
+    final steps = await controller.pending(isWide: !isMobile);
     if (steps.isEmpty || !context.mounted) return;
     if (isMobile) await _untilOnTop(context);
     if (!context.mounted) return;
