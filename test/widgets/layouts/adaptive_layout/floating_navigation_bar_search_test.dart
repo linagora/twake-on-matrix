@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart' as provider;
+import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -46,6 +49,7 @@ Future<_Search> _pumpBar(
   WidgetTester tester, {
   bool withSearch = true,
   TextDirection direction = TextDirection.ltr,
+  bool appTheme = false,
 }) async {
   tester.view.physicalSize = _screen;
   tester.view.devicePixelRatio = 1;
@@ -70,8 +74,16 @@ Future<_Search> _pumpBar(
           locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          builder: (context, child) =>
-              Directionality(textDirection: direction, child: child!),
+          builder: (context, child) => Directionality(
+            textDirection: direction,
+            // The theme of the app styles its text fields.
+            child: appTheme
+                ? Theme(
+                    data: TwakeThemes.buildTheme(context, Brightness.light),
+                    child: child!,
+                  )
+                : child!,
+          ),
           home: Scaffold(
             body: const Center(child: Text('the screen')),
             bottomNavigationBar: FloatingNavigationBar(
@@ -115,9 +127,17 @@ bool _fieldFocused(WidgetTester tester) => tester
     .hasFocus;
 
 void main() {
+  setUpAll(() {
+    // Read by the theme of the app.
+    if (!getIt.isRegistered<ResponsiveUtils>()) {
+      getIt.registerSingleton(ResponsiveUtils());
+    }
+  });
+
   _closedTests();
   _openTests();
   _closeTests();
+  _alignmentTests();
 }
 
 void _closedTests() {
@@ -285,5 +305,43 @@ void _closeTests() {
       expect(find.text('taisiya'), findsNothing);
       expect(_fieldFocused(tester), isTrue);
     });
+  });
+}
+
+// Review of 2026-11-27 (screenshot): in the open field the placeholder, the
+// caret and the typed text sit higher than the search icon.
+void _alignmentTests() {
+  group('FloatingNavigationBar search, open: vertical alignment', () {
+    for (final (name, text) in [
+      ('the placeholder', null),
+      ('the caret', null),
+      ('the typed text', 'taisiya'),
+    ]) {
+      testWidgets(
+        'THEN $name is vertically centred with the search icon',
+        (tester) async {
+          await _pumpBar(tester, appTheme: true);
+          await _openSearch(tester);
+          if (text != null) {
+            await tester.enterText(find.byKey(_searchField), text);
+            await tester.pumpAndSettle();
+          }
+
+          Finder inField(Finder matching) =>
+              find.descendant(of: find.byKey(_searchField), matching: matching);
+          final icon = tester.getCenter(inField(find.byIcon(Icons.search))).dy;
+          final line = inField(
+            name == 'the placeholder'
+                ? find.text('Search')
+                : find.byType(EditableText),
+          );
+          expect(tester.getCenter(line).dy, moreOrLessEquals(icon, epsilon: 1));
+        },
+        variant: const TargetPlatformVariant({
+          TargetPlatform.android,
+          TargetPlatform.iOS,
+        }),
+      );
+    }
   });
 }

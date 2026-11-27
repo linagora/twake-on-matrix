@@ -77,6 +77,7 @@ void main() {
   _atTheTop();
   _scrolled();
   _fromTheTopField();
+  _assistiveTechnology();
   _otherStylesAndLayouts();
 }
 
@@ -338,6 +339,30 @@ void _otherStylesAndLayouts() {
         find.descendant(of: headerFinder, matching: find.byType(TextField)),
         findsOneWidget,
       );
+    });
+  });
+}
+
+void _assistiveTechnology() {
+  group('[ChatList] collapsing search, with a screen reader', () {
+    testWidgets('GIVEN the top of the list\n'
+        'WHEN the screen reader activates the « Search » field\n'
+        'THEN the search opens', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await _pumpChats(tester);
+      final field = find.semantics.byLabel('Search');
+      expect(
+        field,
+        containsSemantics(isButton: true, hasTapAction: true),
+        reason: 'a button a screen reader cannot activate opens nothing',
+      );
+
+      tester.semantics.tap(field);
+      await tester.pumpAndSettle();
+
+      expect(_barFieldFocused(tester), isTrue);
+      expect(find.byKey(_results).hitTestable(), findsOneWidget);
+      semantics.dispose();
     });
   });
 }
