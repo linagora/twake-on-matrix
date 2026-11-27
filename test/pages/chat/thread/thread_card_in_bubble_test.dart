@@ -12,6 +12,7 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
@@ -86,6 +87,12 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          syncedPersonPresenceProvider(
+            root.senderId,
+          ).overrideWith((ref) => Stream.value(null)),
+        ],
         child: ThemeBuilder(
           builder: (context, themeMode, primaryColor) => MaterialApp(
             locale: const Locale('en'),

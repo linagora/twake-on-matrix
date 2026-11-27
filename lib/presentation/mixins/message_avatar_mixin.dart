@@ -1,7 +1,9 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/person_presence_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -26,13 +28,20 @@ mixin MessageAvatarMixin {
           future: event.fetchSenderUser(),
           builder: (context, snapshot) {
             final user = snapshot.data ?? event.senderFromMemoryOrFallback;
-            return Avatar(
+            final avatar = Avatar(
               size: MessageStyle.avatarSize,
               fontSize: MessageStyle.fontSize,
               mxContent: user.avatarUrl,
               name: user.calcDisplayname(),
               onTap: () => onAvatarTap!(event),
             );
+            return event.isOwnMessage
+                ? avatar
+                : PersonPresenceBadge(
+                    userId: event.senderId,
+                    size: MessageStyle.avatarSize,
+                    child: avatar,
+                  );
           },
         ),
       );
