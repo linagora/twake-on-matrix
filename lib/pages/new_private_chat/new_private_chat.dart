@@ -38,6 +38,9 @@ class NewPrivateChatScreenState extends ConsumerState<NewPrivateChat>
   ProviderSubscription<bool>? _invitationEnabledSubscription;
 
   @override
+  bool get enableRecentContacts => false;
+
+  @override
   bool get isInvitationEnabled =>
       mounted && ref.read(loginHomeserverSummaryProvider).isInvitationEnabled;
 

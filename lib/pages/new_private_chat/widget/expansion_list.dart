@@ -56,9 +56,9 @@ class ExpansionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ..._buildResponsiveButtons(context),
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverList.list(children: _buildResponsiveButtons(context)),
         _sliverContactsList(),
         if (PlatformInfos.isMobile) _sliverPhonebookList(),
       ],
@@ -75,15 +75,17 @@ class ExpansionList extends StatelessWidget {
             if (PlatformInfos.isDesktop) {
               if (failure is GetPresentationContactsFailure ||
                   failure is GetPresentationContactsEmpty) {
-                return Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    NoContactsFound(
-                      keyword: textControllerIsEmpty
-                          ? null
-                          : textEditingController.text,
-                    ),
-                  ],
+                return SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      NoContactsFound(
+                        keyword: textControllerIsEmpty
+                            ? null
+                            : textEditingController.text,
+                      ),
+                    ],
+                  ),
                 );
               }
               return child!;
@@ -94,15 +96,17 @@ class ExpansionList extends StatelessWidget {
                 }
                 if (failure is GetPresentationContactsFailure ||
                     failure is GetPresentationContactsEmpty) {
-                  return Column(
-                    children: [
-                      const SizedBox(height: 12),
-                      NoContactsFound(
-                        keyword: textControllerIsEmpty
-                            ? null
-                            : textEditingController.text,
-                      ),
-                    ],
+                  return SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        NoContactsFound(
+                          keyword: textControllerIsEmpty
+                              ? null
+                              : textEditingController.text,
+                        ),
+                      ],
+                    ),
                   );
                 }
                 return child!;
@@ -111,7 +115,7 @@ class ExpansionList extends StatelessWidget {
           },
           (success) {
             if (success is ContactsLoading) {
-              return const LoadingContactWidget();
+              return const SliverToBoxAdapter(child: LoadingContactWidget());
             }
 
             if (success is PresentationExternalContactSuccess) {
@@ -120,13 +124,15 @@ class ExpansionList extends StatelessWidget {
                   return child!;
                 }
               }
-              return TwakeInkWell(
-                onTap: () {
-                  onContactTap(context, success.contact);
-                },
-                child: ExpansionContactListTile(
-                  contact: success.contact,
-                  highlightKeyword: textEditingController.text,
+              return SliverToBoxAdapter(
+                child: TwakeInkWell(
+                  onTap: () {
+                    onContactTap(context, success.contact);
+                  },
+                  child: ExpansionContactListTile(
+                    contact: success.contact,
+                    highlightKeyword: textEditingController.text,
+                  ),
                 ),
               );
             }
@@ -134,15 +140,15 @@ class ExpansionList extends StatelessWidget {
             if (success is PresentationContactsSuccess) {
               final contacts = success.contacts;
               if (contacts.isEmpty && textEditingController.text.isNotEmpty) {
-                return NoContactsFound(
-                  keyword: textEditingController.text.isEmpty
-                      ? null
-                      : textEditingController.text,
+                return SliverToBoxAdapter(
+                  child: NoContactsFound(
+                    keyword: textEditingController.text.isEmpty
+                        ? null
+                        : textEditingController.text,
+                  ),
                 );
               }
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+              return SliverList.builder(
                 itemCount: contacts.length,
                 itemBuilder: (context, index) {
                   if (contacts[index].matrixId != null &&
@@ -157,7 +163,7 @@ class ExpansionList extends StatelessWidget {
                       ),
                     );
                   }
-                  return child!;
+                  return const SizedBox.shrink();
                 },
               );
             }
@@ -166,7 +172,7 @@ class ExpansionList extends StatelessWidget {
           },
         );
       },
-      child: const SizedBox(),
+      child: const SliverToBoxAdapter(),
     );
   }
 
@@ -181,9 +187,7 @@ class ExpansionList extends StatelessWidget {
           (success) {
             if (success is PresentationContactsSuccess) {
               final contacts = success.contacts;
-              return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+              return SliverList.builder(
                 itemCount: contacts.length,
                 itemBuilder: (context, index) {
                   if (contacts[index].matrixId != null &&
@@ -198,7 +202,7 @@ class ExpansionList extends StatelessWidget {
                       ),
                     );
                   }
-                  return child!;
+                  return const SizedBox.shrink();
                 },
               );
             }
@@ -206,7 +210,7 @@ class ExpansionList extends StatelessWidget {
           },
         );
       },
-      child: const SizedBox(),
+      child: const SliverToBoxAdapter(),
     );
   }
 
