@@ -666,6 +666,15 @@ void main() {
   Future<http.Response> notFound() async =>
       http.Response('{"errcode":"M_NOT_FOUND","error":"Not found"}', 404);
 
+  /// Lets the server answer: an HTTP response only completes on the real event
+  /// loop, which pumping alone never runs.
+  Future<void> serverAnswers(WidgetTester tester) async {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pumpAndSettle();
+  }
+
   Timeline timelineOf(List<Event> events) => Timeline(
     room: room,
     chunk: TimelineChunk(events: events),
@@ -697,6 +706,7 @@ void main() {
 
     database.stored.complete(null);
     await tester.pumpAndSettle();
+    await serverAnswers(tester);
 
     expect(text('...'), findsOneWidget);
     expect(genericCaption(), findsOneWidget);
@@ -746,6 +756,7 @@ void main() {
 
     for (var build = 0; build < 4; build++) {
       await pumpRow(tester, event, timeline: timeline);
+      await serverAnswers(tester);
     }
 
     expect(text('...'), findsOneWidget);
@@ -779,6 +790,7 @@ void main() {
         ),
       ),
     );
+    await serverAnswers(tester);
     expect(text('...'), findsOneWidget);
 
     redraw.value++;
@@ -794,6 +806,7 @@ void main() {
     final event = reply();
     final timeline = timelineOf([event]);
     await pumpRow(tester, event, timeline: timeline);
+    await serverAnswers(tester);
     expect(text('...'), findsOneWidget);
 
     // Older history is loaded: the quoted message is now in the timeline.
