@@ -83,41 +83,48 @@ class StorageDirectoryManager {
     }
   }
 
-  static List<int?> _deleteFilesCachedBefore(String root, DateTime cutoff) {
-    final failures = <int?>[];
-    final directory = Directory(root);
-    if (!directory.existsSync()) return failures;
-    final eventFolders = <Directory>[];
-    for (final entity in directory.listSync(followLinks: false)) {
-      if (entity is! Directory) continue;
-      final name = p.basename(entity.path);
-      if (name.startsWith(r'$')) {
-        eventFolders.add(entity);
-      } else if (name == _decryptedFolder) {
-        eventFolders.addAll(
-          entity.listSync(followLinks: false).whereType<Directory>(),
-        );
+  static List<int?> _deleteFilesCachedBefore(String root, DateTime cutoff) => [
+    for (final folder in _eventFolders(Directory(root)))
+      ..._deleteOldFiles(folder, cutoff),
+  ];
+
+  static Iterable<Directory> _eventFolders(Directory root) sync* {
+    if (!root.existsSync()) return;
+    for (final folder in root.listSync(followLinks: false)) {
+      if (folder is! Directory) continue;
+      final name = p.basename(folder.path);
+      if (name.startsWith(r'$')) yield folder;
+      if (name == _decryptedFolder) {
+        yield* folder.listSync(followLinks: false).whereType<Directory>();
       }
     }
-    for (final folder in eventFolders) {
-      try {
-        for (final file in folder.listSync(
-          recursive: true,
-          followLinks: false,
-        )) {
-          if (file is! File) continue;
-          try {
-            if (file.lastModifiedSync().isBefore(cutoff)) file.deleteSync();
-          } on FileSystemException catch (e) {
-            failures.add(e.osError?.errorCode);
-          }
-        }
-        _deleteEmptyFolders(folder);
-      } on FileSystemException catch (e) {
-        failures.add(e.osError?.errorCode);
+  }
+
+  /// The error codes of the files that could not be deleted.
+  static List<int?> _deleteOldFiles(Directory folder, DateTime cutoff) {
+    final failures = <int?>[];
+    try {
+      final files = folder
+          .listSync(recursive: true, followLinks: false)
+          .whereType<File>();
+      for (final file in files) {
+        final failure = _deleteIfBefore(file, cutoff);
+        if (failure != null) failures.add(failure.osError?.errorCode);
       }
+      _deleteEmptyFolders(folder);
+    } on FileSystemException catch (e) {
+      failures.add(e.osError?.errorCode);
     }
     return failures;
+  }
+
+  static FileSystemException? _deleteIfBefore(File file, DateTime cutoff) {
+    try {
+      if (file.lastModifiedSync().isBefore(cutoff)) file.deleteSync();
+      return null;
+    } on FileSystemException catch (e) {
+      return e;
+    }
   }
 
   // Bottom-up, and never a folder that a write fills meanwhile.
