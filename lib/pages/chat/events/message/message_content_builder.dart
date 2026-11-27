@@ -11,6 +11,7 @@ import 'package:twake_chat/pages/chat/optional_stack.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
@@ -57,7 +58,8 @@ class MessageContentBuilder extends ConsumerWidget
           ownMessage: event.isOwnMessage,
           hideDisplayName: event.hideDisplayName(
             nextEvent,
-            Message.responsiveUtils.isMobile(context),
+            isMobile: Message.responsiveUtils.isMobile(context),
+            alignOwnRight: ref.watch(alignOwnMessagesRightProvider),
           ),
           isEdited: event.hasAggregatedEvents(timeline, RelationshipTypes.edit),
           timeline: timeline,

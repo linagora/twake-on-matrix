@@ -207,20 +207,16 @@ extension LocalizedBody on Event {
 
   bool get isOwnMessage => senderId == room.client.userID;
 
-  bool get shouldAlignOwnMessageInDifferentSide =>
-      isOwnMessage && AppConfig.enableRightAndLeftMessageAlignmentOnWeb;
+  /// An own message drawn on the other side, when [alignOwnRight] (the
+  /// preference `alignOwnMessagesRightProvider`).
+  bool shouldAlignOwnMessageInDifferentSide(bool alignOwnRight) =>
+      isOwnMessage && alignOwnRight;
 
-  bool get shouldDisplayContextMenuInLeftBubble {
-    return AppConfig.enableRightAndLeftMessageAlignmentOnWeb
-        ? _isContextMenuForLeftAlignedMessage()
-        : false;
-  }
+  bool shouldDisplayContextMenuInLeftBubble(bool alignOwnRight) =>
+      alignOwnRight && _isContextMenuForLeftAlignedMessage();
 
-  bool get shouldDisplayContextMenuInRightBubble {
-    return AppConfig.enableRightAndLeftMessageAlignmentOnWeb
-        ? _isContextMenuForRightAlignedMessage()
-        : true;
-  }
+  bool shouldDisplayContextMenuInRightBubble(bool alignOwnRight) =>
+      !alignOwnRight || _isContextMenuForRightAlignedMessage();
 
   bool _isContextMenuForLeftAlignedMessage() => isOwnMessage;
 
@@ -237,12 +233,16 @@ extension LocalizedBody on Event {
     MessageTypes.File,
   }.contains(messageType);
 
-  bool hideDisplayName(Event? nextEvent, bool isMobile) =>
+  bool hideDisplayName(
+    Event? nextEvent, {
+    required bool isMobile,
+    required bool alignOwnRight,
+  }) =>
       isMobile && (isOwnMessage || room.isDirectChat) ||
       !isSameSenderWith(nextEvent) ||
       (isOwnMessage && redacted) ||
       type == EventTypes.Encrypted ||
-      shouldAlignOwnMessageInDifferentSide;
+      shouldAlignOwnMessageInDifferentSide(alignOwnRight);
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 

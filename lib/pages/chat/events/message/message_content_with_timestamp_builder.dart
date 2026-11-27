@@ -35,6 +35,8 @@ import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -44,7 +46,7 @@ import 'package:pull_down_button/pull_down_button.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 
-class MessageContentWithTimestampBuilder extends StatefulWidget {
+class MessageContentWithTimestampBuilder extends ConsumerStatefulWidget {
   final Event event;
   final MatrixState? matrixState;
   final Event? nextEvent;
@@ -56,6 +58,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
+
   final List<ContextMenuItemAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
   final bool selectMode;
@@ -188,12 +191,12 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   }
 
   @override
-  State<MessageContentWithTimestampBuilder> createState() =>
+  ConsumerState<MessageContentWithTimestampBuilder> createState() =>
       _MessageContentWithTimestampBuilderState();
 }
 
 class _MessageContentWithTimestampBuilderState
-    extends State<MessageContentWithTimestampBuilder>
+    extends ConsumerState<MessageContentWithTimestampBuilder>
     with TwakeContextMenuMixin {
   final ValueNotifier<bool> _displayEmojiPicker = ValueNotifier(false);
   final ResponsiveUtils _responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -278,6 +281,8 @@ class _MessageContentWithTimestampBuilderState
 
   @override
   Widget build(BuildContext context) {
+    // The helpers read these: some also build the preview of a dialog.
+    ref.watch(alignOwnMessagesRightProvider);
     final displayTime =
         widget.event.type == EventTypes.RoomCreate ||
         widget.nextEvent == null ||
@@ -316,7 +321,7 @@ class _MessageContentWithTimestampBuilderState
         child: Align(
           alignment: MessageStyle.messageAlignmentGeometry(
             widget.event,
-            context,
+            ref.read(alignOwnMessagesRightProvider),
           ),
           child: _messageContentWithTimestampBuilder(
             context: context,
@@ -333,12 +338,16 @@ class _MessageContentWithTimestampBuilderState
     required bool displayTime,
     required bool timelineText,
   }) {
+    final alignOwnRight = ref.read(alignOwnMessagesRightProvider);
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MessageStyle.messageAlignment(widget.event, context),
+      mainAxisAlignment: MessageStyle.messageAlignment(
+        widget.event,
+        alignOwnRight,
+      ),
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (widget.event.shouldDisplayContextMenuInLeftBubble &&
+        if (widget.event.shouldDisplayContextMenuInLeftBubble(alignOwnRight) &&
             !_responsiveUtils.isMobile(context) &&
             !widget.event.redacted)
           _menuActionsRowBuilder(context, isReversed: true),
@@ -348,9 +357,10 @@ class _MessageContentWithTimestampBuilderState
               : null,
           listActions: widget.listActions,
           child: Container(
-            alignment: widget.event.isOwnMessage
-                ? Alignment.topRight
-                : Alignment.topLeft,
+            alignment: MessageStyle.messageAlignmentGeometry(
+              widget.event,
+              alignOwnRight,
+            ),
             padding: MessageStyle.paddingMessageContainer(
               displayTime,
               context,
@@ -364,7 +374,7 @@ class _MessageContentWithTimestampBuilderState
             ),
           ),
         ),
-        if (widget.event.shouldDisplayContextMenuInRightBubble &&
+        if (widget.event.shouldDisplayContextMenuInRightBubble(alignOwnRight) &&
             !_responsiveUtils.isMobile(context) &&
             !widget.event.redacted)
           _menuActionsRowBuilder(context),
@@ -676,9 +686,10 @@ class _MessageContentWithTimestampBuilderState
       widget.previousEvent,
     );
     final showTail = !isDisplayOnlyEmoji && !hasSameSenderBelow;
-    final alignOwnMessageRight =
-        widget.event.isOwnMessage &&
-        _responsiveUtils.enableRightAndLeftMessageAlignment(context);
+    final alignOwnMessageRight = widget.event
+        .shouldAlignOwnMessageInDifferentSide(
+          ref.read(alignOwnMessagesRightProvider),
+        );
     final tailDirection = showTail
         ? (alignOwnMessageRight
               ? BubbleTailDirection.right
@@ -850,7 +861,8 @@ class _MessageContentWithTimestampBuilderState
   bool _hideDisplayName(BuildContext context) {
     return widget.event.hideDisplayName(
       widget.nextEvent,
-      _responsiveUtils.isMobile(context),
+      isMobile: _responsiveUtils.isMobile(context),
+      alignOwnRight: ref.read(alignOwnMessagesRightProvider),
     );
   }
 

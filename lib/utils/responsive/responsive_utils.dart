@@ -1,4 +1,3 @@
-import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -101,11 +100,6 @@ class ResponsiveUtils {
 
   bool isSingleColumnLayout(BuildContext context) {
     return isMobile(context);
-  }
-
-  bool enableRightAndLeftMessageAlignment(BuildContext context) {
-    return isMobile(context) ||
-        AppConfig.enableRightAndLeftMessageAlignmentOnWeb;
   }
 
   double getChatAdaptiveBreakPoint(BuildContext context) {

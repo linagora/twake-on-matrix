@@ -2,7 +2,8 @@
 /// is what the device stores once the step is seen: never change it.
 enum PersonalizeStep {
   density('density'),
-  order('order');
+  order('order'),
+  align('align');
 
   const PersonalizeStep(this.id);
 

@@ -54,6 +54,9 @@ class DisplayPreferencesController extends _$DisplayPreferencesController {
 
   void setRoomOrder(RoomOrder order) =>
       _choose((p) => p.copyWith(roomOrder: order));
+
+  void setBubbleAlign(BubbleAlign align) =>
+      _choose((p) => p.copyWith(bubbleAlign: align));
 }
 
 /// The choices as they are now: the defaults until the storage has answered.
@@ -61,3 +64,9 @@ class DisplayPreferencesController extends _$DisplayPreferencesController {
 DisplayPreferencesState displayPreferences(Ref ref) =>
     ref.watch(displayPreferencesControllerProvider).value ??
     const DisplayPreferencesState();
+
+/// Own messages on the right of the chat, on every screen size: the one
+/// source of the bubble alignment.
+@Riverpod(keepAlive: true)
+bool alignOwnMessagesRight(Ref ref) =>
+    ref.watch(displayPreferencesProvider).bubbleAlign == BubbleAlign.ownRight;
