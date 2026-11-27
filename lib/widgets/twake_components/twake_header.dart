@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
 import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
@@ -70,7 +72,7 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
     super.didUpdateWidget(oldWidget);
     if (widget.client != oldWidget.client &&
         Matrix.of(context).isValidActiveClient) {
-      getCurrentProfile();
+      unawaited(getCurrentProfile());
       onAccountDataSubscription?.cancel();
       listenOnProfileChangeStream(
         client: ref.read(matrixClientProvider),
@@ -81,7 +83,7 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
       );
     }
     if (currentProfileNotifier.value.userId.isEmpty) {
-      getCurrentProfile();
+      unawaited(getCurrentProfile());
     }
   }
 
@@ -95,7 +97,7 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
   @override
   void initState() {
     super.initState();
-    getCurrentProfile();
+    unawaited(getCurrentProfile());
     listenOnProfileChangeStream(
       client: ref.read(matrixClientProvider),
       currentProfile: currentProfileNotifier.value,
