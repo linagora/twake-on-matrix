@@ -132,7 +132,6 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
           .toLowerCase()
           .replaceAll(' ', '-');
       final homeserver = homeserverController.text.toHomeserverUri();
-      final matrix = Matrix.of(context);
       final allHomeserverLoggedIn = ClientManager.loggedIn(
         await ClientManager.getClients(),
       ).map((client) => client.homeserver.toString()).toList();
@@ -164,22 +163,12 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
 
       final ssoSupported = summary.supportSSOLogin;
 
-      try {
-        await client
-            .register(inhibitLogin: true)
-            .timeout(const Duration(seconds: 30));
-        matrix.loginRegistrationSupported = true;
-      } on MatrixException catch (e) {
-        matrix.loginRegistrationSupported = e.requireAdditionalAuthentication;
-      } catch (e) {
-        Logs().w('Registration check failed', e);
-        matrix.loginRegistrationSupported = false;
-      }
+      final isRegistrationSupported = await supportsRegistration(client);
 
       if (!ssoSupported) {
         // No SSO: go straight to password login page
         handlePasswordLogin();
-      } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
+      } else if (!isRegistrationSupported) {
         Map<String, dynamic>? rawLoginTypes;
         await client
             .request(RequestType.GET, '/client/r0/login')
@@ -214,6 +203,22 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
     } catch (e) {
       state = HomeserverState.wrongServerName;
       setState(() => error = (e).toLocalizedString(context));
+    }
+  }
+
+  /// Probes registration without auth: a UIA challenge means it is open.
+  @visibleForTesting
+  static Future<bool> supportsRegistration(Client client) async {
+    try {
+      await client
+          .register(inhibitLogin: true)
+          .timeout(const Duration(seconds: 30));
+      return true;
+    } on MatrixException catch (e) {
+      return e.requireAdditionalAuthentication;
+    } catch (e) {
+      Logs().w('Registration check failed', e);
+      return false;
     }
   }
 
