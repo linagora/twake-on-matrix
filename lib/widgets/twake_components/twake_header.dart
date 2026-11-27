@@ -61,7 +61,7 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
     final userId = ref.read(activeUserIdProvider);
     if (userId == null) return;
     final data = await ref.read(matrixUserProfileProvider(userId).future);
-    if (!mounted) return;
+    if (!mounted || ref.read(activeUserIdProvider) != userId) return;
     currentProfileNotifier.value = data.toProfile(userId);
   }
 

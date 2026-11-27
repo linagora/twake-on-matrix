@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
 import 'package:flutter_test/flutter_test.dart';
@@ -34,11 +36,15 @@ class _FakeMatrix extends Fake implements MatrixState {
   final Client client;
 
   @override
+  bool get isValidActiveClient => true;
+
+  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       '_FakeMatrix';
 }
 
 const _me = '@alice:example.org';
+const _bob = '@bob:example.org';
 
 final _avatar = find.byKey(NavigationKeys.accountAvatar.key);
 
@@ -85,29 +91,39 @@ Future<List<String>> _pumpHeader(
           _me,
         ).overrideWith((ref) => Stream.value(header.presence)),
       ],
-      child: Provider<MatrixState>.value(
-        value: _FakeMatrix(client),
-        child: MaterialApp(
-          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-          locale: const Locale('en'),
-          localizationsDelegates: L10n.localizationsDelegates,
-          supportedLocales: L10n.supportedLocales,
-          home: Scaffold(
-            appBar: TwakeHeader(
-              onClearSelection: () {},
-              client: client,
-              selectModeNotifier: selectMode,
-              conversationSelectionNotifier: selection,
-              onClickAvatar: () => taps.add('settings'),
-            ),
-          ),
-        ),
+      child: _app(
+        client,
+        _header(client, selectMode, selection, () => taps.add('settings')),
       ),
     ),
   );
   await tester.pumpAndSettle();
   return taps;
 }
+
+TwakeHeader _header(
+  Client client,
+  ValueNotifier<SelectMode> selectMode,
+  ValueNotifier<List<ConversationSelectionPresentation>> selection,
+  VoidCallback onClickAvatar,
+) => TwakeHeader(
+  onClearSelection: () {},
+  client: client,
+  selectModeNotifier: selectMode,
+  conversationSelectionNotifier: selection,
+  onClickAvatar: onClickAvatar,
+);
+
+Widget _app(Client client, TwakeHeader header) => Provider<MatrixState>.value(
+  value: _FakeMatrix(client),
+  child: MaterialApp(
+    theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
+    locale: const Locale('en'),
+    localizationsDelegates: L10n.localizationsDelegates,
+    supportedLocales: L10n.supportedLocales,
+    home: Scaffold(appBar: header),
+  ),
+);
 
 void main() {
   setUp(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
@@ -116,6 +132,7 @@ void main() {
   group('account avatar in the Chats header', () {
     _lookAndActionTests();
     _stateTests();
+    _accountSwitchTests();
   });
 }
 
@@ -197,5 +214,53 @@ void _stateTests() {
     await _pumpHeader(tester, const _Header(width: 1400));
 
     expect(_avatar, findsNothing);
+  });
+}
+
+void _accountSwitchTests() {
+  testWidgets('a late profile of the previous account does not replace the '
+      'new one', (tester) async {
+    final alice = Completer<MatrixUserProfile>();
+    final bob = Completer<MatrixUserProfile>();
+    final selectMode = ValueNotifier(SelectMode.normal);
+    final selection = ValueNotifier<List<ConversationSelectionPresentation>>(
+      const [],
+    );
+    addTearDown(selectMode.dispose);
+    addTearDown(selection.dispose);
+    for (final userId in [_me, _bob]) {
+      final client = _FakeClient();
+      await tester.pumpWidget(
+        ProviderScope(
+          retry: (_, _) => null,
+          overrides: [
+            matrixClientProvider.overrideWithValue(client),
+            activeUserIdProvider.overrideWithValue(userId),
+            matrixUserProfileProvider(_me).overrideWith((ref) => alice.future),
+            matrixUserProfileProvider(_bob).overrideWith((ref) => bob.future),
+            personPresenceProvider(
+              _me,
+            ).overrideWith((ref) => Stream.value(null)),
+            personPresenceProvider(
+              _bob,
+            ).overrideWith((ref) => Stream.value(null)),
+          ],
+          child: _app(client, _header(client, selectMode, selection, () {})),
+        ),
+      );
+    }
+    bob.complete(
+      const MatrixUserProfile(matrixId: _bob, displayName: 'Bob Stone'),
+    );
+    await tester.pumpAndSettle();
+    alice.complete(
+      const MatrixUserProfile(matrixId: _me, displayName: 'Alice Martin'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(of: _avatar, matching: find.text('BS')),
+      findsOneWidget,
+    );
   });
 }
