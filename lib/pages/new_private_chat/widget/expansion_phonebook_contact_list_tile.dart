@@ -13,6 +13,8 @@ import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/utils/display_name_widget.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/widgets/avatar/person_presence_badge.dart';
 import 'package:twake_chat/widgets/highlight_text.dart';
 import 'package:twake_chat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/cupertino.dart';
@@ -131,24 +133,32 @@ class _ExpansionPhonebookContactListTileState
                 : null,
             builder: (context, ref, _) {
               final matrixId = widget.contact.matrixId;
-              final profile =
+              final isOnTwake =
                   widget.contact.status == ContactStatus.active &&
-                      matrixId?.isNotEmpty == true
+                  matrixId?.isNotEmpty == true;
+              final profile = isOnTwake
                   ? ref.watch(contactDisplayProvider(matrixId!)).value
                   : null;
               final avatar = profile == null
                   ? null
                   : ref.watch(contactAvatarProvider(matrixId!));
+              final avatarImage = Avatar(
+                mxContent: avatar,
+                name: widget.contact.displayName,
+              );
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: IgnorePointer(
-                      child: Avatar(
-                        mxContent: avatar,
-                        name: widget.contact.displayName,
-                      ),
+                      child: !isOnTwake
+                          ? avatarImage
+                          : PersonPresenceBadge(
+                              userId: matrixId!,
+                              size: AvatarStyle.defaultSize,
+                              child: avatarImage,
+                            ),
                     ),
                   ),
                   const SizedBox(width: 8.0),

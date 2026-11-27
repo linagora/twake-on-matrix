@@ -490,8 +490,13 @@ says « Online »; an away person shows when they were last active.
 Opening a screen shows the cached presence at once, then asks the server once
 (`GET /presence/{userId}/status`); after that the `/sync` the app already
 runs keeps it current (no polling, unlike Twake Space Chat, whose sliding sync
-carries none). The chat list, members,
-contacts and the avatars of messages get the dot in the next changes.
+carries none).
+
+Lists show the same dot, without the text: the direct chats of the chat list
+(not the groups), the members of a group, and the contacts on Twake (the
+contacts tab, the search and the pickers of a new chat or group, which share
+its row). A list shows the presence the `/sync` keeps, without asking the
+server for each row. The avatars of messages get the dot in a next change.
 
 ## D26. Calls start audio-only; the camera and the speaker are buttons (decided by Johann, 2026-11-23)
 

@@ -8,6 +8,8 @@ class PresenceRepositoryImpl implements PresenceRepository {
   final PresenceDatasource _datasource;
 
   @override
-  Stream<PersonPresence?> watchPresence(String userId) =>
-      _datasource.watchPresence(userId);
+  Stream<PersonPresence?> watchPresence(
+    String userId, {
+    required bool readFromServer,
+  }) => _datasource.watchPresence(userId, readFromServer: readFromServer);
 }

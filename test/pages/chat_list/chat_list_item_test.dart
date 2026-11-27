@@ -11,6 +11,10 @@ import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
+import 'package:twake_chat/widgets/avatar/person_presence_badge.dart';
+import 'package:twake_chat/domain/presence/entities/person_presence.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -550,5 +554,58 @@ void main() {
         expect(svgAsset(Assets.images.icFilePdf.path), findsNothing);
       },
     );
+  });
+
+  group('presence dot', () {
+    const peer = '@alice:server.tld';
+
+    Widget withPresence(Widget child) => UncontrolledProviderScope(
+      container: ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: [
+          syncedPersonPresenceProvider(peer).overrideWith(
+            (ref) => Stream.value(
+              const PersonPresence(status: PresenceStatus.online),
+            ),
+          ),
+        ],
+      ),
+      child: wrap(child),
+    );
+
+    testWidgets('build_whenDirectChat_showsThePresenceOfThePeer', (
+      tester,
+    ) async {
+      // Arrange
+      final room = buildRoom(name: 'Alice');
+      when(room.directChatMatrixID).thenReturn(peer);
+
+      // Act
+      await tester.pumpWidget(withPresence(ChatListItem(room)));
+      await tester.pump();
+      await tester.pump();
+
+      // Assert
+      final badge = tester.widget<PersonPresenceBadge>(
+        find.byType(PersonPresenceBadge),
+      );
+      expect(badge.userId, peer);
+      expect(find.byKey(const ValueKey('linagora-presence-dot')), findsOne);
+    });
+
+    testWidgets('build_whenGroup_showsNoPresence', (tester) async {
+      // Arrange
+      final room = buildRoom(name: 'Team');
+      when(room.isDirectChat).thenReturn(false);
+      when(room.directChatMatrixID).thenReturn(peer);
+
+      // Act
+      await tester.pumpWidget(withPresence(ChatListItem(room)));
+      await tester.pump();
+      await tester.pump();
+
+      // Assert
+      expect(find.byType(PersonPresenceBadge), findsNothing);
+    });
   });
 }
