@@ -10,7 +10,9 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_view_style.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_details.dart';
+import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 
 import 'chat_profile_info_details_report_test.mocks.dart';
@@ -121,4 +123,21 @@ void main() {
       expect(blockTaps, 0);
     },
   );
+
+  testWidgets('reportRows_fitInTheSpaceTheHeaderAddsForThem', (tester) async {
+    await pumpDetails(tester, roomWith(isDirectChat: true));
+
+    final top = tester
+        .getTopLeft(find.byKey(ChatProfileInfoDetails.reportChatButtonKey))
+        .dy;
+    final bottom = tester
+        .getBottomLeft(find.byKey(ChatProfileInfoDetails.reportUserButtonKey))
+        .dy;
+    final rowsHeight = bottom - top + ChatProfileInfoStyle.textSpacing;
+
+    expect(
+      rowsHeight,
+      lessThanOrEqualTo(ChatDetailViewStyle.chatInfoReportActionsHeight),
+    );
+  });
 }

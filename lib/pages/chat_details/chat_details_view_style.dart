@@ -28,6 +28,7 @@ class ChatDetailViewStyle {
   static double chatDetailsPageViewWebWidth = 640.0;
   static const double chatInfoActionHeight = 83;
   static const double chatInfoAddContactHeight = 50;
+  static const double chatInfoReportActionsHeight = 106;
   static EdgeInsetsDirectional paddingTabBarView =
       const EdgeInsetsDirectional.only(top: 50);
   static const double avatarFontSize = 36;
