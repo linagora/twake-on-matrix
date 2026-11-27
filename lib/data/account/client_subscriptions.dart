@@ -92,22 +92,28 @@ class ClientSubscriptions {
 
   /// Stops accepting subscriptions for [name] and cancels what it has. The
   /// entries are taken off before the first await, so what a re-login keeps
-  /// meanwhile, of any kind, is tracked on its own. A cancel that fails stops
-  /// the run and is thrown; it and the ones not yet run are kept, so calling it
-  /// again finishes the job.
+  /// meanwhile, of any kind, is tracked on its own. Every cancel starts before
+  /// any is awaited, so no listener stays live behind a slow one. The first
+  /// failure is thrown once they all ran; the failed ones are kept, so calling
+  /// it again finishes the job.
   Future<void> cancel(String name) async {
     _open.remove(name);
     final pending = [
       ...?_unfinished.remove(name),
       ...?_byClient.remove(name)?.values,
     ];
-    for (var i = 0; i < pending.length; i++) {
-      try {
-        await pending[i]();
-      } catch (_) {
-        _unfinished.putIfAbsent(name, () => []).addAll(pending.skip(i));
-        rethrow;
-      }
+    final failed = <CancelSubscription>[];
+    (Object, StackTrace)? firstError;
+    await Future.wait([
+      for (final cancelOne in pending)
+        Future.sync(cancelOne).catchError((Object error, StackTrace stack) {
+          failed.add(cancelOne);
+          firstError ??= (error, stack);
+        }),
+    ]);
+    if (firstError case (final error, final stack)) {
+      _unfinished.putIfAbsent(name, () => []).addAll(failed);
+      Error.throwWithStackTrace(error, stack);
     }
   }
 

@@ -397,7 +397,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   /// Owned by the keep-alive providers in `account_services_providers.dart`.
-  /// Those providers free them; this state only reads them.
+  /// Those providers free them; this state only cancels its subscriptions.
   late final ClientSubscriptions _subscriptions;
   late final QuietLogouts _quietLogouts;
   late final LogoutRemovals _logoutRemovals;
@@ -1996,9 +1996,13 @@ class MatrixState extends ConsumerState<Matrix>
     _loginSessions.release(_loginHost);
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
-    // The keep-alive providers free the subscriptions and the removals when
-    // the container goes away. Disposing them here would kill the shared
-    // instances for a later MatrixState on the same container.
+    // The listeners use this state; the instance stays usable for a later one.
+    unawaited(
+      _subscriptions.cancelAll().catchError(
+        (Object e, StackTrace s) => _report(e, s, 'subscriptions at dispose'),
+      ),
+    );
+    // The keep-alive providers free the removals when the container goes away.
     onClientLoginStateChanged.close();
     // A provider cannot be written while the tree is being finalized.
     final switchEffects = _switchEffects;
