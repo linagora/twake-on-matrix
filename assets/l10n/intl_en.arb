@@ -6,16 +6,7 @@
   "webPushPermissionDeniedHint": "Notifications are blocked. Allow them for this site in your browser settings, then toggle this on.",
   "deviceIdentityRenewTitle": "Please sign in again",
   "deviceIdentityRenewMessage": "To keep your messages secure, this session must be renewed. Sign in again to continue.",
-  "passwordsDoNotMatch": "Passwords do not match!",
-  "pleaseEnterValidEmail": "Please enter a valid email address.",
   "repeatPassword": "Repeat password",
-  "pleaseChooseAtLeastChars": "Please choose at least {min} characters.",
-  "@pleaseChooseAtLeastChars": {
-    "type": "text",
-    "placeholders": {
-      "min": {}
-    }
-  },
   "about": "About",
   "@about": {
     "type": "text",
@@ -1663,16 +1654,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "showPassword": "Show password",
-  "@showPassword": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "signUp": "Sign up",
-  "@signUp": {
-    "type": "text",
-    "placeholders": {}
-  },
   "singlesignon": "Single Sign on",
   "@singlesignon": {
     "type": "text",
@@ -2064,7 +2045,6 @@
       "user": {}
     }
   },
-  "noEmailWarning": "Please enter a valid email address. Otherwise you won't be able to reset your password. If you don't want to, tap again on the button to continue.",
   "stories": "Stories",
   "users": "Users",
   "storeInSecureStorageDescription": "Store the recovery key in the secure storage of this device.",
