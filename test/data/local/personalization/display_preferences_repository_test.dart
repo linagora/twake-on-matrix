@@ -20,12 +20,14 @@ const _allOther = DisplayPreferencesState(
   density: ChatListDensity.compact,
   roomOrder: RoomOrder.sections,
   seenStyle: SeenStyle.avatars,
+  composerStyle: ComposerStyle.compact,
   bubbleAlign: BubbleAlign.left,
 );
 const _allOtherStored = {
   SettingKeys.chatListDensity: 'compact',
   SettingKeys.roomOrder: 'sections',
   SettingKeys.seenStyle: 'avatars',
+  SettingKeys.composerStyle: 'compact',
   SettingKeys.bubbleAlign: 'left',
 };
 

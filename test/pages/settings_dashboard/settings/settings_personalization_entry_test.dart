@@ -133,7 +133,7 @@ void main() {
 
   testWidgets(
     'a tap on the entry opens the personalization screen, at 1200 px with '
-    'the cards of the four options',
+    'the cards of the five options',
     (tester) async {
       await _pumpSettings(tester);
 
@@ -151,6 +151,8 @@ void main() {
         'option-seen-style-ticks',
         'option-seen-style-avatars',
         'option-seen-style-names',
+        'option-composer-compact',
+        'option-composer-classic',
         'option-align-ownRight',
         'option-align-left',
       ]) {

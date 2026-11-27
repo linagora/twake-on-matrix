@@ -705,3 +705,7 @@ messages, like the others'.
 
 The read receipts style is a third option: ticks (the default), avatars or
 names under the last message a reader has read, one line if useful.
+
+On wide screens only (905 px and more), the message field is a fourth option:
+tools under the text, or around it as before (the default). A phone keeps its
+own message field.

@@ -37,7 +37,7 @@ class ChatInputRowWeb extends StatelessWidget {
   final void Function()? onCloseEditAction;
   final Timeline? timeline;
 
-  /// The « modern » composer (React D675): the field, then one row of small
+  /// The « modern » composer: the field, then one row of small
   /// tools under the text, with this button at the far right. Null keeps the
   /// tools around the field.
   final Widget? sendButton;

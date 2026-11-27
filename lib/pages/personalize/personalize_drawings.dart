@@ -252,7 +252,9 @@ class _MiniComposer extends StatelessWidget {
     final hint = Text(
       L10n.of(context)!.message,
       textScaler: TextScaler.noScaling,
-      style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+      style: LinagoraTextStyle.material().bodySmall.copyWith(
+        color: scheme.onSurfaceVariant,
+      ),
     );
     final border = BoxDecoration(
       color: scheme.surface,
