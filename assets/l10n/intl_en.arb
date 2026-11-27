@@ -3970,5 +3970,10 @@
   "@personalizeCompareHint": {
     "type": "text",
     "placeholders": {}
+  },
+  "mentionRoomHint": "Notify everyone in the conversation",
+  "@mentionRoomHint": {
+    "type": "text",
+    "placeholders": {}
   }
 }

@@ -94,6 +94,21 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     super.dispose();
   }
 
+  static const _roomMentionSuggestion = {
+    'type': 'room_mention',
+    'mention': '@room',
+    'displayname': '@room',
+  };
+
+  // Never first for a bare @, where Enter would notify everyone by mistake.
+  static bool _isRoomMentionQuery(String query) =>
+      query.isNotEmpty &&
+      [
+        'room',
+        'all',
+        'everyone',
+      ].any((word) => word.startsWith(query.toLowerCase()));
+
   List<Map<String, String?>> getSuggestions(String text) {
     if (widget.controller!.selection.baseOffset !=
             widget.controller!.selection.extentOffset ||
@@ -214,21 +229,20 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       unicode: true,
     ).firstMatch(searchText);
     if (userMatch != null && widget.room != null) {
+      final query = userMatch[1]!;
+      final userId = widget.room!.client.userID;
+      final canMentionRoom =
+          userId != null && widget.room!.canSendNotification(userId);
+      final roomMentionFirst = canMentionRoom && _isRoomMentionQuery(query);
+      if (roomMentionFirst) ret.add(_roomMentionSuggestion);
+      final usersStart = ret.length;
       final users = widget.room!
           .getParticipants()
           .where((user) => user.senderId != widget.room!.client.userID)
           .toList();
       for (final user in users) {
-        if (engine.matchesText(
-              userMatch[1]!,
-              user.displayName ?? '',
-              options: opts,
-            ) ||
-            engine.matchesText(
-              userMatch[1]!,
-              user.id.split(':')[0],
-              options: opts,
-            )) {
+        if (engine.matchesText(query, user.displayName ?? '', options: opts) ||
+            engine.matchesText(query, user.id.split(':')[0], options: opts)) {
           ret.add({
             'type': 'user',
             'mxid': user.id,
@@ -240,6 +254,12 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         if (ret.length > maxResults) {
           break;
         }
+      }
+      if (canMentionRoom &&
+          !roomMentionFirst &&
+          query.isEmpty &&
+          ret.length > usersStart) {
+        ret.add(_roomMentionSuggestion);
       }
     }
     final roomMatch = RegExp(
@@ -335,7 +355,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         (Match m) => '${m[1]}$insertText',
       );
     }
-    if (suggestion['type'] == 'user') {
+    if (suggestion['type'] == 'user' || suggestion['type'] == 'room_mention') {
       insertText = '${suggestion['mention']!} ';
 
       // match and capture usernames that start with the @ symbol,
@@ -664,7 +684,10 @@ class SuggestionTile extends StatelessWidget {
         ),
       );
     }
-    if (suggestion['type'] == 'user' || suggestion['type'] == 'room') {
+    if (suggestion['type'] == 'user' ||
+        suggestion['type'] == 'room' ||
+        suggestion['type'] == 'room_mention') {
+      final isRoomMention = suggestion['type'] == 'room_mention';
       final url = Uri.parse(suggestion['avatar_url'] ?? '');
       return Container(
         padding: const EdgeInsetsDirectional.all(8.0),
@@ -672,14 +695,21 @@ class SuggestionTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Avatar(
-              mxContent: url,
-              name:
-                  suggestion.tryGet<String>('displayname') ??
-                  suggestion.tryGet<String>('mxid'),
-              size: InputBarStyle.suggestionAvatarSize,
-              fontSize: InputBarStyle.suggestionAvatarFontSize,
-            ),
+            if (isRoomMention)
+              Icon(
+                Icons.groups_outlined,
+                size: InputBarStyle.suggestionAvatarSize,
+                color: Theme.of(context).colorScheme.onSurface,
+              )
+            else
+              Avatar(
+                mxContent: url,
+                name:
+                    suggestion.tryGet<String>('displayname') ??
+                    suggestion.tryGet<String>('mxid'),
+                size: InputBarStyle.suggestionAvatarSize,
+                fontSize: InputBarStyle.suggestionAvatarFontSize,
+              ),
             const SizedBox(width: InputBarStyle.suggestionTileAvatarTextGap),
             Expanded(
               child: Row(
@@ -699,7 +729,9 @@ class SuggestionTile extends StatelessWidget {
                   Flexible(
                     child: Text(
                       maxLines: 1,
-                      suggestion['mxid']!,
+                      isRoomMention
+                          ? L10n.of(context)!.mentionRoomHint
+                          : suggestion['mxid']!,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: LinagoraRefColors.material().tertiary[30],
