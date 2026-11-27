@@ -19,14 +19,26 @@ import 'html_message.dart';
 
 class ReplyContent extends StatelessWidget {
   final Event replyEvent;
-  final bool ownMessage;
   final Timeline? timeline;
+
+  /// Set above a reply: draws the "Reply to" caption and the quoted bubble,
+  /// aligned to this physical side (end is right). Null draws the preview of
+  /// the composer.
+  final CrossAxisAlignment? quoteAlignment;
+
+  /// How far the message bubble covers the bottom of the quoted bubble.
+  final double quoteOverlap;
+
+  /// The quoted message is not loaded: the caption names nobody.
+  final bool quoteSenderUnknown;
 
   const ReplyContent(
     this.replyEvent, {
-    this.ownMessage = false,
     super.key,
     this.timeline,
+    this.quoteAlignment,
+    this.quoteOverlap = 0,
+    this.quoteSenderUnknown = false,
   });
 
   @override
@@ -85,12 +97,13 @@ class ReplyContent extends StatelessWidget {
       );
     }
     final user = displayEvent.getUser();
+    final quoteAlignment = this.quoteAlignment;
+    if (quoteAlignment != null) {
+      return _buildQuote(context, displayEvent, replyBody, quoteAlignment);
+    }
     return Container(
       padding: ReplyContentStyle.replyParentContainerPadding,
-      decoration: ReplyContentStyle.replyParentContainerDecoration(
-        context,
-        ownMessage,
-      ),
+      decoration: ReplyContentStyle.replyParentContainerDecoration(context),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -108,12 +121,7 @@ class ReplyContent extends StatelessWidget {
             ),
             const SizedBox(width: ReplyContentStyle.contentSpacing),
             if (displayEvent.hasAttachment)
-              Center(
-                child: OptionalSelectionContainerDisabled(
-                  isEnabled: PlatformInfos.isDesktop,
-                  child: ReplyPreviewIconBuilder(event: displayEvent),
-                ),
-              ),
+              Center(child: _previewIcon(displayEvent)),
             const SizedBox(width: ReplyContentStyle.contentSpacing),
             Expanded(
               child: Column(
@@ -148,6 +156,85 @@ class ReplyContent extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _previewIcon(Event event) => OptionalSelectionContainerDisabled(
+    isEnabled: PlatformInfos.isDesktop,
+    child: ReplyPreviewIconBuilder(event: event),
+  );
+
+  Widget _buildQuote(
+    BuildContext context,
+    Event event,
+    Widget body,
+    CrossAxisAlignment alignment,
+  ) {
+    final user = event.getUser();
+    final l10n = L10n.of(context)!;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      textDirection: TextDirection.ltr,
+      crossAxisAlignment: alignment,
+      children: [
+        Padding(
+          padding: ReplyContentStyle.quoteCaptionPadding,
+          child: FutureBuilder<User?>(
+            future: user == null && !quoteSenderUnknown
+                ? event.fetchSenderUser()
+                : null,
+            builder: (context, snapshot) {
+              final style = ReplyContentStyle.quoteCaptionTextStyle(context);
+              final name =
+                  (user ?? snapshot.data ?? event.senderFromMemoryOrFallback)
+                      .calcDisplayname();
+              return Text.rich(
+                TextSpan(
+                  children: [
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          end: ReplyContentStyle.contentSpacing,
+                        ),
+                        child: Icon(
+                          Icons.reply,
+                          size: ReplyContentStyle.quoteCaptionIconSize,
+                          color: style?.color,
+                        ),
+                      ),
+                    ),
+                    TextSpan(
+                      text: quoteSenderUnknown
+                          ? l10n.reply
+                          : l10n.replyToName(name),
+                    ),
+                  ],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: style,
+              );
+            },
+          ),
+        ),
+        Container(
+          padding: ReplyContentStyle.quoteBubblePadding.add(
+            EdgeInsets.only(bottom: quoteOverlap),
+          ),
+          decoration: ReplyContentStyle.quoteBubbleDecoration,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (event.hasAttachment) ...[
+                _previewIcon(event),
+                const SizedBox(width: ReplyContentStyle.contentSpacing),
+              ],
+              Flexible(child: body),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

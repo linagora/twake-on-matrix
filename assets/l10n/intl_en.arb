@@ -3646,6 +3646,15 @@
     "type": "text",
     "placeholders": {}
   },
+  "replyToName": "Reply to {name}",
+  "@replyToName": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "scribe": "Scribe",
   "@scribe": {
     "type": "text",

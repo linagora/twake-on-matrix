@@ -12,7 +12,6 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twake_chat/pages/chat/events/message/reply_content_widget.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 import 'message.dart';
@@ -21,7 +20,6 @@ class MessageContentBuilder extends ConsumerWidget
     with MessageContentBuilderMixin {
   final Event event;
   final Timeline timeline;
-  final void Function(String)? scrollToEventId;
   final void Function(Event)? onSelect;
   final Event? nextEvent;
   final bool selectMode;
@@ -36,7 +34,6 @@ class MessageContentBuilder extends ConsumerWidget
     required this.timeline,
     this.onSelect,
     this.nextEvent,
-    this.scrollToEventId,
     this.selectMode = true,
     this.onRetryTextMessage,
     this.inThread = false,
@@ -90,13 +87,6 @@ class MessageContentBuilder extends ConsumerWidget
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (event.isReplyEvent())
-                  ReplyContentWidget(
-                    event: event,
-                    timeline: timeline,
-                    scrollToEventId: scrollToEventId,
-                    ownMessage: event.isOwnMessage,
-                  ),
                 OptionalStack(
                   isEnabled: timelineOverlay,
                   children: [

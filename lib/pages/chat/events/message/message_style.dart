@@ -139,10 +139,6 @@ class MessageStyle {
         ),
         hasBlur: true,
       );
-      if (event.isReplyEvent()) {
-        return double.infinity;
-      }
-
       return _calculateMediaBubbleWidth(
         displayImageInfo: displayImageInfo,
         textWidth: textWidth,
@@ -277,16 +273,5 @@ class MessageStyle {
       return event.isOwnMessage ? Alignment.topRight : Alignment.topLeft;
     }
     return Alignment.topLeft;
-  }
-
-  static double mediaContentWidth({
-    required BuildContext context,
-    required Event event,
-    required double calculatedWidth,
-  }) {
-    if (event.isReplyEvent()) {
-      return double.infinity;
-    }
-    return calculatedWidth;
   }
 }
