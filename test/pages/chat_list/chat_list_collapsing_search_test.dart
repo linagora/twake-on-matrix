@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
@@ -76,6 +77,7 @@ void main() {
   setUpHeaderTests();
   _atTheTop();
   _scrolled();
+  _partlyScrolled();
   _fromTheTopField();
   _assistiveTechnology();
   _otherStylesAndLayouts();
@@ -363,6 +365,61 @@ void _assistiveTechnology() {
       expect(_barFieldFocused(tester), isTrue);
       expect(find.byKey(_results).hitTestable(), findsOneWidget);
       semantics.dispose();
+    });
+  });
+}
+
+Future<void> _scrollTo(
+  WidgetTester tester,
+  HeaderHarness h,
+  double offset,
+) async {
+  h.scroll.jumpTo(offset);
+  await tester.pumpAndSettle();
+  expect(h.scroll.offset, offset);
+}
+
+// The round button takes over from the top field, never beside it: it shows
+// once the list has scrolled the whole field away.
+void _partlyScrolled() {
+  final extent = ChatListHeaderStyle.collapsingSearchExtent;
+  group('[ChatList] collapsing search, the top field partly scrolled', () {
+    for (final (name, offset) in [
+      ('by one pixel', 1.0),
+      ('halfway', extent / 2),
+      ('all but one pixel', extent - 1),
+    ]) {
+      testWidgets('GIVEN the field is scrolled $name\n'
+          'THEN the bar has no search button yet', (tester) async {
+        final h = await _pumpChats(tester);
+
+        await _scrollTo(tester, h, offset);
+
+        expect(find.byKey(_topField), findsOneWidget);
+        expect(find.byKey(_searchButton).hitTestable(), findsNothing);
+      });
+    }
+
+    testWidgets('GIVEN the field is scrolled away, no further\n'
+        'THEN the search button of the bar shows', (tester) async {
+      final h = await _pumpChats(tester);
+
+      await _scrollTo(tester, h, extent);
+
+      expect(find.byKey(_topField).hitTestable(), findsNothing);
+      expect(find.byKey(_searchButton).hitTestable(), findsOneWidget);
+    });
+
+    testWidgets('GIVEN the search button shows\n'
+        'WHEN the field comes partly back\n'
+        'THEN the button goes', (tester) async {
+      final h = await _pumpChats(tester);
+      await _scrollTo(tester, h, 400);
+      expect(find.byKey(_searchButton).hitTestable(), findsOneWidget);
+
+      await _scrollTo(tester, h, extent / 2);
+
+      expect(find.byKey(_searchButton).hitTestable(), findsNothing);
     });
   });
 }

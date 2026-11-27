@@ -3,8 +3,8 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
-import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
+import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 
 import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
@@ -27,10 +27,9 @@ Future<void> _backToChatList(BaseTestScenario scenario) async {
   await scenario.$(ChatList).waitUntilVisible();
 }
 
-/// THR-M-12: the bar is Contacts · Chats · Activity, Settings opens from the
-/// avatar of the app bar, and each still opens its own page (the pages are
-/// indexed by their place in the destinations: adding Activity must not
-/// shift Settings).
+/// THR-M-12: the bar is Contacts · Chats · Activity · Settings and each tab
+/// still opens its own page (the pages are indexed by their place in the
+/// bar: adding Activity must not shift Settings).
 class ActivityTabsScenario extends BaseTestScenario {
   ActivityTabsScenario(super.$, super.robots);
 
@@ -38,22 +37,22 @@ class ActivityTabsScenario extends BaseTestScenario {
   Future<void> runTestLogic() async {
     await $(ChatList).waitUntilVisible();
     final bar = find.byType(FloatingNavigationBar).last;
-    for (final label in ['Contacts', 'Chats', 'Activity']) {
+    expect(
+      $.tester.widget<FloatingNavigationBar>(bar).destinations,
+      AdaptiveDestinationEnum.values,
+    );
+    for (final label in ['Contacts', 'Chats', 'Activity', 'Settings']) {
       expect(
         find.descendant(of: bar, matching: find.text(label)),
         findsOneWidget,
       );
     }
-    expect(
-      find.descendant(of: bar, matching: find.text('Settings')),
-      findsNothing,
-    );
 
     final activity = ActivityRobot($);
     await activity.open();
     await activity.expectOnActivityTab();
 
-    await $(NavigationKeys.settingsAvatar.key).tap();
+    await robots.homeRobot().gotoSettingScreen();
     await $(Settings).waitUntilVisible();
 
     await HomeRobot($).gotoChatListScreen();

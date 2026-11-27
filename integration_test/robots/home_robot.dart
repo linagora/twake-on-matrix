@@ -37,11 +37,7 @@ class HomeRobot extends CoreRobot implements AbstractHomeRobot {
     return $(TwakeNavigationIcon).at(1);
   }
 
-  /// The avatar of the app bar on a phone (Settings is no tab of the bottom
-  /// bar), the destination of the rail on a wide layout.
   Future<PatrolFinder> getSettingTab() async {
-    final avatar = $(find.byKey(NavigationKeys.settingsAvatar.key));
-    if (avatar.exists) return avatar;
     final byKey = $(find.byKey(NavigationKeys.settingsDestination.key));
     if (byKey.exists) return byKey;
     // On web the NavigationRail loses the widget key during

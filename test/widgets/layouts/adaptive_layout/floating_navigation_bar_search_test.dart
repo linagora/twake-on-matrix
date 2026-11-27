@@ -26,11 +26,10 @@ const _closeButton = Key('navigation.searchCloseButton');
 
 const _screen = Size(400, 800);
 
-const _tabs = [
-  AdaptiveDestinationEnum.contacts,
-  AdaptiveDestinationEnum.rooms,
-  AdaptiveDestinationEnum.activity,
-];
+/// The narrowest phone supported.
+const _narrowScreen = Size(320, 568);
+
+const _tabs = AdaptiveDestinationEnum.values;
 
 /// The search of the Chats tab, as the screen that shows the bar holds it.
 class _Search {
@@ -50,8 +49,11 @@ Future<_Search> _pumpBar(
   bool withSearch = true,
   TextDirection direction = TextDirection.ltr,
   bool appTheme = false,
+  Size screen = _screen,
+  Locale locale = const Locale('en'),
+  ValueChanged<int>? onTab,
 }) async {
-  tester.view.physicalSize = _screen;
+  tester.view.physicalSize = screen;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final client = Client('testclient', database: EventIdListDatabase(const []));
@@ -71,7 +73,7 @@ Future<_Search> _pumpBar(
           ],
         ),
         child: MaterialApp(
-          locale: const Locale('en'),
+          locale: locale,
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
           builder: (context, child) => Directionality(
@@ -89,7 +91,7 @@ Future<_Search> _pumpBar(
             bottomNavigationBar: FloatingNavigationBar(
               destinations: AdaptiveDestinationEnum.values,
               selected: AdaptiveDestinationEnum.rooms,
-              onDestinationSelected: (_) {},
+              onDestinationSelected: onTab ?? (_) {},
               searchOpen: withSearch ? search.open : null,
               searchQuery: withSearch ? search.query : null,
             ),
@@ -138,6 +140,7 @@ void main() {
   _openTests();
   _closeTests();
   _alignmentTests();
+  _narrowPhoneTests();
 }
 
 void _closedTests() {
@@ -149,7 +152,7 @@ void _closedTests() {
 
       _expectTabs(findsOneWidget);
       final button = tester.getRect(find.byKey(_searchButton).hitTestable());
-      final lastTab = tester.getRect(_tab(AdaptiveDestinationEnum.activity));
+      final lastTab = tester.getRect(_tab(AdaptiveDestinationEnum.settings));
       expect(button.left, greaterThanOrEqualTo(lastTab.right));
       expect(button.right, lessThanOrEqualTo(_screen.width));
       expect(button.width, moreOrLessEquals(button.height));
@@ -343,5 +346,65 @@ void _alignmentTests() {
         }),
       );
     }
+  });
+}
+
+void _narrowPhoneTests() {
+  group('FloatingNavigationBar search, on a 320 wide phone', () {
+    for (final language in ['en', 'fr']) {
+      testWidgets('THEN the four tabs and the search button fit, in '
+          '« $language »', (tester) async {
+        await _pumpBar(
+          tester,
+          screen: _narrowScreen,
+          locale: Locale(language),
+          appTheme: true,
+        );
+
+        _expectTabs(findsOneWidget);
+        final rects = [
+          for (final tab in _tabs) tester.getRect(_tab(tab)),
+          tester.getRect(find.byKey(_searchButton).hitTestable()),
+        ];
+        expect(rects.first.left, greaterThanOrEqualTo(0));
+        expect(rects.last.right, lessThanOrEqualTo(_narrowScreen.width));
+        for (var i = 1; i < rects.length; i++) {
+          expect(rects[i].left, greaterThanOrEqualTo(rects[i - 1].right));
+        }
+        for (final rect in rects) {
+          expect(rect.width, greaterThanOrEqualTo(44));
+          expect(rect.height, greaterThanOrEqualTo(44));
+        }
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets('WHEN the Settings tab is tapped\n'
+        'THEN Settings is asked for', (tester) async {
+      final tapped = <int>[];
+      await _pumpBar(tester, screen: _narrowScreen, onTab: tapped.add);
+
+      await tester.tap(_tab(AdaptiveDestinationEnum.settings));
+
+      expect(tapped, [
+        AdaptiveDestinationEnum.values.indexOf(
+          AdaptiveDestinationEnum.settings,
+        ),
+      ]);
+    });
+
+    testWidgets('WHEN the search is open\n'
+        'THEN the field and the close button fit', (tester) async {
+      await _pumpBar(tester, screen: _narrowScreen, appTheme: true);
+
+      await _openSearch(tester);
+
+      final field = tester.getRect(find.byKey(_searchField));
+      final close = tester.getRect(find.byKey(_closeButton).hitTestable());
+      expect(field.left, greaterThanOrEqualTo(0));
+      expect(close.left, greaterThanOrEqualTo(field.right));
+      expect(close.right, lessThanOrEqualTo(_narrowScreen.width));
+      expect(tester.takeException(), isNull);
+    });
   });
 }

@@ -18,23 +18,7 @@ import '../../../pages/chat_list/chat_list_header_test_harness.dart'
     show FakeMatrixState;
 import '../../../providers/fake_active_account.dart';
 
-const _labels = ['Contacts', 'Chats', 'Activity'];
-
-/// The tabs of the bar. Settings is a page of the app (the bar is still
-/// given it), never a tab: it opens from the avatar of the app bar.
-const _tabs = [
-  AdaptiveDestinationEnum.contacts,
-  AdaptiveDestinationEnum.rooms,
-  AdaptiveDestinationEnum.activity,
-];
-
-final _selectionPill = find.byWidgetPredicate(
-  (widget) =>
-      widget is DecoratedBox &&
-      widget.decoration is ShapeDecoration &&
-      (widget.decoration as ShapeDecoration).color ==
-          LinagoraSysColors.material().surface,
-);
+const _labels = ['Contacts', 'Chats', 'Activity', 'Settings'];
 
 /// What the bar is pumped with.
 class _Bar {
@@ -133,7 +117,7 @@ void main() {
 
 void _layoutTests() {
   group('FloatingNavigationBar layout', () {
-    testWidgets('shows Contacts, Chats, Activity in that order', (
+    testWidgets('shows Contacts, Chats, Activity, Settings in that order', (
       tester,
     ) async {
       await _pumpBar(tester);
@@ -144,18 +128,11 @@ void _layoutTests() {
       expect(xs, [...xs]..sort());
     });
 
-    testWidgets('Settings is not a tab of the bar', (tester) async {
-      await _pumpBar(tester);
-
-      expect(find.text('Settings'), findsNothing);
-      expect(_item(AdaptiveDestinationEnum.settings), findsNothing);
-    });
-
     testWidgets('every destination has the same width', (tester) async {
       await _pumpBar(tester);
 
       final widths = {
-        for (final destination in _tabs)
+        for (final destination in AdaptiveDestinationEnum.values)
           tester.getSize(_item(destination)).width,
       };
       expect(widths, hasLength(1));
@@ -167,7 +144,7 @@ void _layoutTests() {
       await _pumpBar(tester);
 
       final first = tester.getRect(_item(AdaptiveDestinationEnum.contacts));
-      final last = tester.getRect(_item(AdaptiveDestinationEnum.activity));
+      final last = tester.getRect(_item(AdaptiveDestinationEnum.settings));
       expect((first.left + last.right) / 2, moreOrLessEquals(200));
       expect(first.left, greaterThan(16));
     });
@@ -185,7 +162,7 @@ void _selectionTests() {
       final colors = LinagoraSysColors.material();
 
       expect(_labelColor(tester, 'Activity'), colors.primary);
-      for (final label in ['Contacts', 'Chats']) {
+      for (final label in ['Contacts', 'Chats', 'Settings']) {
         expect(_labelColor(tester, label), colors.onSurface);
       }
     });
@@ -195,29 +172,23 @@ void _selectionTests() {
     ) async {
       await _pumpBar(
         tester,
-        const _Bar(selected: AdaptiveDestinationEnum.activity),
-      );
-
-      expect(_selectionPill, findsOneWidget);
-      expect(
-        tester.getRect(_selectionPill).center.dx,
-        moreOrLessEquals(
-          tester.getCenter(_item(AdaptiveDestinationEnum.activity)).dx,
-        ),
-      );
-    });
-
-    testWidgets('on the Settings page no tab is selected', (tester) async {
-      await _pumpBar(
-        tester,
         const _Bar(selected: AdaptiveDestinationEnum.settings),
       );
-      final colors = LinagoraSysColors.material();
 
-      expect(_selectionPill, findsNothing);
-      for (final label in _labels) {
-        expect(_labelColor(tester, label), colors.onSurface);
-      }
+      final pill = find.byWidgetPredicate(
+        (widget) =>
+            widget is DecoratedBox &&
+            widget.decoration is ShapeDecoration &&
+            (widget.decoration as ShapeDecoration).color ==
+                LinagoraSysColors.material().surface,
+      );
+      expect(pill, findsOneWidget);
+      expect(
+        tester.getRect(pill).center.dx,
+        moreOrLessEquals(
+          tester.getCenter(_item(AdaptiveDestinationEnum.settings)).dx,
+        ),
+      );
     });
 
     testWidgets('a tap reports the index of the destination', (tester) async {
@@ -273,7 +244,7 @@ void _textSizeTests() {
       await _pumpBar(tester, const _Bar(textScale: 3));
 
       // labelMedium is 12/16: a scaled label would be 48 high.
-      expect(tester.getSize(find.text('Contacts')).height, 16);
+      expect(tester.getSize(find.text('Settings')).height, 16);
       expect(tester.takeException(), isNull);
     });
 
@@ -283,7 +254,7 @@ void _textSizeTests() {
         await _pumpBar(tester, const _Bar(width: 240));
 
         expect(tester.takeException(), isNull);
-        for (final destination in _tabs) {
+        for (final destination in AdaptiveDestinationEnum.values) {
           final item = tester.getRect(_item(destination));
           final label = find.descendant(
             of: _item(destination),
@@ -294,16 +265,16 @@ void _textSizeTests() {
           expect(text.right, lessThanOrEqualTo(item.right));
         }
         expect(
-          tester.widget<Text>(find.text('Contacts')).overflow,
+          tester.widget<Text>(find.text('Settings')).overflow,
           isNot(TextOverflow.ellipsis),
         );
         final fitted = find.ancestor(
-          of: find.text('Contacts'),
+          of: find.text('Settings'),
           matching: find.byType(FittedBox),
         );
         expect(
           tester.getSize(fitted).width,
-          lessThan(tester.getSize(find.text('Contacts')).width),
+          lessThan(tester.getSize(find.text('Settings')).width),
         );
       },
     );

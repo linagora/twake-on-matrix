@@ -325,13 +325,9 @@ class FakeChatListController extends Mock implements ChatListController {
   @override
   final activeRoomIdNotifier = ValueNotifier<String?>(null);
 
-  /// How many times the screen asked for Settings.
-  int settingsOpened = 0;
-
   @override
   late final ChatList widget = ChatList(
     activeRoomIdNotifier: activeRoomIdNotifier,
-    onOpenSettings: () => settingsOpened++,
   );
   @override
   MatrixState get matrixState => _matrix;
@@ -343,9 +339,8 @@ class FakeChatListController extends Mock implements ChatListController {
   bool get isSelectMode => selectModeNotifier.value == SelectMode.select;
   @override
   void onClickClearSelection() {}
-  // As the real controller must: the avatar opens Settings.
   @override
-  void onClickAvatar() => widget.onOpenSettings?.call();
+  void onClickAvatar() {}
   @override
   List<Widget> bottomNavigationActionsWidget({
     required EdgeInsetsDirectional paddingIcon,
