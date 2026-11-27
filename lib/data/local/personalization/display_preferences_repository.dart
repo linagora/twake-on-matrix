@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 import 'package:twake_chat/domain/personalization/personalize_step.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 /// Where this device keeps the display choices and the personalization steps
@@ -24,6 +25,11 @@ class DisplayPreferencesRepository {
         SettingKeys.roomOrder,
         RoomOrder.values,
         defaults.roomOrder,
+      ),
+      searchStyle: await _read(
+        SettingKeys.searchStyle,
+        ChatListSearchStyle.values,
+        defaults.searchStyle,
       ),
       seenStyle: await _read(
         SettingKeys.seenStyle,
@@ -55,6 +61,7 @@ class DisplayPreferencesRepository {
   Future<void> save(DisplayPreferencesState preferences) async {
     await _store.setItem(SettingKeys.chatListDensity, preferences.density.name);
     await _store.setItem(SettingKeys.roomOrder, preferences.roomOrder.name);
+    await _store.setItem(SettingKeys.searchStyle, preferences.searchStyle.name);
     await _store.setItem(SettingKeys.seenStyle, preferences.seenStyle.name);
     await _store.setItem(
       SettingKeys.composerStyle,

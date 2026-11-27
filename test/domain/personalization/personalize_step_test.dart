@@ -1,12 +1,40 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/personalization/personalize_step.dart';
 
-const _allIds = ['density', 'order', 'seen-style', 'composer', 'align'];
+const _allIds = [
+  'density',
+  'order',
+  'search-bar',
+  'seen-style',
+  'composer',
+  'align',
+];
+
+/// The ids the release before the search bar step wrote once its flow was
+/// closed: every device that went through it holds them.
+const _idsBeforeSearchBar = [
+  'density',
+  'order',
+  'seen-style',
+  'composer',
+  'align',
+];
+
+/// The steps a wide screen asks: no search bar, the search of a wide screen
+/// stays in the header (D37).
+const _wideSteps = [
+  PersonalizeStep.density,
+  PersonalizeStep.order,
+  PersonalizeStep.seenStyle,
+  PersonalizeStep.composer,
+  PersonalizeStep.align,
+];
 
 /// The steps a phone asks: no composer, it keeps today's input bar.
 const _phoneSteps = [
   PersonalizeStep.density,
   PersonalizeStep.order,
+  PersonalizeStep.searchBar,
   PersonalizeStep.seenStyle,
   PersonalizeStep.align,
 ];
@@ -21,6 +49,17 @@ void main() {
       expect(PersonalizeStep.seenStyle.id, 'seen-style');
     });
 
+    test('the step of the search bar is stored as « search-bar »', () {
+      expect(PersonalizeStep.searchBar.id, 'search-bar');
+    });
+
+    test('the search bar is a new id: the release before never stored it', () {
+      expect(
+        _idsBeforeSearchBar,
+        isNot(contains(PersonalizeStep.searchBar.id)),
+      );
+    });
+
     test('« theme » is not a step yet: it is kept for the dark mode', () {
       expect(
         PersonalizeStep.values.map((step) => step.id),
@@ -29,21 +68,25 @@ void main() {
     });
 
     test('the composer alone is asked on wide screens only', () {
-      expect(PersonalizeStep.values.where((step) => step.isWideOnly), [
+      final phone = pendingSteps(const [], isWide: false);
+
+      expect(PersonalizeStep.values.where((step) => !phone.contains(step)), [
         PersonalizeStep.composer,
+      ]);
+    });
+
+    test('the search bar alone is asked on phones only', () {
+      final wide = pendingSteps(const [], isWide: true);
+
+      expect(PersonalizeStep.values.where((step) => !wide.contains(step)), [
+        PersonalizeStep.searchBar,
       ]);
     });
   });
 
   group('the steps still to ask on a wide screen', () {
-    test('nothing seen: all five, in order', () {
-      expect(pendingSteps(const [], isWide: true), [
-        PersonalizeStep.density,
-        PersonalizeStep.order,
-        PersonalizeStep.seenStyle,
-        PersonalizeStep.composer,
-        PersonalizeStep.align,
-      ]);
+    test('nothing seen: all five, in order, no search bar', () {
+      expect(pendingSteps(const [], isWide: true), _wideSteps);
     });
 
     test('everything seen: none', () {
@@ -52,6 +95,11 @@ void main() {
 
     test('everything seen, in another order: none', () {
       expect(pendingSteps(_allIds.reversed.toList(), isWide: true), isEmpty);
+    });
+
+    test('the five steps of the release before seen: none, though the search '
+        'bar is not seen', () {
+      expect(pendingSteps(_idsBeforeSearchBar, isWide: true), isEmpty);
     });
 
     test('the first two seen: the three others, in order', () {
@@ -81,15 +129,12 @@ void main() {
     test('ids this version does not know hide nothing', () {
       expect(
         pendingSteps(const ['wallpaper', 'clock'], isWide: true),
-        PersonalizeStep.values,
+        _wideSteps,
       );
     });
 
     test('« theme » stored by a later version hides nothing', () {
-      expect(
-        pendingSteps(const ['theme'], isWide: true),
-        PersonalizeStep.values,
-      );
+      expect(pendingSteps(const ['theme'], isWide: true), _wideSteps);
     });
 
     test('« seenStyle » (the Dart name) is not the stored id', () {
@@ -101,15 +146,17 @@ void main() {
   });
 
   group('the steps still to ask on a phone', () {
-    test('nothing seen: the four steps without the composer, in order', () {
+    test('nothing seen: the five steps without the composer, the search bar '
+        'after the order, in order', () {
       expect(pendingSteps(const [], isWide: false), _phoneSteps);
     });
 
-    test('the four seen: none, though the composer is not seen', () {
+    test('the five seen: none, though the composer is not seen', () {
       expect(
         pendingSteps(const [
           'density',
           'order',
+          'search-bar',
           'seen-style',
           'align',
         ], isWide: false),
@@ -117,11 +164,25 @@ void main() {
       );
     });
 
-    test('the first two seen: seen style and align', () {
+    test('the five steps of the release before seen: the search bar alone', () {
+      expect(pendingSteps(_idsBeforeSearchBar, isWide: false), [
+        PersonalizeStep.searchBar,
+      ]);
+    });
+
+    test('the first two seen: search bar, seen style and align', () {
       expect(pendingSteps(const ['density', 'order'], isWide: false), [
+        PersonalizeStep.searchBar,
         PersonalizeStep.seenStyle,
         PersonalizeStep.align,
       ]);
+    });
+
+    test('« searchBar » (the Dart name) is not the stored id', () {
+      expect(
+        pendingSteps(const ['searchBar'], isWide: false),
+        contains(PersonalizeStep.searchBar),
+      );
     });
 
     test('ids this version does not know hide nothing', () {
@@ -150,6 +211,31 @@ void main() {
       final seen = mergeSeenSteps(
         mergeSeenSteps(const [], pendingSteps(const [], isWide: false)),
         const [PersonalizeStep.composer],
+      );
+
+      expect(pendingSteps(seen, isWide: true), isEmpty);
+      expect(pendingSteps(seen, isWide: false), isEmpty);
+    });
+  });
+
+  group('a tablet, then a phone', () {
+    test('what the tablet showed is marked seen, the phone asks the search '
+        'bar alone', () {
+      final seenOnTablet = mergeSeenSteps(
+        const [],
+        pendingSteps(const [], isWide: true),
+      );
+
+      expect(seenOnTablet, isNot(contains('search-bar')));
+      expect(pendingSteps(seenOnTablet, isWide: false), [
+        PersonalizeStep.searchBar,
+      ]);
+    });
+
+    test('once the phone asked it, the tablet asks nothing either', () {
+      final seen = mergeSeenSteps(
+        mergeSeenSteps(const [], pendingSteps(const [], isWide: true)),
+        const [PersonalizeStep.searchBar],
       );
 
       expect(pendingSteps(seen, isWide: true), isEmpty);
@@ -200,6 +286,7 @@ void main() {
       final seen = mergeSeenSteps(const ['wallpaper'], PersonalizeStep.values);
 
       expect(pendingSteps(seen, isWide: true), isEmpty);
+      expect(pendingSteps(seen, isWide: false), isEmpty);
     });
   });
 
@@ -252,14 +339,17 @@ void main() {
       // The stored form is a JSON list (SettingKeys.personalizedSteps).
       expect(
         pendingSteps(
-          parseSeenSteps('["density","order","seen-style","composer","align"]'),
-          isWide: true,
+          parseSeenSteps(
+            '["density","order","search-bar","seen-style","composer",'
+            '"align"]',
+          ),
+          isWide: false,
         ),
         isEmpty,
       );
       expect(
-        pendingSteps(parseSeenSteps('garbage'), isWide: true),
-        PersonalizeStep.values,
+        pendingSteps(parseSeenSteps('garbage'), isWide: false),
+        _phoneSteps,
       );
     });
   });

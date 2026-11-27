@@ -29,7 +29,18 @@ const _wide = Size(1200, 900);
 
 const _aChat = 'a chat';
 
-const _allIds = {'density', 'order', 'seen-style', 'composer', 'align'};
+const _allIds = {
+  'density',
+  'order',
+  'search-bar',
+  'seen-style',
+  'composer',
+  'align',
+};
+
+/// What a device stored once it went through the release before the search
+/// bar step.
+final _idsBeforeSearchBar = _allIds.difference({'search-bar'});
 
 /// The chat list of a started app, its first sync done, over a device that
 /// saw [seen], on a screen of [size]. [launch] runs the trigger, as the chat
@@ -104,6 +115,26 @@ class _ChatList {
 
   bool get flowIsOpen => find.byKey(_counter).evaluate().isNotEmpty;
 
+  /// Next through the [total] steps of the open flow, checking on each that
+  /// none of them is the composer.
+  Future<void> expectNoComposerIn(int total) async {
+    final composerChoice = find.byWidgetPredicate(
+      (widget) =>
+          widget.key is ValueKey<String> &&
+          (widget.key! as ValueKey<String>).value.startsWith(
+            'option-composer-',
+          ),
+    );
+    for (var step = 1; step <= total; step++) {
+      expect(counter, _saysStep(step, total));
+      expect(composerChoice, findsNothing, reason: 'step $step of $total');
+      if (step < total) {
+        await tester.tap(find.byKey(const ValueKey('personalize-next')));
+        await settle();
+      }
+    }
+  }
+
   /// The words of the step counter.
   String get counter => (tester.widget<Text>(
     find.descendant(
@@ -137,7 +168,7 @@ void main() {
 // screen when the flow opens, not when the storage was asked.
 void _resizedWhileLoadingTests() {
   group('the screen turned from wide to phone before the storage answered', () {
-    testWidgets('the flow opens with the four phone steps, no composer', (
+    testWidgets('the flow opens with the five phone steps, no composer', (
       tester,
     ) async {
       final chatList = _ChatList(tester);
@@ -151,11 +182,11 @@ void _resizedWhileLoadingTests() {
       await chatList.settle();
 
       expect(chatList.flowIsOpen, isTrue);
-      expect(chatList.counter, _saysStep(1, 4));
+      await chatList.expectNoComposerIn(5);
     });
 
-    testWidgets('a chat on top: waits for the chat list, then the four phone '
-        'steps', (tester) async {
+    testWidgets('a chat on top: waits for the chat list, then the five phone '
+        'steps, no composer', (tester) async {
       final chatList = _ChatList(tester);
       await chatList.show(size: _wide);
       await chatList.openChat();
@@ -172,7 +203,7 @@ void _resizedWhileLoadingTests() {
 
       await chatList.back();
 
-      expect(chatList.counter, _saysStep(1, 4));
+      await chatList.expectNoComposerIn(5);
     });
   });
 }
@@ -189,19 +220,46 @@ void _whenAndWhatTests() {
       expect(chatList.flowIsOpen, isTrue);
     });
 
-    testWidgets('a phone: the four steps, no composer', (tester) async {
+    testWidgets('a phone: the five steps, the search bar, no composer', (
+      tester,
+    ) async {
       final chatList = _ChatList(tester);
       await chatList.show();
 
       chatList.launch();
       await chatList.settle();
 
-      expect(chatList.counter, _saysStep(1, 4));
+      expect(chatList.counter, _saysStep(1, 5));
     });
 
-    testWidgets('a wide screen: the five steps, composer included', (
-      tester,
-    ) async {
+    testWidgets('a phone that went through the release before: the search '
+        'bar alone, once', (tester) async {
+      final chatList = _ChatList(tester);
+      await chatList.show(seen: _idsBeforeSearchBar);
+
+      chatList.launch();
+      await chatList.settle();
+
+      expect(chatList.counter, _saysStep(1, 1));
+      expect(
+        find.byKey(const ValueKey('option-search-bar-bottomBar')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a wide screen that went through the release before: nothing '
+        'opens, a wide screen has no search bar step', (tester) async {
+      final chatList = _ChatList(tester);
+      await chatList.show(seen: _idsBeforeSearchBar, size: _wide);
+
+      chatList.launch();
+      await chatList.settle();
+
+      expect(chatList.flowIsOpen, isFalse);
+    });
+
+    testWidgets('a wide screen: the five steps, composer included, no search '
+        'bar', (tester) async {
       final chatList = _ChatList(tester);
       await chatList.show(size: _wide);
 
@@ -211,7 +269,7 @@ void _whenAndWhatTests() {
       expect(chatList.counter, _saysStep(1, 5));
     });
 
-    testWidgets('a phone that saw its four steps: nothing opens, though a '
+    testWidgets('a phone that saw its five steps: nothing opens, though a '
         'wide screen would ask the composer', (tester) async {
       final chatList = _ChatList(tester);
       await chatList.show(seen: _allIds.difference({'composer'}));
@@ -318,7 +376,7 @@ void _overAChatTests() {
         await chatList.back();
 
         expect(find.byKey(_counter), findsOneWidget);
-        expect(chatList.counter, _saysStep(1, 4));
+        expect(chatList.counter, _saysStep(1, 5));
       });
 
       testWidgets('once only: closed, then a chat opened and left again, it '

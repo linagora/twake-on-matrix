@@ -1,4 +1,4 @@
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 

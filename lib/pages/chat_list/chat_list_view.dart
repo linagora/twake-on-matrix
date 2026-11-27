@@ -5,7 +5,7 @@ import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view_style.dart';
 import 'package:twake_chat/utils/platform_infos.dart';

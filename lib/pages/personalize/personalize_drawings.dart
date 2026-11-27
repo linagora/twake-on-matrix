@@ -7,6 +7,7 @@ import 'package:twake_chat/domain/personalization/room_sections.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/seen_readers.dart';
 import 'package:twake_chat/pages/personalize/personalize_choices.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:twake_chat/widgets/option_cards/option_cards.dart';
 
@@ -32,10 +33,17 @@ String _sectionTitle(L10n l10n, RoomSectionKind kind) => switch (kind) {
 /// A drawn room list: an avatar and two lines per room, under section titles
 /// in the order « sections ».
 class _MiniRoomList extends StatelessWidget {
-  const _MiniRoomList({required this.compact, required this.sections});
+  const _MiniRoomList({
+    required this.compact,
+    required this.sections,
+    this.search,
+  });
 
   final bool compact;
   final bool sections;
+
+  /// Where the search is drawn: none when null.
+  final ChatListSearchStyle? search;
 
   static const double _width = 120;
 
@@ -60,19 +68,67 @@ class _MiniRoomList extends StatelessWidget {
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         border: Border.all(color: scheme.outlineVariant),
       ),
-      child: ClipRect(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: sections
-              ? [
-                  for (final kind in _previewSections) ...[
-                    _MiniTitle(_sectionTitle(l10n, kind), scheme: scheme),
-                    for (var i = 0; i < _roomsOf(kind); i++) row,
-                  ],
-                ]
-              : [for (var i = 0; i < rows; i++) row],
+      child: _WithSearch(
+        style: search,
+        child: ClipRect(
+          child: OverflowBox(
+            alignment: Alignment.topCenter,
+            maxHeight: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: sections
+                  ? [
+                      for (final kind in _previewSections) ...[
+                        _MiniTitle(_sectionTitle(l10n, kind), scheme: scheme),
+                        for (var i = 0; i < _roomsOf(kind); i++) row,
+                      ],
+                    ]
+                  : [for (var i = 0; i < rows; i++) row],
+            ),
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// [child] (the rooms) with a drawn search above it (collapsing) or below it
+/// (bottom bar); alone when [style] is null.
+class _WithSearch extends StatelessWidget {
+  const _WithSearch({required this.style, required this.child});
+
+  final ChatListSearchStyle? style;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = this.style;
+    if (style == null) return child;
+    final scheme = Theme.of(context).colorScheme;
+    final search = switch (style) {
+      ChatListSearchStyle.bottomBar => Align(
+        alignment: Alignment.centerRight,
+        child: Icon(Icons.search, size: 16, color: scheme.primary),
+      ),
+      ChatListSearchStyle.collapsing => Container(
+        height: 18,
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        alignment: Alignment.centerLeft,
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest,
+          borderRadius: const BorderRadius.all(Radius.circular(9)),
+        ),
+        child: Icon(Icons.search, size: 12, color: scheme.onSurfaceVariant),
+      ),
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 4,
+      children: [
+        if (style == ChatListSearchStyle.collapsing) search,
+        Expanded(child: child),
+        if (style == ChatListSearchStyle.bottomBar) search,
+      ],
     );
   }
 }

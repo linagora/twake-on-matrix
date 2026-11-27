@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 
 void main() {
@@ -11,6 +12,8 @@ void main() {
       expect(preferences.seenStyle, SeenStyle.ticks);
       expect(preferences.composerStyle, ComposerStyle.classic);
       expect(preferences.bubbleAlign, BubbleAlign.ownRight);
+      // D37: a phone searches the chat list from the bottom bar.
+      expect(preferences.searchStyle, ChatListSearchStyle.bottomBar);
     });
 
     test('hold the choices they are given', () {
@@ -20,6 +23,7 @@ void main() {
         seenStyle: SeenStyle.names,
         composerStyle: ComposerStyle.compact,
         bubbleAlign: BubbleAlign.left,
+        searchStyle: ChatListSearchStyle.collapsing,
       );
 
       expect(preferences.density, ChatListDensity.compact);
@@ -27,6 +31,7 @@ void main() {
       expect(preferences.seenStyle, SeenStyle.names);
       expect(preferences.composerStyle, ComposerStyle.compact);
       expect(preferences.bubbleAlign, BubbleAlign.left);
+      expect(preferences.searchStyle, ChatListSearchStyle.collapsing);
     });
 
     test('two sets of the same choices are equal', () {
@@ -36,6 +41,12 @@ void main() {
       );
       expect(
         const DisplayPreferencesState(seenStyle: SeenStyle.avatars),
+        isNot(const DisplayPreferencesState()),
+      );
+      expect(
+        const DisplayPreferencesState(
+          searchStyle: ChatListSearchStyle.collapsing,
+        ),
         isNot(const DisplayPreferencesState()),
       );
     });
@@ -64,6 +75,11 @@ void main() {
       expect(BubbleAlign.values.map((value) => value.name), [
         'ownRight',
         'left',
+      ]);
+      // The bottom bar, the default, is shown first.
+      expect(ChatListSearchStyle.values.map((value) => value.name), [
+        'bottomBar',
+        'collapsing',
       ]);
     });
   });

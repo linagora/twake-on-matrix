@@ -26,6 +26,10 @@ class PersonalizeStepBody extends ConsumerWidget {
           child: switch (step) {
             PersonalizeStep.density ||
             PersonalizeStep.order => _ListScreen(preferences: preferences),
+            PersonalizeStep.searchBar => _ListScreen(
+              preferences: preferences,
+              search: preferences.searchStyle,
+            ),
             _ => _ConversationScreen(preferences: preferences),
           },
         ),
@@ -95,9 +99,12 @@ class _ScreenTitle extends StatelessWidget {
 
 /// The chat list, in the density and the order chosen so far.
 class _ListScreen extends StatelessWidget {
-  const _ListScreen({required this.preferences});
+  const _ListScreen({required this.preferences, this.search});
 
   final DisplayPreferencesState preferences;
+
+  /// Where the search is drawn: none when null.
+  final ChatListSearchStyle? search;
 
   /// The rooms drawn under each section, as (name, unread).
   static const _samples = {
@@ -135,15 +142,18 @@ class _ListScreen extends StatelessWidget {
       children: [
         _ScreenTitle(l10n.chats),
         Expanded(
-          child: ClipRect(
-            child: OverflowBox(
-              alignment: Alignment.topCenter,
-              maxHeight: double.infinity,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: rows,
+          child: _WithSearch(
+            style: search,
+            child: ClipRect(
+              child: OverflowBox(
+                alignment: Alignment.topCenter,
+                maxHeight: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: rows,
+                  ),
                 ),
               ),
             ),

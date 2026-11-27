@@ -74,6 +74,12 @@ const _steps = [
     'recent',
     'sections',
   ], storeKey: SettingKeys.roomOrder),
+  // The search of the chat list on a phone (D37): the bottom bar, today's
+  // search, is the default and shown first.
+  _Step(PersonalizeStep.searchBar, [
+    'bottomBar',
+    'collapsing',
+  ], storeKey: SettingKeys.searchStyle),
   _Step(PersonalizeStep.seenStyle, [
     'ticks',
     'avatars',
@@ -95,7 +101,8 @@ const _steps = [
 
 _Step _of(PersonalizeStep step) => _steps.firstWhere((s) => s.step == step);
 
-/// What a wide screen never asked is handed: the five steps.
+/// What a wide screen never asked is handed: five steps, no search bar, its
+/// search stays in the header (D37).
 const _wideAll = [
   PersonalizeStep.density,
   PersonalizeStep.order,
@@ -110,10 +117,11 @@ const _wideIds = ['density', 'order', 'seen-style', 'composer', 'align'];
 const _phoneAll = [
   PersonalizeStep.density,
   PersonalizeStep.order,
+  PersonalizeStep.searchBar,
   PersonalizeStep.seenStyle,
   PersonalizeStep.align,
 ];
-const _phoneIds = ['density', 'order', 'seen-style', 'align'];
+const _phoneIds = ['density', 'order', 'search-bar', 'seen-style', 'align'];
 
 /// What is under the flow, and where « More options » leads. The settings
 /// pages of the app live right under `/rooms` (`/rooms/folders`, …).
@@ -329,6 +337,7 @@ class _Flow {
   String current(PersonalizeStep step) => switch (step) {
     PersonalizeStep.density => preferences.density.name,
     PersonalizeStep.order => preferences.roomOrder.name,
+    PersonalizeStep.searchBar => preferences.searchStyle.name,
     PersonalizeStep.seenStyle => preferences.seenStyle.name,
     PersonalizeStep.composer => preferences.composerStyle.name,
     PersonalizeStep.align => preferences.bubbleAlign.name,
@@ -407,20 +416,162 @@ void main() {
   _rememberingTests();
   _moreOptionsTests();
   _orderPreviewTests();
+  _searchBarTests();
+  _searchBarPreviewTests();
+}
+
+void _searchBarTests() {
+  group('the search bar step on a phone', () {
+    testWidgets('a phone that went through the release before is asked the '
+        'search bar alone: 1 of 1, Done at once', (tester) async {
+      final flow = _Flow(tester);
+      await flow.open(const [PersonalizeStep.searchBar]);
+
+      expect(flow.counter, _saysStep(1, 1));
+      flow.expectShows(_of(PersonalizeStep.searchBar));
+      expect(find.byKey(_done), findsOneWidget);
+    });
+
+    testWidgets('offers « bottomBar » and « collapsing », « bottomBar » chosen '
+        'on arrival', (tester) async {
+      final flow = _Flow(tester);
+      await flow.open(const [PersonalizeStep.searchBar]);
+
+      expect(
+        flow.isChosen(_option(PersonalizeStep.searchBar, 'bottomBar')),
+        isTrue,
+      );
+      expect(
+        flow.isChosen(_option(PersonalizeStep.searchBar, 'collapsing')),
+        isFalse,
+      );
+    });
+
+    testWidgets('« collapsing » applies at once and is kept on the device', (
+      tester,
+    ) async {
+      final flow = _Flow(tester);
+      await flow.open(_phoneAll);
+      await flow.forward(2);
+
+      await flow.tap(_option(PersonalizeStep.searchBar, 'collapsing'));
+
+      expect(flow.current(PersonalizeStep.searchBar), 'collapsing');
+      expect(
+        flow.isChosen(_option(PersonalizeStep.searchBar, 'collapsing')),
+        isTrue,
+      );
+      expect(
+        flow.isChosen(_option(PersonalizeStep.searchBar, 'bottomBar')),
+        isFalse,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(SettingKeys.searchStyle), 'collapsing');
+    });
+
+    testWidgets('closed without a choice keeps the bottom bar', (tester) async {
+      final flow = _Flow(tester);
+      await flow.open(const [PersonalizeStep.searchBar]);
+
+      await flow.tap(_close);
+
+      expect(flow.current(PersonalizeStep.searchBar), 'bottomBar');
+    });
+
+    testWidgets('a device that stored « collapsing » shows it chosen', (
+      tester,
+    ) async {
+      final flow = _Flow(tester);
+      await flow.open(const [
+        PersonalizeStep.searchBar,
+      ], const _Device(stored: {SettingKeys.searchStyle: 'collapsing'}));
+
+      expect(
+        flow.isChosen(_option(PersonalizeStep.searchBar, 'collapsing')),
+        isTrue,
+      );
+      expect(
+        flow.isChosen(_option(PersonalizeStep.searchBar, 'bottomBar')),
+        isFalse,
+      );
+    });
+
+    testWidgets('fits without an overflow, with larger text too', (
+      tester,
+    ) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final flow = _Flow(tester);
+      await flow.open(const [PersonalizeStep.searchBar]);
+
+      await flow.tap(_option(PersonalizeStep.searchBar, 'collapsing'));
+
+      expect(tester.takeException(), isNull);
+    });
+  });
+}
+
+// The drawing of the step is the chat list (its title, its rooms) with the
+// search where the choice puts it: the round button at the bottom, or the
+// thin field above the rooms. The search is drawn with the search icon of
+// the app, the first room is Alice, as in the drawing of the order.
+void _searchBarPreviewTests() {
+  group('the drawing of the search bar step', () {
+    Rect searchIn(WidgetTester tester) =>
+        tester.getRect(find.byIcon(Icons.search));
+    Rect firstRoom(WidgetTester tester) =>
+        tester.getRect(find.text('Alice').first);
+
+    testWidgets('shows the chat list', (tester) async {
+      final flow = _Flow(tester);
+      await flow.open(const [PersonalizeStep.searchBar]);
+
+      expect(find.text(_en.chats), findsOneWidget);
+      expect(find.text('Alice'), findsWidgets);
+    });
+
+    testWidgets('« bottomBar »: one search, below the rooms', (tester) async {
+      final flow = _Flow(tester);
+      await flow.open(const [PersonalizeStep.searchBar]);
+
+      expect(find.byIcon(Icons.search), findsOneWidget);
+      expect(searchIn(tester).top, greaterThan(firstRoom(tester).bottom));
+    });
+
+    testWidgets('« collapsing »: one search, above the rooms', (tester) async {
+      final flow = _Flow(tester);
+      await flow.open(const [PersonalizeStep.searchBar]);
+
+      await flow.tap(_option(PersonalizeStep.searchBar, 'collapsing'));
+
+      expect(find.byIcon(Icons.search), findsOneWidget);
+      expect(searchIn(tester).bottom, lessThan(firstRoom(tester).top));
+    });
+
+    testWidgets('follows the choice back to « bottomBar »', (tester) async {
+      final flow = _Flow(tester);
+      await flow.open(const [
+        PersonalizeStep.searchBar,
+      ], const _Device(stored: {SettingKeys.searchStyle: 'collapsing'}));
+
+      await flow.tap(_option(PersonalizeStep.searchBar, 'bottomBar'));
+
+      expect(searchIn(tester).top, greaterThan(firstRoom(tester).bottom));
+    });
+  });
 }
 
 void _pendingAtStartTests() {
   group('the steps handed to the flow at start', () {
-    testWidgets('a phone never asked: the four steps, no composer', (
-      tester,
-    ) async {
+    testWidgets('a phone never asked: the five steps, the search bar, no '
+        'composer', (tester) async {
       SharedPreferences.setMockInitialValues({});
 
       expect(await _pendingAt(_phone), _phoneAll);
     });
 
     testWidgets('a wide screen never asked: the five steps, composer '
-        'included', (tester) async {
+        'included, no search bar', (tester) async {
       SharedPreferences.setMockInitialValues({});
 
       expect(await _pendingAt(_wide), _wideAll);
@@ -430,18 +581,18 @@ void _pendingAtStartTests() {
 
 void _phoneFlowTests() {
   group('the personalization flow on a phone, one step at a time', () {
-    testWidgets('a phone never asked: opens on the density, 1 of 4', (
+    testWidgets('a phone never asked: opens on the density, 1 of 5', (
       tester,
     ) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
 
-      expect(flow.counter, _saysStep(1, 4));
+      expect(flow.counter, _saysStep(1, 5));
       flow.expectShows(_of(PersonalizeStep.density));
     });
 
-    testWidgets('Next walks the four steps in order, and never shows the '
-        'composer', (tester) async {
+    testWidgets('Next walks the five steps in order, the search bar after the '
+        'order, and never shows the composer', (tester) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
 
@@ -533,9 +684,9 @@ void _phoneButtonsTests() {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
 
-      await flow.forward(3);
+      await flow.forward(4);
 
-      expect(flow.counter, _saysStep(4, 4));
+      expect(flow.counter, _saysStep(5, 5));
       flow.expectShows(_of(PersonalizeStep.align));
       for (final key in [_done, _back, _more, _close]) {
         expect(find.byKey(key), findsOneWidget, reason: '$key');
@@ -550,7 +701,7 @@ void _phoneButtonsTests() {
 
       await flow.tap(_back);
 
-      expect(flow.counter, _saysStep(2, 4));
+      expect(flow.counter, _saysStep(2, 5));
       flow.expectShows(_of(PersonalizeStep.order));
     });
 
@@ -563,7 +714,7 @@ void _phoneButtonsTests() {
 
       await flow.tap(_back);
 
-      expect(flow.counter, _saysStep(1, 4));
+      expect(flow.counter, _saysStep(1, 5));
       flow.expectShows(_of(PersonalizeStep.density));
       expect(find.byKey(_back), findsNothing);
       expect(find.byKey(_next), findsOneWidget);
@@ -656,10 +807,10 @@ void _fixedStepsTests() {
           .markSeen(PersonalizeStep.values);
       await flow.settle();
 
-      expect(flow.counter, _saysStep(1, 4));
+      expect(flow.counter, _saysStep(1, 5));
       flow.expectShows(_of(PersonalizeStep.density));
       await flow.tap(_next);
-      expect(flow.counter, _saysStep(2, 4));
+      expect(flow.counter, _saysStep(2, 5));
       flow.expectShows(_of(PersonalizeStep.order));
     });
 
@@ -671,7 +822,7 @@ void _fixedStepsTests() {
 
       await flow.tap(_option(PersonalizeStep.density, 'compact'));
 
-      expect(flow.counter, _saysStep(1, 4));
+      expect(flow.counter, _saysStep(1, 5));
       flow.expectShows(_of(PersonalizeStep.density));
       expect(find.byKey(_next), findsOneWidget);
     });
@@ -726,7 +877,7 @@ void _choiceTests() {
     ) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
-      await flow.forward(2);
+      await flow.forward(3);
 
       await flow.tap(_option(PersonalizeStep.seenStyle, 'avatars'));
 
@@ -780,11 +931,11 @@ void _closingTests() {
       expect(await flow.seen, isEmpty);
     });
 
-    testWidgets('Done on a phone remembers the four steps it showed, not the '
+    testWidgets('Done on a phone remembers the five steps it showed, not the '
         'composer', (tester) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
-      await flow.forward(3);
+      await flow.forward(4);
 
       await flow.tap(_done);
 
@@ -835,7 +986,7 @@ void _closingTests() {
         'the flow', (tester) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll, _Device(store: _FullDisk()));
-      await flow.forward(3);
+      await flow.forward(4);
 
       await flow.tap(_done);
 
@@ -896,14 +1047,14 @@ void _rememberingTests() {
     });
 
     testWidgets('closed on a wide screen: nothing is asked at the next start, '
-        'on a phone either', (tester) async {
+        'a phone asks the search bar alone', (tester) async {
       final flow = _Flow(tester);
       await flow.open(_wideAll, _onWide);
 
       await flow.tap(_close);
 
       expect(await _pendingAt(_wide), isEmpty);
-      expect(await _pendingAt(_phone), isEmpty);
+      expect(await _pendingAt(_phone), [PersonalizeStep.searchBar]);
     });
   });
 }
@@ -929,7 +1080,7 @@ void _moreOptionsTests() {
     testWidgets('from the last step too', (tester) async {
       final flow = _Flow(tester);
       await flow.open(_phoneAll);
-      await flow.forward(3);
+      await flow.forward(4);
 
       await flow.tap(_more);
 

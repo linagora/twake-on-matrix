@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/data/local/personalization/display_preferences_repository.dart';
 import 'package:twake_chat/data/local/personalization/display_preferences_repository.provider.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 
 /// The repository of the app, over the device storage holding [stored].
@@ -24,6 +25,7 @@ const _allOther = DisplayPreferencesState(
   seenStyle: SeenStyle.avatars,
   composerStyle: ComposerStyle.compact,
   bubbleAlign: BubbleAlign.left,
+  searchStyle: ChatListSearchStyle.collapsing,
 );
 const _allOtherStored = {
   SettingKeys.chatListDensity: 'compact',
@@ -31,6 +33,7 @@ const _allOtherStored = {
   SettingKeys.seenStyle: 'avatars',
   SettingKeys.composerStyle: 'compact',
   SettingKeys.bubbleAlign: 'left',
+  SettingKeys.searchStyle: 'collapsing',
 };
 
 Future<Map<String, Object?>> _device() async {
@@ -93,6 +96,29 @@ void _choicesTests() {
         expect(await _device(), stored);
       },
     );
+
+    test('the search style is stored under « chat.twake.search_style »', () {
+      expect(SettingKeys.searchStyle, 'chat.twake.search_style');
+    });
+
+    test('a device of the release before (no search style stored): the '
+        'bottom bar, the other choices kept', () async {
+      final stored = {..._allOtherStored}..remove(SettingKeys.searchStyle);
+
+      expect(
+        await _repository(stored).load(),
+        _allOther.copyWith(searchStyle: ChatListSearchStyle.bottomBar),
+      );
+    });
+
+    test('the search style « collapsing » alone is read', () async {
+      expect(
+        (await _repository({
+          SettingKeys.searchStyle: 'collapsing',
+        }).load()).searchStyle,
+        ChatListSearchStyle.collapsing,
+      );
+    });
 
     test('the old web switch off does not move the bubbles', () async {
       final repository = _repository({

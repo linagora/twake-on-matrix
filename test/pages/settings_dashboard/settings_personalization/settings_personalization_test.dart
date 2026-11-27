@@ -62,8 +62,18 @@ const _composer = _Section(
   byDefault: 'classic',
 );
 
-/// The options of a wide screen, in the order of the start flow.
-const _wideSections = [
+// The search of the chat list on a phone (D37): the bottom bar, today's
+// search and the default, is shown first; « collapsing » is the thin field
+// at the top of the list. A chat list drawn tall: the cards share one row.
+const _search = _Section(
+  'search-bar',
+  ['bottomBar', 'collapsing'],
+  storeKey: SettingKeys.searchStyle,
+  sideBySide: true,
+);
+
+/// Every option, in the order of the start flow.
+const _allSections = [
   _Section(
     'density',
     ['comfortable', 'compact'],
@@ -76,6 +86,7 @@ const _wideSections = [
     storeKey: SettingKeys.roomOrder,
     sideBySide: true,
   ),
+  _search,
   _Section(
     'seen-style',
     ['ticks', 'avatars', 'names'],
@@ -91,9 +102,16 @@ const _wideSections = [
   ),
 ];
 
+/// The options of a wide screen: no search bar, its search stays in the
+/// header (D37).
+final _wideSections = [
+  for (final section in _allSections)
+    if (section != _search) section,
+];
+
 /// The options of a phone: no composer, the phone keeps today's input bar.
 final _phoneSections = [
-  for (final section in _wideSections)
+  for (final section in _allSections)
     if (section != _composer) section,
 ];
 
@@ -160,6 +178,7 @@ String _current(ProviderContainer container, String id) {
     'seen-style' => preferences.seenStyle.name,
     'composer' => preferences.composerStyle.name,
     'align' => preferences.bubbleAlign.name,
+    'search-bar' => preferences.searchStyle.name,
     _ => throw ArgumentError(id),
   };
 }
@@ -235,6 +254,7 @@ void main() {
     _screenChoiceTests(name, size, sections);
   }
   _composerTests();
+  _searchBarTests();
   _choicesTests();
   _phoneLayoutTests();
   _orderPreviewTests();
@@ -370,6 +390,72 @@ void _composerTests() {
   });
 }
 
+void _searchBarTests() {
+  group('Settings › Personalization, the search of the chat list', () {
+    testWidgets('a wide screen has no search bar option', (tester) async {
+      await _pump(tester, size: _wide);
+
+      expect(_anyCardOf('search-bar'), findsNothing);
+    });
+
+    testWidgets('a wide screen that stored « collapsing » still has no search '
+        'bar option', (tester) async {
+      await _pump(
+        tester,
+        size: _wide,
+        stored: {SettingKeys.searchStyle: 'collapsing'},
+      );
+
+      expect(_anyCardOf('search-bar'), findsNothing);
+    });
+
+    testWidgets('a phone places the search bar between the order and the '
+        'seen style', (tester) async {
+      await _pump(tester);
+
+      final order = tester.getRect(find.byKey(_card('order', 'recent')));
+      final search = tester.getRect(
+        find.byKey(_card('search-bar', 'bottomBar')),
+      );
+      final seenStyle = tester.getRect(
+        find.byKey(_card('seen-style', 'ticks')),
+      );
+      expect(order.top, lessThan(search.top));
+      expect(search.top, lessThan(seenStyle.top));
+    });
+
+    testWidgets('a phone shows « bottomBar » first, chosen on arrival', (
+      tester,
+    ) async {
+      await _pump(tester);
+
+      final bottomBar = tester.getRect(
+        find.byKey(_card('search-bar', 'bottomBar')),
+      );
+      final collapsing = tester.getRect(
+        find.byKey(_card('search-bar', 'collapsing')),
+      );
+      expect(bottomBar.left, lessThan(collapsing.left));
+      expect(_chosen(tester, _card('search-bar', 'bottomBar')), isTrue);
+      expect(_chosen(tester, _card('search-bar', 'collapsing')), isFalse);
+    });
+
+    testWidgets('« collapsing » chosen, then « bottomBar » again: back to the '
+        'bottom bar, kept on the device', (tester) async {
+      final container = await _pump(
+        tester,
+        stored: {SettingKeys.searchStyle: 'collapsing'},
+      );
+
+      await _tap(tester, _card('search-bar', 'bottomBar'));
+
+      expect(_current(container, 'search-bar'), 'bottomBar');
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(SettingKeys.searchStyle), 'bottomBar');
+    });
+  });
+}
+
 void _choicesTests() {
   group('Settings › Personalization, choices', () {
     testWidgets('a choice can be taken back', (tester) async {
@@ -474,9 +560,9 @@ void _everyStepLayoutTests() {
     for (final step in PersonalizeStep.values) {
       test('${step.id} has its layout chosen', () {
         expect(
-          _wideSections.map((section) => section.id),
+          _allSections.map((section) => section.id),
           contains(step.id),
-          reason: 'list ${step.id} in _wideSections, with its sideBySide',
+          reason: 'list ${step.id} in _allSections, with its sideBySide',
         );
       });
     }

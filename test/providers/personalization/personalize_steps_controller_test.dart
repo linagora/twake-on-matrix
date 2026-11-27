@@ -6,8 +6,35 @@ import 'package:twake_chat/providers/personalization/personalize_steps_controlle
 
 import 'fake_display_preferences_repository.dart';
 
-const _allIds = {'density', 'order', 'seen-style', 'composer', 'align'};
-const _phoneIds = {'density', 'order', 'seen-style', 'align'};
+const _allIds = {
+  'density',
+  'order',
+  'search-bar',
+  'seen-style',
+  'composer',
+  'align',
+};
+const _phoneIds = {'density', 'order', 'search-bar', 'seen-style', 'align'};
+
+/// What a device of the release before the search bar step stored once its
+/// flow was closed.
+const _idsBeforeSearchBar = {
+  'density',
+  'order',
+  'seen-style',
+  'composer',
+  'align',
+};
+
+/// A wide screen asks every step but the search bar: its search stays in the
+/// header (D37).
+const _wideSteps = [
+  PersonalizeStep.density,
+  PersonalizeStep.order,
+  PersonalizeStep.seenStyle,
+  PersonalizeStep.composer,
+  PersonalizeStep.align,
+];
 
 /// A started app over [storage].
 class _App {
@@ -59,21 +86,35 @@ void _pendingTests() {
   group('the steps to ask at start', () {
     for (final (name, seen, isWide, expected) in [
       (
-        'a wide screen never asked: all five, in order',
+        'a wide screen never asked: five, in order, no search bar',
         <String>{},
         true,
-        PersonalizeStep.values,
+        _wideSteps,
       ),
       (
-        'a phone never asked: the four steps without the composer',
+        'a phone never asked: the five steps without the composer, the '
+            'search bar after the order',
         <String>{},
         false,
         const [
           PersonalizeStep.density,
           PersonalizeStep.order,
+          PersonalizeStep.searchBar,
           PersonalizeStep.seenStyle,
           PersonalizeStep.align,
         ],
+      ),
+      (
+        'a phone that went through the release before: the search bar alone',
+        _idsBeforeSearchBar,
+        false,
+        const [PersonalizeStep.searchBar],
+      ),
+      (
+        'a wide screen that went through the release before: none',
+        _idsBeforeSearchBar,
+        true,
+        <PersonalizeStep>[],
       ),
       (
         'a device that saw every step: none',
@@ -98,13 +139,13 @@ void _pendingTests() {
         const [PersonalizeStep.seenStyle],
       ),
       (
-        'a phone that saw its four steps: none',
+        'a phone that saw its five steps: none',
         _phoneIds,
         false,
         <PersonalizeStep>[],
       ),
       (
-        'a tablet, after a phone saw its four steps: the composer alone',
+        'a tablet, after a phone saw its five steps: the composer alone',
         _phoneIds,
         true,
         const [PersonalizeStep.composer],
@@ -113,7 +154,7 @@ void _pendingTests() {
         '« theme », stored by a later version, hides no step',
         {'theme'},
         true,
-        PersonalizeStep.values,
+        _wideSteps,
       ),
     ]) {
       test(name, () async {
@@ -133,10 +174,14 @@ void _pendingTests() {
       expect(await pending, isEmpty);
     });
 
-    test('a storage that cannot be read: every step', () async {
+    test('a storage that cannot be read: every step of the screen', () async {
       final app = _App(FakeDisplayPreferencesRepository(failLoad: true));
 
-      expect(await app.pending(), PersonalizeStep.values);
+      expect(await app.pending(), _wideSteps);
+      expect(
+        await app.pending(isWide: false),
+        contains(PersonalizeStep.searchBar),
+      );
     });
 
     test('the state is the seen ids the device holds', () async {
@@ -195,9 +240,19 @@ void _markSeenTests() {
       );
       expect(await app.pending(isWide: false), [
         PersonalizeStep.order,
+        PersonalizeStep.searchBar,
         PersonalizeStep.seenStyle,
         PersonalizeStep.align,
       ]);
+    });
+
+    test('pending on a wide screen never includes the search bar, whatever '
+        'was marked', () async {
+      final app = _App.seen({});
+
+      await app.markSeen(const [PersonalizeStep.density]);
+
+      expect(await app.pending(), isNot(contains(PersonalizeStep.searchBar)));
     });
 
     test('a step not marked is still asked at the next start', () async {
