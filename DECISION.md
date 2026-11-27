@@ -655,6 +655,15 @@ cannot be found, the caption is "Reply", with no name.
 The gap shows what is behind the message: the chat background, or the colour of
 a selected or highlighted row.
 
+## D35. Cached files are deleted after 7 days (decided by Johann, 2026-11-27)
+
+At launch, the app deletes the downloaded and decrypted files it cached more
+than 7 days ago (#885). The age is the file's date on the device: the time it
+was downloaded, decrypted or kept as the sender's copy, not the last time it
+was opened, so a decrypted file never stays more than a week. Files saved on
+purpose (Downloads/Twake, gallery) are never touched; the logout cleanup
+(#3746) and Settings → Data and storage → Clear cache stay as they are.
+
 ## D36. Every store build gets a release note, and a built tag never moves (decided by Clément, 2026-11-25)
 
 Every build that reaches a store (TestFlight for iOS or macOS, Play Store

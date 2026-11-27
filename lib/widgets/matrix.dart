@@ -10,6 +10,7 @@ import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/data/model/federation_server/federation_server_information.dart';
+import 'package:twake_chat/domain/cached_files/usecases/delete_expired_cached_files_use_case.provider.dart';
 import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart';
 import 'package:twake_chat/domain/exception/federation_configuration_not_found.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
@@ -1110,6 +1111,8 @@ class MatrixState extends ConsumerState<Matrix>
       });
     }
 
+    unawaited(_deleteExpiredCachedFiles());
+
     _initWithStore();
 
     for (final c in accountClients) {
@@ -1713,6 +1716,14 @@ class MatrixState extends ConsumerState<Matrix>
       );
     } catch (e, s) {
       _report(e, s, 'deletion of the downloaded files at the last logout');
+    }
+  }
+
+  Future<void> _deleteExpiredCachedFiles() async {
+    try {
+      await ref.read(deleteExpiredCachedFilesUseCaseProvider).execute();
+    } catch (e, s) {
+      _report(e, s, 'deletion of the expired cached files');
     }
   }
 

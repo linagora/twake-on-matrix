@@ -19,6 +19,8 @@ import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/data/cached_files/repositories/cached_files_repository.provider.dart';
+import 'package:twake_chat/domain/cached_files/repositories/cached_files_repository.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
@@ -665,6 +667,12 @@ class _NoopPhonebookResolver extends Fake implements PhonebookResolver {
   Future<void> cancel() async {}
 }
 
+// The launch sweep runs in an isolate, which a widget test never lets finish.
+class _NoCachedFiles implements CachedFilesRepository {
+  @override
+  Future<void> deleteFilesCachedBefore(DateTime cutoff) async {}
+}
+
 /// Mounts `Matrix` over a container that `main` would have built: the boot
 /// clients and the persisted state are overridden.
 class _Harness {
@@ -684,6 +692,7 @@ class _Harness {
            ),
            bootClientsProvider.overrideWithValue(clients),
            bootAccountSnapshotProvider.overrideWithValue(snapshot),
+           cachedFilesRepositoryProvider.overrideWithValue(_NoCachedFiles()),
            ...overrides,
          ],
        ) {

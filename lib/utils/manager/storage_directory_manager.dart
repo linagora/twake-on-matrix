@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
@@ -20,7 +21,15 @@ class StorageDirectoryManager {
   Future<String> getFileStoreDirectory() async =>
       await _appFileStoreDirectory() ?? (await getDownloadsDirectory())!.path;
 
+  Future<void>? _cacheSweep;
+
+  // Waits for the launch sweep: a path handed out during it could be deleted.
   Future<String?> _appFileStoreDirectory() async {
+    if (_cacheSweep case final sweep?) await sweep;
+    return _appOwnedRoot();
+  }
+
+  Future<String?> _appOwnedRoot() async {
     try {
       return (await getTemporaryDirectory()).path;
     } catch (_) {}
@@ -45,6 +54,81 @@ class StorageDirectoryManager {
       } on PathNotFoundException {
         // Two last logouts can run at once.
       }
+    }
+  }
+
+  /// Only the manager's own folders, never the public Downloads fallback.
+  Future<void> deleteFilesCachedBefore(DateTime cutoff) {
+    final sweep = _sweepFilesCachedBefore(cutoff);
+    final gate = sweep.then<void>((_) {}, onError: (_) {});
+    _cacheSweep = gate;
+    gate.whenComplete(() {
+      if (identical(_cacheSweep, gate)) _cacheSweep = null;
+    });
+    return sweep;
+  }
+
+  Future<void> _sweepFilesCachedBefore(DateTime cutoff) async {
+    final root = await _appOwnedRoot();
+    if (root == null) return;
+    final failures = await Isolate.run(
+      () => _deleteFilesCachedBefore(root, cutoff),
+    );
+    if (failures.isNotEmpty) {
+      // Error codes only: a path holds the file name.
+      Logs().w(
+        'StorageDirectoryManager::deleteFilesCachedBefore: '
+        '${failures.length} cached files kept, errors $failures',
+      );
+    }
+  }
+
+  static List<int?> _deleteFilesCachedBefore(String root, DateTime cutoff) {
+    final failures = <int?>[];
+    final directory = Directory(root);
+    if (!directory.existsSync()) return failures;
+    final eventFolders = <Directory>[];
+    for (final entity in directory.listSync(followLinks: false)) {
+      if (entity is! Directory) continue;
+      final name = p.basename(entity.path);
+      if (name.startsWith(r'$')) {
+        eventFolders.add(entity);
+      } else if (name == _decryptedFolder) {
+        eventFolders.addAll(
+          entity.listSync(followLinks: false).whereType<Directory>(),
+        );
+      }
+    }
+    for (final folder in eventFolders) {
+      try {
+        for (final file in folder.listSync(
+          recursive: true,
+          followLinks: false,
+        )) {
+          if (file is! File) continue;
+          try {
+            if (file.lastModifiedSync().isBefore(cutoff)) file.deleteSync();
+          } on FileSystemException catch (e) {
+            failures.add(e.osError?.errorCode);
+          }
+        }
+        _deleteEmptyFolders(folder);
+      } on FileSystemException catch (e) {
+        failures.add(e.osError?.errorCode);
+      }
+    }
+    return failures;
+  }
+
+  // Bottom-up, and never a folder that a write fills meanwhile.
+  static void _deleteEmptyFolders(Directory folder) {
+    for (final child in folder.listSync(followLinks: false)) {
+      if (child is Directory) _deleteEmptyFolders(child);
+    }
+    try {
+      folder.deleteSync();
+    } on FileSystemException {
+      // Not empty.
     }
   }
 
