@@ -55,7 +55,6 @@ class MessageContentBuilder extends ConsumerWidget
           context,
           event: event,
           maxWidth: constraints.maxWidth,
-          ownMessage: event.isOwnMessage,
           hideDisplayName: event.hideDisplayName(
             nextEvent,
             isMobile: Message.responsiveUtils.isMobile(context),

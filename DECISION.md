@@ -696,3 +696,9 @@ Settings › Personalization holds the display options of Twake Space Chat: chat
 list density and room order. The choices are stored on this device only, not in
 the account. The defaults do not change: until the user picks another, density
 and order stay as they are today.
+
+The bubble side is a choice on every screen, phones included. Its default is
+own messages on the right, on wide screens too, where main put every message
+on the left. The old wide-screen switch is dropped without migration. On a
+phone, « all on the left » shows the name and the avatar of the user's own
+messages, like the others'.

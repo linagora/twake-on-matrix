@@ -8,16 +8,19 @@ void main() {
 
       expect(preferences.density, ChatListDensity.comfortable);
       expect(preferences.roomOrder, RoomOrder.recent);
+      expect(preferences.bubbleAlign, BubbleAlign.ownRight);
     });
 
     test('hold the choices they are given', () {
       const preferences = DisplayPreferencesState(
         density: ChatListDensity.compact,
         roomOrder: RoomOrder.sections,
+        bubbleAlign: BubbleAlign.left,
       );
 
       expect(preferences.density, ChatListDensity.compact);
       expect(preferences.roomOrder, RoomOrder.sections);
+      expect(preferences.bubbleAlign, BubbleAlign.left);
     });
 
     test('two sets of the same choices are equal', () {
@@ -41,6 +44,10 @@ void main() {
       expect(RoomOrder.values.map((value) => value.name), [
         'recent',
         'sections',
+      ]);
+      expect(BubbleAlign.values.map((value) => value.name), [
+        'ownRight',
+        'left',
       ]);
     });
   });

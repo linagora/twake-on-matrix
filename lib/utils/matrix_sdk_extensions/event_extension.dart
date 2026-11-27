@@ -238,7 +238,7 @@ extension LocalizedBody on Event {
     required bool isMobile,
     required bool alignOwnRight,
   }) =>
-      isMobile && (isOwnMessage || room.isDirectChat) ||
+      isMobile && room.isDirectChat ||
       !isSameSenderWith(nextEvent) ||
       (isOwnMessage && redacted) ||
       type == EventTypes.Encrypted ||

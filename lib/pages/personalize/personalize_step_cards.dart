@@ -21,7 +21,7 @@ class PersonalizeStepCards extends ConsumerWidget {
       layout: switch (step) {
         PersonalizeStep.density ||
         PersonalizeStep.order => OptionCardsLayout.sideBySide,
-        _ => OptionCardsLayout.stacked,
+        PersonalizeStep.align => OptionCardsLayout.stacked,
       },
       onChanged: (choice) => choice.onSelected(),
       choices: [

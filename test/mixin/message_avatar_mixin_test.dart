@@ -193,9 +193,12 @@ Future<void> main() async {
     group('Mobile-sized screens', () {
       const mobileSize = Size(400, 800);
 
-      testWidgets('Should return SizedBox when Own message in group chat', (
-        WidgetTester tester,
-      ) async {
+      // The placeholder is drawn only beside a message on the left: on a
+      // phone, an own message is there with « every message on the left »
+      // alone, and it then shows my avatar like the others' (review of
+      // #3841).
+      testWidgets('Should display Avatar when Own message on the left in '
+          'group chat', (WidgetTester tester) async {
         await runTest(
           tester,
           event: event,
@@ -205,8 +208,8 @@ Future<void> main() async {
           isDirectChat: false,
           screenSize: mobileSize,
         );
-        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-        expect(find.byType(SizedBox), findsOneWidget);
+        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
+        expect(find.byType(Avatar), findsOneWidget);
       });
 
       testWidgets('Should return SizedBox when Own message in direct chat', (

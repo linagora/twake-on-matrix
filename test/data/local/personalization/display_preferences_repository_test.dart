@@ -19,10 +19,12 @@ DisplayPreferencesRepository _repository(Map<String, Object> stored) {
 const _allOther = DisplayPreferencesState(
   density: ChatListDensity.compact,
   roomOrder: RoomOrder.sections,
+  bubbleAlign: BubbleAlign.left,
 );
 const _allOtherStored = {
   SettingKeys.chatListDensity: 'compact',
   SettingKeys.roomOrder: 'sections',
+  SettingKeys.bubbleAlign: 'left',
 };
 
 Future<Map<String, Object?>> _device() async {
@@ -55,13 +57,38 @@ void _choicesTests() {
     test('one unknown stored value does not lose the others', () async {
       final repository = _repository({
         SettingKeys.chatListDensity: 'cosy',
-        SettingKeys.roomOrder: 'sections',
+        SettingKeys.bubbleAlign: 'left',
       });
 
       expect(
         await repository.load(),
-        const DisplayPreferencesState(roomOrder: RoomOrder.sections),
+        const DisplayPreferencesState(bubbleAlign: BubbleAlign.left),
       );
+    });
+
+    test(
+      'changes nothing on the device, the old web switch included',
+      () async {
+        // Web is retired: the old « own messages on the right » switch is not
+        // read any more, the align step asks everyone.
+        final stored = {
+          ..._allOtherStored,
+          SettingKeys.enableRightAndLeftMessageAlignmentOnWeb: false,
+        };
+        final repository = _repository(stored);
+
+        await repository.load();
+
+        expect(await _device(), stored);
+      },
+    );
+
+    test('the old web switch off does not move the bubbles', () async {
+      final repository = _repository({
+        SettingKeys.enableRightAndLeftMessageAlignmentOnWeb: false,
+      });
+
+      expect((await repository.load()).bubbleAlign, BubbleAlign.ownRight);
     });
   });
 
