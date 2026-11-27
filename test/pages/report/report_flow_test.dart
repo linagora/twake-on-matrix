@@ -91,17 +91,16 @@ Future<({_ScriptedDialogs dialogs, _RecordingSubmit submit})> _report({
   required List<MessageReportReason?> reasons,
   List<ReportCommentAnswer> comments = const [],
   List<bool> confirms = const [],
-  int failures = 0,
-  Exception? error,
+  _RecordingSubmit? submit,
 }) async {
   final dialogs = _ScriptedDialogs(
     reasons: reasons,
     comments: comments,
     confirms: confirms,
   );
-  final submit = _RecordingSubmit(failures: failures, error: error);
-  await _run(dialogs, submit.call);
-  return (dialogs: dialogs, submit: submit);
+  final recording = submit ?? _RecordingSubmit();
+  await _run(dialogs, recording.call);
+  return (dialogs: dialogs, submit: recording);
 }
 
 void main() {
@@ -167,7 +166,7 @@ void main() {
       reasons: [MessageReportReason.other],
       comments: [const ReportCommentSubmitted('rude')],
       confirms: [true, true],
-      failures: 1,
+      submit: _RecordingSubmit(failures: 1),
     );
 
     expect(dialogs.events, [
@@ -186,7 +185,7 @@ void main() {
     final (:dialogs, submit: _) = await _report(
       reasons: [MessageReportReason.spam],
       confirms: [true, false],
-      failures: 1,
+      submit: _RecordingSubmit(failures: 1),
     );
 
     expect(dialogs.events, ['pick', 'confirm', 'failed', 'confirm']);
@@ -196,8 +195,10 @@ void main() {
     final (:dialogs, :submit) = await _report(
       reasons: [MessageReportReason.spam],
       confirms: [true, true],
-      failures: 1,
-      error: ReportNotSupportedException(cause: Exception('M_UNRECOGNIZED')),
+      submit: _RecordingSubmit(
+        failures: 1,
+        error: ReportNotSupportedException(cause: Exception('M_UNRECOGNIZED')),
+      ),
     );
 
     expect(dialogs.events, ['pick', 'confirm', 'failed']);
