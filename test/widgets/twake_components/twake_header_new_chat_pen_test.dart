@@ -9,6 +9,7 @@ import 'package:provider/provider.dart' show Provider;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -60,7 +61,10 @@ Future<_Harness> _pumpHeader(
   final client = _FakeClient();
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [matrixClientProvider.overrideWithValue(client)],
+      overrides: [
+        matrixClientProvider.overrideWithValue(client),
+        activeUserIdProvider.overrideWithValue(null),
+      ],
       child: Provider<MatrixState>.value(
         value: _FakeMatrix(client),
         child: MaterialApp(

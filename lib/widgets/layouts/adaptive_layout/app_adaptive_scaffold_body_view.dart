@@ -21,6 +21,7 @@ import 'package:matrix/matrix.dart';
 
 class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
+  final List<AdaptiveDestinationEnum> barDestinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier;
   final OnDestinationSelected onDestinationSelected;
   final OnClientSelectedSetting onClientSelected;
@@ -41,6 +42,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.onDestinationSelected,
     required this.onClientSelected,
     required this.destinations,
+    required this.barDestinations,
     required this.onPopInvoked,
     required this.onOpenSettings,
     this.searchOpen,
@@ -124,6 +126,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                   onDestinationSelected: onDestinationSelected,
                                   onClientSelected: onClientSelected,
                                   destinations: destinations,
+                                  barDestinations: barDestinations,
                                   onOpenSettings: onOpenSettings,
                                   searchOpen: searchOpen,
                                   searchQuery: searchQuery,
@@ -151,6 +154,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       onDestinationSelected: onDestinationSelected,
                       onClientSelected: onClientSelected,
                       destinations: destinations,
+                      barDestinations: barDestinations,
                       onOpenSettings: onOpenSettings,
                       searchOpen: searchOpen,
                       searchQuery: searchQuery,
@@ -175,6 +179,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
 
 class _ColumnPageView extends StatelessWidget {
   final List<AdaptiveDestinationEnum> destinations;
+  final List<AdaptiveDestinationEnum> barDestinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier;
   final PageController pageController;
   final OnDestinationSelected onDestinationSelected;
@@ -192,6 +197,7 @@ class _ColumnPageView extends StatelessWidget {
     required this.onDestinationSelected,
     required this.onClientSelected,
     required this.destinations,
+    required this.barDestinations,
     required this.onOpenSettings,
     required this.searchOpen,
     required this.searchQuery,
@@ -275,9 +281,11 @@ class _ColumnPageView extends StatelessWidget {
             // its field.
             final search = withSearch && ResponsiveUtils().isMobile(context);
             return FloatingNavigationBar(
-              destinations: destinations,
+              destinations: barDestinations,
               selected: activeNavigationBarNotifier.value,
-              onDestinationSelected: onDestinationSelected,
+              onDestinationSelected: (index) => onDestinationSelected(
+                destinations.indexOf(barDestinations[index]),
+              ),
               searchOpen: search ? searchOpen : null,
               searchQuery: search ? searchQuery : null,
               searchSuffix: search ? const BrowsePublicGroupsButton() : null,

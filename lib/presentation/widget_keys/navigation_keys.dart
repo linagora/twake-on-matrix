@@ -17,6 +17,10 @@ enum NavigationKeys {
     Key('navigation.settingsDestination'),
     ValueKey('navigation.settingsDestination'),
   ),
+  accountAvatar(
+    Key('navigation.accountAvatar'),
+    ValueKey('navigation.accountAvatar'),
+  ),
   breakpointMobile(
     Key('navigation.breakpointMobile'),
     ValueKey('navigation.breakpointMobile'),

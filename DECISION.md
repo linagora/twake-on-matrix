@@ -639,6 +639,23 @@ Deviations from Twake Space Chat, to keep this first version small:
 
 Completes D12, which showed a call only while it went on.
 
+## D32. Settings opens from the account avatar of Chats (proposed by Johann, 2026-11-26)
+
+Status: proposed.
+
+On a phone and a tablet, Settings leaves the floating bar, which keeps three
+tabs: Contacts, Chats, Activity (Contacts, Chats without the threads). The
+avatar of the active account, 36 pt with its presence dot, sits at the top left
+of the Chats header, left of the centred title; the new chat capsule stays at
+the top right. A tap opens Settings. Screen readers read it as « Settings ».
+
+Settings keeps the bar, with no tab selected. The avatar is on Chats only:
+from Contacts or Activity, Settings is one tap away through Chats. Desktop
+keeps Settings in the side rail and shows no avatar in the header.
+
+Updates D37: the capsule of the Chats bar holds these three tabs, plus the
+search button.
+
 ## D34. A reply shows its quote above the message bubble (decided by Clément, 2026-11-27)
 
 The quoted message moves out of the message bubble. From top to bottom, a reply

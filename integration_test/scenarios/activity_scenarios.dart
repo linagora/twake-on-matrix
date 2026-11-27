@@ -27,9 +27,10 @@ Future<void> _backToChatList(BaseTestScenario scenario) async {
   await scenario.$(ChatList).waitUntilVisible();
 }
 
-/// THR-M-12: the bar is Contacts · Chats · Activity · Settings and each tab
-/// still opens its own page (the pages are indexed by their place in the
-/// bar: adding Activity must not shift Settings).
+/// THR-M-12: the bar is Contacts · Chats · Activity, Settings opens from
+/// the account avatar of Chats, and each one still opens its own page (the
+/// pages are indexed by their place in the bar: adding Activity must not
+/// shift Settings).
 class ActivityTabsScenario extends BaseTestScenario {
   ActivityTabsScenario(super.$, super.robots);
 
@@ -37,11 +38,12 @@ class ActivityTabsScenario extends BaseTestScenario {
   Future<void> runTestLogic() async {
     await $(ChatList).waitUntilVisible();
     final bar = find.byType(FloatingNavigationBar).last;
-    expect(
-      $.tester.widget<FloatingNavigationBar>(bar).destinations,
-      AdaptiveDestinationEnum.values,
-    );
-    for (final label in ['Contacts', 'Chats', 'Activity', 'Settings']) {
+    expect($.tester.widget<FloatingNavigationBar>(bar).destinations, [
+      AdaptiveDestinationEnum.contacts,
+      AdaptiveDestinationEnum.rooms,
+      AdaptiveDestinationEnum.activity,
+    ]);
+    for (final label in ['Contacts', 'Chats', 'Activity']) {
       expect(
         find.descendant(of: bar, matching: find.text(label)),
         findsOneWidget,

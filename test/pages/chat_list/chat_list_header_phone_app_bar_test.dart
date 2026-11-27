@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/twake_components/twake_header_account_avatar.dart';
 
 import 'chat_list_header_test_harness.dart';
 
@@ -29,14 +29,29 @@ void main() {
     });
   });
 
-  // Settings stays a tab of the bottom bar; the avatar is another PR (#3829).
-  group('[ChatList] phone app bar', () {
+  group('[ChatList] app bar account avatar', () {
     testWidgets('GIVEN a phone\n'
-        'THEN the app bar has no avatar', (tester) async {
+        'THEN the app bar shows the account avatar', (tester) async {
       await HeaderHarness.pump(tester, const HeaderView.phone(roomCount: 0));
 
       expect(
-        find.descendant(of: headerFinder, matching: find.byType(Avatar)),
+        find.descendant(
+          of: headerFinder,
+          matching: find.byType(TwakeHeaderAccountAvatar),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('GIVEN a wide screen\n'
+        'THEN the app bar has no avatar', (tester) async {
+      await HeaderHarness.pump(tester, const HeaderView.wide());
+
+      expect(
+        find.descendant(
+          of: headerFinder,
+          matching: find.byType(TwakeHeaderAccountAvatar),
+        ),
         findsNothing,
       );
     });
