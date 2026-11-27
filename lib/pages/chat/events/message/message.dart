@@ -310,7 +310,6 @@ class _MessageState extends ConsumerState<Message> with MessageAvatarMixin {
               widget.onAvatarTap,
               event: widget.event,
               sameSender: widget.event.isSameSenderWith(widget.previousEvent),
-              ownMessage: widget.event.isOwnMessage,
               context: context,
               selectMode: widget.selectMode,
             ),

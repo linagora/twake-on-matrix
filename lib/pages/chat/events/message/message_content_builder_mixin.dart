@@ -18,7 +18,6 @@ mixin MessageContentBuilderMixin {
     BuildContext context, {
     required Event event,
     required double maxWidth,
-    bool ownMessage = false,
     bool hideDisplayName = false,
     bool isEdited = false,
     Timeline? timeline,
@@ -54,7 +53,7 @@ mixin MessageContentBuilderMixin {
       timeline: timeline,
     );
 
-    if (ownMessage || hideDisplayName) {
+    if (hideDisplayName) {
       return messageMetrics;
     }
 

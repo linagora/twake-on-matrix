@@ -11,7 +11,6 @@ mixin MessageAvatarMixin {
   Widget placeHolderWidget(
     Function(Event)? onAvatarTap, {
     required bool sameSender,
-    required bool ownMessage,
     required Event event,
     required BuildContext context,
     required bool selectMode,

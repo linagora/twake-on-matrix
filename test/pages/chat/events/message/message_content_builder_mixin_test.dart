@@ -165,12 +165,11 @@ Future<void> main() async {
       required Event event,
       required double maxWidth,
       BubbleRegime? regime,
-      bool ownMessage = false,
       bool hideDisplayName = false,
       bool? expectedIsNeedAddNewLine,
     }) async {
       MessageMetrics? metrics;
-      // Same event as an own message: no display name, width is the body alone.
+      // Same event with no display name: width is the body alone.
       MessageMetrics? messageOnlyMetrics;
 
       await tester.pumpWidget(
@@ -203,7 +202,6 @@ Future<void> main() async {
                         context,
                         event: event,
                         maxWidth: maxWidth,
-                        ownMessage: ownMessage,
                         hideDisplayName: hideDisplayName,
                       );
                   messageOnlyMetrics = regime == BubbleRegime.displayNameDriven
@@ -211,7 +209,7 @@ Future<void> main() async {
                           context,
                           event: event,
                           maxWidth: maxWidth,
-                          ownMessage: true,
+                          hideDisplayName: true,
                         )
                       : null;
                   return const SizedBox();
@@ -269,8 +267,7 @@ Future<void> main() async {
         );
       });
 
-      group('GIVEN ownMessage is true\n'
-          'OR hideDisplayName is true\n'
+      group('GIVEN hideDisplayName is true\n'
           'THEN return message width\n', () {
         testWidgets('GIVEN message body has multiple lines\n'
             'AND last line of message has enough space for timeline\n'
@@ -297,7 +294,7 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
             regime: BubbleRegime.fits,
-            ownMessage: true,
+            hideDisplayName: true,
           );
         });
         testWidgets('GIVEN message body has multiple lines\n'
@@ -329,13 +326,12 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
             regime: BubbleRegime.fits,
-            ownMessage: true,
+            hideDisplayName: true,
           );
         });
       });
 
-      group('GIVEN ownMessage is false\n'
-          'AND hideDisplayName is false\n', () {
+      group('GIVEN hideDisplayName is false\n', () {
         testWidgets('GIVEN width of display name is wider than message body\n'
             'THEN return message bubble width is width of display name\n', (
           WidgetTester tester,
@@ -358,7 +354,6 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
             regime: BubbleRegime.displayNameDriven,
-            ownMessage: false,
             hideDisplayName: false,
           );
         });
@@ -388,7 +383,6 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
             regime: BubbleRegime.fits,
-            ownMessage: false,
             hideDisplayName: false,
           );
         });
@@ -419,7 +413,6 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
             regime: BubbleRegime.fits,
-            ownMessage: false,
             hideDisplayName: false,
           );
         });
@@ -466,8 +459,7 @@ Future<void> main() async {
         );
       });
 
-      group('GIVEN ownMessage is true\n'
-          'OR hideDisplayName is true\n'
+      group('GIVEN hideDisplayName is true\n'
           'THEN return message width\n', () {
         testWidgets('GIVEN message body has multiple lines\n'
             'AND last line of message has enough space for timeline\n'
@@ -494,7 +486,7 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
             regime: BubbleRegime.fits,
-            ownMessage: true,
+            hideDisplayName: true,
           );
         });
         testWidgets('GIVEN message body has multiple lines\n'
@@ -521,13 +513,12 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
             regime: BubbleRegime.wraps,
-            ownMessage: true,
+            hideDisplayName: true,
           );
         });
       });
 
-      group('GIVEN ownMessage is false\n'
-          'AND hideDisplayName is false\n', () {
+      group('GIVEN hideDisplayName is false\n', () {
         testWidgets('GIVEN width of display name is wider than message body\n'
             'THEN return message bubble width is width of display name\n', (
           WidgetTester tester,
@@ -550,7 +541,6 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
             regime: BubbleRegime.displayNameDriven,
-            ownMessage: false,
             hideDisplayName: false,
           );
         });
@@ -581,7 +571,6 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
             regime: BubbleRegime.fits,
-            ownMessage: true,
           );
         });
 
@@ -610,7 +599,6 @@ Future<void> main() async {
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
             regime: BubbleRegime.wraps,
-            ownMessage: true,
           );
         });
       });
@@ -637,47 +625,45 @@ Future<void> main() async {
         room: room,
       );
 
-      testWidgets('GIVEN ownMessage is true AND platform is Web\n'
+      testWidgets('GIVEN hideDisplayName istrue AND platform is Web\n'
           'THEN isNeedAddNewLine is true\n', (WidgetTester tester) async {
         await runTest(
           tester,
           event: urlEvent,
           maxWidth: messageMaxWidthWeb,
           expectedIsNeedAddNewLine: true,
-          ownMessage: true,
+          hideDisplayName: true,
         );
       });
 
-      testWidgets('GIVEN ownMessage is true AND platform is Mobile\n'
+      testWidgets('GIVEN hideDisplayName istrue AND platform is Mobile\n'
           'THEN isNeedAddNewLine is true\n', (WidgetTester tester) async {
         await runTest(
           tester,
           event: urlEvent,
           maxWidth: messageMaxWidthMobile,
           expectedIsNeedAddNewLine: true,
-          ownMessage: true,
+          hideDisplayName: true,
         );
       });
 
-      testWidgets('GIVEN ownMessage is false AND platform is Web\n'
+      testWidgets('GIVEN hideDisplayName isfalse AND platform is Web\n'
           'THEN isNeedAddNewLine is true\n', (WidgetTester tester) async {
         await runTest(
           tester,
           event: urlEvent,
           maxWidth: messageMaxWidthWeb,
           expectedIsNeedAddNewLine: true,
-          ownMessage: false,
         );
       });
 
-      testWidgets('GIVEN ownMessage is false AND platform is Mobile\n'
+      testWidgets('GIVEN hideDisplayName isfalse AND platform is Mobile\n'
           'THEN isNeedAddNewLine is true\n', (WidgetTester tester) async {
         await runTest(
           tester,
           event: urlEvent,
           maxWidth: messageMaxWidthMobile,
           expectedIsNeedAddNewLine: true,
-          ownMessage: false,
         );
       });
     });
@@ -1005,7 +991,7 @@ Future<void> main() async {
           tester,
           event: textEventWithError,
           maxWidth: 400,
-          ownMessage: true,
+          hideDisplayName: true,
           expectedIsNeedAddNewLine: true,
         );
       });
@@ -1026,7 +1012,7 @@ Future<void> main() async {
           tester,
           event: noticeEventWithError,
           maxWidth: 1000,
-          ownMessage: true,
+          hideDisplayName: true,
           expectedIsNeedAddNewLine: false,
         );
       });
@@ -1063,7 +1049,7 @@ Future<void> main() async {
                         context,
                         event: event,
                         maxWidth: 400,
-                        ownMessage: true,
+                        hideDisplayName: true,
                         isEdited: isEdited,
                       );
                   return const SizedBox();
