@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 import 'package:twake_chat/domain/personalization/personalize_step.dart';
 import 'package:twake_chat/domain/personalization/room_sections.dart';
@@ -88,11 +89,9 @@ class _MiniTitle extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       textScaler: TextScaler.noScaling,
-      style: TextStyle(
-        fontSize: 8,
-        fontWeight: FontWeight.w600,
-        color: scheme.primary,
-      ),
+      style: LinagoraTextStyle.material().bodySmall
+          .apply(fontSizeFactor: 2 / 3)
+          .copyWith(fontWeight: FontWeight.w600, color: scheme.primary),
     ),
   );
 }

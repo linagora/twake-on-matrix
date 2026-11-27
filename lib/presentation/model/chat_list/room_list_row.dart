@@ -82,7 +82,7 @@ List<RoomListRow> buildSectionedRoomListRows(
 }) {
   final byId = {for (final entry in visible) entry.id: entry};
   bool inSpace(RoomListEntry entry) =>
-      !entry.isSpace && parentSpaceOf(entry, byId) != null;
+      !entry.isDirect && parentSpaceOf(entry, byId) != null;
   final (:pinned, placed: spaces) = _arrange(
     [
       for (final entry in visible)

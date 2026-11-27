@@ -156,6 +156,36 @@ void _expectOnThePhone(Rect rect) {
   expect(rect.right, lessThanOrEqualTo(390));
 }
 
+/// Each rect of [rects] with the one shown just before it.
+List<(Rect, Rect)> _neighbours(List<Rect> rects) => [
+  for (var i = 1; i < rects.length; i++) (rects[i - 1], rects[i]),
+];
+
+/// The cards of [section] share one row, left to right, on the phone.
+void _expectOneRow(WidgetTester tester, _Section section) {
+  final rects = _rectsOf(tester, section);
+  for (final (index, rect) in rects.indexed) {
+    expect(rect.top, rects.first.top, reason: '${section.cards[index]}');
+    _expectOnThePhone(rect);
+  }
+  for (final (before, after) in _neighbours(rects)) {
+    expect(before.right, lessThanOrEqualTo(after.left));
+  }
+}
+
+/// The cards of [section] are stacked, one wide card per row, top to bottom.
+void _expectStacked(WidgetTester tester, _Section section) {
+  final rects = _rectsOf(tester, section);
+  for (final (index, rect) in rects.indexed) {
+    expect(rect.left, rects.first.left, reason: '${section.cards[index]}');
+    _expectOnThePhone(rect);
+    expect(rect.width, greaterThan(rect.height));
+  }
+  for (final (before, after) in _neighbours(rects)) {
+    expect(before.bottom, lessThanOrEqualTo(after.top));
+  }
+}
+
 final _en = lookupL10n(const Locale('en'));
 
 void main() {
@@ -318,44 +348,20 @@ void _choicesTests() {
 
 void _phoneLayoutTests() {
   group('Settings › Personalization layout on a phone 390 px wide', () {
-    for (final section in _phoneSections.where((s) => s.sideBySide)) {
-      testWidgets('the ${section.id} cards share one row, in order', (
-        tester,
-      ) async {
-        await _pump(tester);
+    for (final (sideBySide, layout, expectLayout) in [
+      (true, 'share one row,', _expectOneRow),
+      (false, 'are stacked, one per row,', _expectStacked),
+    ]) {
+      for (final section in _phoneSections.where(
+        (s) => s.sideBySide == sideBySide,
+      )) {
+        testWidgets('the ${section.id} cards $layout in order', (tester) async {
+          await _pump(tester);
 
-        final rects = _rectsOf(tester, section);
-        for (final (index, rect) in rects.indexed) {
-          expect(rect.top, rects.first.top, reason: '${section.cards[index]}');
-          _expectOnThePhone(rect);
-          if (index > 0) {
-            expect(rects[index - 1].right, lessThanOrEqualTo(rect.left));
-          }
-        }
-        expect(tester.takeException(), isNull);
-      });
-    }
-
-    for (final section in _phoneSections.where((s) => !s.sideBySide)) {
-      testWidgets('the ${section.id} cards are stacked, one per row, in '
-          'order', (tester) async {
-        await _pump(tester);
-
-        final rects = _rectsOf(tester, section);
-        for (final (index, rect) in rects.indexed) {
-          expect(
-            rect.left,
-            rects.first.left,
-            reason: '${section.cards[index]}',
-          );
-          _expectOnThePhone(rect);
-          expect(rect.width, greaterThan(rect.height));
-          if (index > 0) {
-            expect(rects[index - 1].bottom, lessThanOrEqualTo(rect.top));
-          }
-        }
-        expect(tester.takeException(), isNull);
-      });
+          expectLayout(tester, section);
+          expect(tester.takeException(), isNull);
+        });
+      }
     }
   });
 }

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/data/local/personalization/display_preferences_repository.dart';
+import 'package:twake_chat/data/local/personalization/display_preferences_repository.provider.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 

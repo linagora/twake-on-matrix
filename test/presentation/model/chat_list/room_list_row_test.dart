@@ -58,6 +58,7 @@ void main() {
   _buildRoomListRowsJoinableTests();
   _buildSectionedRoomListRowsTests();
   _buildSectionedRoomListRowsSpacesTests();
+  _buildSectionedRoomListRowsDirectsTests();
 }
 
 void _buildRoomListRowsTests() {
@@ -332,5 +333,52 @@ void _buildSectionedRoomListRowsSpacesTests() {
 
       expect(_shape(rows), '# spaces 0:!s # groups 0:!g');
     });
+
+    // A sub-space shows under its space: once that space is pinned, nothing
+    // is left for a « spaces » section (review of #3825).
+    test('whenAPinnedSpaceHoldsASubSpace_showsNoEmptySpacesTitle', () {
+      final rows = buildSectionedRoomListRows([
+        _space('!s', isFavourite: true),
+        _space('!sub', parents: ['!s']),
+        _room('!g'),
+      ]);
+
+      expect(_shape(rows), '0:!s 1:!sub # groups 0:!g');
+    });
+  });
+}
+
+// A direct chat (a person or a bot) is never put under a space, even when it
+// names one: it stays in the direct chats, in the order of the sections, and
+// never drops out of the list (review of #3825).
+void _buildSectionedRoomListRowsDirectsTests() {
+  group('buildSectionedRoomListRows', () {
+    for (final (kind, name) in [
+      (RoomKind.direct, 'Direct'),
+      (RoomKind.bot, 'Bot'),
+    ]) {
+      RoomListEntry chatIn(String spaceId) =>
+          RoomListEntry(id: '!dm', kind: kind, parentSpaceIds: [spaceId]);
+
+      test('whenA${name}ChatNamesAPinnedSpace_keepsItInDirects', () {
+        final rows = buildSectionedRoomListRows([
+          _space('!s', isFavourite: true),
+          chatIn('!s'),
+          _room('!g'),
+        ]);
+
+        expect(_shape(rows), '0:!s # groups 0:!g # directs 0:!dm');
+      });
+
+      test('whenA${name}ChatNamesASpace_keepsItInDirects_notUnderIt', () {
+        final rows = buildSectionedRoomListRows([
+          chatIn('!s'),
+          _space('!s'),
+          _room('!g'),
+        ]);
+
+        expect(_shape(rows), '# spaces 0:!s # groups 0:!g # directs 0:!dm');
+      });
+    }
   });
 }

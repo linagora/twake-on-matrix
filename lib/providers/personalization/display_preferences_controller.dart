@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/local/personalization/display_preferences_repository.dart';
+import 'package:twake_chat/data/local/personalization/display_preferences_repository.provider.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 
 part 'display_preferences_controller.g.dart';

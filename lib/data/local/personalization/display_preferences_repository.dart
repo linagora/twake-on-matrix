@@ -1,10 +1,6 @@
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
-import 'package:twake_chat/utils/famedlysdk_store.provider.dart';
-
-part 'display_preferences_repository.g.dart';
 
 /// Where this device keeps the display choices. A stored name this version does not know reads as the default.
 class DisplayPreferencesRepository {
@@ -42,8 +38,3 @@ class DisplayPreferencesRepository {
     await _store.setItem(SettingKeys.roomOrder, preferences.roomOrder.name);
   }
 }
-
-/// Kept alive: the choices are read once per run of the app.
-@Riverpod(keepAlive: true)
-DisplayPreferencesRepository displayPreferencesRepository(Ref ref) =>
-    DisplayPreferencesRepository(ref.watch(storeProvider));
