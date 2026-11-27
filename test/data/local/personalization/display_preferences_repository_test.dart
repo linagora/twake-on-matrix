@@ -19,11 +19,13 @@ DisplayPreferencesRepository _repository(Map<String, Object> stored) {
 const _allOther = DisplayPreferencesState(
   density: ChatListDensity.compact,
   roomOrder: RoomOrder.sections,
+  seenStyle: SeenStyle.avatars,
   bubbleAlign: BubbleAlign.left,
 );
 const _allOtherStored = {
   SettingKeys.chatListDensity: 'compact',
   SettingKeys.roomOrder: 'sections',
+  SettingKeys.seenStyle: 'avatars',
   SettingKeys.bubbleAlign: 'left',
 };
 
@@ -58,11 +60,15 @@ void _choicesTests() {
       final repository = _repository({
         SettingKeys.chatListDensity: 'cosy',
         SettingKeys.bubbleAlign: 'left',
+        SettingKeys.seenStyle: 'names',
       });
 
       expect(
         await repository.load(),
-        const DisplayPreferencesState(bubbleAlign: BubbleAlign.left),
+        const DisplayPreferencesState(
+          bubbleAlign: BubbleAlign.left,
+          seenStyle: SeenStyle.names,
+        ),
       );
     });
 

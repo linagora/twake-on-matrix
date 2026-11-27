@@ -3869,6 +3869,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "personalizeSeenStyleQuestion": "What should show under a read message?",
+  "@personalizeSeenStyleQuestion": {
+    "type": "text",
+    "placeholders": {}
+  },
   "personalizeAlignQuestion": "Where should your messages go?",
   "@personalizeAlignQuestion": {
     "type": "text",
@@ -3891,6 +3896,21 @@
   },
   "roomOrderSections": "By type",
   "@roomOrderSections": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "seenStyleTicks": "Ticks",
+  "@seenStyleTicks": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "seenStyleAvatars": "Avatars",
+  "@seenStyleAvatars": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "seenStyleNames": "Names",
+  "@seenStyleNames": {
     "type": "text",
     "placeholders": {}
   },

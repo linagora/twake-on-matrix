@@ -43,6 +43,13 @@ final _options = [
     withOther: (p) => p.copyWith(roomOrder: RoomOrder.sections),
   ),
   _Option(
+    'seen style',
+    other: 'avatars',
+    choose: (controller) => controller.setSeenStyle(SeenStyle.avatars),
+    read: (preferences) => preferences.seenStyle.name,
+    withOther: (p) => p.copyWith(seenStyle: SeenStyle.avatars),
+  ),
+  _Option(
     'bubble alignment',
     other: 'left',
     choose: (controller) => controller.setBubbleAlign(BubbleAlign.left),
@@ -233,6 +240,17 @@ void _choiceTests() {
       expect(app.preferences.density, ChatListDensity.comfortable);
       final restarted = await app.restart();
       expect(restarted.preferences.density, ChatListDensity.comfortable);
+    });
+
+    test('of three: each one can be chosen', () async {
+      final app = await _App.loaded(FakeDisplayPreferencesRepository());
+
+      for (final style in SeenStyle.values.reversed) {
+        app.controller.setSeenStyle(style);
+        await pumpEventQueue();
+        expect(app.preferences.seenStyle, style);
+        expect((await app.restart()).preferences.seenStyle, style);
+      }
     });
 
     test(

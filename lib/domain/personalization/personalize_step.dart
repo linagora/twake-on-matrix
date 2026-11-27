@@ -3,6 +3,7 @@
 enum PersonalizeStep {
   density('density'),
   order('order'),
+  seenStyle('seen-style'),
   align('align');
 
   const PersonalizeStep(this.id);

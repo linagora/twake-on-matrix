@@ -67,6 +67,8 @@ class Message extends ConsumerStatefulWidget {
   final bool selected;
   final Timeline timeline;
 
+  /// Who stopped reading at this own message.
+  final List<User> readers;
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
   final bool selectMode;
@@ -126,6 +128,7 @@ class Message extends ConsumerStatefulWidget {
     this.hideKeyboardChatScreen,
     this.selectMode = true,
     required this.timeline,
+    this.readers = const [],
     required this.isHoverNotifier,
     this.highlightedEventIdNotifier,
     required this.listHorizontalActionMenu,
@@ -326,6 +329,7 @@ class _MessageState extends ConsumerState<Message> with MessageAvatarMixin {
           selected: widget.selected,
           selectMode: widget.selectMode,
           timeline: widget.timeline,
+          readers: widget.readers,
           isHoverNotifier: widget.isHoverNotifier,
           listHorizontalActionMenu: widget.listHorizontalActionMenu,
           onMenuAction: widget.onMenuAction,

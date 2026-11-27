@@ -55,6 +55,9 @@ class DisplayPreferencesController extends _$DisplayPreferencesController {
   void setRoomOrder(RoomOrder order) =>
       _choose((p) => p.copyWith(roomOrder: order));
 
+  void setSeenStyle(SeenStyle style) =>
+      _choose((p) => p.copyWith(seenStyle: style));
+
   void setBubbleAlign(BubbleAlign align) =>
       _choose((p) => p.copyWith(bubbleAlign: align));
 }

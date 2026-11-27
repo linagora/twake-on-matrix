@@ -249,6 +249,12 @@ class MessageStyle {
 
   static const double paddingAllPushpin = 0;
 
+  static const EdgeInsets paddingSeenReaders = EdgeInsets.only(
+    top: 2,
+    left: 4,
+    right: 4,
+  );
+
   static MainAxisAlignment messageAlignment(Event event, bool alignOwnRight) =>
       event.shouldAlignOwnMessageInDifferentSide(alignOwnRight)
       ? MainAxisAlignment.end

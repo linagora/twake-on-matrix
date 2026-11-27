@@ -5,6 +5,7 @@ import 'package:twake_chat/domain/personalization/display_preferences.dart';
 import 'package:twake_chat/domain/personalization/personalize_step.dart';
 import 'package:twake_chat/domain/personalization/room_sections.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat/seen_readers.dart';
 import 'package:twake_chat/pages/personalize/personalize_choices.dart';
 import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:twake_chat/widgets/option_cards/option_cards.dart';
@@ -155,10 +156,11 @@ class _Bar extends StatelessWidget {
 
 /// A drawn bubble, on the right when [end].
 class _MiniBubble extends StatelessWidget {
-  const _MiniBubble({required this.own, required this.end});
+  const _MiniBubble({required this.own, required this.end, this.trailing});
 
   final bool own;
   final bool end;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -178,6 +180,7 @@ class _MiniBubble extends StatelessWidget {
             Expanded(
               child: _Bar(widthFactor: 1, color: scheme.onSurfaceVariant),
             ),
+            ?trailing,
           ],
         ),
       ),
@@ -198,6 +201,40 @@ class _MiniBubbles extends StatelessWidget {
       children: [
         const _MiniBubble(own: false, end: false),
         _MiniBubble(own: true, end: ownRight),
+      ],
+    ),
+  );
+}
+
+/// An own message read by Alice, Bruno and Chloé, in [style].
+class _MiniSeen extends StatelessWidget {
+  const _MiniSeen({required this.style});
+
+  final SeenStyle style;
+
+  static const List<SeenReader> _readers = [
+    (name: 'Alice', avatar: null),
+    (name: 'Bruno', avatar: null),
+    (name: 'Chloé', avatar: null),
+  ];
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 280,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      spacing: 4,
+      children: [
+        _MiniBubble(
+          own: true,
+          end: true,
+          trailing: Icon(
+            Icons.done_all,
+            size: 14,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        SeenReaders(style: style, readers: _readers),
       ],
     ),
   );

@@ -702,3 +702,6 @@ own messages on the right, on wide screens too, where main put every message
 on the left. The old wide-screen switch is dropped without migration. On a
 phone, « all on the left » shows the name and the avatar of the user's own
 messages, like the others'.
+
+The read receipts style is a third option: ticks (the default), avatars or
+names under the last message a reader has read, one line if useful.

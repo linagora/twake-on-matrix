@@ -55,6 +55,19 @@ class PersonalizeChoices {
           },
         ),
     ],
+    PersonalizeStep.seenStyle => [
+      for (final style in SeenStyle.values)
+        _choice(
+          style,
+          preferences.seenStyle,
+          controller.setSeenStyle,
+          switch (style) {
+            SeenStyle.ticks => l10n.seenStyleTicks,
+            SeenStyle.avatars => l10n.seenStyleAvatars,
+            SeenStyle.names => l10n.seenStyleNames,
+          },
+        ),
+    ],
     PersonalizeStep.align => [
       for (final align in BubbleAlign.values)
         _choice(
