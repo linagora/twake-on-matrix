@@ -85,92 +85,87 @@ Future<void> _run(
   l10n: lookupL10n(const Locale('en')),
 ).run(title: 'Report', description: 'Why?', submit: submit);
 
+Future<({_ScriptedDialogs dialogs, _RecordingSubmit submit})> _report({
+  required List<MessageReportReason?> reasons,
+  List<ReportCommentAnswer> comments = const [],
+  List<bool> confirms = const [],
+  int failures = 0,
+}) async {
+  final dialogs = _ScriptedDialogs(
+    reasons: reasons,
+    comments: comments,
+    confirms: confirms,
+  );
+  final submit = _RecordingSubmit(failures: failures);
+  await _run(dialogs, submit.call);
+  return (dialogs: dialogs, submit: submit);
+}
+
 void main() {
   test('run_whenThePickerIsDismissed_sendsNothing', () async {
-    final dialogs = _ScriptedDialogs(reasons: [null], confirms: []);
-    final submit = _RecordingSubmit();
-
-    await _run(dialogs, submit.call);
+    final (:dialogs, :submit) = await _report(reasons: [null]);
 
     expect(submit.reasons, isEmpty);
     expect(dialogs.events, ['pick']);
   });
 
   test('run_whenTheConfirmIsCancelled_sendsNothing', () async {
-    final dialogs = _ScriptedDialogs(
+    final (:dialogs, :submit) = await _report(
       reasons: [MessageReportReason.spam],
       confirms: [false],
     );
-    final submit = _RecordingSubmit();
-
-    await _run(dialogs, submit.call);
 
     expect(submit.reasons, isEmpty);
     expect(dialogs.events, ['pick', 'confirm']);
   });
 
   test('run_whenAReasonIsConfirmed_sendsItThenShowsReported', () async {
-    final dialogs = _ScriptedDialogs(
+    final (:dialogs, :submit) = await _report(
       reasons: [MessageReportReason.spam],
       confirms: [true],
     );
-    final submit = _RecordingSubmit();
-
-    await _run(dialogs, submit.call);
 
     expect(submit.reasons, ['Spam']);
     expect(dialogs.events, ['pick', 'confirm', 'reported']);
   });
 
   test('run_whenOtherIsChosen_sendsTheReasonWithTheComment', () async {
-    final dialogs = _ScriptedDialogs(
+    final (:dialogs, :submit) = await _report(
       reasons: [MessageReportReason.other],
       comments: [const ReportCommentSubmitted('rude')],
       confirms: [true],
     );
-    final submit = _RecordingSubmit();
-
-    await _run(dialogs, submit.call);
 
     expect(submit.reasons, ['Other: rude']);
   });
 
   test('run_whenTheCommentGoesBack_showsThePickerAgain', () async {
-    final dialogs = _ScriptedDialogs(
+    final (:dialogs, :submit) = await _report(
       reasons: [MessageReportReason.other, MessageReportReason.violence],
       comments: [const ReportCommentBack()],
       confirms: [true],
     );
-    final submit = _RecordingSubmit();
-
-    await _run(dialogs, submit.call);
 
     expect(dialogs.events, ['pick', 'comment', 'pick', 'confirm', 'reported']);
     expect(submit.reasons, ['Violence']);
   });
 
   test('run_whenTheCommentIsDismissed_sendsNothing', () async {
-    final dialogs = _ScriptedDialogs(
+    final (:dialogs, :submit) = await _report(
       reasons: [MessageReportReason.other],
       comments: [const ReportCommentDismissed()],
-      confirms: [],
     );
-    final submit = _RecordingSubmit();
-
-    await _run(dialogs, submit.call);
 
     expect(submit.reasons, isEmpty);
   });
 
   test('run_whenTheServerFails_keepsTheDraftForTheRetry', () async {
-    final dialogs = _ScriptedDialogs(
+    final (:dialogs, :submit) = await _report(
       reasons: [MessageReportReason.other],
       comments: [const ReportCommentSubmitted('rude')],
       confirms: [true, true],
+      failures: 1,
     );
-    final submit = _RecordingSubmit(failures: 1);
-
-    await _run(dialogs, submit.call);
 
     expect(dialogs.events, [
       'pick',
@@ -185,13 +180,11 @@ void main() {
   });
 
   test('run_whenTheServerFailsAndTheRetryIsCancelled_showsNoSuccess', () async {
-    final dialogs = _ScriptedDialogs(
+    final (:dialogs, submit: _) = await _report(
       reasons: [MessageReportReason.spam],
       confirms: [true, false],
+      failures: 1,
     );
-    final submit = _RecordingSubmit(failures: 1);
-
-    await _run(dialogs, submit.call);
 
     expect(dialogs.events, ['pick', 'confirm', 'failed', 'confirm']);
   });
