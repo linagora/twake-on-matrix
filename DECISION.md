@@ -648,8 +648,8 @@ mention (`m.mentions.room`).
 
 - It is offered only to whoever the power levels let notify the room
   (`notifications.room`, 50 by default), and never in a direct chat.
-- It is offered after a bare « @ », or once the text after « @ » starts
-  « room », « all » or « everyone ».
+- It is offered after a bare « @ », or while the text after « @ » is the start
+  of « room », « all » or « everyone » (« @r », « @al »).
 - It always comes after the members that match, so that Enter never notifies
   everyone by mistake: typing « @a » then Enter for Alice mentions Alice.
 
