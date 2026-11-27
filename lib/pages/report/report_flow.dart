@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/exception/report/report_exception.dart';
 import 'package:twake_chat/domain/model/chat/message_report_reason.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/report/report_flow_dialogs.dart';
@@ -64,6 +65,7 @@ class ReportFlow {
         return;
       }
       _dialogs.showFailed(error);
+      if (error is ReportNotSupportedException) return;
     }
   }
 }

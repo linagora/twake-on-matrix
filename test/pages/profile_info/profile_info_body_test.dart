@@ -7,6 +7,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/exception/report/report_exception.dart';
 import 'package:twake_chat/domain/report/usecases/report_user_usecase.dart';
 import 'package:twake_chat/domain/report/usecases/report_user_usecase.provider.dart';
 import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
@@ -192,6 +193,26 @@ void main() {
         find.text('The content has been reported to the server admins'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('tells the user when the server cannot take it', (
+      tester,
+    ) async {
+      repository.reportUserError = ReportNotSupportedException(
+        cause: Exception('M_UNRECOGNIZED'),
+      );
+      await pumpBody(tester, _FakeUser(Membership.join));
+
+      await tapAndSettle(tester, find.byKey(reportUserKey));
+      await tapAndSettle(tester, find.text('Spam'));
+      await tapAndSettle(tester, find.text('Send Report'));
+
+      expect(
+        find.text('Your server doesn’t support this report yet'),
+        findsOneWidget,
+      );
+      expect(find.text('Send this report?'), findsNothing);
+      expect(repository.userReports, isEmpty);
     });
   });
 }

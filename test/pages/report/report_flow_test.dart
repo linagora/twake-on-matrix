@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/exception/report/report_exception.dart';
 import 'package:twake_chat/domain/model/chat/message_report_reason.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/report/report_flow.dart';
@@ -63,16 +64,17 @@ class _ScriptedDialogs implements ReportFlowDialogs {
 }
 
 class _RecordingSubmit {
-  _RecordingSubmit({this.failures = 0});
+  _RecordingSubmit({this.failures = 0, this.error});
 
   int failures;
+  final Exception? error;
   final List<String> reasons = [];
 
   Future<void> call(String reason) async {
     reasons.add(reason);
     if (failures > 0) {
       failures--;
-      throw Exception('server error');
+      throw error ?? Exception('server error');
     }
   }
 }
@@ -90,13 +92,14 @@ Future<({_ScriptedDialogs dialogs, _RecordingSubmit submit})> _report({
   List<ReportCommentAnswer> comments = const [],
   List<bool> confirms = const [],
   int failures = 0,
+  Exception? error,
 }) async {
   final dialogs = _ScriptedDialogs(
     reasons: reasons,
     comments: comments,
     confirms: confirms,
   );
-  final submit = _RecordingSubmit(failures: failures);
+  final submit = _RecordingSubmit(failures: failures, error: error);
   await _run(dialogs, submit.call);
   return (dialogs: dialogs, submit: submit);
 }
@@ -187,6 +190,18 @@ void main() {
     );
 
     expect(dialogs.events, ['pick', 'confirm', 'failed', 'confirm']);
+  });
+
+  test('run_whenTheServerDoesNotSupportTheReport_stopsWithoutRetry', () async {
+    final (:dialogs, :submit) = await _report(
+      reasons: [MessageReportReason.spam],
+      confirms: [true, true],
+      failures: 1,
+      error: ReportNotSupportedException(cause: Exception('M_UNRECOGNIZED')),
+    );
+
+    expect(dialogs.events, ['pick', 'confirm', 'failed']);
+    expect(submit.reasons, ['Spam']);
   });
 
   test('run_whileTheServerHasNotAnswered_showsNoSuccess', () async {

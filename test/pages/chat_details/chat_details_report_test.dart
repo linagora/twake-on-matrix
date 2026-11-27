@@ -206,7 +206,6 @@ void main() {
     await openReport(tester);
     await tapText(tester, 'Spam');
     await tapText(tester, 'Send Report');
-    await tapText(tester, 'Cancel');
 
     expect(find.text('Oops, something went wrong…'), findsOneWidget);
     expect(find.text('Reason: Spam'), findsOneWidget);

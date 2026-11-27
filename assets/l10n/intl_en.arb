@@ -2602,6 +2602,7 @@
   "reportChat": "Report chat",
   "reportUser": "Report user",
   "reportUserDesc": "What’s the issue with this user?",
+  "reportNotSupported": "Your server doesn’t support this report yet",
   "sendReport": "Send Report",
   "addComment": "Add comment",
   "spam": "Spam",

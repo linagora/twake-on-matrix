@@ -15,6 +15,8 @@ typedef _ReportCase = ({
   Future<void> Function(ReportDatasourceImpl datasource) send,
   String failureName,
   Matcher failure,
+  String olderVersion,
+  String supportedVersion,
 });
 
 final List<_ReportCase> _cases = [
@@ -34,6 +36,8 @@ final List<_ReportCase> _cases = [
       'roomId',
       '!room:hs',
     ),
+    olderVersion: 'v1.12',
+    supportedVersion: 'v1.13',
   ),
   (
     name: 'reportUser',
@@ -52,6 +56,8 @@ final List<_ReportCase> _cases = [
       'userId',
       '@bob:hs',
     ),
+    olderVersion: 'v1.13',
+    supportedVersion: 'v1.14',
   ),
 ];
 
@@ -95,6 +101,49 @@ void main() {
         report.send(const ReportDatasourceImpl(null)),
         throwsA(isA<ReportNoClientException>()),
       );
+    });
+
+    group('${report.name} on an unknown endpoint', () {
+      setUp(
+        () => report.failWith(
+          client,
+          MatrixException.fromJson({'errcode': 'M_UNRECOGNIZED'}),
+        ),
+      );
+
+      void serverAdvertises(List<String> versions) => when(
+        client.getVersions(),
+      ).thenAnswer((_) async => GetVersionsResponse(versions: versions));
+
+      test('throwsReportNotSupported_whenTheServerIsOlder', () async {
+        serverAdvertises(['v1.11', report.olderVersion]);
+
+        await expectLater(
+          report.send(ReportDatasourceImpl(client)),
+          throwsA(isA<ReportNotSupportedException>()),
+        );
+      });
+
+      test(
+        'keepsThe${report.failureName}_whenTheServerIsRecentEnough',
+        () async {
+          serverAdvertises([report.olderVersion, report.supportedVersion]);
+
+          await expectLater(
+            report.send(ReportDatasourceImpl(client)),
+            throwsA(report.failure),
+          );
+        },
+      );
+
+      test('throwsReportNotSupported_whenTheVersionsCannotBeRead', () async {
+        when(client.getVersions()).thenThrow(Exception('offline'));
+
+        await expectLater(
+          report.send(ReportDatasourceImpl(client)),
+          throwsA(isA<ReportNotSupportedException>()),
+        );
+      });
     });
   }
 }

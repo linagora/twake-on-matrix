@@ -81,9 +81,16 @@ class MaterialReportFlowDialogs implements ReportFlowDialogs {
   @override
   Future<Object?> runWithLoading(Future<void> Function() action) async {
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: action,
+      future: () async {
+        try {
+          await action();
+          return null;
+        } on Exception catch (exception) {
+          return exception;
+        }
+      },
     );
-    return result.error;
+    return result.error ?? result.result;
   }
 
   @override
@@ -95,7 +102,13 @@ class MaterialReportFlowDialogs implements ReportFlowDialogs {
   @override
   void showFailed(Object error) {
     if (!_context.mounted) return;
-    final cause = error is ReportException ? error.cause ?? error : error;
-    TwakeSnackBar.show(_context, cause.toLocalizedString(_context));
+    final message = switch (error) {
+      ReportNotSupportedException() => _l10n.reportNotSupported,
+      ReportException(:final cause) => (cause ?? error).toLocalizedString(
+        _context,
+      ),
+      _ => error.toLocalizedString(_context),
+    };
+    TwakeSnackBar.show(_context, message);
   }
 }

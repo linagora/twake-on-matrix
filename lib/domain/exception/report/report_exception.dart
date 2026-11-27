@@ -29,3 +29,8 @@ class ReportUserFailedException extends ReportException {
 
   final String userId;
 }
+
+class ReportNotSupportedException extends ReportException {
+  const ReportNotSupportedException({required Object super.cause})
+    : super('The server does not support this report');
+}
