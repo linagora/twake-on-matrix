@@ -639,6 +639,21 @@ Deviations from Twake Space Chat, to keep this first version small:
 
 Completes D12, which showed a call only while it went on.
 
+## D33. « @room » notifies the whole group (proposed by Johann, 2026-11-27)
+
+Typing « @ » in a group offers « @room », next to the members, as Twake Space
+Chat does (#995): a group icon, « @room », and « Notify everyone in the
+conversation ». Picking it writes « @room », which the message sends as a room
+mention (`m.mentions.room`).
+
+- It is offered only to whoever the power levels let notify the room
+  (`notifications.room`, 50 by default), and never in a direct chat.
+- It is offered after a bare « @ » when at least one member is listed too, or
+  while the text after « @ » is the start of « room », « all » or « everyone »
+  (« @r », « @al »).
+- It always comes after the members that match, so that Enter never notifies
+  everyone by mistake: typing « @a » then Enter for Alice mentions Alice.
+
 ## D34. A reply shows its quote above the message bubble (decided by Clément, 2026-11-27)
 
 The quoted message moves out of the message bubble. From top to bottom, a reply

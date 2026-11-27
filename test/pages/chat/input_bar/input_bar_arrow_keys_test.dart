@@ -26,6 +26,10 @@ class _FakeGroupRoom extends Fake implements Room {
   bool get isDirectChat => false;
 
   @override
+  bool canSendNotification(String userid, {String notificationType = 'room'}) =>
+      false;
+
+  @override
   List<User> getParticipants([
     List<Membership> membershipFilter = const [
       Membership.join,
