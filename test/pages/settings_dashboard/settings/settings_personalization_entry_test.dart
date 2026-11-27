@@ -133,7 +133,7 @@ void main() {
 
   testWidgets(
     'a tap on the entry opens the personalization screen, at 1200 px with '
-    'the cards of the two options',
+    'the cards of the three options',
     (tester) async {
       await _pumpSettings(tester);
 
@@ -148,6 +148,8 @@ void main() {
         'option-density-compact',
         'option-order-recent',
         'option-order-sections',
+        'option-align-ownRight',
+        'option-align-left',
       ]) {
         expect(
           find.byKey(ValueKey<String>(card)),

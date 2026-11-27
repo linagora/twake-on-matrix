@@ -42,6 +42,13 @@ final _options = [
     read: (preferences) => preferences.roomOrder.name,
     withOther: (p) => p.copyWith(roomOrder: RoomOrder.sections),
   ),
+  _Option(
+    'bubble alignment',
+    other: 'left',
+    choose: (controller) => controller.setBubbleAlign(BubbleAlign.left),
+    read: (preferences) => preferences.bubbleAlign.name,
+    withOther: (p) => p.copyWith(bubbleAlign: BubbleAlign.left),
+  ),
 ];
 
 /// Every option set to its other choice.
@@ -86,6 +93,8 @@ class _App {
   DisplayPreferencesController get controller =>
       container.read(displayPreferencesControllerProvider.notifier);
 
+  bool get alignOwnRight => container.read(alignOwnMessagesRightProvider);
+
   /// The same device started again.
   Future<_App> restart() => loaded(storage);
 }
@@ -126,6 +135,38 @@ void _loadingTests() {
       );
 
       expect(app.preferences, const DisplayPreferencesState());
+      expect(app.alignOwnRight, isTrue);
+    });
+  });
+
+  group('own messages on the right', () {
+    test('while the storage has not answered: on the right, the default', () {
+      final storage = FakeDisplayPreferencesRepository(
+        stored: const DisplayPreferencesState(bubbleAlign: BubbleAlign.left),
+      )..holdLoads();
+      final app = _App(storage);
+
+      expect(app.state.isLoading, isTrue);
+      expect(app.alignOwnRight, isTrue);
+    });
+
+    test('every message on the left once the device said so', () async {
+      final app = await _App.loaded(
+        FakeDisplayPreferencesRepository(
+          stored: const DisplayPreferencesState(bubbleAlign: BubbleAlign.left),
+        ),
+      );
+
+      expect(app.alignOwnRight, isFalse);
+    });
+
+    test('follows a choice', () async {
+      final app = await _App.loaded(FakeDisplayPreferencesRepository());
+
+      app.controller.setBubbleAlign(BubbleAlign.left);
+      await pumpEventQueue();
+
+      expect(app.alignOwnRight, isFalse);
     });
   });
 }
@@ -200,7 +241,7 @@ void _choiceTests() {
         final storage = FakeDisplayPreferencesRepository(
           stored: const DisplayPreferencesState(
             density: ChatListDensity.compact,
-            roomOrder: RoomOrder.sections,
+            bubbleAlign: BubbleAlign.left,
           ),
         )..holdLoads();
         final app = _App(storage);
@@ -211,10 +252,10 @@ void _choiceTests() {
 
         expect(app.preferences.density, ChatListDensity.comfortable);
         // The preference not touched is still the stored one.
-        expect(app.preferences.roomOrder, RoomOrder.sections);
+        expect(app.preferences.bubbleAlign, BubbleAlign.left);
         final restarted = await app.restart();
         expect(restarted.preferences.density, ChatListDensity.comfortable);
-        expect(restarted.preferences.roomOrder, RoomOrder.sections);
+        expect(restarted.preferences.bubbleAlign, BubbleAlign.left);
       },
     );
 

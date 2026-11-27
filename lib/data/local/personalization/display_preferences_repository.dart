@@ -21,6 +21,11 @@ class DisplayPreferencesRepository {
         RoomOrder.values,
         defaults.roomOrder,
       ),
+      bubbleAlign: await _read(
+        SettingKeys.bubbleAlign,
+        BubbleAlign.values,
+        defaults.bubbleAlign,
+      ),
     );
   }
 
@@ -36,5 +41,6 @@ class DisplayPreferencesRepository {
   Future<void> save(DisplayPreferencesState preferences) async {
     await _store.setItem(SettingKeys.chatListDensity, preferences.density.name);
     await _store.setItem(SettingKeys.roomOrder, preferences.roomOrder.name);
+    await _store.setItem(SettingKeys.bubbleAlign, preferences.bubbleAlign.name);
   }
 }

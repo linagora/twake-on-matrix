@@ -152,3 +152,53 @@ class _Bar extends StatelessWidget {
     ),
   );
 }
+
+/// A drawn bubble, on the right when [end].
+class _MiniBubble extends StatelessWidget {
+  const _MiniBubble({required this.own, required this.end});
+
+  final bool own;
+  final bool end;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Align(
+      alignment: end ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        width: 140,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: own ? scheme.primaryContainer : scheme.surfaceContainerHighest,
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+        ),
+        child: Row(
+          spacing: 6,
+          children: [
+            Expanded(
+              child: _Bar(widthFactor: 1, color: scheme.onSurfaceVariant),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniBubbles extends StatelessWidget {
+  const _MiniBubbles({required this.ownRight});
+
+  final bool ownRight;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 280,
+    child: Column(
+      spacing: 6,
+      children: [
+        const _MiniBubble(own: false, end: false),
+        _MiniBubble(own: true, end: ownRight),
+      ],
+    ),
+  );
+}

@@ -249,29 +249,22 @@ class MessageStyle {
 
   static const double paddingAllPushpin = 0;
 
-  static MainAxisAlignment messageAlignment(
-    Event event,
-    BuildContext context,
-  ) => responsiveUtils.isMobile(context) && event.isOwnMessage
+  static MainAxisAlignment messageAlignment(Event event, bool alignOwnRight) =>
+      event.shouldAlignOwnMessageInDifferentSide(alignOwnRight)
       ? MainAxisAlignment.end
       : MainAxisAlignment.start;
 
   static CrossAxisAlignment messageCrossAxisAlignment(
     Event event,
-    BuildContext context,
-  ) {
-    return event.shouldAlignOwnMessageInDifferentSide
-        ? CrossAxisAlignment.end
-        : CrossAxisAlignment.start;
-  }
+    bool alignOwnRight,
+  ) => event.shouldAlignOwnMessageInDifferentSide(alignOwnRight)
+      ? CrossAxisAlignment.end
+      : CrossAxisAlignment.start;
 
   static AlignmentGeometry messageAlignmentGeometry(
     Event event,
-    BuildContext context,
-  ) {
-    if (responsiveUtils.enableRightAndLeftMessageAlignment(context)) {
-      return event.isOwnMessage ? Alignment.topRight : Alignment.topLeft;
-    }
-    return Alignment.topLeft;
-  }
+    bool alignOwnRight,
+  ) => event.shouldAlignOwnMessageInDifferentSide(alignOwnRight)
+      ? Alignment.topRight
+      : Alignment.topLeft;
 }

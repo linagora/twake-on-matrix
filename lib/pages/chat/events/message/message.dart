@@ -22,6 +22,8 @@ import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -49,7 +51,7 @@ typedef OnTapAvatar = void Function(Event);
 
 typedef OnScrollToEventId = void Function(String);
 
-class Message extends StatefulWidget {
+class Message extends ConsumerStatefulWidget {
   final Event event;
   final MatrixState? matrixState;
   final Event? previousEvent;
@@ -64,6 +66,7 @@ class Message extends StatefulWidget {
   final ValueNotifier<String?>? highlightedEventIdNotifier;
   final bool selected;
   final Timeline timeline;
+
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
   final bool selectMode;
@@ -174,10 +177,10 @@ class Message extends StatefulWidget {
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   @override
-  State<Message> createState() => _MessageState();
+  ConsumerState<Message> createState() => _MessageState();
 }
 
-class _MessageState extends State<Message> with MessageAvatarMixin {
+class _MessageState extends ConsumerState<Message> with MessageAvatarMixin {
   InViewState? inViewState;
 
   final inviewNotifier = ValueNotifier(false);
@@ -283,15 +286,17 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       );
     }
 
-    final rowMainAxisAlignment = widget.event.isOwnMessage
-        ? MainAxisAlignment.end
-        : MainAxisAlignment.start;
+    final alignOwnRight = ref.watch(alignOwnMessagesRightProvider);
+    final rowMainAxisAlignment = MessageStyle.messageAlignment(
+      widget.event,
+      alignOwnRight,
+    );
 
     final hasReactionEvent = context
         .albumEventsOf(widget.event)
         .any((event) => event.hasReactionEvent(timeline: widget.timeline));
     final rowChildren = <Widget>[
-      if (!widget.event.shouldAlignOwnMessageInDifferentSide)
+      if (!widget.event.shouldAlignOwnMessageInDifferentSide(alignOwnRight))
         Padding(
           // Reactions hang below the bubble (overflowing by
           // kMessageReactionsOverlayHeight). Lift the avatar by that amount so
@@ -305,7 +310,6 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
               widget.onAvatarTap,
               event: widget.event,
               sameSender: widget.event.isSameSenderWith(widget.previousEvent),
-              ownMessage: widget.event.isOwnMessage,
               context: context,
               selectMode: widget.selectMode,
             ),
@@ -368,7 +372,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
     final column = Column(
       crossAxisAlignment: MessageStyle.messageCrossAxisAlignment(
         widget.event,
-        context,
+        alignOwnRight,
       ),
       children: [
         ..._separators(displayTime),

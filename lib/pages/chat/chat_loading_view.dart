@@ -1,17 +1,17 @@
 import 'dart:math';
 
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/chat_loading_view_style.dart';
-import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:skeletons/skeletons.dart';
 
-class ChatLoadingView extends StatelessWidget {
+class ChatLoadingView extends ConsumerWidget {
   const ChatLoadingView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final responsive = getIt.get<ResponsiveUtils>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final alignOwnRight = ref.watch(alignOwnMessagesRightProvider);
     return Container(
       alignment: Alignment.bottomCenter,
       child: ListView.builder(
@@ -25,14 +25,12 @@ class ChatLoadingView extends StatelessWidget {
               child: SkeletonItem(
                 child: Row(
                   crossAxisAlignment: _crossAxisAlignment(
-                    context: context,
-                    responsive: responsive,
+                    alignOwnRight: alignOwnRight,
                     index: index,
                   ),
                   children: [
                     if (_shouldDisplayAvatar(
-                      context: context,
-                      responsive: responsive,
+                      alignOwnRight: alignOwnRight,
                       index: index,
                     ))
                       const SkeletonAvatar(
@@ -64,8 +62,7 @@ class ChatLoadingView extends StatelessWidget {
                       ),
                     ),
                     if (!_shouldDisplayAvatar(
-                      context: context,
-                      responsive: responsive,
+                      alignOwnRight: alignOwnRight,
                       index: index,
                     )) ...[
                       const SizedBox(width: 8),
@@ -88,14 +85,12 @@ class ChatLoadingView extends StatelessWidget {
               child: SkeletonItem(
                 child: Row(
                   crossAxisAlignment: _crossAxisAlignment(
-                    context: context,
-                    responsive: responsive,
+                    alignOwnRight: alignOwnRight,
                     index: index,
                   ),
                   children: [
                     if (_shouldDisplayAvatar(
-                      context: context,
-                      responsive: responsive,
+                      alignOwnRight: alignOwnRight,
                       index: index,
                     )) ...[
                       const SkeletonAvatar(
@@ -129,8 +124,7 @@ class ChatLoadingView extends StatelessWidget {
                       ),
                     ),
                     if (!_shouldDisplayAvatar(
-                      context: context,
-                      responsive: responsive,
+                      alignOwnRight: alignOwnRight,
                       index: index,
                     )) ...[
                       const SizedBox(width: 8),
@@ -154,34 +148,16 @@ class ChatLoadingView extends StatelessWidget {
   }
 
   CrossAxisAlignment _crossAxisAlignment({
-    required BuildContext context,
-    required ResponsiveUtils responsive,
+    required bool alignOwnRight,
     required int index,
-  }) {
-    if (responsive.enableRightAndLeftMessageAlignment(context) == false) {
-      return CrossAxisAlignment.end;
-    }
-    if (responsive.enableRightAndLeftMessageAlignment(context)) {
-      return index.isEven ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    }
-
-    return CrossAxisAlignment.end;
-  }
+  }) => alignOwnRight && index.isOdd
+      ? CrossAxisAlignment.start
+      : CrossAxisAlignment.end;
 
   bool _shouldDisplayAvatar({
-    required BuildContext context,
-    required ResponsiveUtils responsive,
+    required bool alignOwnRight,
     required int index,
-  }) {
-    if (responsive.enableRightAndLeftMessageAlignment(context) == false) {
-      return true;
-    }
-    if (responsive.enableRightAndLeftMessageAlignment(context)) {
-      return index.isEven;
-    }
-
-    return true;
-  }
+  }) => !alignOwnRight || index.isEven;
 
   int _random(int min, int max) {
     return min + Random().nextInt(max - min);

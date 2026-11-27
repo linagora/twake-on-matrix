@@ -55,6 +55,18 @@ class PersonalizeChoices {
           },
         ),
     ],
+    PersonalizeStep.align => [
+      for (final align in BubbleAlign.values)
+        _choice(
+          align,
+          preferences.bubbleAlign,
+          controller.setBubbleAlign,
+          switch (align) {
+            BubbleAlign.ownRight => l10n.bubbleAlignOwnRight,
+            BubbleAlign.left => l10n.bubbleAlignLeft,
+          },
+        ),
+    ],
   };
 
   PersonalizeChoice _choice<T extends Enum>(

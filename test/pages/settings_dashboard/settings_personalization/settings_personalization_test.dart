@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
+import 'package:twake_chat/domain/personalization/personalize_step.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_personalization/settings_personalization.dart';
 import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
@@ -62,6 +63,12 @@ const _wideSections = [
     ['recent', 'sections'],
     storeKey: SettingKeys.roomOrder,
     sideBySide: true,
+  ),
+  _Section(
+    'align',
+    ['ownRight', 'left'],
+    storeKey: SettingKeys.bubbleAlign,
+    sideBySide: false,
   ),
 ];
 
@@ -128,6 +135,7 @@ String _current(ProviderContainer container, String id) {
   return switch (id) {
     'density' => preferences.density.name,
     'order' => preferences.roomOrder.name,
+    'align' => preferences.bubbleAlign.name,
     _ => throw ArgumentError(id),
   };
 }
@@ -205,6 +213,7 @@ void main() {
   _choicesTests();
   _phoneLayoutTests();
   _orderPreviewTests();
+  _everyStepLayoutTests();
 }
 
 void _screenTests(String name, Size size, List<_Section> sections) {
@@ -315,11 +324,11 @@ void _choicesTests() {
     testWidgets('choosing one option leaves the others as they were', (
       tester,
     ) async {
-      const others = {'order': 'sections'};
+      const others = {'align': 'left'};
       final container = await _pump(
         tester,
         size: _wide,
-        stored: {SettingKeys.roomOrder: 'sections'},
+        stored: {SettingKeys.bubbleAlign: 'left'},
       );
 
       await _tap(tester, _card('density', 'compact'));
@@ -382,5 +391,22 @@ void _orderPreviewTests() {
       expect(tops, [...tops]..sort(), reason: 'unread, groups, directs');
       expect(tops.toSet().length, tops.length);
     });
+  });
+}
+
+// Each step picks how its cards are laid out (`sideBySide` above): a new step
+// fails here until it is listed with its layout, instead of falling into one
+// unseen (review of #3841).
+void _everyStepLayoutTests() {
+  group('Settings › Personalization, the layout of each step', () {
+    for (final step in PersonalizeStep.values) {
+      test('${step.id} has its layout chosen', () {
+        expect(
+          _wideSections.map((section) => section.id),
+          contains(step.id),
+          reason: 'list ${step.id} in _wideSections, with its sideBySide',
+        );
+      });
+    }
   });
 }
