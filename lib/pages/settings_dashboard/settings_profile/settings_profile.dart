@@ -6,17 +6,11 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
-import 'package:twake_chat/domain/app_state/settings/update_profile_failure.dart';
-import 'package:twake_chat/domain/app_state/settings/update_profile_success.dart';
-import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor.dart';
-import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
-import 'package:twake_chat/domain/usecase/settings/update_profile_interactor.dart';
-import 'package:twake_chat/event/twake_event_dispatcher.dart';
-import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/domain/profile/entities/account_profile.dart';
+import 'package:twake_chat/domain/profile/entities/avatar_upload.dart';
+import 'package:twake_chat/presentation/extensions/settings/avatar_upload_extension.dart';
+import 'package:twake_chat/domain/profile/exceptions/profile_exception.dart';
 import 'package:twake_chat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_controller.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state.dart';
@@ -62,11 +56,6 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
         PopupContextMenuActionMixin,
         PickAvatarMixin,
         SingleTickerProviderStateMixin {
-  final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
-  final uploadContentInteractor = getIt.get<UploadContentInteractor>();
-  final uploadContentWebInteractor = getIt
-      .get<UploadContentInBytesInteractor>();
-
   final MenuController menuController = MenuController();
 
   late final AnimationController animationController;
@@ -78,9 +67,6 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
   MatrixFile? matrixFile;
 
   ProviderSubscription<AsyncValue<SettingsProfileState>>? _profileSubscription;
-
-  final TwakeEventDispatcher twakeEventDispatcher = getIt
-      .get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
 
@@ -176,12 +162,21 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
     }
   }
 
-  void _handleRemoveAvatarAction() async {
+  Future<void> _handleRemoveAvatarAction() async {
     _clearImageInLocal();
     _refreshEditedState();
-    if (hasAvatar) {
-      TwakeDialog.showLoadingDialog(context);
-      _uploadProfile(isDeleteAvatar: true);
+    if (!hasAvatar) return;
+    TwakeDialog.showLoadingDialog(context);
+    try {
+      await _profileController.removeAvatar();
+      if (!mounted) return;
+      pickAvatarUIState.value = Right<Failure, Success>(
+        DeleteAvatarUIStateSuccess(),
+      );
+    } on RemoveOwnAvatarException catch (e) {
+      if (mounted) TwakeSnackBar.show(context, e.cause.toString());
+    } finally {
+      if (mounted) TwakeDialog.hideLoadingDialog(context);
     }
   }
 
@@ -231,7 +226,7 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
     );
     if (action == null) return;
     if (action == AvatarAction.remove) {
-      _handleRemoveAvatarAction();
+      unawaited(_handleRemoveAvatarAction());
       return;
     }
     _showImagesPickerAction();
@@ -261,7 +256,7 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
         pickAvatarUIState.value = Right<Failure, Success>(
           GetAvatarInitialUIState(),
         );
-        _handleRemoveAvatarAction();
+        unawaited(_handleRemoveAvatarAction());
         break;
     }
   }
@@ -272,196 +267,34 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
     avatarUrl: profile.avatarUrl,
   );
 
-  void _sendAccountDataEvent({required AccountProfile profile}) async {
-    Logs().d(
-      'SettingsProfileController::_handleSyncProfile() - Syncing profile',
-    );
-    twakeEventDispatcher.sendAccountDataEvent(
-      client: client,
-      basicEvent: BasicEvent(
-        type: TwakeInappEventTypes.uploadAvatarEvent,
-        content: _toSdkProfile(profile).toJson(),
-      ),
-    );
-    Logs().d(
-      'SettingsProfileController::_handleSyncProfile() - Syncing success',
-    );
-  }
-
-  void _setAvatarInStream() {
-    if (assetEntity != null) {
-      uploadContentInteractor
-          .execute(matrixClient: client, entity: assetEntity!)
-          .listen(
-            (event) => _handleUploadAvatarOnData(context, event),
-            onDone: _handleUploadAvatarOnDone,
-            onError: _handleUploadAvatarOnError,
-          );
-    } else {
-      _uploadProfile(displayName: _editedDisplayName);
-    }
-  }
-
-  void _setAvatarOnWeb() {
-    if (matrixFile != null) {
-      uploadContentWebInteractor
-          .execute(matrixClient: client, matrixFile: matrixFile!)
-          .listen(
-            (event) => _handleUploadAvatarOnData(context, event),
-            onDone: _handleUploadAvatarOnDone,
-            onError: _handleUploadAvatarOnError,
-          );
-    } else {
-      _uploadProfile(displayName: _editedDisplayName);
-    }
-  }
-
-  void onUploadProfileAction() {
+  Future<void> onUploadProfileAction() async {
     displayNameFocusNode.unfocus();
     TwakeDialog.showLoadingDialog(context);
-    if (PlatformInfos.isMobile) {
-      _setAvatarInStream();
-    } else {
-      _setAvatarOnWeb();
+    try {
+      await _profileController.save(
+        displayName: _editedDisplayName,
+        avatar: await _pendingAvatar(),
+      );
+    } on SaveOwnProfileException catch (e) {
+      if (mounted) TwakeSnackBar.show(context, e.cause.toString());
+    } finally {
+      if (mounted) {
+        _clearImageInLocal();
+        _refreshEditedState();
+        TwakeDialog.hideLoadingDialog(context);
+      }
     }
   }
 
-  void _clearImageInMemory() {
-    Logs().d('SettingsProfile::_clearImageInLocal() - Clear image in local');
-    if (assetEntity != null) {
-      assetEntity = null;
+  Future<AvatarUpload?> _pendingAvatar() async {
+    if (matrixFile case final file?) {
+      return AvatarUpload.fromBytes(
+        bytes: file.bytes,
+        name: file.name,
+        mimeType: file.mimeType,
+      );
     }
-    if (matrixFile != null) {
-      matrixFile = null;
-    }
-  }
-
-  void _handleUploadAvatarOnDone() {
-    Logs().d('SettingsProfile::_handleUploadAvatarOnDone() - done');
-  }
-
-  void _handleUploadAvatarOnError(dynamic error, StackTrace? stackTrace) {
-    TwakeDialog.hideLoadingDialog(context);
-    Logs().e(
-      'SettingsProfile::_handleUploadAvatarOnError() - error: $error | stackTrace: $stackTrace',
-    );
-  }
-
-  void _handleUploadAvatarOnData(
-    BuildContext context,
-    Either<Failure, Success> event,
-  ) {
-    Logs().d('SettingsProfile::_handleUploadAvatarOnData()');
-    event.fold(
-      (failure) {
-        Logs().e(
-          'SettingsProfile::_handleUploadAvatarOnData() - failure: $failure',
-        );
-        if (failure is UploadContentFailed) {
-          TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(context, failure.exception.toString());
-        } else if (failure is FileTooBigMatrix) {
-          TwakeDialog.hideLoadingDialog(context);
-          TwakeSnackBar.show(
-            context,
-            failure.fileTooBigMatrixException.toString(),
-          );
-        }
-      },
-      (success) {
-        Logs().d(
-          'SettingsProfile::_handleUploadAvatarOnData() - success: $success',
-        );
-        if (success is UploadContentSuccess) {
-          _uploadProfile(
-            avatarUr: success.uri,
-            displayName: _editedDisplayName,
-          );
-        }
-      },
-    );
-  }
-
-  void _uploadProfile({
-    Uri? avatarUr,
-    String? displayName,
-    bool isDeleteAvatar = false,
-  }) async {
-    uploadProfileInteractor
-        .execute(
-          client: client,
-          avatarUrl: avatarUr,
-          isDeleteAvatar: isDeleteAvatar,
-          displayName: displayName,
-        )
-        .listen(
-          (event) => _handleUploadProfileOnData(context, event),
-          onDone: _handleUploadProfileOnDone,
-          onError: _handleUploadProfileOnError,
-        );
-  }
-
-  void _handleUploadProfileOnDone() {
-    Logs().d('SettingsProfile::_handleUploadProfileOnDone() - done');
-  }
-
-  void _handleUploadProfileOnError(dynamic error, StackTrace? stackTrace) {
-    TwakeDialog.hideLoadingDialog(context);
-    Logs().e(
-      'SettingsProfile::_handleUploadProfileOnError() - error: $error | stackTrace: $stackTrace',
-    );
-  }
-
-  void _handleUploadProfileOnData(
-    BuildContext context,
-    Either<Failure, Success> event,
-  ) {
-    Logs().d('SettingsProfile::_handleUploadProfileOnData()');
-    event.fold(
-      (failure) {
-        Logs().e(
-          'SettingsProfile::_handleUploadProfileOnData() - failure: $failure',
-        );
-        if (failure is UpdateProfileFailure) {
-          _handleUpdateProfileFailure(failure.exception.toString());
-        }
-      },
-      (success) {
-        Logs().d(
-          'SettingsProfile::_handleUploadProfileOnData() - success: $success',
-        );
-        if (success is UpdateProfileSuccess) {
-          _applySavedProfile(
-            AccountProfile(
-              userId: client.userID!,
-              displayName: success.displayName ?? displayName,
-              avatarUrl: success.avatar ?? _profile?.avatarUrl,
-            ),
-          );
-        }
-
-        if (success is DeleteProfileSuccess) {
-          _applySavedProfile(
-            AccountProfile(
-              userId: client.userID!,
-              displayName: success.displayName ?? displayName,
-            ),
-          );
-          pickAvatarUIState.value = Right<Failure, Success>(
-            DeleteAvatarUIStateSuccess(),
-          );
-        }
-      },
-    );
-  }
-
-  void _applySavedProfile(AccountProfile profile) {
-    _sendAccountDataEvent(profile: profile);
-    _profileController.applySaved(profile);
-    _clearImageInLocal();
-    _refreshEditedState();
-    unawaited(_profileController.refresh());
-    TwakeDialog.hideLoadingDialog(context);
+    return assetEntity?.toAvatarUpload();
   }
 
   void _onProfileChanged(
@@ -485,7 +318,7 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
 
   void onDisplayNameSubmitted() {
     if (isEditedProfileNotifier.value) {
-      onUploadProfileAction();
+      unawaited(onUploadProfileAction());
     }
   }
 
@@ -566,17 +399,6 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
     _refreshEditedState();
   }
 
-  void _handleUpdateProfileFailure(String errorMessage) {
-    TwakeDialog.hideLoadingDialog(context);
-    TwakeSnackBar.show(context, errorMessage);
-    _clearImageInLocal();
-    _refreshEditedState();
-    final profile = _profile;
-    if (profile != null) {
-      _sendAccountDataEvent(profile: profile);
-    }
-  }
-
   void _clearImageInLocal() {
     Logs().d('SettingsProfile::_clearImageInLocal() - Clear image in local');
     if (assetEntity != null) {
@@ -637,7 +459,6 @@ class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
     animationController.dispose();
     isExpandedAvatar.dispose();
     _clearImageInLocal();
-    _clearImageInMemory();
     disposePickAvatarMixin();
     displayNameEditingController.dispose();
     matrixIdEditingController.dispose();

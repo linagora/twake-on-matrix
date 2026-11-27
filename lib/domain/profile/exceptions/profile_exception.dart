@@ -11,3 +11,11 @@ final class FetchOwnProfileException extends ProfileException {
 final class FetchAccountProfilesException extends ProfileException {
   const FetchAccountProfilesException(super.cause);
 }
+
+final class SaveOwnProfileException extends ProfileException {
+  const SaveOwnProfileException(super.cause);
+}
+
+final class RemoveOwnAvatarException extends ProfileException {
+  const RemoveOwnAvatarException(super.cause);
+}
