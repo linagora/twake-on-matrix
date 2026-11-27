@@ -425,14 +425,17 @@ Future<void> main() async {
             content: {'msgtype': 'm.text', 'body': 'Hi'},
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
-            senderId: '@averyveryverylongdisplaynameforabubble:example.org',
+            senderId:
+                '@averyveryverylongdisplaynamewithoutanyspacesforabubble:example.org',
             originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
             room: room,
           );
+          // Wide enough for "Hi" and its time on one line, narrower than the
+          // name, so the width is driven by the name and must be clamped.
           await runTest(
             tester,
             event: eventToTest,
-            maxWidth: 100,
+            maxWidth: 200,
             regime: BubbleRegime.displayNameDriven,
             hideDisplayName: false,
           );
