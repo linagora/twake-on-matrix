@@ -1,5 +1,6 @@
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_placeholder.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_file_preview.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_image_preview_style.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -29,6 +30,14 @@ mixin ChatListItemMixin {
     Event? event,
   ) {
     if (event == null) return const SizedBox.shrink();
+    if (event.isAFile && room.membership != Membership.invite) {
+      return ChatListFilePreview(
+        iconPath: event.chatListFileIcon,
+        text: event.chatListFileText,
+        maxLines: isGroup ? 1 : 2,
+        style: ListItemStyle.subtitleTextStyle(),
+      );
+    }
     return FutureBuilder<String>(
       future: event.calcLocalizedBodyRemoveBreakLine(L10n.of(context)!),
       builder: (context, snapshot) {
@@ -99,11 +108,10 @@ mixin ChatListItemMixin {
       L10n.of(context)!,
     );
     if (event.isAFile == true) {
-      return Text(
-        "${user.calcDisplayname()}: ${event.fileCaption ?? event.filename}",
-        softWrap: false,
+      return ChatListFilePreview(
+        iconPath: event.chatListFileIcon,
+        text: "${user.calcDisplayname()}: ${event.chatListFileText}",
         maxLines: 2,
-        overflow: TextOverflow.ellipsis,
         style: ChatListSubSubtitleTextStyleView.textStyle.textStyle(
           room,
           context,
