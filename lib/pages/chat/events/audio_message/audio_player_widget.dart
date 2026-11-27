@@ -5,9 +5,11 @@ import 'package:async/async.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_play_extension.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_style.dart';
+import 'package:twake_chat/pages/chat/events/audio_message/voice_autoplay_controller.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
+import 'package:twake_chat/utils/exception/logged_out_during_download_exception.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -20,17 +22,20 @@ import 'package:twake_chat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
-import 'package:path_provider/path_provider.dart';
 
-class AudioPlayerWidget extends StatefulWidget {
+class AudioPlayerWidget extends ConsumerStatefulWidget {
   final Color color;
   final Event event;
   final Timeline timeline;
+
+  /// The thread whose screen shows this message, null in the chat.
+  final String? threadRootId;
 
   static const int wavesCount = 80;
 
@@ -39,15 +44,97 @@ class AudioPlayerWidget extends StatefulWidget {
     this.color = Colors.black,
     super.key,
     required this.timeline,
+    this.threadRootId,
   });
 
   @override
-  AudioPlayerState createState() => AudioPlayerState();
+  ConsumerState<AudioPlayerWidget> createState() => AudioPlayerState();
 }
 
 enum AudioPlayerStatus { notDownloaded, downloading, downloaded }
 
-class AudioPlayerState extends State<AudioPlayerWidget>
+/// Downloads [event] and plays it on the shared player of [matrix], unless
+/// [canStart] says no once it is downloaded. [onEnded] runs if it plays to the
+/// end.
+Future<void> playVoiceMessage(
+  BuildContext context,
+  MatrixState matrix,
+  Event event, {
+  bool Function()? canStart,
+  VoidCallback? onEnded,
+}) async {
+  matrix.voiceMessageEvent.value = event;
+  await matrix.audioPlayer.stop();
+  await matrix.audioPlayer.dispose();
+  late File file;
+
+  matrix.currentAudioStatus.value = AudioPlayerStatus.downloading;
+  try {
+    final matrixFile = await event.downloadAndDecryptAttachment();
+
+    file = await event.writeDecryptedAttachment(
+      matrixFile,
+      convert:
+          Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg'
+          ? _convertOggForIOS
+          : null,
+    );
+
+    matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
+  } on LoggedOutDuringDownloadException {
+    matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+    return;
+  } catch (e, s) {
+    Logs().v('Could not download audio file', e, s);
+    if (matrix.voiceMessageEvent.value?.eventId == event.eventId) {
+      matrix.voiceMessageEvent.value = null;
+      matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+    }
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
+    }
+    rethrow;
+  }
+  if (matrix.voiceMessageEvent.value?.eventId != event.eventId) return;
+  if (canStart?.call() == false) {
+    matrix.voiceMessageEvent.value = null;
+    matrix.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+    return;
+  }
+  matrix.audioPlayer = AudioPlayer();
+  matrix.voiceMessageEvent.value = event;
+
+  matrix.audioPlayer.setFilePath(file.path);
+
+  // Set up auto-dispose listener managed globally in MatrixState
+  matrix.setupAudioPlayerAutoDispose(onCompleted: onEnded);
+
+  matrix.audioPlayer.play().onError((e, s) {
+    Logs().e('Could not play audio file', e, s);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          e?.toLocalizedString(context) ??
+              L10n.of(context)!.couldNotPlayAudioFile,
+        ),
+      ),
+    );
+  });
+}
+
+Future<File> _convertOggForIOS(File file) async {
+  Logs().v('Convert ogg audio file for iOS...');
+  final convertedFile = File('${file.path}.caf');
+  if (await convertedFile.exists() == false) {
+    OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+  }
+  return convertedFile;
+}
+
+class AudioPlayerState extends ConsumerState<AudioPlayerWidget>
     with AudioMixin, AutomaticKeepAliveClientMixin {
   final List<double> _calculatedWaveform = [];
 
@@ -116,65 +203,22 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       return;
     }
 
-    matrix.voiceMessageEvent.value = widget.event;
-    await matrix.audioPlayer.stop();
-    await matrix.audioPlayer.dispose();
-    late File file;
-    MatrixFile? matrixFile;
-
-    matrix.currentAudioStatus.value = AudioPlayerStatus.downloading;
+    final autoplay = ref.read(
+      voiceAutoplayControllerProvider(
+        widget.event.roomId!,
+        widget.threadRootId,
+      ).notifier,
+    );
     try {
-      matrixFile = await widget.event.downloadAndDecryptAttachment();
-
-      final tempDir = await getTemporaryDirectory();
-      final fileName = Uri.encodeComponent(
-        widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
-      );
-      file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
-
-      await file.writeAsBytes(matrixFile.bytes);
-
-      if (Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-        file = await handleOggAudioFileIniOS(file);
-      }
-
-      matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
-    } catch (e, s) {
-      Logs().v('Could not download audio file', e, s);
-      ScaffoldMessenger.of(
+      await playVoiceMessage(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
-      rethrow;
-    }
-    if (matrix.voiceMessageEvent.value?.eventId != widget.event.eventId) return;
-    matrix.audioPlayer = AudioPlayer();
-    matrix.voiceMessageEvent.value = widget.event;
-
-    matrix.audioPlayer.setFilePath(file.path);
-
-    // Set up auto-dispose listener managed globally in MatrixState
-    matrix.setupAudioPlayerAutoDispose();
-
-    matrix.audioPlayer.play().onError((e, s) {
-      Logs().e('Could not play audio file', e, s);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e?.toLocalizedString(context) ??
-                L10n.of(context)!.couldNotPlayAudioFile,
-          ),
-        ),
+        matrix,
+        widget.event,
+        onEnded: () => autoplay.voiceMessageEnded(widget.event.eventId),
       );
-    });
-  }
-
-  Future<File> handleOggAudioFileIniOS(File file) async {
-    Logs().v('Convert ogg audio file for iOS...');
-    final convertedFile = File('${file.path}.caf');
-    if (await convertedFile.exists() == false) {
-      OpusCaf().convertOpusToCaf(file.path, convertedFile.path);
+    } on Exception catch (e, s) {
+      Logs().e('AudioPlayerWidget::_onButtonTap', e, s);
     }
-    return convertedFile;
   }
 
   @override

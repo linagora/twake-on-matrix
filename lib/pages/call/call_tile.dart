@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/call/call_video.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 
 class CallTile extends StatelessWidget {
@@ -9,11 +10,13 @@ class CallTile extends StatelessWidget {
 
   static const _width = 160.0;
   static const _avatarSize = 64.0;
+  static const _videoAspectRatio = 3 / 4;
 
   final CallParticipant participant;
 
   @override
   Widget build(BuildContext context) {
+    final video = participant.video;
     final l10n = L10n.of(context)!;
     final displayName = participant.displayName ?? participant.userId;
     final name = participant.isLocal ? l10n.you : displayName;
@@ -40,11 +43,20 @@ class CallTile extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Avatar(
-              mxContent: participant.avatarUrl,
-              name: displayName,
-              size: _avatarSize,
-            ),
+            if (video != null)
+              AspectRatio(
+                aspectRatio: _videoAspectRatio,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CallVideo(video: video),
+                ),
+              )
+            else
+              Avatar(
+                mxContent: participant.avatarUrl,
+                name: displayName,
+                size: _avatarSize,
+              ),
             const SizedBox(height: 8),
             Text(
               name,

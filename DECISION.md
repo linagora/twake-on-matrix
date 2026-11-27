@@ -403,28 +403,39 @@ This replaces the generic text by default (2026-10-29) for clear rooms, and
 the decrypted preview of encrypted rooms (2026-10-24), both decided before
 this file. Android is unchanged.
 
-## D21. Who a call rings (proposed by Clément, 2026-11-23)
+## D21. Who a call rings, and how it rings in the app (proposed by Clément, 2026-11-23; who rings decided by Johann, 2026-11-23)
 
 When someone joins a call that nobody else is in, Twake Chat sends a MatrixRTC
 ring (MSC4075) in the room. Another device of the same account in the call
 counts as someone: only the first to join rings.
 
-- A direct chat rings the partner, even before they join, while at most two
-  members have joined.
-- A group, or a direct chat with three or more joined members, gets a
-  `notification` with no mention: nobody is rung.
+- The whole room rings, direct chats and groups alike, as Twake Space Chat
+  rings it: `notification_type: ring`, a lifetime of 60 s (decided by Johann,
+  2026-11-23: mobile behaves as the web).
+- Unlike matrix-js-sdk 43, the ring mentions nobody (`m.mentions: {}`, D29).
+  A ring that names other people only does not ring.
 - The ring is sent in the clear, also in an encrypted room: the push gateway
   and the other devices read it without the keys of the room. It holds no
   message content.
-- The ring sound comes from two underride push rules of the account, one for
-  the ring and one for the legacy `call.notify`, added only when absent. An
-  override would sound over the mute of a room. Trade-off: the mentioned
-  partner of a direct chat gets the mention sound, not the ring.
+- The ring sound of the push comes from two underride push rules of the
+  account, one for the ring and one for the legacy `call.notify`, added only
+  when absent, once the account has synced its push rules, at each start of
+  the app. An override would sound over the mute of a room.
+- With the app open, a ring shows over the app: « Pierre is calling you » for
+  a direct chat, « Clément · is calling you in General » for a group, with
+  « Decline » and « Answer » (the words of Twake Space Chat, its D134). It
+  rings, in a loop, two rising triplets every two seconds (the notes of Twake
+  Space Chat), until it is answered, declined, its ring lapses (60 s, at most
+  120 s for other clients) or another device of the account joins or
+  declines. During another call it shows without its sound; « Answer » leaves
+  that call.
+- « Answer » joins at once, audio only, and opens the call. « Decline » sends
+  the decline of MSC4310 in the clear; in a direct chat the caller leaves the
+  call and reads « Call declined ». A group call goes on.
+- Calls start audio only (decided by Johann, 2026-11-23).
 
-Open with the product owner: Twake Space Chat rings the whole room in direct
-chats and groups alike. A group call started from Twake Space Chat rings the
-mobile users, and one started from mobile rings no Twake Space Chat user.
-Should both clients do the same?
+Not yet: a ring with the app in the background or closed, the system call
+screen (CallKit), the missed calls and the call history.
 
 Completes D12, which left the ring push rules for later.
 
@@ -458,7 +469,135 @@ Opening the chat only marks as read the messages shown on the screen. The
 unread count drops to the messages below, and the room is read once the user
 reaches the bottom, as before.
 
-## D29. Every store build gets a release note, and a built tag never moves (decided by Clément, 2026-11-25)
+## D25. A presence dot on people, and their presence under their name (decided by Johann, 2026-11-20, following Twake Space Chat D466 and D54)
+
+A person's avatar carries a dot at its bottom right: green when online
+(Matrix presence `online`, or `currently_active`), amber when away (presence
+`unavailable`), none when offline or unknown (Matrix presence:
+https://spec.matrix.org/v1.16/client-server-api/#presence)
+(`LinagoraPresenceBadge` of the design system: 10 up to a 40 avatar, 12
+above, a 2 ring in the colour behind the avatar). The dot sits on the circle
+at 45°, so it stays on the edge of large avatars; Twake Space Chat pins it to
+the corner of the avatar box, which only differs on large avatars.
+
+This change shows the dot in the header of a direct chat, on the avatar of
+its details and on a member's profile (on the round avatar, not on the
+enlarged picture). The text under the name is `status · presence`, the
+presence alone without a status: « Online », « online 5m ago » up to « a
+while ago », or « Offline » when no activity is known. Only the online state
+says « Online »; an away person shows when they were last active.
+
+Opening a screen shows the cached presence at once, then asks the server once
+(`GET /presence/{userId}/status`); after that the `/sync` the app already
+runs keeps it current (no polling, unlike Twake Space Chat, whose sliding sync
+carries none). The chat list, members,
+contacts and the avatars of messages get the dot in the next changes.
+
+## D26. Calls start audio-only; the camera and the speaker are buttons (decided by Johann, 2026-11-23)
+
+A call on mobile starts with the camera off, as D15 decided. Twake Space
+Chat no longer does: since its D778 (2026-11-21) its calls start with the
+camera on, so the « as the calls of Twake Space Chat » of D15 is out of date,
+not its rule. The call screen has a camera button and a speaker button, next
+to the microphone.
+
+- The camera shows the own video in the own tile, and the others see it in
+  theirs. A tile without a video keeps the avatar.
+- An audio call plays on the earpiece, or on the headset (wired or Bluetooth)
+  when one is connected.
+- Until the user taps the speaker button, the speaker follows the camera: on
+  with the camera, off without it. A headset still takes the audio then.
+- The speaker button turns the speaker on even over a headset. Off, the audio
+  goes back to the headset, else to the earpiece.
+
+Not yet: a list of the audio outputs to pick a Bluetooth device by name, and
+the switch between the front and the back camera.
+
+Completes D15, which left the camera and the speaker for later.
+
+## D27. Chat list: floating bottom bar, pen capsule and pill chips ahead of the design system (decided by Johann, 2026-11-24)
+
+On a phone (and a tablet, which shares the bottom bar), the tab bar is a
+near-white capsule floating above the content: it hugs its four tabs (Contacts,
+Chats, Activity, Settings, in that order), every tab has the width of the
+widest label, and the selected tab sits in a light grey pill, its icon and label
+in the primary colour. The unread badges of Chats and Activity are unchanged.
+The capsule ignores the system text size, like the old bar; a label that does
+not fit shrinks instead of being cut. Lists behind the bar end with a spacer as
+tall as the bar, so their last row can be reached.
+
+The header keeps the centred title. The new chat pen moves into a small
+floating capsule of the same style, outside the app bar so its shadow is not
+clipped; it is hidden in selection. The title bar, search and filters share one
+white background from the status bar down, with no divider, at rest and
+scrolled.
+
+The filter chips become pills on one row: the selected one filled in the
+primary colour without a check mark, the others light grey without a border.
+They scroll sideways under an edge fade instead of the arrow buttons, and a
+long press opens the menu of a folder (the ⋮ button of the selected chip is
+gone on a phone). Wide layouts keep the design system chips and the arrows.
+
+These three components are local to the app, built from the design system
+tokens: the design runs ahead of the design system, and they are specific to
+Chat. They move to linagora-design-flutter once the designers adopt them.
+
+## D28. The folder screens follow one layout (proposed by Johann, 2026-11-18)
+
+Status: proposed, pending the designer's review.
+
+The Folders settings and the folder form share one edge: 16 dp on both sides,
+for every row, header and field. Each section opens with the design system's
+section header, in upper case, and its help text is small and tertiary.
+
+In the folder form, the kinds of chats are ticked with checkboxes, not
+switches: nothing applies before Save. A kind row is 56 dp high and a chat row
+64 dp, with the checkbox on the same right edge. Save stays pinned at the
+bottom, whatever the number of chats. The emoji is picked from the start of
+the name field. It opens a sheet with a handle, a title, 16 dp margins and a
+Clear action once an emoji is set. The colours are one row of nine swatches:
+the first one, crossed, means no colour.
+
+In the Folders list, a folder's colour shows as a tint behind its emoji, under
+a « Your folders » header. Each folder keeps its own delete button.
+
+## D29. Rings carry no mention (decided by Johann, 2026-11-26)
+
+A ring of Twake Chat (MSC4075) sends `m.mentions: {}`, where matrix-js-sdk 43,
+and so Twake Space Chat, sends `room: true`.
+
+With `room: true`, Synapse's default override `.m.rule.is_room_mention` takes
+the push of any caller allowed to mention the room (power level 50 or more)
+before the ring rule of D21, an underride: the push is highlighted but plays no
+ring sound, and a room set to « mentions only » is still notified. With no
+mention, the ring rule takes every ring: the push plays the ring sound whoever
+calls, and a room set to « mentions only » stays silent. Seen on Synapse 1.162,
+2026-11-25. Twake Space Chat rings without reading the mentions of a ring.
+
+Trade-off, accepted: a client that rings only when a ring mentions it or the
+room does not ring for these calls. Twake Chat builds before this one do so,
+through `shouldNotifyUser` of the Dart SDK; the review of #3760 reports the same
+for Element X.
+
+## D30. Voice messages play one after the other (proposed by Johann, 2026-11-24)
+
+When a voice message plays to its end, the next message of the chat plays at
+once if it is a voice message too (#2796). The run stops:
+
+- at the first message that is not a voice message: a text, an image, or an
+  audio file that was not recorded as a voice message;
+- after the last message the chat has loaded on screen; a message no longer
+  on screen goes on with the messages stored on the device, up to the last one;
+- when the user closes the player, or starts another audio;
+- when the user leaves the chat or covers it (a thread, a dialog, a bottom
+  sheet): the next one does not start. On mobile the voice message that is playing goes on to its end,
+  as before; on desktop, leaving the chat stops it, as before.
+
+Events the chat does not show (reactions, edits) do not stop the run. On the
+thread screen, the run plays the replies of that thread only, from its root
+too; in the chat, it skips the thread replies, as the chat does.
+
+## D36. Every store build gets a release note, and a built tag never moves (decided by Clément, 2026-11-25)
 
 Every build that reaches a store (TestFlight for iOS or macOS, Play Store
 internal) is announced in `#twake-chat-mobile-release-notes:linagora.com`,

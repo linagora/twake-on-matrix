@@ -698,6 +698,11 @@ class _MessageContentWithTimestampBuilderState
       ),
     );
     final card = widget.threadCard;
+    // The thread row runs edge to edge: the bubble keeps no padding of its
+    // own then, and its body brings the padding the bubble would give.
+    final bubblePadding = isMediaOnly
+        ? kBubbleMediaContentPadding
+        : kBubbleContentPadding;
     final messageContent = MessageContentBuilder(
       event: widget.event,
       timeline: widget.timeline,
@@ -706,8 +711,9 @@ class _MessageContentWithTimestampBuilderState
       scrollToEventId: widget.scrollToEventId,
       selectMode: widget.selectMode,
       onRetryTextMessage: widget.onRetryTextMessage,
+      inThread: widget.inThread,
     );
-    // With a card, the time goes under it, not over the text.
+    // With a thread row, the time goes above it, not over the text.
     final time =
         widget.event.isReplyEventWithAudio() || (card != null && !timelineText)
         ? null
@@ -737,20 +743,31 @@ class _MessageContentWithTimestampBuilderState
             child: DisplayNameWidget(event: widget.event),
           )
         : null;
-    // Fit-content: the bubble widens to the card's whole last-reply line, up
-    // to the widest bubble.
+    // Fit-content: the bubble widens to the whole thread row, up to the widest
+    // bubble. The row is edge to edge, under the time.
     final bubbleContent = card != null
         ? WidthMatchedFooter(
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [?displayName, messageContent],
+            body: Padding(
+              padding: bubblePadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [?displayName, messageContent],
+              ),
             ),
             footer: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Padding(padding: MessageStyle.paddingThreadCard, child: card),
                 if (time != null)
-                  Align(alignment: AlignmentDirectional.centerEnd, child: time),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: bubblePadding.horizontal / 2,
+                      ),
+                      child: time,
+                    ),
+                  ),
+                card,
               ],
             ),
           )
@@ -787,6 +804,7 @@ class _MessageContentWithTimestampBuilderState
       isOwnMessage: widget.event.isOwnMessage,
       tailDirection: tailDirection,
       contentType: bubbleContentType,
+      padding: card != null ? EdgeInsets.zero : null,
       constraints: bubbleConstraints,
       isAlignedToEnd: alignOwnMessageRight,
       reactions: reactions,

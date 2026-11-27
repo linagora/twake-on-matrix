@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' as emoji_mart;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
@@ -12,15 +11,16 @@ import 'package:twake_chat/domain/spaces/folders.dart';
 import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_folders/folder_actions.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_folders/widgets/folder_check_row.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_folders/widgets/folder_color_swatch.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_folders/widgets/folder_emoji_button.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_folders/settings_folders_style.dart';
 import 'package:twake_chat/presentation/extensions/folder_extension.dart';
 import 'package:twake_chat/providers/room_list/folders_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_entries_provider.dart';
-import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
-import 'package:twake_chat/providers/emoji_data_provider.dart';
 
 /// Back where the form was opened from, or the folders after a reload.
 void _leaveForm(BuildContext context) {
@@ -261,7 +261,7 @@ class _UserFolderFormState extends ConsumerState<_UserFolderForm> {
           onColorChanged: (color) => setState(() => _color = color),
         ),
         _TypePicker(include: _include, onChanged: _toggleType),
-        const _ChatPickerHeader(),
+        LinagoraSectionHeader(label: l10n.chats.toUpperCase()),
       ],
     );
   }
@@ -301,27 +301,34 @@ class _FormScaffoldState extends State<_FormScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _formAppBar(context, widget.title),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: SettingsFoldersStyle.padding.copyWith(bottom: 0),
-            sliver: SliverList.list(children: widget.children),
-          ),
-          if (widget.rowBuilder case final rowBuilder?)
-            SliverList.builder(
-              itemCount: widget.rowCount,
-              itemBuilder: rowBuilder,
-            ),
-          SliverPadding(
-            padding: SettingsFoldersStyle.padding,
-            sliver: SliverToBoxAdapter(
-              child: Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: LinagoraButton(
-                  key: const ValueKey('folder_save'),
-                  label: L10n.of(context)!.save,
-                  onPressed: _isSaving ? null : _save,
+      // Save sits in the body, so it stays above the keyboard and is
+      // reachable however many chats the list holds.
+      body: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                SliverList.list(children: widget.children),
+                if (widget.rowBuilder case final rowBuilder?)
+                  SliverList.builder(
+                    itemCount: widget.rowCount,
+                    itemBuilder: rowBuilder,
+                  ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: SettingsFoldersStyle.sectionGap),
                 ),
+              ],
+            ),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: SettingsFoldersStyle.rowPadding,
+              child: LinagoraButton(
+                key: const ValueKey('folder_save'),
+                label: L10n.of(context)!.save,
+                width: double.infinity,
+                onPressed: _isSaving ? null : _save,
               ),
             ),
           ),
@@ -373,49 +380,50 @@ class _LooksFields extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: SettingsFoldersStyle.smallGap,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          spacing: SettingsFoldersStyle.smallGap,
-          children: [
-            _EmojiButton(emoji: emoji, onChanged: onEmojiChanged),
-            Expanded(
-              child: LinagoraTextField(
-                key: const ValueKey('folder_name'),
-                controller: name,
-                autofocus: autofocus,
-                label: l10n.folderName,
-                hintText: nameHint,
-                variant: LinagoraTextFieldVariant.outline,
-                onChanged: _capName,
+        Padding(
+          padding: SettingsFoldersStyle.nameFieldPadding,
+          child: LinagoraTextField(
+            key: const ValueKey('folder_name'),
+            controller: name,
+            autofocus: autofocus,
+            label: l10n.folderName,
+            hintText: nameHint,
+            variant: LinagoraTextFieldVariant.outline,
+            onChanged: _capName,
+            decoration: InputDecoration(
+              prefixIcon: FolderEmojiButton(
+                emoji: emoji,
+                onChanged: onEmojiChanged,
               ),
             ),
-          ],
+          ),
         ),
-        Text(l10n.folderColor, style: Theme.of(context).textTheme.titleSmall),
-        Wrap(
-          spacing: SettingsFoldersStyle.chipGap,
-          children: [
-            LinagoraFilterChip(
-              label: l10n.folderNoColor,
-              selected: color == null,
-              onSelected: (_) => onColorChanged(null),
-            ),
-            for (final (index, each) in SettingsFoldersStyle.palette.indexed)
-              Tooltip(
-                message: '${l10n.folderColor} ${index + 1}',
-                child: ChoiceChip(
-                  label: const SizedBox.square(
-                    dimension: SettingsFoldersStyle.colorSwatchSize,
-                  ),
-                  backgroundColor: Color(each.argb),
-                  selected: color == each,
-                  onSelected: (_) => onColorChanged(each),
+        LinagoraSectionHeader(label: l10n.folderColor.toUpperCase()),
+        // One row; it scrolls on a phone too narrow for the nine swatches.
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: SettingsFoldersStyle.blockPadding,
+          child: Row(
+            children: [
+              FolderColorSwatch(
+                tooltip: l10n.folderNoColor,
+                color: null,
+                isSelected: color == null,
+                onTap: () => onColorChanged(null),
+              ),
+              for (final (index, each) in SettingsFoldersStyle.palette.indexed)
+                FolderColorSwatch(
+                  tooltip: '${l10n.folderColor} ${index + 1}',
+                  color: Color(each.argb),
+                  isSelected: color == each,
+                  onTap: () => onColorChanged(each),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
+        const SizedBox(height: SettingsFoldersStyle.sectionGap),
       ],
     );
   }
@@ -431,43 +439,32 @@ class _TypePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SizedBox(height: SettingsFoldersStyle.gap),
-        Text(
-          l10n.folderIncluded,
-          style: Theme.of(context).textTheme.titleSmall,
+        LinagoraSectionHeader(label: l10n.folderIncluded.toUpperCase()),
+        Padding(
+          padding: SettingsFoldersStyle.helpPadding,
+          child: Text(
+            l10n.folderIncludedHelp,
+            style: SettingsFoldersStyle.helpText,
+          ),
         ),
-        Text(l10n.folderIncludedHelp),
         for (final type in FolderChatType.values)
-          LinagoraSettingItem.selectable(
+          FolderCheckRow(
             key: ValueKey('folder_type_${type.name}'),
-            control: LinagoraSettingItemControl.checkbox,
             title: switch (type) {
               FolderChatType.direct => l10n.folderTypeDirect,
               FolderChatType.group => l10n.folderTypeGroup,
               FolderChatType.broadcast => l10n.folderTypeBroadcast,
               FolderChatType.bot => l10n.folderTypeBot,
             },
-            value: include.contains(type),
+            isChecked: include.contains(type),
             onChanged: (isOn) => onChanged(type, isOn),
           ),
+        const SizedBox(height: SettingsFoldersStyle.sectionGap),
       ],
     );
   }
-}
-
-class _ChatPickerHeader extends StatelessWidget {
-  const _ChatPickerHeader();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: SettingsFoldersStyle.gap),
-    child: Text(
-      L10n.of(context)!.chats,
-      style: Theme.of(context).textTheme.titleSmall,
-    ),
-  );
 }
 
 /// A chat to tick: its avatar, and its space so that equal names differ.
@@ -486,9 +483,8 @@ class _ChatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LinagoraSettingItem.selectable(
+    return FolderCheckRow(
       key: ValueKey('folder_chat_${chat.id}'),
-      control: LinagoraSettingItemControl.checkbox,
       leading: Avatar(
         mxContent: chat.avatar,
         name: chat.name,
@@ -496,62 +492,8 @@ class _ChatRow extends StatelessWidget {
       ),
       title: chat.name,
       subtitle: parentNames.isEmpty ? null : parentNames.join(', '),
-      value: isPicked,
+      isChecked: isPicked,
       onChanged: onChanged,
-    );
-  }
-}
-
-/// The emoji of the folder, from the picker of the chat.
-class _EmojiButton extends ConsumerWidget {
-  const _EmojiButton({required this.emoji, required this.onChanged});
-
-  final String? emoji;
-  final ValueChanged<String?> onChanged;
-
-  Future<void> _pick(BuildContext context, WidgetRef ref) async {
-    final textTheme = Theme.of(context).textTheme;
-    final picked = await showAdaptiveBottomSheet<String>(
-      context: context,
-      builder: (sheetContext) => SizedBox(
-        height: SettingsFoldersStyle.emojiPickerHeight,
-        child: emoji_mart.EmojiPicker(
-          emojiData: ref.read(emojiDataProvider).requireValue,
-          configuration: emoji_mart.EmojiPickerConfiguration(
-            emojiStyle: textTheme.headlineLarge!,
-          ),
-          onEmojiSelected: (emojiId, emoji) =>
-              Navigator.of(sheetContext).pop(emoji),
-        ),
-      ),
-    );
-    if (picked != null) onChanged(picked);
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = L10n.of(context)!;
-    final emoji = this.emoji;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Tooltip(
-          message: l10n.folderEmoji,
-          child: LinagoraButton(
-            key: const ValueKey('folder_emoji'),
-            label: emoji ?? SettingsFoldersStyle.defaultEmoji,
-            variant: LinagoraButtonVariant.outlined,
-            onPressed: () => _pick(context, ref),
-          ),
-        ),
-        if (emoji != null)
-          LinagoraIconButton(
-            key: const ValueKey('folder_emoji_clear'),
-            icon: Icons.close,
-            tooltip: l10n.clear,
-            onPressed: () => onChanged(null),
-          ),
-      ],
     );
   }
 }

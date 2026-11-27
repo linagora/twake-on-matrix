@@ -1,22 +1,10 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 
 import '../config/app_config.dart';
 
 extension RoomStatusExtension on Room {
-  CachedPresence? get directChatPresence =>
-      client.presences[directChatMatrixID];
-
-  String getLocalizedStatus(BuildContext context, {CachedPresence? presence}) {
-    if (isDirectChat) {
-      return getLocalizedStatusDirectChat(presence, context);
-    }
-
-    return _getLocalizedStatusGroupChat(context);
-  }
-
   String getLocalizedTypingText(L10n l10n) {
     var typingText = '';
     final typingUsers = this.typingUsers;
@@ -93,44 +81,10 @@ extension RoomStatusExtension on Room {
         lastEvent!.status.isSending;
   }
 
-  String _getLocalizedStatusGroupChat(BuildContext context) {
+  String getLocalizedStatus(BuildContext context) {
     final totalMembers =
         (summary.mInvitedMemberCount ?? 0) + (summary.mJoinedMemberCount ?? 0);
 
     return L10n.of(context)!.countMembers(totalMembers);
-  }
-
-  String getLocalizedStatusDirectChat(
-    CachedPresence? directChatPresence,
-    BuildContext context,
-  ) {
-    if (directChatPresence != null) {
-      if (directChatPresence.presence == PresenceType.online) {
-        return L10n.of(context)!.online;
-      }
-      final lastActiveDateTime = directChatPresence.lastActiveTimestamp;
-      final currentDateTime = DateTime.now();
-      if (lastActiveDateTime != null) {
-        if (lastActiveDateTime.isLessThanOneMinuteAgo()) {
-          return L10n.of(context)!.online;
-        } else if (lastActiveDateTime.isLessThanOneHourAgo()) {
-          return L10n.of(context)!.onlineMinAgo(
-            currentDateTime.difference(lastActiveDateTime).inMinutes,
-          );
-        } else if (lastActiveDateTime.isLessThanADayAgo()) {
-          final timeOffline = currentDateTime.difference(lastActiveDateTime);
-          return L10n.of(
-            context,
-          )!.onlineHourAgo((timeOffline.inMinutes / 60).round());
-        } else if (lastActiveDateTime.isLessThan30DaysAgo()) {
-          return L10n.of(context)!.onlineDayAgo(
-            currentDateTime.difference(lastActiveDateTime).inDays,
-          );
-        } else {
-          return L10n.of(context)!.aWhileAgo;
-        }
-      }
-    }
-    return L10n.of(context)!.offline;
   }
 }

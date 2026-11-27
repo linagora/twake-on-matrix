@@ -212,6 +212,63 @@ void main() {
     expect(state(), isA<CallConnected>());
   });
 
+  group('declined', () {
+    const direct = CallRoomInfo(
+      isEncrypted: false,
+      isDirect: true,
+      canJoin: true,
+    );
+
+    test('aDirectCallStillAlone_endsAsDeclined', () async {
+      // Arrange
+      repository.roomInfo = direct;
+      await controller().join('!dm', isVideo: false);
+      repository.participants.add([
+        participant('@me:hs.test:DEV', isLocal: true),
+      ]);
+      await pumpEventQueue();
+
+      // Act
+      repository.declines.add(null);
+      await pumpEventQueue();
+
+      // Assert
+      expect((state() as CallFailed).error, isA<CallDeclinedException>());
+      expect(repository.calls, containsAllInOrder(['disconnect', 'leave !dm']));
+    });
+
+    test('aDirectCallTheOtherJoined_staysConnected', () async {
+      // Arrange
+      repository.roomInfo = direct;
+      await controller().join('!dm', isVideo: false);
+      repository.participants.add([
+        participant('@me:hs.test:DEV', isLocal: true),
+        participant('@bob:hs.test:BOB'),
+      ]);
+      await pumpEventQueue();
+
+      // Act
+      repository.declines.add(null);
+      await pumpEventQueue();
+
+      // Assert
+      expect(state(), isA<CallConnected>());
+    });
+
+    test('aGroupCall_staysConnected', () async {
+      // Arrange
+      await controller().join('!room', isVideo: false);
+      await pumpEventQueue();
+
+      // Act
+      repository.declines.add(null);
+      await pumpEventQueue();
+
+      // Assert
+      expect(state(), isA<CallConnected>());
+    });
+  });
+
   test('leave_whenTheMembershipCannotBeEnded_goesIdle', () async {
     // Arrange
     await controller().join('!room', isVideo: false);
@@ -235,6 +292,114 @@ void main() {
 
     // Assert
     expect(isOn, isFalse);
+  });
+
+  test('join_anAudioCall_startsOnTheEarpiece', () async {
+    // Act
+    await controller().join('!room', isVideo: false);
+
+    // Assert
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+  });
+
+  test('setCamera_beforeAnOutputIsPicked_turnsTheSpeakerOn', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+
+    // Act
+    final isChanged = await controller().setCamera(isOn: true);
+
+    // Assert
+    expect(isChanged, isTrue);
+    expect((state() as CallConnected).isSpeakerOn, isTrue);
+    expect(
+      repository.calls,
+      containsAllInOrder(['camera true', 'speaker true forced=false']),
+    );
+  });
+
+  test('setCamera_afterTheEarpieceIsPicked_keepsIt', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+    await controller().setSpeaker(isOn: true);
+    await controller().setSpeaker(isOn: false);
+    repository.calls.clear();
+
+    // Act
+    await controller().setCamera(isOn: true);
+
+    // Assert
+    expect(repository.calls, ['camera true']);
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+  });
+
+  test('setCamera_whenRefused_answersFalseAndKeepsTheOutput', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+    repository.mediaError = const CallMediaFailedException();
+
+    // Act
+    final isChanged = await controller().setCamera(isOn: true);
+
+    // Assert
+    expect(isChanged, isFalse);
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+  });
+
+  test('setSpeaker_inTheCall_forcesItOverAHeadset', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+
+    // Act
+    await controller().setSpeaker(isOn: true);
+
+    // Assert
+    expect((state() as CallConnected).isSpeakerOn, isTrue);
+    expect(repository.calls.last, 'speaker true forced=true');
+  });
+
+  test('setCamera_finishingInALaterCall_leavesItsSpeaker', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+    repository.cameraGate = Completer<void>();
+    final camera = controller().setCamera(isOn: true);
+    await pumpEventQueue();
+    await controller().leave();
+    await controller().join('!other', isVideo: false);
+
+    // Act
+    repository.cameraGate!.complete();
+    await camera;
+
+    // Assert
+    expect(repository.calls, isNot(contains('speaker true forced=false')));
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+  });
+
+  test('setSpeaker_whileTheCameraSwitchesIt_keepsTheExplicitChoice', () async {
+    // Arrange
+    await controller().join('!room', isVideo: false);
+    repository.speakerGate = Completer<void>();
+    final camera = controller().setCamera(isOn: true);
+    await pumpEventQueue();
+    repository.speakerGate = null;
+    await controller().setSpeaker(isOn: false);
+
+    // Act
+    repository.speakerGateOf.first.complete();
+    await camera;
+
+    // Assert
+    expect((state() as CallConnected).isSpeakerOn, isFalse);
+    expect((state() as CallConnected).isSpeakerChosen, isTrue);
+  });
+
+  test('setSpeaker_outsideACall_changesNothing', () async {
+    // Act
+    await controller().setSpeaker(isOn: true);
+
+    // Assert
+    expect(repository.calls, isEmpty);
   });
 
   test('leave_beforeTheMediaConnects_connectsNoMedia', () async {

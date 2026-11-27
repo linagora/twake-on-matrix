@@ -19,6 +19,10 @@ abstract class CallRepository {
 
   Future<void> sendRing(CallJoin join, {required String membershipEventId});
 
+  /// Emits when someone else declines the last ring this device sent in
+  /// [room].
+  Stream<void> watchRingDeclined(CallRoom room);
+
   Future<void> declineRing(CallRing ring);
 
   /// The rings that ring now, on each change.
@@ -40,6 +44,12 @@ abstract class CallRepository {
   Future<void> disconnectMedia();
 
   Future<void> setMicrophone({required bool isOn});
+
+  Future<void> setCamera({required bool isOn});
+
+  /// Off, the audio goes to the headset when one is connected, else to the
+  /// earpiece. [isForced] keeps the speaker on over a headset.
+  Future<void> setSpeaker({required bool isOn, required bool isForced});
 
   /// Emits when encryption is turned on in [room].
   Stream<void> watchRoomEncrypted(CallRoom room);

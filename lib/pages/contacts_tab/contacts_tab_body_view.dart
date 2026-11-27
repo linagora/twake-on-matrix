@@ -46,8 +46,12 @@ class ContactsTabBodyView extends ConsumerWidget {
           if (PlatformInfos.isMobile)
             SliverPhonebookContactsWithoutMatrixId(controller: controller),
           SliverEmptyContacts(controller: controller),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: ContactsTabViewStyle.padding),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height:
+                  ContactsTabViewStyle.padding +
+                  MediaQuery.paddingOf(context).bottom,
+            ),
           ),
         ],
       ),

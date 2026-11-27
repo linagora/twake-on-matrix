@@ -153,6 +153,12 @@ class ChatListBodyView extends StatelessWidget {
                         ),
                       ),
                     ChatListViewBuilder(controller: controller, rooms: rooms),
+                    // The floating bottom bar covers the end of the list.
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: MediaQuery.paddingOf(context).bottom,
+                      ),
+                    ),
                   ],
                 );
               }

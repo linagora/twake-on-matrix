@@ -44,6 +44,7 @@ class DraftChatInputRow extends StatelessWidget {
   final void Function()? onFinishRecorderWeb;
   final void Function()? onDeleteRecorderWeb;
   final ValueNotifier<int> recordDurationWebNotifier;
+  final ValueChanged<List<MatrixFile>>? onPasteImages;
 
   const DraftChatInputRow({
     super.key,
@@ -68,6 +69,7 @@ class DraftChatInputRow extends StatelessWidget {
     required this.recordDurationWebNotifier,
     this.pauseRecording,
     this.deleteRecording,
+    this.onPasteImages,
   });
 
   @override
@@ -364,6 +366,7 @@ class DraftChatInputRow extends StatelessWidget {
           onChanged: onInputBarChanged,
           focusSuggestionController: focusSuggestionController,
           isDraftChat: true,
+          onPasteImages: onPasteImages,
         ),
       ],
     );

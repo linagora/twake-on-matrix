@@ -26,8 +26,6 @@ import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
-import 'package:twake_chat/utils/room_status_extension.dart';
-import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -270,12 +268,6 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
         presentationContact = updatedContact;
       });
     }
-  }
-
-  String? get getLocalizedStatusMessage {
-    return room
-        ?.getLocalizedStatus(context, presence: room?.directChatPresence)
-        .capitalize(context);
   }
 
   void handleOnMessage() {

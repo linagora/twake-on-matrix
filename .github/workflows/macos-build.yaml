@@ -21,12 +21,12 @@ concurrency:
 
 env:
   FLUTTER_VERSION: 3.47.8
-  XCODE_VERSION: 26.2
+  XCODE_VERSION: 27.2
 
 jobs:
   build_debug_macos:
     name: Build debug version for macOS
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 45
     # secrets (SSH_KEY) are empty on fork PRs
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository

@@ -57,6 +57,7 @@ import 'package:twake_chat/pages/chat/jump_cache_extent.dart';
 import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
 import 'package:twake_chat/domain/thread/usecases/get_thread_replies_use_case.provider.dart';
 import 'package:twake_chat/pages/chat/providers/message_link_providers.dart';
+import 'package:twake_chat/pages/scribe/scribe_controller.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
@@ -109,7 +110,6 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/utils/room_draft_storage.dart';
-import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:twake_chat/utils/toggle_reaction.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
@@ -143,8 +143,11 @@ import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
+import 'package:twake_chat/domain/voice_message/entities/shown_message.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/voice_message_extension.dart';
 
 import 'events/audio_message/audio_player_widget.dart';
+import 'events/audio_message/voice_autoplay_controller.dart';
 import 'sticker_picker_dialog.dart';
 
 part 'chat_scroll_to_event_mixin.dart';
@@ -475,44 +478,6 @@ class ChatController extends ConsumerState<Chat>
   SuggestionsController<Map<String, String?>> suggestionsController =
       SuggestionsController();
 
-  ValueNotifier<CachedPresence?> cachedPresenceNotifier = ValueNotifier(null);
-
-  StreamController<CachedPresence> cachedPresenceStreamController =
-      StreamController.broadcast();
-  StreamSubscription<CachedPresence>? cachedPresenceStreamSubscription;
-
-  Future<void> initCachedPresence() async {
-    cachedPresenceNotifier.value = room?.directChatPresence;
-    if (room?.directChatMatrixID != null) {
-      cachedPresenceStreamSubscription = Matrix.of(context)
-          .onLatestPresenceChanged
-          .stream
-          .listen((event) {
-            if (event.userid == room!.directChatMatrixID) {
-              Logs().v(
-                'onlatestPresenceChanged: ${event.presence}, ${event.lastActiveTimestamp}',
-              );
-              cachedPresenceStreamController.add(event);
-            }
-          });
-      try {
-        final getPresenceResponse = await client.getPresence(
-          room!.directChatMatrixID!,
-        );
-
-        cachedPresenceNotifier.value = CachedPresence.fromPresenceResponse(
-          getPresenceResponse,
-          room!.directChatMatrixID!,
-        );
-      } catch (e) {
-        Logs().e('Failed to get presence', e);
-        cachedPresenceNotifier.value = CachedPresence.neverSeen(
-          room!.directChatMatrixID!,
-        );
-      }
-    }
-  }
-
   Future<void> _requestParticipants() async {
     if (room == null) return;
     try {
@@ -837,6 +802,8 @@ class ChatController extends ConsumerState<Chat>
   /// Marks on return what arrived while the window was closed or in the
   /// background.
   AppLifecycleListener? _lifecycleListener;
+
+  ProviderSubscription<VoiceAutoplayState>? _voiceAutoplaySubscription;
 
   void _markLatestReadIfAtBottom() {
     // A closed (macOS) or background window shows nothing: no read receipt.
@@ -2021,6 +1988,8 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void onInputBarSubmitted() async {
+    final roomId = room?.id;
+    if (roomId != null && ref.read(scribeControllerProvider(roomId))) return;
     await Future.delayed(const Duration(milliseconds: 100));
     await send();
     FocusScope.of(context).requestFocus(inputFocus);
@@ -2068,14 +2037,26 @@ class ChatController extends ConsumerState<Chat>
   Timer? _storeInputTimeoutTimer;
   static const Duration _storeInputTimeout = Duration(milliseconds: 500);
 
-  void onInputBarChanged(String text) {
-    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
-      return;
-    }
+  void _storeDraft(String text) {
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
       await _draftStorage.save(roomId!, text, threadRootId: threadRootId);
     });
+  }
+
+  void replaceDraft(String text) {
+    sendController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    _storeDraft(text);
+  }
+
+  void onInputBarChanged(String text) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
+      return;
+    }
+    _storeDraft(text);
     typingCoolDown?.cancel();
     typingCoolDown = Timer(const Duration(seconds: 2), () {
       typingCoolDown = null;
@@ -3540,6 +3521,55 @@ class ChatController extends ConsumerState<Chat>
     matrix?.voiceMessageEvent.value = null;
   }
 
+  /// A screen covered by another one (a thread over its room) or closed does
+  /// not go on with its run.
+  bool get _isFrontScreen =>
+      mounted && (ModalRoute.of(context)?.isCurrent ?? true);
+
+  VoiceAutoplayController get _voiceAutoplay => ref.read(
+    voiceAutoplayControllerProvider(widget.roomId, threadRootId).notifier,
+  );
+
+  void _findNextVoiceMessage(String eventId) {
+    if (!_isFrontScreen) return;
+    final shown = eventsToDisplay.reversed
+        .where(isEventVisible)
+        .map(
+          (event) => ShownMessage(
+            eventId: event.eventId,
+            isVoiceMessage: event.isVoiceMessage,
+          ),
+        )
+        .toList();
+    unawaited(_voiceAutoplay.findNext(eventId, shown: shown));
+  }
+
+  bool _isQueued(String eventId) =>
+      ref.read(voiceAutoplayControllerProvider(widget.roomId, threadRootId)) ==
+      VoiceAutoplayState.next(eventId);
+
+  Future<void> _playNextVoiceMessage(String eventId) async {
+    final autoplay = _voiceAutoplay;
+    try {
+      final event = await room?.getEventById(eventId);
+      final matrix = this.matrix;
+      if (!_isFrontScreen || event == null || matrix == null) return;
+      // A newer run started, or the user started another audio, meanwhile.
+      if (!_isQueued(eventId) || matrix.voiceMessageEvent.value != null) {
+        return;
+      }
+      await playVoiceMessage(
+        context,
+        matrix,
+        event,
+        canStart: () => _isFrontScreen,
+        onEnded: () => autoplay.voiceMessageEnded(event.eventId),
+      );
+    } on Exception catch (e, s) {
+      Logs().e('Chat::_playNextVoiceMessage', e, s);
+    }
+  }
+
   /// Sync playback UI with [MatrixState.audioPlayer] after [matrix] is ready.
   ///
   /// On mobile, if a voice message is already playing (user left another chat
@@ -3616,12 +3646,24 @@ class ChatController extends ConsumerState<Chat>
       // The thread screen shows no presence (its app bar is the thread one),
       // but its composer needs the participants (mentions, possibly opened by
       // deep link with no room Chat) and the blocked state of a DM.
-      if (!isThread) initCachedPresence();
       await _requestParticipants();
       listenIgnoredUser();
       // A thread opened over the room must not stop its voice message.
       if (!isThread) initAudioPlayer();
     });
+    _voiceAutoplaySubscription = ref.listenManual(
+      voiceAutoplayControllerProvider(widget.roomId, threadRootId),
+      (_, next) {
+        switch (next) {
+          case VoiceAutoplayEnded(:final eventId):
+            _findNextVoiceMessage(eventId);
+          case VoiceAutoplayNext(:final eventId):
+            unawaited(_playNextVoiceMessage(eventId));
+          case VoiceAutoplayIdle():
+            break;
+        }
+      },
+    );
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
   }
 
@@ -3808,6 +3850,7 @@ class ChatController extends ConsumerState<Chat>
     _threadEvents = null;
     if (!_threadReady.isCompleted) _threadReady.complete();
     _lifecycleListener?.dispose();
+    _voiceAutoplaySubscription?.close();
     timeline?.cancelSubscriptions();
     timeline = null;
 
@@ -3860,15 +3903,12 @@ class ChatController extends ConsumerState<Chat>
     onUpdateEventStreamSubcription?.cancel();
     keyboardVisibilitySubscription?.cancel();
     replyEventNotifier.dispose();
-    cachedPresenceStreamController.close();
-    cachedPresenceNotifier.dispose();
     showFullEmojiPickerOnWebNotifier.dispose();
     showEmojiPickerComposerNotifier.removeListener(_emojiPickerListener);
     showEmojiPickerComposerNotifier.dispose();
     disposeUnblockUserSubscription();
     isBlockedUserNotifier.dispose();
     ignoredUsersStreamSub?.cancel();
-    cachedPresenceStreamSubscription?.cancel();
     sendingClient = null;
     showScrollDownButtonNotifier.dispose();
     editEventNotifier.dispose();

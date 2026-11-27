@@ -40,6 +40,8 @@ class UploadManager {
 
   final Set<String> _retriesInProgress = {};
 
+  final Map<String, _MobileSendJob> _mobileJobs = {};
+
   static const int _shrinkImageMaxDimension = 1600;
 
   Future<UploadFileInfo?> getUploadFileInfo(
@@ -124,14 +126,107 @@ class UploadManager {
       _eventIdMapUploadFileInfo[event.eventId]?.isFailed != false;
 
   Future<void> cancelUpload(Event event) async {
-    final cancelToken = _eventIdMapUploadFileInfo[event.eventId]?.cancelToken;
-    if (cancelToken != null) {
+    final info = _eventIdMapUploadFileInfo[event.eventId];
+    final cancelToken = info?.cancelToken;
+    if (info != null && cancelToken != null) {
       Logs().d('Remove eventid: ${event.eventId}');
+      final job = _mobileJobs.remove(event.eventId);
       event.room.sendingFilePlaceholders.remove(event.eventId);
       _clearFileTask(event.eventId);
       event.remove();
       cancelToken.cancel();
+      await _handOverCaptionAndReply(event.room, info, job);
     }
+  }
+
+  // A batch's caption rides on its last file and its reply on its first.
+  Future<void> _handOverCaptionAndReply(
+    Room room,
+    UploadFileInfo cancelled,
+    _MobileSendJob? cancelledJob,
+  ) async {
+    final caption = cancelled.captionInfo;
+    final replyId = cancelled.inReplyToEventId;
+    if (caption == null && replyId == null) return;
+    // A cancelled send that comes back as failed must not send them again.
+    cancelled
+      ..captionInfo = null
+      ..inReplyToEventId = null;
+
+    final inReplyTo = replyId == null
+        ? null
+        : cancelledJob?.inReplyTo ?? await _replyTarget(room, replyId);
+    final waiting = cancelled.batchId == null
+        ? const <_MobileSendJob>[]
+        : _mobileJobs.values
+              .where(
+                (job) =>
+                    !job.started &&
+                    job.info?.isFailed != true &&
+                    job.info?.batchId == cancelled.batchId,
+              )
+              .toList();
+
+    if (inReplyTo != null && waiting.isNotEmpty) {
+      final heir = waiting.first..inReplyTo = inReplyTo;
+      _handOver(
+        room,
+        heir,
+        (info) => info.inReplyToEventId = inReplyTo.eventId,
+      );
+    }
+    if (caption == null) return;
+    if (waiting.isNotEmpty) {
+      final heir = waiting.last..captionInfo = caption.caption;
+      _handOver(room, heir, (info) => info.captionInfo = caption);
+      return;
+    }
+    final thread = _threadOf(cancelled);
+    uploadWorkerQueue.addTask(
+      Task(
+        id: caption.txid,
+        runnable: () => room.sendTextEvent(
+          caption.caption,
+          txid: caption.txid,
+          inReplyTo: inReplyTo,
+          parseCommands: false,
+          threadRootEventId: thread?.rootEventId,
+          threadLastEventId: thread?.lastEventId,
+        ),
+      ),
+    );
+  }
+
+  Future<Event?> _replyTarget(Room room, String eventId) async {
+    try {
+      return await room.getEventById(eventId);
+    } on Exception catch (e) {
+      Logs().w(
+        'UploadManager::_replyTarget(): $eventId could not be loaded, the '
+        'reply is dropped: $e',
+      );
+      return null;
+    }
+  }
+
+  // Saved in the placeholder so a retry after a restart keeps it.
+  void _handOver(
+    Room room,
+    _MobileSendJob heir,
+    void Function(UploadFileInfo info) update,
+  ) {
+    final info = heir.info;
+    if (info == null) return;
+    update(info);
+    unawaited(_updateEventUploadInfo(room, heir.txid, info));
+  }
+
+  ThreadSendTarget? _threadOf(UploadFileInfo info) {
+    final rootId = info.threadRootEventId;
+    final lastId = info.threadLastEventId;
+    return rootId == null || lastId == null
+        ? null
+        : ThreadSendTarget(rootEventId: rootId, lastEventId: lastId);
   }
 
   Future<MatrixFile?> getMatrixFile(
@@ -196,14 +291,7 @@ class UploadManager {
       }
 
       final caption = uploadInfo.captionInfo?.caption;
-      final threadRootId = uploadInfo.threadRootEventId;
-      final threadLastId = uploadInfo.threadLastEventId;
-      final thread = threadRootId == null || threadLastId == null
-          ? null
-          : ThreadSendTarget(
-              rootEventId: threadRootId,
-              lastEventId: threadLastId,
-            );
+      final thread = _threadOf(uploadInfo);
       final inReplyTo = thread != null || uploadInfo.inReplyToEventId == null
           ? null
           : await room.getEventById(uploadInfo.inReplyToEventId!);
@@ -302,6 +390,7 @@ class UploadManager {
       Logs().e('UploadManager::_clear(): Error $e');
     } finally {
       _eventIdMapUploadFileInfo.remove(eventId);
+      _mobileJobs.remove(eventId);
       Logs().i('UploadManager:: Clear with $eventId successfully');
     }
   }
@@ -695,6 +784,7 @@ class UploadManager {
       thread: thread,
       uploadInfo: uploadInfo,
     );
+    _mobileJobs[txid] = job;
     if (fileInfo is PendingFileInfo) {
       unawaited(_queueWhenReady(job, fileInfo));
     } else {
@@ -738,6 +828,7 @@ class UploadManager {
       Task(
         id: job.txid,
         runnable: () async {
+          job.started = true;
           try {
             final eventId = await job.room.sendFileEventMobile(
               ready,
@@ -751,7 +842,7 @@ class UploadManager {
               captionInfo: job.captionInfo,
               inReplyTo: job.inReplyTo,
               thread: job.thread,
-              uploadInfo: job.uploadInfo,
+              uploadInfo: job.info?.toJson() ?? job.uploadInfo,
               extraContent: _batchStamp.contentFor(job.info?.batchId),
             );
             if (eventId == null) {
@@ -887,7 +978,7 @@ class UploadManager {
 
 /// What one mobile send carries from the queueing of a file to its send.
 class _MobileSendJob {
-  const _MobileSendJob({
+  _MobileSendJob({
     required this.txid,
     required this.fakeImageEvent,
     required this.room,
@@ -910,8 +1001,9 @@ class _MobileSendJob {
   final UploadFileInfo? info;
   final DateTime? sentDate;
   final int? shrinkImageMaxDimension;
-  final String? captionInfo;
-  final Event? inReplyTo;
+  String? captionInfo;
+  Event? inReplyTo;
   final ThreadSendTarget? thread;
   final Map<String, dynamic>? uploadInfo;
+  bool started = false;
 }

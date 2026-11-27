@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
 import 'dart:io';
@@ -522,7 +523,9 @@ extension SendFileExtension on Room {
       content,
       txid: txid,
       inReplyTo: inReplyTo,
-      threadRootEventId: thread?.rootEventId,
+      threadRootEventId:
+          thread?.rootEventId ??
+          (inReplyTo == null ? null : ThreadRules.threadRootOf(inReplyTo)),
       threadLastEventId: thread?.lastEventId,
       editEventId: editEventId,
     );

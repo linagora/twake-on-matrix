@@ -21,7 +21,7 @@ class UploadFileInfo extends UploadInfo {
   final StreamController<Either<Failure, Success>> uploadStateStreamController;
   final CancelToken cancelToken;
   final DateTime createdAt;
-  final UploadCaptionInfo? captionInfo;
+  UploadCaptionInfo? captionInfo;
   String? inReplyToEventId;
   final String? batchId;
   final String? threadRootEventId;

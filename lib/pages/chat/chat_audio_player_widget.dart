@@ -5,7 +5,9 @@ import 'package:twake_chat/pages/chat/events/audio_message/audio_play_extension.
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/utils/exception/logged_out_during_download_exception.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
@@ -16,7 +18,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
-import 'package:path_provider/path_provider.dart';
 
 class ChatAudioPlayerWidget extends StatelessWidget {
   final MatrixState? matrix;
@@ -179,23 +180,23 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     try {
       matrixFile = await currentEvent?.downloadAndDecryptAttachment();
 
-      final tempDir = await getTemporaryDirectory();
-      final mxcUrl = currentEvent?.attachmentOrThumbnailMxcUrl();
-      final fileName = Uri.encodeComponent(mxcUrl?.pathSegments.last ?? '');
-      file = File('${tempDir.path}/${fileName}_${matrixFile?.name}');
-
-      final bytes = matrixFile?.bytes;
-
-      if (bytes == null || bytes.isEmpty) {
+      if (currentEvent == null ||
+          matrixFile == null ||
+          matrixFile.bytes.isEmpty) {
         throw Exception('Downloaded file has no content');
       }
-      await file.writeAsBytes(bytes);
-
-      if (Platform.isIOS && matrixFile?.mimeType.toLowerCase() == 'audio/ogg') {
-        file = await _handleOggAudioFileIniOS(file);
-      }
+      file = await currentEvent.writeDecryptedAttachment(
+        matrixFile,
+        convert:
+            Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg'
+            ? _handleOggAudioFileIniOS
+            : null,
+      );
 
       matrix?.currentAudioStatus.value = AudioPlayerStatus.downloaded;
+    } on LoggedOutDuringDownloadException {
+      matrix?.currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+      return;
     } catch (e, s) {
       Logs().v('Could not download audio file', e, s);
       ScaffoldMessenger.of(

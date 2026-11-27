@@ -67,14 +67,15 @@ import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 import 'package:twake_chat/data/account/rollback_removals.dart';
 import 'package:twake_chat/providers/rollback_removals_provider.dart';
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/data/account/quiet_logouts.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
-import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/offline_failure.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -98,9 +99,6 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
-
-// ignore: implementation_imports
-import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -168,10 +166,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   ValueNotifier<bool> showToMBootstrap = ValueNotifier(false);
 
-  bool get twakeSupported {
-    final tomServerUrlInterceptor = ref.read(tomServerUrlInterceptorProvider);
-    return tomServerUrlInterceptor.baseUrl != null;
-  }
+  bool get twakeSupported => ref.read(twakeSupportedProvider);
 
   BackgroundPush? backgroundPush;
 
@@ -344,42 +339,6 @@ class MatrixState extends ConsumerState<Matrix>
               },
             );
           }, onDone: _cancelSupportChat);
-    });
-  }
-
-  /// Callback will be called on presence update and return latest value.
-  final CachedStreamController<CachedPresence> onLatestPresenceChanged =
-      CachedStreamController();
-  StreamSubscription? _presenceSubscription;
-
-  @override
-  void listenPresence(Client client) {
-    _presenceSubscription?.cancel();
-    _presenceSubscription = client.onSync.stream.listen((sync) {
-      // Deduplicate per user: keep only the most recent presence per userid
-      // to avoid UI flickering when a sync contains multiple events for the
-      // same user, while still emitting updates for every user in the sync.
-      final latestPerUser = <String, CachedPresence>{};
-
-      for (final newPresence in sync.presence ?? []) {
-        final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
-        final userId = cachedPresence.userid;
-        final existing = latestPerUser[userId];
-        final newTs = cachedPresence.lastActiveTimestamp;
-        final oldTs = existing?.lastActiveTimestamp;
-        if (existing == null ||
-            (newTs != null &&
-                (oldTs == null ||
-                    newTs.isAfter(oldTs) ||
-                    newTs.isAtSameMomentAs(oldTs))) ||
-            (newTs == null && oldTs == null)) {
-          latestPerUser[userId] = cachedPresence;
-        }
-      }
-
-      for (final presence in latestPerUser.values) {
-        onLatestPresenceChanged.add(presence);
-      }
     });
   }
 
@@ -1748,7 +1707,11 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _deleteDownloadedFiles() async {
     try {
-      await StorageDirectoryManager.instance.deleteDownloadedFiles();
+      await DownloadFileExtension.deleteDownloadedFilesAtLastLogout(
+        isStillLoggedOut: () =>
+            ref.read(accountsProvider) is LastLoggedOut ||
+            ref.read(accountsProvider) is NoAccount,
+      );
     } catch (e, s) {
       _report(e, s, 'deletion of the downloaded files at the last logout');
     }
@@ -1897,7 +1860,7 @@ class MatrixState extends ConsumerState<Matrix>
   ///
   /// This method should be called after setting up a new audio source.
   /// It automatically cleans up the audio player and resets state when playback finishes.
-  void setupAudioPlayerAutoDispose() {
+  void setupAudioPlayerAutoDispose({VoidCallback? onCompleted}) {
     final currentEvent = voiceMessageEvent.value;
     _audioPlayerStateSubscription?.cancel();
     _audioPlayerStateSubscription = audioPlayer.playerStateStream.listen((
@@ -1912,6 +1875,7 @@ class MatrixState extends ConsumerState<Matrix>
         audioPlayer.stop();
         audioPlayer.dispose();
         currentAudioStatus.value = AudioPlayerStatus.notDownloaded;
+        onCompleted?.call();
       }
     });
   }
@@ -2054,9 +2018,7 @@ class MatrixState extends ConsumerState<Matrix>
     _audioPlayerStateSubscription?.cancel();
     audioPlayer.dispose();
     voiceMessageEvent.dispose();
-    _presenceSubscription?.cancel();
     _cancelSupportChat();
-    onLatestPresenceChanged.close();
     super.dispose();
   }
 

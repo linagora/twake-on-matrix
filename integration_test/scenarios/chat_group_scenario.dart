@@ -134,12 +134,20 @@ class ChatGroupReplyScenario extends BaseTestScenario {
     await robots.messageMenuRobot().openReply(senderMsg);
     await robots.chatGroupDetailRobot().sendMessage(replySender);
     await _waitExists(this, replySender);
+    await robots.chatGroupDetailRobot().expectReplyTo(
+      reply: replySender,
+      original: senderMsg,
+    );
 
     final replyReceiver = 'reply receiver at ${_uid()}';
     await _waitShown(this, receiverMsg, searchTimeline: true);
     await robots.messageMenuRobot().openReply(receiverMsg);
     await robots.chatGroupDetailRobot().sendMessage(replyReceiver);
     await _waitExists(this, replyReceiver);
+    await robots.chatGroupDetailRobot().expectReplyTo(
+      reply: replyReceiver,
+      original: receiverMsg,
+    );
   }
 }
 

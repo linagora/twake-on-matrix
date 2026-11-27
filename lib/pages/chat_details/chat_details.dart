@@ -9,11 +9,11 @@ import 'package:twake_chat/presentation/mixins/chat_details_tab_mixin.dart';
 import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +56,7 @@ class ChatDetailsController extends ConsumerState<ChatDetails>
   final muteNotifier = ValueNotifier<PushRuleState>(PushRuleState.notify);
 
   @override
-  Room? get room => Matrix.of(context).client.getRoomById(widget.roomId);
+  Room? get room => ref.read(matrixClientProvider).getRoomById(widget.roomId);
 
   @override
   ChatDetailsScreenEnum get chatType => ChatDetailsScreenEnum.group;
@@ -143,7 +143,7 @@ class ChatDetailsController extends ConsumerState<ChatDetails>
     try {
       final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () async {
-          await Matrix.of(context).client.reportRoom(roomId, 'No reason');
+          await ref.read(matrixClientProvider).reportRoom(roomId, 'No reason');
         },
       );
       if (result.error != null) throw result.error;

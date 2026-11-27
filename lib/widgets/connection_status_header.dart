@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
-import 'matrix.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
-class ConnectionStatusHeader extends StatefulWidget {
+class ConnectionStatusHeader extends ConsumerStatefulWidget {
   const ConnectionStatusHeader({super.key, this.connectedWidget});
 
   final Widget? connectedWidget;
@@ -15,8 +16,9 @@ class ConnectionStatusHeader extends StatefulWidget {
   ConnectionStatusHeaderState createState() => ConnectionStatusHeaderState();
 }
 
-class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
-  late final StreamSubscription _onSyncSub;
+class ConnectionStatusHeaderState
+    extends ConsumerState<ConnectionStatusHeader> {
+  StreamSubscription? _onSyncSub;
   SyncStatusUpdate? _lastStatus;
   bool _lastHideState = true;
   Timer? _debounceTimer;
@@ -24,9 +26,19 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
   @override
   void initState() {
     super.initState();
-    _onSyncSub = Matrix.of(
-      context,
-    ).client.onSyncStatus.stream.listen(_onStatusUpdate);
+    _subscribe(ref.read(activeMatrixClientProvider));
+    ref.listenManual(activeMatrixClientProvider, (previous, next) {
+      if (previous == next) return;
+      _debounceTimer?.cancel();
+      _lastStatus = null;
+      _lastHideState = true;
+      _subscribe(next);
+    });
+  }
+
+  void _subscribe(Client? client) {
+    _onSyncSub?.cancel();
+    _onSyncSub = client?.onSyncStatus.stream.listen(_onStatusUpdate);
   }
 
   void _onStatusUpdate(SyncStatusUpdate update) {
@@ -34,7 +46,8 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
     _debounceTimer = Timer(const Duration(milliseconds: 100), () {
       if (!mounted) return;
 
-      final client = Matrix.of(context).client;
+      final client = ref.read(activeMatrixClientProvider);
+      if (client == null) return;
       final hide = client.onSync.value != null && client.prevBatch != null;
 
       if (_lastStatus?.status != update.status || _lastHideState != hide) {
@@ -49,13 +62,14 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
   @override
   void dispose() {
     _debounceTimer?.cancel();
-    _onSyncSub.cancel();
+    _onSyncSub?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
     final status =
         _lastStatus ??
         client.onSyncStatus.value ??

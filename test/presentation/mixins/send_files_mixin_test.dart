@@ -395,6 +395,40 @@ void main() {
       },
     );
 
+    testWidgets('gives each image of one paste its own file', (tester) async {
+      await withContext(tester, (context) async {
+        await tester.runAsync(
+          () => mixin.sendPastedImagesNative(
+            context,
+            room: room,
+            images: [
+              for (final byte in [1, 2])
+                MatrixImageFile(
+                  bytes: Uint8List.fromList([byte]),
+                  name: 'pasted',
+                  mimeType: 'image/png',
+                ),
+            ],
+          ),
+        );
+      });
+
+      final captured =
+          verify(
+                uploadManager.uploadFileMobile(
+                  room: room,
+                  fileInfos: captureAnyNamed('fileInfos'),
+                ),
+              ).captured.single
+              as List<FileInfo>;
+
+      expect(captured.map((file) => file.filePath).toSet(), hasLength(2));
+      expect(
+        captured.map((file) => File(file.filePath!).readAsBytesSync().single),
+        [1, 2],
+      );
+    });
+
     for (final mimeType in ['image/jpeg', 'image/jpg']) {
       testWidgets('names a $mimeType image .jpg', (tester) async {
         await withContext(tester, (context) async {

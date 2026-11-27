@@ -48,6 +48,9 @@ class CallRepositoryImpl implements CallRepository {
       _rtc.sendRing(join, membershipEventId: membershipEventId);
 
   @override
+  Stream<void> watchRingDeclined(CallRoom room) => _rtc.watchRingDeclined(room);
+
+  @override
   Future<void> declineRing(CallRing ring) => _rtc.declineRing(ring);
 
   @override
@@ -99,6 +102,13 @@ class CallRepositoryImpl implements CallRepository {
   @override
   Future<void> setMicrophone({required bool isOn}) =>
       _media.setMicrophone(isOn: isOn);
+
+  @override
+  Future<void> setCamera({required bool isOn}) => _media.setCamera(isOn: isOn);
+
+  @override
+  Future<void> setSpeaker({required bool isOn, required bool isForced}) =>
+      _media.setSpeaker(isOn: isOn, isForced: isForced);
 
   @override
   Stream<List<CallParticipant>> watchParticipants(CallRoom room) =>

@@ -9,7 +9,7 @@ abstract class AbstractHomeRobot {
   Future<void> gotoChatListScreen();
   Future<void> gotoSettingScreen();
 
-  /// Whether the main navigation is visible — `BottomNavigationBar` on
+  /// Whether the main navigation is visible — `FloatingNavigationBar` on
   /// narrow (mobile) layouts, `NavigationRail` on wide (web/desktop) layouts.
   bool isMainNavigationVisible();
 

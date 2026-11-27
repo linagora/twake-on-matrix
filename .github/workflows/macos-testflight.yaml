@@ -14,12 +14,12 @@ on:
 
 env:
   FLUTTER_VERSION: 3.47.8
-  XCODE_VERSION: 26.2
+  XCODE_VERSION: 27.2
 
 jobs:
   release_macos:
     name: Release on macOS
-    runs-on: macos-26
+    runs-on: xcode-27
     environment: prod
 
     env:

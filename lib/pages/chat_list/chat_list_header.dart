@@ -5,14 +5,15 @@ import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_new_chat_button.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_bar.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/connection_status_header.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
+import 'package:twake_chat/widgets/twake_components/floating_capsule.dart';
 import 'package:twake_chat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ChatListHeader extends StatelessWidget {
@@ -27,27 +28,26 @@ class ChatListHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    final isMobile = ChatListHeaderStyle.responsive.isMobile(context);
+    final appBar = TwakeHeader(
+      onClearSelection: controller.onClickClearSelection,
+      client: controller.activeClient,
+      selectModeNotifier: controller.selectModeNotifier,
+      conversationSelectionNotifier: controller.conversationSelectionNotifier,
+      onClickAvatar: controller.onClickAvatar,
+      connectionStatusHeaderWidget: const ConnectionStatusHeader(),
+      actions: [
+        if (!isMobile)
+          ChatListNewChatButton(controller: controller, isSingleColumn: false),
+      ],
+    );
+    final header = Column(
       children: [
-        TwakeHeader(
-          onClearSelection: controller.onClickClearSelection,
-          client: controller.activeClient,
-          selectModeNotifier: controller.selectModeNotifier,
-          conversationSelectionNotifier:
-              controller.conversationSelectionNotifier,
-          onClickAvatar: controller.onClickAvatar,
-          connectionStatusHeaderWidget: const ConnectionStatusHeader(),
-          actions: [
-            ChatListNewChatButton(
-              controller: controller,
-              isSingleColumn: ChatListHeaderStyle.responsive.isMobile(context),
-            ),
-          ],
-        ),
+        if (isMobile)
+          _PhoneAppBar(controller: controller, appBar: appBar)
+        else
+          appBar,
         Container(
-          color: ChatListHeaderStyle.responsive.isMobile(context)
-              ? LinagoraSysColors.material().background
-              : Colors.transparent,
           height: ChatListHeaderStyle.searchBarContainerHeight,
           padding: ChatListHeaderStyle.searchInputPadding,
           child: PlatformInfos.isDesktop
@@ -56,22 +56,19 @@ class ChatListHeader extends StatelessWidget {
         ),
         ValueListenableBuilder<SelectMode>(
           valueListenable: controller.selectModeNotifier,
-          builder: (context, selectMode, _) =>
-              RoomListFilterBar(enabled: !selectMode.isSelectMode),
+          builder: (context, selectMode, _) => isMobile
+              ? RoomListFilterPills(enabled: !selectMode.isSelectMode)
+              : RoomListFilterBar(enabled: !selectMode.isSelectMode),
         ),
-        if (ChatListHeaderStyle.responsive.isMobile(context)) ...[
-          // Only show audio player on actual mobile platforms (not just mobile-sized layouts)
-          if (PlatformInfos.isMobile)
-            ChatAudioPlayerWidget(matrix: controller.matrixState),
-          Divider(
-            height: ChatListHeaderStyle.dividerHeight,
-            thickness: ChatListHeaderStyle.dividerThickness,
-            color: LinagoraStateLayer(
-              LinagoraSysColors.material().surfaceTint,
-            ).opacityLayer3,
-          ),
-        ],
+        // Only show audio player on actual mobile platforms (not just mobile-sized layouts)
+        if (isMobile && PlatformInfos.isMobile)
+          ChatAudioPlayerWidget(matrix: controller.matrixState),
       ],
+    );
+    if (!isMobile) return header;
+    return ColoredBox(
+      color: LinagoraSysColors.material().onPrimary,
+      child: header,
     );
   }
 
@@ -127,6 +124,70 @@ class ChatListHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The app bar with the new chat capsule over it, outside it so the app bar
+/// does not clip the capsule's shadow.
+class _PhoneAppBar extends StatelessWidget {
+  const _PhoneAppBar({required this.controller, required this.appBar});
+
+  final ChatListController controller;
+  final Widget appBar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            appBar,
+            PositionedDirectional(
+              end: ChatListHeaderStyle.newChatCapsuleEnd,
+              bottom: ChatListHeaderStyle.newChatCapsuleBottom,
+              child: _NewChatCapsule(controller: controller),
+            ),
+          ],
+        ),
+        // The select mode app bar is taller by this gap.
+        ValueListenableBuilder<SelectMode>(
+          valueListenable: controller.selectModeNotifier,
+          builder: (context, selectMode, _) => SizedBox(
+            height: selectMode.isSelectMode
+                ? 0
+                : ChatListHeaderStyle.newChatCapsuleGap,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NewChatCapsule extends StatelessWidget {
+  const _NewChatCapsule({required this.controller});
+
+  final ChatListController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<SelectMode>(
+      valueListenable: controller.selectModeNotifier,
+      builder: (context, selectMode, _) {
+        if (selectMode.isSelectMode) return const SizedBox.shrink();
+        return SizedBox.square(
+          dimension: ChatListHeaderStyle.newChatCapsuleSize,
+          child: FloatingCapsule(
+            child: ChatListNewChatButton(
+              controller: controller,
+              isSingleColumn: true,
+              color: LinagoraSysColors.material().onSurface,
+            ),
+          ),
+        );
+      },
     );
   }
 }

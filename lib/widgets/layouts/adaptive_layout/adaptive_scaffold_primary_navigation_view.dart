@@ -1,13 +1,14 @@
 import 'package:twake_chat/pages/chat_list/client_chooser_button_style.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_style.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
-class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
+class AdaptiveScaffoldPrimaryNavigationView extends ConsumerWidget {
   final List<NavigationRailDestination> getNavigationRailDestinations;
   final int? selectedIndex;
   final Function(int)? onDestinationSelected;
@@ -22,7 +23,9 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
     return Material(
       color: Theme.of(context).colorScheme.surface,
       child: Container(
@@ -67,9 +70,7 @@ class AdaptiveScaffoldPrimaryNavigationView extends StatelessWidget {
                     builder: (context, profile, _) {
                       return Avatar(
                         mxContent: profile.avatarUrl,
-                        name:
-                            profile.displayName ??
-                            Matrix.of(context).client.userID!.localpart,
+                        name: profile.displayName ?? client.userID!.localpart,
                         size: AdaptiveScaffoldPrimaryNavigationStyle.avatarSize,
                         fontSize:
                             ClientChooserButtonStyle.avatarFontSizeInAppBar,

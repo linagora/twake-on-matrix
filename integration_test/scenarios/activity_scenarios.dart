@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
+import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 
 import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
@@ -35,15 +36,17 @@ class ActivityTabsScenario extends BaseTestScenario {
   @override
   Future<void> runTestLogic() async {
     await $(ChatList).waitUntilVisible();
-    final bar = $.tester.widget<BottomNavigationBar>(
-      find.byType(BottomNavigationBar).last,
+    final bar = find.byType(FloatingNavigationBar).last;
+    expect(
+      $.tester.widget<FloatingNavigationBar>(bar).destinations,
+      AdaptiveDestinationEnum.values,
     );
-    expect(bar.items.map((item) => item.label), [
-      'Contacts',
-      'Chats',
-      'Activity',
-      'Settings',
-    ]);
+    for (final label in ['Contacts', 'Chats', 'Activity', 'Settings']) {
+      expect(
+        find.descendant(of: bar, matching: find.text(label)),
+        findsOneWidget,
+      );
+    }
 
     final activity = ActivityRobot($);
     await activity.open();
@@ -79,7 +82,7 @@ class ActivityOpenFollowedThreadScenario extends BaseTestScenario {
     await receiverThread(roomId: fixture.roomId, root: root, reply: webReply);
     await waitForThreadMessage(this, root);
     // Replying makes the user follow the thread.
-    await threads.openFromCard(lastReply: webReply);
+    await threads.openFromCard(root: root);
     await threads.sendInThread(myReply);
     await threads.expectMessageInThread(myReply);
     await threads.closeThread();

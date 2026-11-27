@@ -116,6 +116,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
         if (item.kind == ActivityKind.unreadRoom) item.roomId,
     ];
     return Scaffold(
+      extendBody: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       bottomNavigationBar: widget.bottomNavigationBar,
       appBar: AppBar(

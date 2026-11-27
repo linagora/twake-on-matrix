@@ -2,38 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings_view.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
-
-class _FakeClient extends Fake implements Client {
-  @override
-  String? get userID => '@alice:example.org';
-}
-
-class _FakeMatrix extends Fake implements MatrixState {
-  @override
-  final Client client = _FakeClient();
-
-  @override
-  bool get twakeSupported => false;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
-      '_FakeMatrix';
-}
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 
 /// The notifiers start as the real controller seeds them: nothing loaded.
 class _FakeController extends Fake implements SettingsController {
-  @override
-  final MatrixState matrix = _FakeMatrix();
-
   @override
   final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(null);
 
@@ -70,10 +49,10 @@ class _SettingsViewScreen {
   final WidgetTester tester;
   final _FakeController controller;
 
-  Future<void> pump() async {
+  Future<void> pump({bool twakeSupported = false}) async {
     await tester.pumpWidget(
-      Provider<MatrixState>.value(
-        value: controller.matrix,
+      ProviderScope(
+        overrides: [twakeSupportedProvider.overrideWithValue(twakeSupported)],
         child: MaterialApp(
           theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           localizationsDelegates: L10n.localizationsDelegates,
@@ -168,5 +147,12 @@ void main() {
 
     expect(_SettingsViewScreen(tester, controller).avatarName, 'Alice Martin');
     expect(find.text('Alice Martin'), findsOneWidget);
+  });
+
+  testWidgets('account with a ToM server: no backup row', (tester) async {
+    await _SettingsViewScreen(tester, controller).pump(twakeSupported: true);
+
+    expect(find.byType(SwitchListTile), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 }

@@ -154,7 +154,7 @@ packages:
     source: hosted
     version: "2.13.0"
   audio_session:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: audio_session
       sha256: f9e7711a0e24ca8b40f5d7ac374c3c6e55016f3157912badd18199cdbbca5c4d
@@ -955,7 +955,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "1171329c57606a2a01fbcbddce887cc663455e26"
+      resolved-ref: "333eb572c1b7c4a9116f30ccf1c70432798ab777"
       url: "https://github.com/linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1850,11 +1850,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.4.2"
-      resolved-ref: "6649323f354ab319e48f6b79e500650a38caac7d"
+      ref: "v0.4.3"
+      resolved-ref: d92acf0810e6879db1e29b85f3bd4659115e584e
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
-    version: "0.4.2"
+    version: "0.4.3"
   linkfy_text:
     dependency: "direct main"
     description:

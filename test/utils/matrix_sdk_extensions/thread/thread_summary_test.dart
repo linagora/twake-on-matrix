@@ -23,9 +23,22 @@ void main() {
     AppConfig.threadsEnabled = true;
     room = MockRoom();
     when(room.id).thenReturn('!room:example.com');
+    // The members the room knows: a name, and a picture for Bob alone.
+    when(room.unsafeGetUserFromMemoryOrFallback(any)).thenAnswer((call) {
+      final id = call.positionalArguments.first as String;
+      return User(
+        id,
+        room: room,
+        displayName: _names[id],
+        avatarUrl: id == bob ? 'mxc://example.com/bob' : null,
+      );
+    });
   });
 
   tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
+  const carol = '@carol:example.com';
+  const dan = '@dan:example.com';
 
   DateTime at(int minute) => DateTime.utc(2026, 11, 6, 10, minute);
 
@@ -555,4 +568,206 @@ void main() {
       expect(summary.replyCount, 1);
     });
   });
+
+  /// Need (Clément, 2026-11-25, as the web D800 `readRepliers`): the row of
+  /// the thread shows the faces of who replied, from the replies the client
+  /// holds (server latest reply + live replies): each person once, the most
+  /// recent replier first; a deleted reply, an edit or a reaction brings
+  /// nobody. The count stays the server count.
+  group('the people who replied', () {
+    List<String> ids(ThreadSummary summary) => [
+      for (final replier in summary.repliers) replier.userId,
+    ];
+
+    Event deleted(Event event) => event
+      ..setRedactionEvent(
+        Event(
+          type: EventTypes.Redaction,
+          content: {},
+          redacts: event.eventId,
+          eventId: r'$redaction',
+          senderId: event.senderId,
+          originServerTs: at(30),
+          room: room,
+        ),
+      );
+
+    test('lists each person once, the most recent replier first', () {
+      final summary = ThreadSummary.fromRoot(
+        root(),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'one', minute: 1, sender: bob),
+          reply(eventId: r'$r2', body: 'two', minute: 2, sender: carol),
+          reply(eventId: r'$r3', body: 'three', minute: 3, sender: bob),
+          reply(eventId: r'$r4', body: 'four', minute: 4, sender: dan),
+        ],
+      )!;
+
+      expect(ids(summary), [dan, bob, carol]);
+    });
+
+    test('orders by the time of the replies, not by the order received', () {
+      final summary = ThreadSummary.fromRoot(
+        root(),
+        liveEvents: [
+          reply(eventId: r'$r4', body: 'four', minute: 4, sender: dan),
+          reply(eventId: r'$r1', body: 'one', minute: 1, sender: bob),
+          reply(eventId: r'$r2', body: 'two', minute: 2, sender: carol),
+        ],
+      )!;
+
+      expect(ids(summary), [dan, carol, bob]);
+    });
+
+    test('an old thread with no reply loaded shows the sender of the server '
+        'latest reply, and keeps the server count', () {
+      final summary = ThreadSummary.fromRoot(
+        root(count: 7, latest: serverLatest),
+      )!;
+
+      expect(ids(summary), [bob]);
+      expect(summary.replyCount, 7);
+    });
+
+    test('the server latest reply and the live replies make one list, the '
+        'latest reply counted once', () {
+      final summary = ThreadSummary.fromRoot(
+        root(count: 2, latest: serverLatest),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'Hello', minute: 1, sender: carol),
+          // The live copy of the server latest reply.
+          reply(eventId: r'$r2', body: 'See you tomorrow', minute: 2),
+          reply(eventId: r'$r3', body: 'Fine', minute: 5, sender: dan),
+        ],
+      )!;
+
+      expect(ids(summary), [dan, bob, carol]);
+    });
+
+    test('leaves out the author of the root who did not reply', () {
+      final summary = ThreadSummary.fromRoot(
+        root(sender: alice),
+        liveEvents: [reply(eventId: r'$r1', body: 'one', minute: 1)],
+      )!;
+
+      expect(ids(summary), [bob]);
+    });
+
+    test('lists the author of the root who also replied', () {
+      final summary = ThreadSummary.fromRoot(
+        root(sender: alice),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'one', minute: 1, sender: bob),
+          reply(eventId: r'$r2', body: 'two', minute: 2, sender: alice),
+        ],
+      )!;
+
+      expect(ids(summary), [alice, bob]);
+    });
+
+    test('a deleted reply brings nobody', () {
+      final summary = ThreadSummary.fromRoot(
+        root(),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'one', minute: 1, sender: bob),
+          deleted(
+            reply(eventId: r'$r2', body: 'oops', minute: 2, sender: carol),
+          ),
+        ],
+      )!;
+
+      expect(ids(summary), [bob]);
+    });
+
+    test('a deleted server latest reply brings nobody', () {
+      final summary = ThreadSummary.fromRoot(
+        root(count: 2, latest: serverLatest),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'Hello', minute: 1, sender: carol),
+          deleted(reply(eventId: r'$r2', body: 'See you tomorrow', minute: 2)),
+        ],
+      )!;
+
+      expect(ids(summary), [carol]);
+    });
+
+    test('an edit or a reaction brings nobody', () {
+      final summary = ThreadSummary.fromRoot(
+        root(count: 2, latest: serverLatest),
+        liveEvents: [
+          // By Alice, who never replied.
+          reaction(target: r'$r2', minute: 6),
+          Event.fromJson({
+            ...edit(
+              eventId: r'$e1',
+              target: r'$r2',
+              newBody: 'edited',
+              minute: 7,
+            ).toJson(),
+            'sender': dan,
+          }, room),
+        ],
+      )!;
+
+      expect(ids(summary), [bob]);
+    });
+
+    test('replies to another thread bring nobody', () {
+      final summary = ThreadSummary.fromRoot(
+        root(),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'one', minute: 1, sender: bob),
+          reply(
+            eventId: r'$other',
+            body: 'elsewhere',
+            minute: 2,
+            sender: dan,
+            threadRoot: r'$another_root',
+          ),
+        ],
+      )!;
+
+      expect(ids(summary), [bob]);
+    });
+
+    test('keeps every person, past the three the row shows', () {
+      const eve = '@eve:example.com';
+      final summary = ThreadSummary.fromRoot(
+        root(),
+        liveEvents: [
+          reply(eventId: r'$r1', body: '1', minute: 1, sender: alice),
+          reply(eventId: r'$r2', body: '2', minute: 2, sender: bob),
+          reply(eventId: r'$r3', body: '3', minute: 3, sender: carol),
+          reply(eventId: r'$r4', body: '4', minute: 4, sender: dan),
+          reply(eventId: r'$r5', body: '5', minute: 5, sender: eve),
+        ],
+      )!;
+
+      expect(ids(summary), [eve, dan, carol, bob, alice]);
+    });
+
+    test('gives each one their name and picture as the room knows them', () {
+      final summary = ThreadSummary.fromRoot(
+        root(),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'one', minute: 1, sender: bob),
+          reply(eventId: r'$r2', body: 'two', minute: 2, sender: carol),
+        ],
+      )!;
+
+      final [carolFace, bobFace] = summary.repliers;
+      expect(carolFace.displayName, 'Carol Jones');
+      expect(carolFace.avatarUrl, isNull);
+      expect(bobFace.displayName, 'Bob Martin');
+      expect(bobFace.avatarUrl, Uri.parse('mxc://example.com/bob'));
+    });
+  });
 }
+
+/// The display names of the members of the room.
+const _names = {
+  '@alice:example.com': 'Alice Smith',
+  '@bob:example.com': 'Bob Martin',
+  '@carol:example.com': 'Carol Jones',
+  '@dan:example.com': 'Dan Brown',
+};

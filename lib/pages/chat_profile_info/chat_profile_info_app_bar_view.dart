@@ -10,10 +10,15 @@ import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_details.dar
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:twake_chat/widgets/avatar/secondary_avatar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/extensions/person_presence_extension.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
-class ChatProfileInfoAppBarView extends StatelessWidget {
+class ChatProfileInfoAppBarView extends ConsumerWidget {
   const ChatProfileInfoAppBarView({
     super.key,
     this.avatarUri,
@@ -30,7 +35,6 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
     required this.maxGroupInfoHeight,
     required this.onChatInfoTap,
     required this.animationController,
-    this.getLocalizedStatusMessage,
     required this.onMessage,
     required this.onSearch,
   });
@@ -49,12 +53,18 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
   final double maxGroupInfoHeight;
   final VoidCallback onChatInfoTap;
   final AnimationController animationController;
-  final String? getLocalizedStatusMessage;
   final VoidCallback onMessage;
   final VoidCallback onSearch;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final matrixId = this.matrixId;
+    final presence = matrixId == null
+        ? null
+        : ref.watch(personPresenceProvider(matrixId)).value;
+    final subtitle = presence
+        ?.localizedSubtitle(L10n.of(context)!)
+        .capitalize(context);
     return ValueListenableBuilder(
       valueListenable: userInfoNotifier,
       builder: (context, userInfo, child) {
@@ -71,6 +81,7 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
                     userInfo: userInfo,
                     userInfoModel: userInfoModel,
                     animationController: animationController,
+                    presence: presence?.badge,
                   ),
                 ),
                 Positioned.fill(
@@ -89,7 +100,7 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
                         userInfo: userInfo,
                         userInfoModel: userInfoModel,
                       ),
-                      subTitle: getLocalizedStatusMessage,
+                      subTitle: subtitle,
                       onTap: onChatInfoTap,
                     ),
                     ChatDetailsGroupActionsView(
@@ -123,6 +134,7 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
     required Either<Failure, Success> userInfo,
     required UserInfo? userInfoModel,
     required AnimationController animationController,
+    required LinagoraPresence? presence,
   }) {
     return userInfo.fold(
       (failure) {
@@ -130,6 +142,8 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
           mxContent: avatarUri,
           name: userInfoModel?.displayName ?? displayName,
           fontSize: ChatProfileInfoStyle.avatarFontSize,
+          presence: presence,
+          presenceRingColor: ChatProfileInfoStyle.presenceRingColor,
           animationController: animationController,
         );
       },
@@ -153,6 +167,8 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
                 : avatarUri,
             name: userInfoModel?.displayName ?? displayName,
             fontSize: ChatProfileInfoStyle.avatarFontSize,
+            presence: presence,
+            presenceRingColor: ChatProfileInfoStyle.presenceRingColor,
             animationController: animationController,
           );
         }
@@ -160,6 +176,8 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
           mxContent: avatarUri,
           name: userInfoModel?.displayName ?? displayName,
           fontSize: ChatProfileInfoStyle.avatarFontSize,
+          presence: presence,
+          presenceRingColor: ChatProfileInfoStyle.presenceRingColor,
           animationController: animationController,
         );
       },

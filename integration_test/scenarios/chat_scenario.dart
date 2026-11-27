@@ -24,6 +24,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/images_picker/image_item_widget.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:patrol/patrol.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 
 import '../base/api_login_helper.dart';
 import '../base/core_robot.dart';
@@ -462,7 +463,7 @@ class ChatScenario extends CoreRobot {
       'Chats tab is not visible',
     );
     s.softAssertEquals(
-      $(BottomNavigationBar).visible,
+      $(FloatingNavigationBar).visible,
       true,
       'Bottom navigator bar is not visible',
     );

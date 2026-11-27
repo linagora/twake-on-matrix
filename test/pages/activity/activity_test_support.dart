@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
@@ -198,6 +200,7 @@ Client accountClient(String userId) {
   final client = MockClient();
   when(client.userID).thenReturn(userId);
   when(client.clientName).thenReturn('client-$userId');
+  when(client.onSync).thenReturn(CachedStreamController<SyncUpdate>());
   return client;
 }
 

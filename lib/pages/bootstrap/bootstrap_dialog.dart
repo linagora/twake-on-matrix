@@ -12,10 +12,10 @@ import 'package:twake_chat/pages/key_verification/key_verification_success_view.
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/twake_supported_provider.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -40,7 +40,7 @@ class BootstrapDialog extends ConsumerWidget {
   /// recover a lost key from, so they fall back to the legacy local
   /// bootstrap flow via [TomBootstrapDialog].
   Future<bool> _resetEncryption(BuildContext context, WidgetRef ref) async {
-    if (Matrix.of(context).twakeSupported) {
+    if (ref.read(twakeSupportedProvider)) {
       final result = await ref
           .read(tomEncryptionResetServiceProvider(client))
           .reset();

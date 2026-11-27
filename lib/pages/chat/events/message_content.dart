@@ -1,4 +1,5 @@
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/pages/chat/events/encrypted_content.dart';
 import 'package:twake_chat/pages/chat/events/formatted_text_widget.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/message_content_image_builder.dart';
@@ -49,6 +50,9 @@ class MessageContent extends StatelessWidget
   final double? textWidth;
   final String? videoCallBaseUrl;
 
+  /// True on the thread screen.
+  final bool inThread;
+
   const MessageContent(
     this.event, {
     super.key,
@@ -60,6 +64,7 @@ class MessageContent extends StatelessWidget
     required this.ownMessage,
     required this.timeline,
     this.textWidth,
+    this.inThread = false,
   });
 
   Widget _buildAlbumTile(
@@ -201,6 +206,9 @@ class MessageContent extends StatelessWidget
                   event,
                   color: textColor,
                   timeline: timeline,
+                  threadRootId: inThread
+                      ? event.threadRootId ?? event.eventId
+                      : null,
                 ),
               );
             }

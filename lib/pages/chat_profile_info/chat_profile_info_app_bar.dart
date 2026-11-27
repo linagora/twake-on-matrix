@@ -36,7 +36,6 @@ class ChatProfileInfoAppBar extends StatefulWidget {
   final ValueNotifier<bool?> blockUserLoadingNotifier;
   final void Function(BuildContext context, Room? room)? onLeaveChat;
   final bool innerBoxIsScrolled;
-  final String? getLocalizedStatusMessage;
   final VoidCallback onMessage;
   final VoidCallback onSearch;
 
@@ -58,7 +57,6 @@ class ChatProfileInfoAppBar extends StatefulWidget {
     required this.blockUserLoadingNotifier,
     this.onLeaveChat,
     required this.innerBoxIsScrolled,
-    this.getLocalizedStatusMessage,
     required this.onMessage,
     required this.onSearch,
   });
@@ -197,8 +195,6 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                               ),
                               onChatInfoTap: _handleGroupInfoTap,
                               animationController: animationController,
-                              getLocalizedStatusMessage:
-                                  widget.getLocalizedStatusMessage,
                               onSearch: widget.onSearch,
                               onMessage: widget.onMessage,
                             );
@@ -226,8 +222,6 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                               onChatInfoTap: _handleGroupInfoTap,
                               animationController: animationController,
                               avatarUri: widget.avatarUri,
-                              getLocalizedStatusMessage:
-                                  widget.getLocalizedStatusMessage,
                               onSearch: widget.onSearch,
                               onMessage: widget.onMessage,
                             );
@@ -251,8 +245,6 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                                 widget.onLeaveChat?.call(context, widget.room),
                             onChatInfoTap: _handleGroupInfoTap,
                             animationController: animationController,
-                            getLocalizedStatusMessage:
-                                widget.getLocalizedStatusMessage,
                             onSearch: widget.onSearch,
                             onMessage: widget.onMessage,
                           );

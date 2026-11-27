@@ -18,6 +18,7 @@ class ContactsTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       resizeToAvoidBottomInset: false,
       appBar: PreferredSize(
         preferredSize: ContactsTabViewStyle.preferredSizeAppBar,

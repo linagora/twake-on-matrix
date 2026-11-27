@@ -5,7 +5,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/call/usecases/join_call_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/leave_call_usecase.dart';
 import 'package:twake_chat/domain/call/usecases/leave_call_usecase.provider.dart';
+import 'package:twake_chat/domain/call/usecases/set_call_camera_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/set_call_media_usecase.provider.dart';
+import 'package:twake_chat/domain/call/usecases/set_call_speaker_usecase.provider.dart';
+import 'package:twake_chat/domain/call/usecases/watch_call_ring_declined_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/watch_call_participants_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/watch_call_room_encrypted_usecase.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
@@ -28,9 +31,11 @@ class CallController extends _$CallController {
 
   StreamSubscription<List<CallParticipant>>? _participants;
   StreamSubscription<void>? _encryption;
+  StreamSubscription<void>? _declined;
   // Read at join: after an account switch it still holds the joining client.
   LeaveCallUseCase? _leaveCall;
   Future<void>? _cleanup;
+  Future<void>? _joining;
   var _cancellation = CallCancellation();
 
   bool get _isLeaveRequested => _cancellation.isCancelled;
@@ -40,18 +45,40 @@ class CallController extends _$CallController {
     ref.onDispose(() {
       unawaited(_participants?.cancel());
       unawaited(_encryption?.cancel());
+      unawaited(_declined?.cancel());
     });
     // A call belongs to the account that joined it.
     ref.listen(activeMatrixClientProvider, (_, _) => unawaited(leave()));
     return const CallState.idle();
   }
 
-  Future<void> join(String roomId, {required bool isVideo}) async {
-    if (state is CallConnecting || state is CallConnected) return;
+  Future<void> join(String roomId, {required bool isVideo}) {
+    if (state is CallConnecting || state is CallConnected) {
+      return Future.value();
+    }
+    final joining = _join(roomId, isVideo: isVideo);
+    _joining = joining;
+    return joining.whenComplete(() {
+      if (identical(_joining, joining)) _joining = null;
+    });
+  }
+
+  /// Leaves the call of this device, waits for a connecting one to be
+  /// cancelled, then joins [roomId].
+  Future<void> switchTo(String roomId, {required bool isVideo}) async {
+    final joining = _joining;
+    // The leave is immediate for the state; its membership ends behind it.
+    unawaited(leave());
+    await joining;
+    if (!ref.mounted) return;
+    await join(roomId, isVideo: isVideo);
+  }
+
+  Future<void> _join(String roomId, {required bool isVideo}) async {
     _start(roomId);
     try {
-      final room = await _join(roomId, isVideo: isVideo);
-      if (ref.mounted) await _onJoined(roomId, room);
+      final room = await _execute(roomId, isVideo: isVideo);
+      if (ref.mounted) await _onJoined(roomId, room, isVideo: isVideo);
     } catch (error, stackTrace) {
       _onJoinFailed(roomId, error, stackTrace);
       // A bug, not a failure of the call: it must reach the crash reports.
@@ -65,7 +92,7 @@ class CallController extends _$CallController {
     _leaveCall = ref.read(leaveCallUseCaseProvider);
   }
 
-  Future<CallRoomInfo?> _join(String roomId, {required bool isVideo}) async {
+  Future<CallRoomInfo?> _execute(String roomId, {required bool isVideo}) async {
     final joinCall = ref.read(joinCallUseCaseProvider);
     final serviceUrl = ref
         .read(loginHomeserverSummaryProvider)
@@ -100,12 +127,20 @@ class CallController extends _$CallController {
         ),
       );
 
-  Future<void> _onJoined(String roomId, CallRoomInfo? room) async {
+  Future<void> _onJoined(
+    String roomId,
+    CallRoomInfo? room, {
+    required bool isVideo,
+  }) async {
     if (room == null) {
       state = const CallState.idle();
       return;
     }
-    state = CallState.connected(roomId: roomId, isDirect: room.isDirect);
+    state = CallState.connected(
+      roomId: roomId,
+      isDirect: room.isDirect,
+      isSpeakerOn: isVideo,
+    );
     _participants = ref
         .read(watchCallParticipantsUseCaseProvider)
         .execute(roomId)
@@ -118,6 +153,13 @@ class CallController extends _$CallController {
           if (room.isEncrypted) return;
           _endWith(const CallEncryptionTurnedOnException());
         }, onError: _onEncryptionWatchFailed);
+    // A group call goes on when someone declines it.
+    if (room.isDirect) {
+      _declined = ref
+          .read(watchCallRingDeclinedUseCaseProvider)
+          .execute(roomId)
+          .listen((_) => _onDeclined());
+    }
     if (_isLeaveRequested) await leave();
   }
 
@@ -139,6 +181,14 @@ class CallController extends _$CallController {
   static bool _hasOtherUser(List<CallParticipant> participants) {
     final me = participants.firstWhereOrNull((p) => p.isLocal)?.userId;
     return participants.any((p) => p.userId != me);
+  }
+
+  void _onDeclined() {
+    final current = state;
+    if (current is! CallConnected || _hasOtherUser(current.participants)) {
+      return;
+    }
+    _endWith(const CallDeclinedException());
   }
 
   void _endWith(CallException error) {
@@ -197,6 +247,8 @@ class CallController extends _$CallController {
     _participants = null;
     unawaited(_encryption?.cancel());
     _encryption = null;
+    unawaited(_declined?.cancel());
+    _declined = null;
     state = then;
     return _cleanup = () async {
       await participants?.cancel();
@@ -218,5 +270,42 @@ class CallController extends _$CallController {
     } on CallException {
       return false;
     }
+  }
+
+  /// False when the device refused the change.
+  Future<bool> setCamera({required bool isOn}) async {
+    if (state is! CallConnected) return false;
+    final call = _cancellation;
+    try {
+      await ref.read(setCallCameraUseCaseProvider).execute(isOn: isOn);
+    } on CallException {
+      return false;
+    }
+    if (!ref.mounted || call != _cancellation) return true;
+    final current = state;
+    if (current is! CallConnected || current.isSpeakerChosen) return true;
+    await _setSpeaker(isOn: isOn, isForced: false);
+    return true;
+  }
+
+  Future<void> setSpeaker({required bool isOn}) =>
+      _setSpeaker(isOn: isOn, isForced: true);
+
+  /// Best effort, as the audio route of LiveKit.
+  Future<void> _setSpeaker({required bool isOn, required bool isForced}) async {
+    if (state is! CallConnected) return;
+    final call = _cancellation;
+    await ref
+        .read(setCallSpeakerUseCaseProvider)
+        .execute(isOn: isOn, isForced: isForced);
+    if (!ref.mounted || call != _cancellation) return;
+    final current = state;
+    if (current is! CallConnected) return;
+    // An explicit choice made meanwhile wins over the camera's.
+    if (!isForced && current.isSpeakerChosen) return;
+    state = current.copyWith(
+      isSpeakerOn: isOn,
+      isSpeakerChosen: current.isSpeakerChosen || isForced,
+    );
   }
 }
