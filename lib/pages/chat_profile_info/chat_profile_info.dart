@@ -116,7 +116,7 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
   }
 
   Future<void> onReportUser() async {
-    final userId = room?.directChatMatrixID;
+    final userId = presentationContact?.matrixId ?? room?.directChatMatrixID;
     if (userId == null) return;
     await reportUser(context, userId);
   }

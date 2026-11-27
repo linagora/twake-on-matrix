@@ -128,6 +128,8 @@ class ChatProfileInfoDetails extends StatelessWidget {
                       enableCopy: false,
                     ),
                   ),
+                ],
+                if (matrixId != null) ...[
                   const SizedBox(height: ChatProfileInfoStyle.textSpacing),
                   InkWell(
                     key: reportUserButtonKey,
@@ -142,6 +144,8 @@ class ChatProfileInfoDetails extends StatelessWidget {
                       enableCopy: false,
                     ),
                   ),
+                ],
+                if (room?.isDirectChat == true) ...[
                   const SizedBox(height: ChatProfileInfoStyle.textSpacing),
                   InkWell(
                     key: leaveChatButtonKey,

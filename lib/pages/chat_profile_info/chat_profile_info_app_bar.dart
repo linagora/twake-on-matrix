@@ -358,7 +358,10 @@ class _SizedAppBar extends StatelessWidget {
       additionalHeight += ChatDetailViewStyle.chatInfoAddContactHeight;
     }
     if (room?.isDirectChat == true) {
-      additionalHeight += ChatDetailViewStyle.chatInfoReportActionsHeight;
+      additionalHeight += ChatDetailViewStyle.chatInfoReportRowHeight;
+    }
+    if (matrixId != null) {
+      additionalHeight += ChatDetailViewStyle.chatInfoReportRowHeight;
     }
 
     return height + additionalHeight;

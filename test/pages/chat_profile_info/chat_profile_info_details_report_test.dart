@@ -42,7 +42,7 @@ void main() {
     return room;
   }
 
-  Future<void> pumpDetails(WidgetTester tester, Room room) async {
+  Future<void> pumpDetails(WidgetTester tester, Room? room) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [contactsControllerProvider.overrideWith(_NoContacts.new)],
@@ -103,8 +103,19 @@ void main() {
       find.byKey(ChatProfileInfoDetails.reportChatButtonKey),
       findsNothing,
     );
+  });
+
+  testWidgets('reportUser_onAContactProfileWithoutAChat_isShown', (
+    tester,
+  ) async {
+    await pumpDetails(tester, null);
+
     expect(
       find.byKey(ChatProfileInfoDetails.reportUserButtonKey),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(ChatProfileInfoDetails.reportChatButtonKey),
       findsNothing,
     );
   });
@@ -137,7 +148,7 @@ void main() {
 
     expect(
       rowsHeight,
-      lessThanOrEqualTo(ChatDetailViewStyle.chatInfoReportActionsHeight),
+      lessThanOrEqualTo(2 * ChatDetailViewStyle.chatInfoReportRowHeight),
     );
   });
 }
