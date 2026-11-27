@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -319,6 +320,80 @@ void main() {
 
       expect(shape(room.readersStoppedAtByEvent(timeline)), {
         ownText: [userA],
+      });
+    });
+
+    // Review of #3842: my edit and my thread reply are events of the timeline
+    // the chat does not draw as a row. A reader stopped at one of them shows
+    // under my latest message the chat draws.
+    group('my latest events hidden in the chat', () {
+      const ownEdit = r'$ownEdit';
+      const ownThreadReply = r'$ownThreadReply';
+      final threadsWere = AppConfig.threadsEnabled;
+
+      setUp(() => AppConfig.threadsEnabled = true);
+      tearDown(() => AppConfig.threadsEnabled = threadsWere);
+
+      Event ownRelated(
+        Room room,
+        String eventId, {
+        required String relType,
+        required String target,
+      }) => Event(
+        eventId: eventId,
+        senderId: ownUserId,
+        type: EventTypes.Message,
+        content: {
+          'msgtype': 'm.text',
+          'body': '* hello again',
+          if (relType == RelationshipTypes.edit)
+            'm.new_content': {'msgtype': 'm.text', 'body': 'hello again'},
+          'm.relates_to': {'rel_type': relType, 'event_id': target},
+        },
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(0),
+        room: room,
+      );
+
+      test('a reader whose receipt is on my edit is under the message I '
+          'edited, my latest one the chat draws', () {
+        final room = buildRoom(receipts: {userA: ownEdit});
+        final timeline = MockTimeline();
+        when(timeline.events).thenReturn([
+          ownRelated(
+            room,
+            ownEdit,
+            relType: RelationshipTypes.edit,
+            target: ownText,
+          ),
+          typedEvent(room, ownText),
+          typedEvent(room, theirsOlder, sender: userB),
+          typedEvent(room, ownOldest),
+        ]);
+
+        expect(shape(room.readersStoppedAtByEvent(timeline)), {
+          ownText: [userA],
+        });
+      });
+
+      test('a reader whose receipt is on my thread reply is under my latest '
+          'message of the chat, not under the reply', () {
+        final room = buildRoom(receipts: {userA: ownThreadReply});
+        final timeline = MockTimeline();
+        when(timeline.events).thenReturn([
+          ownRelated(
+            room,
+            ownThreadReply,
+            relType: RelationshipTypes.thread,
+            target: ownOldest,
+          ),
+          typedEvent(room, ownText),
+          typedEvent(room, theirsOlder, sender: userB),
+          typedEvent(room, ownOldest),
+        ]);
+
+        expect(shape(room.readersStoppedAtByEvent(timeline)), {
+          ownText: [userA],
+        });
       });
     });
 

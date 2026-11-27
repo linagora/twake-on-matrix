@@ -65,6 +65,12 @@ const _wideSections = [
     sideBySide: true,
   ),
   _Section(
+    'seen-style',
+    ['ticks', 'avatars', 'names'],
+    storeKey: SettingKeys.seenStyle,
+    sideBySide: false,
+  ),
+  _Section(
     'align',
     ['ownRight', 'left'],
     storeKey: SettingKeys.bubbleAlign,
@@ -135,6 +141,7 @@ String _current(ProviderContainer container, String id) {
   return switch (id) {
     'density' => preferences.density.name,
     'order' => preferences.roomOrder.name,
+    'seen-style' => preferences.seenStyle.name,
     'align' => preferences.bubbleAlign.name,
     _ => throw ArgumentError(id),
   };
@@ -324,11 +331,14 @@ void _choicesTests() {
     testWidgets('choosing one option leaves the others as they were', (
       tester,
     ) async {
-      const others = {'align': 'left'};
+      const others = {'align': 'left', 'seen-style': 'names'};
       final container = await _pump(
         tester,
         size: _wide,
-        stored: {SettingKeys.bubbleAlign: 'left'},
+        stored: {
+          SettingKeys.bubbleAlign: 'left',
+          SettingKeys.seenStyle: 'names',
+        },
       );
 
       await _tap(tester, _card('density', 'compact'));
@@ -346,11 +356,11 @@ void _choicesTests() {
 
       container
           .read(displayPreferencesControllerProvider.notifier)
-          .setRoomOrder(RoomOrder.sections);
+          .setSeenStyle(SeenStyle.avatars);
       await _settle(tester);
 
-      expect(_chosen(tester, _card('order', 'sections')), isTrue);
-      expect(_chosen(tester, _card('order', 'recent')), isFalse);
+      expect(_chosen(tester, _card('seen-style', 'avatars')), isTrue);
+      expect(_chosen(tester, _card('seen-style', 'ticks')), isFalse);
     });
   });
 }

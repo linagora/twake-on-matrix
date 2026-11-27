@@ -8,6 +8,7 @@ void main() {
 
       expect(preferences.density, ChatListDensity.comfortable);
       expect(preferences.roomOrder, RoomOrder.recent);
+      expect(preferences.seenStyle, SeenStyle.ticks);
       expect(preferences.bubbleAlign, BubbleAlign.ownRight);
     });
 
@@ -15,21 +16,23 @@ void main() {
       const preferences = DisplayPreferencesState(
         density: ChatListDensity.compact,
         roomOrder: RoomOrder.sections,
+        seenStyle: SeenStyle.names,
         bubbleAlign: BubbleAlign.left,
       );
 
       expect(preferences.density, ChatListDensity.compact);
       expect(preferences.roomOrder, RoomOrder.sections);
+      expect(preferences.seenStyle, SeenStyle.names);
       expect(preferences.bubbleAlign, BubbleAlign.left);
     });
 
     test('two sets of the same choices are equal', () {
       expect(
-        const DisplayPreferencesState(roomOrder: RoomOrder.sections),
-        const DisplayPreferencesState(roomOrder: RoomOrder.sections),
+        const DisplayPreferencesState(seenStyle: SeenStyle.avatars),
+        const DisplayPreferencesState(seenStyle: SeenStyle.avatars),
       );
       expect(
-        const DisplayPreferencesState(roomOrder: RoomOrder.sections),
+        const DisplayPreferencesState(seenStyle: SeenStyle.avatars),
         isNot(const DisplayPreferencesState()),
       );
     });
@@ -44,6 +47,11 @@ void main() {
       expect(RoomOrder.values.map((value) => value.name), [
         'recent',
         'sections',
+      ]);
+      expect(SeenStyle.values.map((value) => value.name), [
+        'ticks',
+        'avatars',
+        'names',
       ]);
       expect(BubbleAlign.values.map((value) => value.name), [
         'ownRight',

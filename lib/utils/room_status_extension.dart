@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 
@@ -83,13 +84,15 @@ extension RoomStatusExtension on Room {
   }
 
   /// For each index of [events] (newest first), the id of the newest own
-  /// message at that index or older.
+  /// message the chat draws at that index or older: an edit or a thread reply
+  /// has no row.
   List<String?> _newestOwnFrom(List<Event> events) {
     String? newest;
     final ownFrom = List<String?>.filled(events.length, null);
     for (var index = events.length - 1; index >= 0; index--) {
       final event = events[index];
       if (event.senderId == client.userID &&
+          event.isVisibleInGui &&
           EventTypeRules.userContentTypes.contains(event.type)) {
         newest = event.eventId;
       }
