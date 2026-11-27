@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ProviderContainer, UncontrolledProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -10,6 +11,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
@@ -75,8 +77,13 @@ void main() {
     when(
       client.getRoomById(_roomId),
     ).thenReturn(Room(id: _roomId, client: client));
+    final container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [matrixClientProvider.overrideWithValue(client)],
+    );
     await tester.pumpWidget(
-      ProviderScope(
+      UncontrolledProviderScope(
+        container: container,
         child: Provider<MatrixState>.value(
           value: _FakeMatrix(client),
           child: MaterialApp(

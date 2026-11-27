@@ -7,8 +7,10 @@ import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
-class ChatListSortRooms extends StatefulWidget {
+class ChatListSortRooms extends ConsumerStatefulWidget {
   const ChatListSortRooms({
     super.key,
     required this.rooms,
@@ -25,10 +27,10 @@ class ChatListSortRooms extends StatefulWidget {
   final ValueNotifier<bool> sortingRoomsNotifier;
 
   @override
-  State<ChatListSortRooms> createState() => _ChatListSortRoomsState();
+  ConsumerState<ChatListSortRooms> createState() => _ChatListSortRoomsState();
 }
 
-class _ChatListSortRoomsState extends State<ChatListSortRooms> {
+class _ChatListSortRoomsState extends ConsumerState<ChatListSortRooms> {
   Map<String, RoomPreviewResult?> _previewByRoomId = {};
   List<Room> _sortCache = [];
   Map<String, StreamSubscription?> _roomSubscriptions = {};
@@ -93,11 +95,11 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
       _previewByRoomId[room.id] = result;
     }
 
-    if (!mounted) return _sortCache;
+    final client = mounted ? ref.read(activeMatrixClientProvider) : null;
+    if (client == null) return _sortCache;
 
     widget.sortingRoomsNotifier.value = false;
-    return List.from(widget.rooms)
-      ..sort(sortRoomsBy(Matrix.of(context).client));
+    return List.from(widget.rooms)..sort(sortRoomsBy(client));
   }
 
   void _triggerSort() {

@@ -9,10 +9,11 @@ import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:twake_chat/pages/chat_encryption_settings/chat_encryption_settings_view.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import '../key_verification/key_verification_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class ChatEncryptionSettings extends StatefulWidget {
+class ChatEncryptionSettings extends ConsumerStatefulWidget {
   const ChatEncryptionSettings({super.key});
 
   @override
@@ -20,10 +21,11 @@ class ChatEncryptionSettings extends StatefulWidget {
       ChatEncryptionSettingsController();
 }
 
-class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
+class ChatEncryptionSettingsController
+    extends ConsumerState<ChatEncryptionSettings> {
   String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
 
-  Room get room => Matrix.of(context).client.getRoomById(roomId!)!;
+  Room get room => ref.read(matrixClientProvider).getRoomById(roomId!)!;
 
   Future<void> unblock(DeviceKeys key) async {
     if (key.blocked) {

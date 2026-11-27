@@ -9,7 +9,6 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_qr_code_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,17 +19,19 @@ import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
-class PersonalQrView extends StatelessWidget {
+class PersonalQrView extends ConsumerWidget {
   const PersonalQrView(this.controller, {super.key});
 
   final PersonalQrController controller;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
     final sysColor = LinagoraSysColors.material();
-    final client = Matrix.of(context).client;
+    final client = ref.watch(activeMatrixClientProvider);
+    if (client == null) return const SizedBox.shrink();
     final userId = client.userID ?? '';
     final qrData = client.personalInviteUrl;
 
