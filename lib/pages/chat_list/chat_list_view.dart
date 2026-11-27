@@ -27,7 +27,7 @@ class ChatListView extends StatefulWidget {
 
   /// [ChatListSearchStyle.collapsing]: on a phone with [searchOpen], a thin
   /// field at the top of the list opens the search; the search button of
-  /// the bar shows only once the list has scrolled.
+  /// the bar shows only once that field has scrolled away.
   final ChatListSearchStyle searchStyle;
 
   const ChatListView({
@@ -50,7 +50,7 @@ class _ChatListViewState extends State<ChatListView> {
   // Keeps the header State when select mode swaps the sliver that wraps it.
   final _headerKey = GlobalKey();
 
-  /// Collapsing style: whether the list has scrolled its search field away.
+  /// Collapsing style: whether the search field has scrolled away.
   final _scrolled = ValueNotifier(false);
 
   @override
@@ -67,7 +67,8 @@ class _ChatListViewState extends State<ChatListView> {
       _ => null,
     };
     if (metrics != null && metrics.axis == Axis.vertical) {
-      _scrolled.value = metrics.pixels > 0;
+      _scrolled.value =
+          metrics.pixels >= ChatListHeaderStyle.collapsingSearchExtent;
     }
     return false;
   }

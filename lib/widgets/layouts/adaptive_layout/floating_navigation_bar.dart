@@ -16,10 +16,9 @@ import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 /// The phone tab bar: a capsule that hugs equal-width tabs and ignores the
 /// system text size, its labels shrinking instead of being cut.
 ///
-/// Settings is never a tab, even when [destinations] holds it: it opens from
-/// the avatar of the app bar. With [searchOpen] (the Chats tab) a round search
-/// button sits at the end; opened, it grows into a field writing into
-/// [searchQuery], the tabs fold away and a close button comes at the end.
+/// With [searchOpen] (the Chats tab) a round search button sits at the end;
+/// opened, it grows into a field writing into [searchQuery], the tabs fold away
+/// and a close button comes at the end.
 class FloatingNavigationBar extends StatelessWidget {
   const FloatingNavigationBar({
     super.key,
@@ -138,13 +137,8 @@ class FloatingNavigationBar extends StatelessWidget {
     double buttonShown = 1,
   }) {
     final l10n = L10n.of(context)!;
-    final tabs = [
-      for (final (index, destination) in destinations.indexed)
-        if (destination != AdaptiveDestinationEnum.settings)
-          (index, destination),
-    ];
     final labels = [
-      for (final (_, destination) in tabs) destination.label(l10n),
+      for (final destination in destinations) destination.label(l10n),
     ];
     final hasSearch = searchOpen != null;
     return MediaQuery.withNoTextScaling(
@@ -161,25 +155,23 @@ class FloatingNavigationBar extends StatelessWidget {
             final itemWidth = math.min(
               _itemWidth(context, labels),
               (constraints.maxWidth - 2 * _innerPadding - searchButtonRoom) /
-                  tabs.length,
+                  destinations.length,
             );
             final tabsCapsule = FloatingCapsule(
               padding: const EdgeInsets.all(_innerPadding),
               child: _Items(
-                destinations: [
-                  for (final (_, destination) in tabs) destination,
-                ],
+                destinations: destinations,
                 labels: labels,
-                selectedIndex: tabs.indexWhere((tab) => tab.$2 == selected),
+                selectedIndex: destinations.indexOf(selected),
                 itemWidth: itemWidth,
-                onDestinationSelected: (shown) =>
-                    onDestinationSelected(tabs[shown].$1),
+                onDestinationSelected: onDestinationSelected,
               ),
             );
             if (!hasSearch) {
               return Center(heightFactor: 1, child: tabsCapsule);
             }
-            final tabsWidth = itemWidth * tabs.length + 2 * _innerPadding;
+            final tabsWidth =
+                itemWidth * destinations.length + 2 * _innerPadding;
             final fieldWidth = constraints.maxWidth - _searchGap - height;
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -349,6 +341,8 @@ class _SearchField extends StatelessWidget {
       key: NavigationKeys.searchField.key,
       controller: query,
       autofocus: true,
+      // The theme's decoration would sit above the icon.
+      textAlignVertical: TextAlignVertical.center,
       textInputAction: TextInputAction.search,
       contextMenuBuilder: mobileTwakeContextMenuBuilder,
       decoration: InputDecoration(

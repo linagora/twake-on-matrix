@@ -159,15 +159,18 @@ class SearchScreenState extends ConsumerState<Search>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         await searchContactAndRecentChatController?.init();
+        if (!mounted) return;
         serverSearchController.initSearch(context: context);
         fetchPreSearchRecentContacts();
-        textEditingController.addListener(() {
-          onSearchBarChanged(textEditingController.text);
-        });
+        textEditingController.addListener(_onQueryChanged);
+        // A borrowed field may already hold a query.
+        _onQueryChanged();
         scrollController.addLoadMoreListener(loadMore);
       }
     });
   }
+
+  void _onQueryChanged() => onSearchBarChanged(textEditingController.text);
 
   void onSearchBarChanged(String keyword) {
     searchContactAndRecentChatController?.onSearchBarChanged(keyword);
@@ -210,6 +213,7 @@ class SearchScreenState extends ConsumerState<Search>
     serverSearchController.dispose();
     preSearchRecentContactsNotifier.dispose();
     publicGroupsSearchTerm.dispose();
+    textEditingController.removeListener(_onQueryChanged);
     if (widget.textEditingController == null) textEditingController.dispose();
     scrollController.dispose();
     super.dispose();

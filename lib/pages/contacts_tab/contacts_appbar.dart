@@ -5,7 +5,6 @@ import 'package:twake_chat/pages/search/search_text_field.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
-import 'package:twake_chat/widgets/avatar/settings_avatar_button.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -15,7 +14,6 @@ class ContactsAppBar extends StatelessWidget {
   final FocusNode searchFocusNode;
   final TextEditingController textEditingController;
   final Function()? clearSearchBar;
-  final VoidCallback? onOpenSettings;
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
   const ContactsAppBar({
@@ -24,7 +22,6 @@ class ContactsAppBar extends StatelessWidget {
     required this.searchFocusNode,
     required this.textEditingController,
     this.clearSearchBar,
-    this.onOpenSettings,
   });
 
   @override
@@ -35,9 +32,6 @@ class ContactsAppBar extends StatelessWidget {
         TwakeAppBar(
           title: L10n.of(context)!.contacts,
           context: context,
-          leading: onOpenSettings != null && !responsiveUtils.isDesktop(context)
-              ? Center(child: SettingsAvatarButton(onTap: onOpenSettings))
-              : null,
           actions: [
             Padding(
               padding: PlatformInfos.isMobile

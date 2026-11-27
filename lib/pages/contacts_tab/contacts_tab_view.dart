@@ -9,14 +9,10 @@ class ContactsTabView extends StatelessWidget {
   final ContactsTabController contactsController;
   final Widget? bottomNavigationBar;
 
-  /// The avatar of the phone app bar opens Settings.
-  final VoidCallback? onOpenSettings;
-
   const ContactsTabView({
     super.key,
     required this.contactsController,
     this.bottomNavigationBar,
-    this.onOpenSettings,
   });
 
   @override
@@ -31,7 +27,6 @@ class ContactsTabView extends StatelessWidget {
           searchFocusNode: contactsController.searchFocusNode,
           clearSearchBar: contactsController.closeSearchBar,
           textEditingController: contactsController.textEditingController,
-          onOpenSettings: onOpenSettings,
         ),
       ),
       backgroundColor: LinagoraSysColors.material().onPrimary,

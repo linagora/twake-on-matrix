@@ -52,10 +52,6 @@ enum NavigationKeys {
   collapsingSearchField(
     Key('navigation.collapsingSearchField'),
     ValueKey('navigation.collapsingSearchField'),
-  ),
-  settingsAvatar(
-    Key('navigation.settingsAvatar'),
-    ValueKey('navigation.settingsAvatar'),
   );
 
   const NavigationKeys(this.key, this.valueKey);

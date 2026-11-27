@@ -17,20 +17,12 @@ import 'package:twake_chat/pages/activity/activity_row.dart';
 import 'package:twake_chat/pages/activity/activity_search.dart';
 import 'package:twake_chat/pages/activity/activity_view_controller.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_appbar_style.dart';
-import 'package:twake_chat/widgets/avatar/settings_avatar_button.dart';
 
 /// THR-M-12: the tab that gathers what happened in the rooms of the user.
 class ActivityPage extends ConsumerStatefulWidget {
-  const ActivityPage({
-    super.key,
-    this.bottomNavigationBar,
-    this.onOpenSettings,
-  });
+  const ActivityPage({super.key, this.bottomNavigationBar});
 
   final Widget? bottomNavigationBar;
-
-  /// The avatar of the phone app bar opens Settings.
-  final VoidCallback? onOpenSettings;
 
   @override
   ConsumerState<ActivityPage> createState() => _ActivityPageState();
@@ -129,11 +121,6 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
       bottomNavigationBar: widget.bottomNavigationBar,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        leading:
-            !ContactsAppbarStyle.responsiveUtils.isDesktop(context) &&
-                widget.onOpenSettings != null
-            ? Center(child: SettingsAvatarButton(onTap: widget.onOpenSettings))
-            : null,
         // As the title of Chats: centred on a phone, 16 px in on a wide screen.
         centerTitle: isMobile,
         title: Padding(

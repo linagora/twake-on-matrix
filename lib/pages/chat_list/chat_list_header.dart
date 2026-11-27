@@ -180,6 +180,7 @@ class _CollapsingSearchField extends StatelessWidget {
                   button: true,
                   label: L10n.of(context)!.search,
                   excludeSemantics: true,
+                  onTap: onTap,
                   child: GestureDetector(
                     onTap: onTap,
                     child: TextField(

@@ -7,7 +7,6 @@ import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.d
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
-import 'package:twake_chat/widgets/avatar/settings_avatar_button.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:twake_chat/widgets/mixins/show_dialog_mixin.dart';
@@ -116,20 +115,6 @@ class _TwakeHeaderState extends ConsumerState<TwakeHeader>
                 backgroundColor: LinagoraSysColors.material().onPrimary,
                 title: L10n.of(context)!.chats,
                 context: context,
-                // Wherever the floating bar shows, which has no Settings tab.
-                leading: !responsive.isDesktop(context)
-                    ? Center(
-                        child: ValueListenableBuilder(
-                          valueListenable: currentProfileNotifier,
-                          builder: (context, profile, _) =>
-                              SettingsAvatarButton.of(
-                                onTap: widget.onClickAvatar,
-                                avatarUrl: profile.avatarUrl,
-                                name: profile.displayName ?? profile.userId,
-                              ),
-                        ),
-                      )
-                    : null,
                 connectionStatusHeaderWidget:
                     widget.connectionStatusHeaderWidget,
                 actions: widget.actions,

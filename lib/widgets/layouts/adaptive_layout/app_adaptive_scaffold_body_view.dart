@@ -208,7 +208,6 @@ class _ColumnPageView extends StatelessWidget {
           navigatorBarType: AdaptiveDestinationEnum.contacts,
           navigatorBarWidget: ContactsTab(
             bottomNavigationBar: _bottomNavigationBarBuilder(context),
-            onOpenSettings: onOpenSettings,
           ),
         ),
         ChatList(
@@ -233,7 +232,6 @@ class _ColumnPageView extends StatelessWidget {
             navigatorBarType: AdaptiveDestinationEnum.activity,
             navigatorBarWidget: ActivityPage(
               bottomNavigationBar: _bottomNavigationBarBuilder(context),
-              onOpenSettings: onOpenSettings,
             ),
           ),
         _triggerPageViewBuilder(
