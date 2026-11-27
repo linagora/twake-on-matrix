@@ -5,6 +5,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 enum SettingEnum {
   profile,
   chatSettings,
+  personalization,
   privacyAndSecurity,
   notificationAndSounds,
   chatFolders,
@@ -20,6 +21,8 @@ enum SettingEnum {
     switch (this) {
       case SettingEnum.chatSettings:
         return L10n.of(context)!.chat;
+      case SettingEnum.personalization:
+        return L10n.of(context)!.personalization;
       case SettingEnum.privacyAndSecurity:
         return L10n.of(context)!.privacyAndSecurity;
       case SettingEnum.notificationAndSounds:
@@ -49,6 +52,8 @@ enum SettingEnum {
     switch (this) {
       case SettingEnum.chatSettings:
         return Icons.chat_bubble_outline_outlined;
+      case SettingEnum.personalization:
+        return Icons.palette_outlined;
       case SettingEnum.privacyAndSecurity:
         return Icons.lock_outline;
       case SettingEnum.notificationAndSounds:

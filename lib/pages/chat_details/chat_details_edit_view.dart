@@ -26,6 +26,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
+import 'package:twake_chat/pages/scribe/widgets/scribe_room_setting.dart';
 
 class ChatDetailsEditView extends ConsumerWidget {
   final ChatDetailsEditController controller;
@@ -302,6 +303,7 @@ class ChatDetailsEditView extends ConsumerWidget {
                 ],
               ),
             ),
+            ScribeRoomSetting(roomId: controller.widget.roomId),
             RoomAccessSection(
               roomId: controller.widget.roomId,
               draft: controller.roomAccessDraftNotifier,

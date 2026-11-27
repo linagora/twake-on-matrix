@@ -13,6 +13,8 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/user_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/widgets/avatar/person_presence_badge.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
@@ -111,9 +113,13 @@ class _ParticipantListItemState extends State<ParticipantListItem>
             ),
             Opacity(
               opacity: widget.member.membership == Membership.join ? 1 : 0.5,
-              child: Avatar(
-                mxContent: widget.member.avatarUrl,
-                name: widget.member.calcDisplayname(),
+              child: PersonPresenceBadge(
+                userId: widget.member.id,
+                size: AvatarStyle.defaultSize,
+                child: Avatar(
+                  mxContent: widget.member.avatarUrl,
+                  name: widget.member.calcDisplayname(),
+                ),
               ),
             ),
             const SizedBox(width: 8.0),

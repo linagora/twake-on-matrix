@@ -46,6 +46,13 @@ abstract class MatrixRtcDatasource {
 
   Future<void> leaveMembership(CallRoom room);
 
+  /// Writes, in the clear, the line of the call this device rang in [room],
+  /// once it ends; nothing for a call it did not ring.
+  /// At hang-up, before anything is awaited: no answer counts after [endedAt].
+  void closeCall(CallRoom room, {required DateTime endedAt});
+
+  Future<void> sendCallLine(CallRoom room);
+
   /// Emits once [room] is encrypted, at once if it already is; fails with
   /// `CallRoomNotFoundException` once the account is no longer in it.
   Stream<void> watchRoomEncrypted(CallRoom room);

@@ -9,6 +9,8 @@ import 'package:twake_chat/domain/app_state/room/block_user_state.dart';
 import 'package:twake_chat/domain/app_state/room/unblock_user_state.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
+import 'package:twake_chat/pages/report/report_room_mixin.dart';
+import 'package:twake_chat/pages/report/report_user_mixin.dart';
 import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/usecase/room/block_user_interactor.dart';
@@ -60,7 +62,9 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
         PlayVideoActionMixin,
         TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatProfileInfo>,
-        LeaveChatMixin {
+        LeaveChatMixin,
+        ReportRoomMixin<ChatProfileInfo>,
+        ReportUserMixin<ChatProfileInfo> {
   final _getUserInfoInteractor = getIt.get<GetUserInfoInteractor>();
 
   StreamSubscription? userInfoNotifierSub;
@@ -103,6 +107,18 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
     } else {
       return const ClampingScrollPhysics();
     }
+  }
+
+  Future<void> onReportChat() async {
+    final roomId = widget.roomId;
+    if (roomId == null) return;
+    await reportRoom(context, roomId);
+  }
+
+  Future<void> onReportUser() async {
+    final userId = presentationContact?.matrixId ?? room?.directChatMatrixID;
+    if (userId == null) return;
+    await reportUser(context, userId);
   }
 
   void onUnblockUser() {

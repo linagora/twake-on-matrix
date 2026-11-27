@@ -118,6 +118,7 @@ Tag push triggers both CI workflows automatically.
 | File | Trigger | Effect |
 |---|---|---|
 | `.github/workflows/release.yaml` | tag `v*.*.*` | Android APK→Play Store internal; iOS IPA→TestFlight; GitHub Release |
+| `.github/workflows/macos-testflight.yaml` | manual (`workflow_dispatch`, input `tag`) | macOS app→TestFlight |
 
 Check status:
 ```bash
@@ -134,7 +135,7 @@ gh run list --workflow=release.yaml --limit 5
 
 ### Step 7 — Release note (mandatory for mobile)
 
-After a TestFlight / Play Store build, post the non-technical release note in `#twake-chat-mobile-release-notes:linagora.com`. See the `twake-mobile-release` skill.
+After every TestFlight / Play Store build (macOS included), post the non-technical release note in `#twake-chat-mobile-release-notes:linagora.com`. See the `twake-mobile-release` skill.
 
 ## Security Policy
 

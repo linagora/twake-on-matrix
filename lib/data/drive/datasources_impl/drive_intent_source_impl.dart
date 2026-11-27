@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:matrix/matrix.dart' show Logs;
+import 'package:twake_chat/data/drive/sources/workplace_failures.dart';
+import 'package:twake_chat/data/drive/sources/workplace_token_exchange.dart';
 import 'package:twake_chat/domain/drive/entities/drive_intent.dart';
 import 'package:twake_chat/domain/drive/entities/drive_picker_options.dart';
 import 'package:twake_chat/domain/drive/entities/drive_session.dart';
@@ -13,12 +15,11 @@ import 'package:twake_drive_picker/core.dart';
 ///
 /// Logs say where a step failed, never a token or a link.
 class DriveIntentSourceImpl implements DriveIntentSource {
-  DriveIntentSourceImpl({required Dio dio, required bool requireHttps})
-    : _dio = dio,
-      _requireHttps = requireHttps;
+  DriveIntentSourceImpl({required WorkplaceTokenExchange exchange})
+    : _exchange = exchange;
 
-  final Dio _dio;
-  final bool _requireHttps;
+  final WorkplaceTokenExchange _exchange;
+  final _failures = const WorkplaceFailures();
 
   @override
   Future<DriveIntent> createIntent({
@@ -26,29 +27,11 @@ class DriveIntentSourceImpl implements DriveIntentSource {
     required Future<DriveSession> Function() renewSession,
     required DrivePickerOptions options,
   }) async {
-    var current = session;
-    final repository = _repository();
-    final runner = WorkplaceAccessModeRunner(
-      exchangeTokenInteractor: ExchangeDriveTokenInteractor(repository),
-      oidcTokenGetter: () => current.idToken.value,
-      oidcRefreshTrigger: () async {
-        final renewed = await renewSession();
-        // The exchange and the intent go to the workplace of the first
-        // session: a token for another one must not be sent there.
-        if (renewed.platformUrl != session.platformUrl) {
-          throw const DriveWorkplaceUnknown();
-        }
-        current = renewed;
-        return current.idToken.value;
-      },
-      // The Cozy bridge is for a page that embeds Drive; the app always
-      // trades the token.
-      isBridgeAvailable: () => false,
-    );
     try {
-      final intent = await runner.run(
-        session.platformUrl,
-        CreateDriveIntentCall(
+      final intent = await _exchange.run(
+        session: session,
+        renewSession: renewSession,
+        callOf: (_, repository) => CreateDriveIntentCall(
           CreateDriveIntentInteractor(repository),
           session.platformUrl,
           _intentConfig(options),
@@ -73,15 +56,6 @@ class DriveIntentSourceImpl implements DriveIntentSource {
     }
   }
 
-  WorkplaceRepositoryImpl _repository() {
-    final config = WorkplaceConfig(dio: _dio, requireHttps: _requireHttps);
-    final executor = WorkplaceRequestExecutor(config: config);
-    return WorkplaceRepositoryImpl(
-      _ValidatedIntentDataSource(executor: executor, config: config),
-      WorkplaceDriveDataSourceImpl(executor: executor),
-    );
-  }
-
   WorkplaceIntentConfig _intentConfig(DrivePickerOptions options) =>
       WorkplaceIntentConfig(
         addAsLink: WorkplaceActionConfig(label: options.linkLabel),
@@ -101,61 +75,11 @@ class DriveIntentSourceImpl implements DriveIntentSource {
       'DriveIntentSourceImpl::createIntent: ${e.type.name}, status $status',
     );
     if (status == 429) return const DriveRateLimited();
-    if (status == 400 && _isChatAppMissing(e)) {
-      return const DriveChatAppMissing();
-    }
-    return _byConnection(e.type) ?? _byStatus(status);
+    if (_failures.isChatAppMissing(e)) return const DriveChatAppMissing();
+    return _failures.connectionFailureOf(e.type) ?? _byStatus(status);
   }
-
-  /// What a failed connection means, or null when the server answered.
-  DriveException? _byConnection(DioExceptionType type) => switch (type) {
-    DioExceptionType.connectionTimeout ||
-    DioExceptionType.sendTimeout ||
-    DioExceptionType.receiveTimeout ||
-    DioExceptionType.transformTimeout => const DriveTimedOut(),
-    DioExceptionType.connectionError => const DriveOffline(),
-    DioExceptionType.badCertificate ||
-    DioExceptionType.badResponse ||
-    DioExceptionType.cancel ||
-    DioExceptionType.unknown => null,
-  };
-
-  /// The exchange's answer when the Chat app is not on the user's Drive, as
-  /// the mobile single login contract gives it.
-  bool _isChatAppMissing(DioException e) =>
-      e.requestOptions.path.endsWith('/auth/token_exchange') &&
-      '${e.response?.data}'.toLowerCase().contains('not installed');
 
   DriveException _byStatus(int? status) => status == 400 || status == 401
       ? const DriveExchangeRejected()
       : const DriveIntentFailed();
-}
-
-/// The picker package's JSON parser uses unchecked casts and Error types for
-/// malformed server data. Convert those only at the parser boundary; errors
-/// from renewal, request setup and other app code continue to surface.
-class _ValidatedIntentDataSource extends WorkplaceDataSourceImpl {
-  _ValidatedIntentDataSource({required super.executor, required super.config});
-
-  @override
-  Future<String> exchangeToken(Uri platformUrl, String oidcIdToken) async {
-    try {
-      return await super.exchangeToken(platformUrl, oidcIdToken);
-    } on TypeError {
-      throw const FormatException('invalid token exchange answer');
-    }
-  }
-
-  @override
-  WorkplaceIntent parseIntentResponse(dynamic data, {bool? requireHttps}) {
-    try {
-      return super.parseIntentResponse(data, requireHttps: requireHttps);
-    } on TypeError {
-      throw const FormatException('invalid Drive intent answer');
-    } on StateError {
-      throw const FormatException('Drive intent answer has no service');
-    } on ArgumentError {
-      throw const FormatException('Drive intent URL was refused');
-    }
-  }
 }

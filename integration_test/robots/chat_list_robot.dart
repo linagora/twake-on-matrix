@@ -5,6 +5,7 @@ import 'package:twake_chat/pages/chat_draft/draft_chat_view.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
 import 'package:twake_chat/pages/search/search_view.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
@@ -106,10 +107,20 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
     return getChatGroupByTitle(title).getUnreadMessage();
   }
 
+  /// The search button of the bottom bar on a phone, the field of the header
+  /// on a wide layout.
+  Future<void> _tapSearch() async {
+    final button = $(NavigationKeys.searchButton.key);
+    if (button.exists) {
+      await button.tap();
+    } else {
+      await $(TextField).tap();
+    }
+  }
+
   @override
   Future<void> openSearchScreen() async {
-    // Tap on the search TextField in the chat list to open search screen
-    await $(TextField).tap();
+    await _tapSearch();
     await $.pumpAndSettle();
 
     // Handle the contacts permission dialog before waiting for SearchView,
@@ -122,8 +133,7 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   }
 
   Future<void> openSearchScreenWithoutAcceptPermission() async {
-    // Tap on the search TextField in the chat list to open search screen
-    await $(TextField).tap();
+    await _tapSearch();
     // Verify SearchView is opened
     await $.pumpAndSettle();
     await $.waitUntilVisible($(SearchView));

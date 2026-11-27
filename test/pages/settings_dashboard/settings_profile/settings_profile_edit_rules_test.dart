@@ -41,22 +41,18 @@ void main() {
     }
   });
 
-  test('shouldOverwriteName keeps names typed or edited by the user', () {
-    const cases = <(String, String, bool, bool)>[
-      ('Alice', 'Alice', false, true),
-      ('Alice', 'Bob', false, false),
-      ('Bob', 'Bob', true, false),
+  test('shouldSyncName_withUserEdit_keepsTheTypedName', () {
+    const cases = <(String, bool)>[
+      ('', true),
+      (' Alice ', true),
+      ('Bob', false),
     ];
 
-    for (final (before, after, hadUnsavedEdit, expected) in cases) {
+    for (final (text, expected) in cases) {
       expect(
-        SettingsProfileEditRules.shouldOverwriteName(
-          textBeforeRead: before,
-          textAfterRead: after,
-          hadUnsavedEditBeforeRead: hadUnsavedEdit,
-        ),
+        SettingsProfileEditRules.shouldSyncName(text: text, shownName: 'Alice'),
         expected,
-        reason: 'before: "$before", after: "$after", edited: $hadUnsavedEdit',
+        reason: 'text: "$text"',
       );
     }
   });

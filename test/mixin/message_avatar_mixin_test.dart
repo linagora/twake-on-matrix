@@ -50,7 +50,6 @@ Future<void> main() async {
       required Event event,
       required bool selectMode,
       required bool sameSender,
-      required bool ownMessage,
       required Size screenSize,
       required bool isDirectChat,
     }) async {
@@ -91,7 +90,6 @@ Future<void> main() async {
                   widget = mockMessageAvatarUtils.placeHolderWidget(
                     (_) {},
                     sameSender: sameSender,
-                    ownMessage: ownMessage,
                     event: event,
                     context: context,
                     selectMode: selectMode,
@@ -110,7 +108,7 @@ Future<void> main() async {
     group('Web-sized screens', () {
       const webSize = Size(1200, 800);
 
-      testWidgets('Should display Avatar when Own message in group chat', (
+      testWidgets('Should return SizedBox in direct chat', (
         WidgetTester tester,
       ) async {
         await runTest(
@@ -118,23 +116,6 @@ Future<void> main() async {
           event: event,
           selectMode: false,
           sameSender: true,
-          ownMessage: true,
-          screenSize: webSize,
-          isDirectChat: false,
-        );
-        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
-        expect(find.byType(Avatar), findsOneWidget);
-      });
-
-      testWidgets('Should return SizedBox when Own message in direct chat', (
-        WidgetTester tester,
-      ) async {
-        await runTest(
-          tester,
-          event: event,
-          selectMode: false,
-          sameSender: true,
-          ownMessage: true,
           screenSize: webSize,
           isDirectChat: true,
         );
@@ -142,7 +123,7 @@ Future<void> main() async {
         expect(find.byType(SizedBox), findsOneWidget);
       });
 
-      testWidgets('Should return SizedBox when Not my message in direct chat', (
+      testWidgets('Should display Avatar in group chat', (
         WidgetTester tester,
       ) async {
         await runTest(
@@ -150,23 +131,6 @@ Future<void> main() async {
           event: event,
           selectMode: false,
           sameSender: true,
-          ownMessage: false,
-          screenSize: webSize,
-          isDirectChat: true,
-        );
-        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-        expect(find.byType(SizedBox), findsOneWidget);
-      });
-
-      testWidgets('Should return Avatar when not my message in group chat', (
-        WidgetTester tester,
-      ) async {
-        await runTest(
-          tester,
-          event: event,
-          selectMode: false,
-          sameSender: true,
-          ownMessage: false,
           screenSize: webSize,
           isDirectChat: false,
         );
@@ -182,7 +146,6 @@ Future<void> main() async {
           event: event,
           selectMode: true,
           sameSender: true,
-          ownMessage: false,
           screenSize: webSize,
           isDirectChat: true,
         );
@@ -193,7 +156,7 @@ Future<void> main() async {
     group('Mobile-sized screens', () {
       const mobileSize = Size(400, 800);
 
-      testWidgets('Should return SizedBox when Own message in group chat', (
+      testWidgets('Should return SizedBox in direct chat', (
         WidgetTester tester,
       ) async {
         await runTest(
@@ -201,23 +164,6 @@ Future<void> main() async {
           event: event,
           selectMode: false,
           sameSender: true,
-          ownMessage: true,
-          isDirectChat: false,
-          screenSize: mobileSize,
-        );
-        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-        expect(find.byType(SizedBox), findsOneWidget);
-      });
-
-      testWidgets('Should return SizedBox when Own message in direct chat', (
-        WidgetTester tester,
-      ) async {
-        await runTest(
-          tester,
-          event: event,
-          selectMode: false,
-          sameSender: true,
-          ownMessage: true,
           screenSize: mobileSize,
           isDirectChat: true,
         );
@@ -225,7 +171,11 @@ Future<void> main() async {
         expect(find.byType(SizedBox), findsOneWidget);
       });
 
-      testWidgets('Should return SizedBox when Not my message in direct chat', (
+      // The placeholder is drawn only beside a message on the left: on a
+      // phone, an own message is there with « every message on the left »
+      // alone, and it then shows my avatar like the others' (review of
+      // #3841). The sender does not change the placeholder.
+      testWidgets('Should display Avatar in group chat', (
         WidgetTester tester,
       ) async {
         await runTest(
@@ -233,23 +183,6 @@ Future<void> main() async {
           event: event,
           selectMode: false,
           sameSender: true,
-          ownMessage: false,
-          screenSize: mobileSize,
-          isDirectChat: true,
-        );
-        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
-        expect(find.byType(SizedBox), findsOneWidget);
-      });
-
-      testWidgets('Should return Avatar when Not my message in group chat', (
-        WidgetTester tester,
-      ) async {
-        await runTest(
-          tester,
-          event: event,
-          selectMode: false,
-          sameSender: true,
-          ownMessage: false,
           screenSize: mobileSize,
           isDirectChat: false,
         );
@@ -265,7 +198,6 @@ Future<void> main() async {
           event: event,
           selectMode: true,
           sameSender: true,
-          ownMessage: false,
           screenSize: mobileSize,
           isDirectChat: true,
         );

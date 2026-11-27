@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/drive/datasources_impl/drive_intent_source_impl.dart';
+import 'package:twake_chat/data/drive/sources/workplace_token_exchange.dart';
 import 'package:twake_chat/domain/drive/entities/drive_id_token.dart';
 import 'package:twake_chat/domain/drive/entities/drive_picker_options.dart';
 import 'package:twake_chat/domain/drive/entities/drive_session.dart';
@@ -56,7 +57,12 @@ void main() {
         ),
       );
     }
-    return DriveIntentSourceImpl(dio: dio, requireHttps: requireHttps);
+    return DriveIntentSourceImpl(
+      exchange: WorkplaceTokenExchangeImpl(
+        dio: dio,
+        requireHttps: requireHttps,
+      ),
+    );
   }
 
   Future<dynamic> create({
@@ -167,7 +173,7 @@ void main() {
       ]);
     });
 
-    test('a renewal on another workplace is refused, not followed', () async {
+    test('a token for another workplace is never sent there', () async {
       onExchange = (options) => jsonResponse({'error': 'stale'}, 401);
       renew = () async => DriveSession(
         idToken: DriveIdToken(value: 'second', expiresAt: DateTime.utc(2030)),
@@ -267,6 +273,21 @@ void main() {
 
       await expectLater(create(), throwsA(isA<DriveIntentFailed>()));
     });
+
+    for (final token in ['', '  ']) {
+      test(
+        'a blank exchanged token "$token" fails, no intent requested',
+        () async {
+          onExchange = (options) => jsonResponse({'access_token': token});
+
+          await expectLater(create(), throwsA(isA<DriveIntentFailed>()));
+          expect(
+            adapter.requests.where((request) => request.uri.path == '/intents'),
+            isEmpty,
+          );
+        },
+      );
+    }
 
     test('an intent with no service fails the intent', () async {
       onIntents = (options) => jsonResponse({

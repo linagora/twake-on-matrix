@@ -1,19 +1,16 @@
 import 'dart:async';
 
-import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/repository/capabilities/server_capabilities_repository.provider.dart';
-import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:twake_chat/data/repository/user_info_repository.provider.dart';
 import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/domain/repository/capabilities/server_capabilities_repository.dart';
-import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
+
+import '../../../domain/user_info/fake_user_info_repository.dart';
 
 class _CountingRepository implements ServerCapabilitiesRepository {
   int calls = 0;
@@ -51,26 +48,20 @@ const _locked = ProfileEditCapabilities(
   canEditDisplayName: false,
 );
 
-class _CountingUserInfoInteractor extends Fake
-    implements GetUserInfoInteractor {
+class _CountingUserInfoRepository extends FakeUserInfoRepository {
   int calls = 0;
 
   @override
-  Stream<Either<Failure, Success>> execute({String? userId}) async* {
+  Future<UserInfo> getUserInfo(String userId) {
     calls++;
-    yield Right(GetUserInfoSuccess(UserInfo(uid: userId)));
+    return super.getUserInfo(userId);
   }
 }
 
 void main() {
-  late _CountingUserInfoInteractor userInfoInteractor;
+  late _CountingUserInfoRepository userInfoRepository;
 
-  setUp(() {
-    userInfoInteractor = _CountingUserInfoInteractor();
-    GetIt.instance.registerSingleton<GetUserInfoInteractor>(userInfoInteractor);
-  });
-
-  tearDown(GetIt.instance.reset);
+  setUp(() => userInfoRepository = _CountingUserInfoRepository());
 
   testWidgets('build_withCapabilitiesAndUserInfo_loadsEachOnce', (
     tester,
@@ -86,6 +77,7 @@ void main() {
         retry: (_, _) => null,
         overrides: [
           serverCapabilitiesRepositoryProvider.overrideWithValue(repository),
+          userInfoRepositoryProvider.overrideWithValue(userInfoRepository),
         ],
         child: SettingsProfileCapabilityCheck(
           userId: '@me:server',
@@ -101,7 +93,7 @@ void main() {
 
     // Assert
     expect(repository.calls, 1);
-    expect(userInfoInteractor.calls, 1);
+    expect(userInfoRepository.calls, 1);
     expect(capabilities?.canEditAvatar, isFalse);
     expect(capabilities?.canEditDisplayName, isTrue);
     expect(userInfo?.uid, '@me:server');
@@ -134,6 +126,7 @@ void main() {
           serverCapabilitiesRepositoryProvider.overrideWith(
             (ref) => _ScriptedRepository(responses),
           ),
+          userInfoRepositoryProvider.overrideWithValue(userInfoRepository),
         ],
       );
       shown = true;

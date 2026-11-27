@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/domain/personalization/display_preferences.dart';
+import 'package:twake_chat/domain/personalization/room_sections.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -56,6 +59,11 @@ class _RoomListSliver extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final content = ref.watch(roomListContentProvider(activeRoomId));
+    final bySections = ref.watch(
+      displayPreferencesProvider.select(
+        (preferences) => preferences.roomOrder == RoomOrder.sections,
+      ),
+    );
     final entryById = {for (final entry in content.visible) entry.id: entry};
     return ChatListSortRooms(
       rooms: rooms,
@@ -66,11 +74,15 @@ class _RoomListSliver extends ConsumerWidget {
           return const SliverToBoxAdapter();
         }
         final roomById = {for (final room in sortedRooms) room.id: room};
-        final rows = buildRoomListRows(
-          <RoomListEntry>[for (final room in sortedRooms) ?entryById[room.id]],
-          foldedSpaceIds: content.foldedSpaceIds,
-          joinableBySpace: content.joinableBySpace,
-        );
+        final visible = <RoomListEntry>[
+          for (final room in sortedRooms) ?entryById[room.id],
+        ];
+        final rows =
+            (bySections ? buildSectionedRoomListRows : buildRoomListRows)(
+              visible,
+              foldedSpaceIds: content.foldedSpaceIds,
+              joinableBySpace: content.joinableBySpace,
+            );
         final indexByKey = {
           for (final (index, row) in rows.indexed) row.key: index,
         };
@@ -83,6 +95,10 @@ class _RoomListSliver extends ConsumerWidget {
         return SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) => switch (rows[index]) {
+              final RoomListSectionTitleRow row => _SectionTitle(
+                key: ValueKey(row.key),
+                kind: row.kind,
+              ),
               final RoomListJoinableRow row => JoinableSubspaceRow(
                 key: ValueKey(row.key),
                 row: row,
@@ -109,6 +125,31 @@ class _RoomListSliver extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({super.key, required this.kind});
+
+  final RoomSectionKind kind;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    return Padding(
+      padding: ChatListViewStyle.paddingSectionTitle,
+      child: Text(
+        switch (kind) {
+          RoomSectionKind.unread => l10n.unread,
+          RoomSectionKind.spaces => l10n.roomSectionSpaces,
+          RoomSectionKind.directs => l10n.directChats,
+          RoomSectionKind.groups => l10n.groups,
+        },
+        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
     );
   }
 }

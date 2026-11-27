@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills.dart';
 
 import 'activity_test_support.dart';
 
@@ -44,7 +45,7 @@ void main() {
     );
 
     final labels = find.descendant(
-      of: find.byType(ChoiceChip),
+      of: find.byType(FilterPill),
       matching: find.byType(Text),
     );
     expect(labels, findsNWidgets(4));

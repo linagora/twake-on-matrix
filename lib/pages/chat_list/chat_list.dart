@@ -1,3 +1,4 @@
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
@@ -40,8 +41,10 @@ import 'package:matrix/matrix.dart';
 
 import '../../widgets/matrix.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class ChatList extends StatefulWidget {
+class ChatList extends ConsumerStatefulWidget {
   final ValueNotifier<String?> activeRoomIdNotifier;
 
   final Widget? bottomNavigationBar;
@@ -50,19 +53,29 @@ class ChatList extends StatefulWidget {
 
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
 
+  /// See [ChatListView.searchOpen].
+  final ValueNotifier<bool>? searchOpen;
+  final Widget? searchResults;
+
+  /// See [ChatListView.searchStyle].
+  final ChatListSearchStyle searchStyle;
+
   const ChatList({
     super.key,
     required this.activeRoomIdNotifier,
     this.bottomNavigationBar,
     this.onOpenSettings,
     this.adaptiveScaffoldBodyArgs,
+    this.searchOpen,
+    this.searchResults,
+    this.searchStyle = ChatListSearchStyle.bottomBar,
   });
 
   @override
   ChatListController createState() => ChatListController();
 }
 
-class ChatListController extends State<ChatList>
+class ChatListController extends ConsumerState<ChatList>
     with
         AutomaticKeepAliveClientMixin,
         TickerProviderStateMixin,
@@ -117,23 +130,27 @@ class ChatListController extends State<ChatList>
       .any((conversation) => !_containUnreadMessage(conversation));
 
   bool _containUnreadMessage(ConversationSelectionPresentation conversation) {
-    final room = Matrix.of(context).client.getRoomById(conversation.roomId);
+    final room = ref
+        .read(matrixClientProvider)
+        .getRoomById(conversation.roomId);
     return room != null &&
         (room.isUnreadOrInvitedWithThreads || room.hasNewMessagesWithThreads);
   }
 
   bool get anySelectedRoomNotFavorite =>
       conversationSelectionNotifier.value.any(
-        (conversation) => !Matrix.of(
-          context,
-        ).client.getRoomById(conversation.roomId)!.isFavourite,
+        (conversation) => !ref
+            .read(matrixClientProvider)
+            .getRoomById(conversation.roomId)!
+            .isFavourite,
       );
 
   bool get anySelectedRoomNotMuted => conversationSelectionNotifier.value.any(
     (conversation) =>
-        Matrix.of(
-          context,
-        ).client.getRoomById(conversation.roomId)!.pushRuleState ==
+        ref
+            .read(matrixClientProvider)
+            .getRoomById(conversation.roomId)!
+            .pushRuleState ==
         PushRuleState.notify,
   );
 
@@ -722,6 +739,9 @@ class ChatListController extends State<ChatList>
         bottomNavigationBar: widget.bottomNavigationBar,
         onOpenSearchPageInMultipleColumns: onOpenSearchPageInMultipleColumns,
         onTapBottomNavigation: _onTapBottomNavigation,
+        searchOpen: widget.searchOpen,
+        searchResults: widget.searchResults,
+        searchStyle: widget.searchStyle,
       ),
     );
   }

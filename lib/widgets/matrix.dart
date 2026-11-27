@@ -158,7 +158,6 @@ class MatrixState extends ConsumerState<Matrix>
   XFile? loginAvatar;
   String? loginUsername;
   String? loginType;
-  bool? loginRegistrationSupported;
 
   bool waitForFirstSync = false;
 
@@ -548,7 +547,6 @@ class MatrixState extends ConsumerState<Matrix>
       accountsProvider,
       (_, _) => _httpClientOwner = _currentHttpClientOwner(),
     );
-    _preloadMessageAlignmentSetting();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         _switchEffects.set(this);
@@ -1903,28 +1901,6 @@ class MatrixState extends ConsumerState<Matrix>
     client.backgroundSync = foreground;
     client.syncPresence = foreground ? null : PresenceType.unavailable;
     backgroundPush?.clearAllNotifications();
-  }
-
-  void _preloadMessageAlignmentSetting() {
-    store
-        .getItemBool(
-          SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
-          AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
-        )
-        .then((value) {
-          if (!mounted ||
-              AppConfig.enableRightAndLeftMessageAlignmentOnWeb == value) {
-            return;
-          }
-          // The flag is a plain static that nothing listens to, so a rebuild
-          // has to be requested explicitly for already-mounted descendants.
-          setState(() {
-            AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value;
-          });
-        })
-        .catchError((Object e, StackTrace s) {
-          Logs().w('MatrixState::_preloadMessageAlignmentSetting: error', e, s);
-        });
   }
 
   Future<void> initSettings() async {

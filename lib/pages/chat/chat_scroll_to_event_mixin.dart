@@ -731,6 +731,7 @@ extension ChatScrollToEventMixin on ChatController {
     return AlbumTimelineIndex(
           visible,
           breakBefore: unreadReceivedMessageLocation,
+          threadRootIds: liveThreadRootIds,
         ).albumLeaderOf(eventId) ??
         eventId;
   }

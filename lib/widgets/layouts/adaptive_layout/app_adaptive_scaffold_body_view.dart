@@ -2,8 +2,10 @@ import 'package:twake_chat/config/first_column_inner_routes.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/activity/activity_page.dart';
+import 'package:twake_chat/pages/chat_list/browse_public_groups_button.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
+import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation.dart';
@@ -25,6 +27,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   final PageController pageController;
   final OnPopInvoked onPopInvoked;
   final VoidCallback onOpenSettings;
+  final ValueNotifier<bool>? searchOpen;
+  final TextEditingController? searchQuery;
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
   final ValueNotifier<Profile?> currentProfile;
   final ValueNotifier<String?> activeRoomIdNotifier;
@@ -39,6 +43,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
     required this.destinations,
     required this.onPopInvoked,
     required this.onOpenSettings,
+    this.searchOpen,
+    this.searchQuery,
     this.adaptiveScaffoldBodyArgs,
     required this.currentProfile,
   });
@@ -119,6 +125,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                   onClientSelected: onClientSelected,
                                   destinations: destinations,
                                   onOpenSettings: onOpenSettings,
+                                  searchOpen: searchOpen,
+                                  searchQuery: searchQuery,
                                   adaptiveScaffoldBodyArgs:
                                       adaptiveScaffoldBodyArgs,
                                 );
@@ -144,6 +152,8 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                       onClientSelected: onClientSelected,
                       destinations: destinations,
                       onOpenSettings: onOpenSettings,
+                      searchOpen: searchOpen,
+                      searchQuery: searchQuery,
                       adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
                     ),
                   ),
@@ -171,6 +181,8 @@ class _ColumnPageView extends StatelessWidget {
   final OnClientSelectedSetting onClientSelected;
   final ValueNotifier<String?> activeRoomIdNotifier;
   final VoidCallback onOpenSettings;
+  final ValueNotifier<bool>? searchOpen;
+  final TextEditingController? searchQuery;
   final AbsAppAdaptiveScaffoldBodyArgs? adaptiveScaffoldBodyArgs;
 
   const _ColumnPageView({
@@ -181,6 +193,8 @@ class _ColumnPageView extends StatelessWidget {
     required this.onClientSelected,
     required this.destinations,
     required this.onOpenSettings,
+    required this.searchOpen,
+    required this.searchQuery,
     required this.adaptiveScaffoldBodyArgs,
   });
 
@@ -199,11 +213,19 @@ class _ColumnPageView extends StatelessWidget {
         ChatList(
           bottomNavigationBar: _triggerPageViewBuilder(
             navigatorBarType: AdaptiveDestinationEnum.rooms,
-            navigatorBarWidget: _bottomNavigationBarBuilder(context),
+            navigatorBarWidget: _bottomNavigationBarBuilder(
+              context,
+              withSearch: true,
+            ),
           ),
           activeRoomIdNotifier: activeRoomIdNotifier,
           onOpenSettings: onOpenSettings,
           adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
+          searchOpen: searchOpen,
+          searchResults: Search(
+            embedded: true,
+            textEditingController: searchQuery,
+          ),
         ),
         if (destinations.contains(AdaptiveDestinationEnum.activity))
           _triggerPageViewBuilder(
@@ -237,18 +259,30 @@ class _ColumnPageView extends StatelessWidget {
     );
   }
 
-  Widget _bottomNavigationBarBuilder(BuildContext context) {
+  /// [withSearch]: the bar of the Chats tab, with its search button.
+  Widget _bottomNavigationBarBuilder(
+    BuildContext context, {
+    bool withSearch = false,
+  }) {
     return SlotLayout(
       config: <Breakpoint, SlotLayoutConfig>{
         const WidthPlatformBreakpoint(
           end: ResponsiveUtils.minDesktopWidth,
         ): SlotLayout.from(
           key: NavigationKeys.bottomNavigation.valueKey,
-          builder: (_) => FloatingNavigationBar(
-            destinations: destinations,
-            selected: activeNavigationBarNotifier.value,
-            onDestinationSelected: onDestinationSelected,
-          ),
+          builder: (context) {
+            // The search of the bar is the phone's: wider, the header keeps
+            // its field.
+            final search = withSearch && ResponsiveUtils().isMobile(context);
+            return FloatingNavigationBar(
+              destinations: destinations,
+              selected: activeNavigationBarNotifier.value,
+              onDestinationSelected: onDestinationSelected,
+              searchOpen: search ? searchOpen : null,
+              searchQuery: search ? searchQuery : null,
+              searchSuffix: search ? const BrowsePublicGroupsButton() : null,
+            );
+          },
         ),
       },
     );

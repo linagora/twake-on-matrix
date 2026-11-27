@@ -2,6 +2,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart'
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
+import 'package:twake_chat/pages/chat/events/message/reply_content_widget.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
@@ -34,6 +35,10 @@ import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:twake_chat/domain/personalization/display_preferences.dart';
+import 'package:twake_chat/pages/chat/seen_readers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -43,7 +48,7 @@ import 'package:pull_down_button/pull_down_button.dart';
 
 typedef ContextMenuBuilder = List<Widget> Function(BuildContext context);
 
-class MessageContentWithTimestampBuilder extends StatefulWidget {
+class MessageContentWithTimestampBuilder extends ConsumerStatefulWidget {
   final Event event;
   final MatrixState? matrixState;
   final Event? nextEvent;
@@ -55,6 +60,9 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final ValueNotifier<String?> isHoverNotifier;
   final bool selected;
   final Timeline timeline;
+
+  /// Who stopped reading at this own message, from the list of the chat.
+  final List<User> readers;
   final List<ContextMenuItemAction> listHorizontalActionMenu;
   final OnMenuAction? onMenuAction;
   final bool selectMode;
@@ -116,6 +124,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.selected = false,
     this.selectMode = true,
     required this.timeline,
+    this.readers = const [],
     required this.isHoverNotifier,
     required this.listHorizontalActionMenu,
     required this.maxWidth,
@@ -169,10 +178,12 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     required bool canReply,
     required bool canReport,
     required bool canEditCaption,
+    bool canStartThread = false,
   }) {
     final hasCaption = members.last.isCaptionModeOrReply();
     return [
       if (canReply) MessageContextMenuAction.reply,
+      if (canStartThread) MessageContextMenuAction.startThread,
       MessageContextMenuAction.forward,
       if (hasCaption) MessageContextMenuAction.copy,
       if (canReport) MessageContextMenuAction.report,
@@ -187,12 +198,12 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   }
 
   @override
-  State<MessageContentWithTimestampBuilder> createState() =>
+  ConsumerState<MessageContentWithTimestampBuilder> createState() =>
       _MessageContentWithTimestampBuilderState();
 }
 
 class _MessageContentWithTimestampBuilderState
-    extends State<MessageContentWithTimestampBuilder>
+    extends ConsumerState<MessageContentWithTimestampBuilder>
     with TwakeContextMenuMixin {
   final ValueNotifier<bool> _displayEmojiPicker = ValueNotifier(false);
   final ResponsiveUtils _responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -225,6 +236,7 @@ class _MessageContentWithTimestampBuilderState
       canReply: event.room.canSendDefaultMessages,
       canReport: event.room.canReportContent,
       canEditCaption: album.last.canEditEvents(widget.matrixState),
+      canStartThread: widget.onStartThread != null,
     );
   }
 
@@ -277,6 +289,11 @@ class _MessageContentWithTimestampBuilderState
 
   @override
   Widget build(BuildContext context) {
+    // The helpers read these: some also build the preview of a dialog.
+    ref.watch(alignOwnMessagesRightProvider);
+    ref.watch(
+      displayPreferencesProvider.select((preferences) => preferences.seenStyle),
+    );
     final displayTime =
         widget.event.type == EventTypes.RoomCreate ||
         widget.nextEvent == null ||
@@ -315,7 +332,7 @@ class _MessageContentWithTimestampBuilderState
         child: Align(
           alignment: MessageStyle.messageAlignmentGeometry(
             widget.event,
-            context,
+            ref.read(alignOwnMessagesRightProvider),
           ),
           child: _messageContentWithTimestampBuilder(
             context: context,
@@ -332,12 +349,16 @@ class _MessageContentWithTimestampBuilderState
     required bool displayTime,
     required bool timelineText,
   }) {
+    final alignOwnRight = ref.read(alignOwnMessagesRightProvider);
     return Row(
       mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MessageStyle.messageAlignment(widget.event, context),
+      mainAxisAlignment: MessageStyle.messageAlignment(
+        widget.event,
+        alignOwnRight,
+      ),
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        if (widget.event.shouldDisplayContextMenuInLeftBubble &&
+        if (widget.event.shouldDisplayContextMenuInLeftBubble(alignOwnRight) &&
             !_responsiveUtils.isMobile(context) &&
             !widget.event.redacted)
           _menuActionsRowBuilder(context, isReversed: true),
@@ -347,9 +368,10 @@ class _MessageContentWithTimestampBuilderState
               : null,
           listActions: widget.listActions,
           child: Container(
-            alignment: widget.event.isOwnMessage
-                ? Alignment.topRight
-                : Alignment.topLeft,
+            alignment: MessageStyle.messageAlignmentGeometry(
+              widget.event,
+              alignOwnRight,
+            ),
             padding: MessageStyle.paddingMessageContainer(
               displayTime,
               context,
@@ -363,7 +385,7 @@ class _MessageContentWithTimestampBuilderState
             ),
           ),
         ),
-        if (widget.event.shouldDisplayContextMenuInRightBubble &&
+        if (widget.event.shouldDisplayContextMenuInRightBubble(alignOwnRight) &&
             !_responsiveUtils.isMobile(context) &&
             !widget.event.redacted)
           _menuActionsRowBuilder(context),
@@ -598,8 +620,9 @@ class _MessageContentWithTimestampBuilderState
         widget.onSaveAlbumToGallery?.call(targets);
       case MessageContextMenuAction.delete:
         widget.onDeleteAlbum?.call(context, targets);
+      case MessageContextMenuAction.startThread:
+        widget.onStartThread?.call(targets.single);
       case MessageContextMenuAction.copyLink ||
-          MessageContextMenuAction.startThread ||
           MessageContextMenuAction.saveToDownload ||
           MessageContextMenuAction.trySendAgain:
         break;
@@ -675,9 +698,10 @@ class _MessageContentWithTimestampBuilderState
       widget.previousEvent,
     );
     final showTail = !isDisplayOnlyEmoji && !hasSameSenderBelow;
-    final alignOwnMessageRight =
-        widget.event.isOwnMessage &&
-        _responsiveUtils.enableRightAndLeftMessageAlignment(context);
+    final alignOwnMessageRight = widget.event
+        .shouldAlignOwnMessageInDifferentSide(
+          ref.read(alignOwnMessagesRightProvider),
+        );
     final tailDirection = showTail
         ? (alignOwnMessageRight
               ? BubbleTailDirection.right
@@ -708,7 +732,6 @@ class _MessageContentWithTimestampBuilderState
       timeline: widget.timeline,
       onSelect: widget.onSelect,
       nextEvent: widget.nextEvent,
-      scrollToEventId: widget.scrollToEventId,
       selectMode: widget.selectMode,
       onRetryTextMessage: widget.onRetryTextMessage,
       inThread: widget.inThread,
@@ -791,24 +814,80 @@ class _MessageContentWithTimestampBuilderState
         : null;
 
     if (isDisplayOnlyEmoji) {
-      return MessageBubble.plain(
+      return _withReaders(
+        MessageBubble.plain(
+          key: key,
+          constraints: bubbleConstraints,
+          isAlignedToEnd: alignOwnMessageRight,
+          reactions: reactions,
+          child: bubbleContent,
+        ),
+        alignEnd: alignOwnMessageRight,
+      );
+    }
+    final bubble = _withReaders(
+      MessageBubble(
         key: key,
+        isOwnMessage: widget.event.isOwnMessage,
+        tailDirection: tailDirection,
+        contentType: bubbleContentType,
+        padding: card != null ? EdgeInsets.zero : null,
         constraints: bubbleConstraints,
         isAlignedToEnd: alignOwnMessageRight,
         reactions: reactions,
         child: bubbleContent,
-      );
-    }
-    return MessageBubble(
-      key: key,
-      isOwnMessage: widget.event.isOwnMessage,
-      tailDirection: tailDirection,
-      contentType: bubbleContentType,
-      padding: card != null ? EdgeInsets.zero : null,
-      constraints: bubbleConstraints,
-      isAlignedToEnd: alignOwnMessageRight,
-      reactions: reactions,
-      child: bubbleContent,
+      ),
+      alignEnd: alignOwnMessageRight,
+    );
+    if (!widget.event.isReplyEvent()) return bubble;
+
+    final alignment = alignOwnMessageRight
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start;
+    return ReplyColumn(
+      crossAxisAlignment: alignment,
+      children: [
+        ConstrainedBox(
+          constraints: bubbleConstraints,
+          child: ReplyContentWidget(
+            event: widget.event,
+            timeline: widget.timeline,
+            scrollToEventId: widget.scrollToEventId,
+            alignment: alignment,
+          ),
+        ),
+        bubble,
+      ],
+    );
+  }
+
+  /// [bubble], with under it who stopped reading at this own message, in the
+  /// seen style chosen (the ticks are in the time of the bubble).
+  Widget _withReaders(Widget bubble, {required bool alignEnd}) {
+    final style = ref.read(
+      displayPreferencesProvider.select((preferences) => preferences.seenStyle),
+    );
+    if (style == SeenStyle.ticks || !widget.event.isOwnMessage) return bubble;
+    final readers = widget.readers;
+    if (readers.isEmpty) return bubble;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        bubble,
+        Padding(
+          padding: MessageStyle.paddingSeenReaders,
+          child: SeenReaders(
+            style: style,
+            readers: [
+              for (final user in readers)
+                (name: user.calcDisplayname(), avatar: user.avatarUrl),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -830,7 +909,8 @@ class _MessageContentWithTimestampBuilderState
   bool _hideDisplayName(BuildContext context) {
     return widget.event.hideDisplayName(
       widget.nextEvent,
-      _responsiveUtils.isMobile(context),
+      isMobile: _responsiveUtils.isMobile(context),
+      alignOwnRight: ref.read(alignOwnMessagesRightProvider),
     );
   }
 

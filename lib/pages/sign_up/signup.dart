@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/sign_up/signup_view.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:go_router/go_router.dart';
 import '../../utils/localized_exception_extension.dart';
 
-class SignupPage extends StatefulWidget {
+class SignupPage extends ConsumerStatefulWidget {
   const SignupPage({super.key});
 
   @override
   SignupPageController createState() => SignupPageController();
 }
 
-class SignupPageController extends State<SignupPage> {
+class SignupPageController extends ConsumerState<SignupPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController password2Controller = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -83,7 +85,7 @@ class SignupPageController extends State<SignupPage> {
     });
 
     try {
-      final client = await Matrix.of(context).getLoginClient();
+      final client = await ref.read(loginSessionsProvider).loginClient();
       final email = emailController.text;
       if (email.isNotEmpty) {
         Matrix.of(context).currentClientSecret = DateTime.now()

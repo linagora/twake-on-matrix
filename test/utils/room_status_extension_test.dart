@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -195,6 +196,255 @@ void main() {
       );
 
       expect(ids(fromStore), [userA]);
+    });
+  });
+
+  group('readers stopped at, by own event, once per timeline', () {
+    const theirs = r'$theirs';
+    const ownSticker = r'$ownSticker';
+    const ownText = r'$ownText';
+    const theirsOlder = r'$theirsOlder';
+    const ownOldest = r'$ownOldest';
+
+    Event typedEvent(
+      Room room,
+      String eventId, {
+      String sender = ownUserId,
+      String type = EventTypes.Message,
+    }) => Event(
+      eventId: eventId,
+      senderId: sender,
+      type: type,
+      content: switch (type) {
+        EventTypes.Sticker => {
+          'body': 'a sticker',
+          'url': 'mxc://example.com/sticker',
+          'info': <String, Object?>{},
+        },
+        EventTypes.Reaction => {
+          'm.relates_to': {
+            'rel_type': 'm.annotation',
+            'event_id': ownText,
+            'key': '👍',
+          },
+        },
+        _ => {'msgtype': 'm.text', 'body': 'hello'},
+      },
+      originServerTs: DateTime.fromMillisecondsSinceEpoch(0),
+      room: room,
+    );
+
+    /// Newest first: their message, my sticker, my text, their older
+    /// message, my oldest text.
+    MockTimeline conversation(Room room) {
+      final timeline = MockTimeline();
+      when(timeline.events).thenReturn([
+        typedEvent(room, theirs, sender: userB),
+        typedEvent(room, ownSticker, type: EventTypes.Sticker),
+        typedEvent(room, ownText),
+        typedEvent(room, theirsOlder, sender: userB),
+        typedEvent(room, ownOldest),
+      ]);
+      return timeline;
+    }
+
+    /// The reader ids under each own event that has any.
+    Map<String, List<String>> shape(Map<String, List<User>> byEvent) => {
+      for (final MapEntry(:key, :value) in byEvent.entries)
+        if (value.isNotEmpty) key: ids(value)..sort(),
+    };
+
+    test('an empty timeline: no reader anywhere', () {
+      final room = buildRoom(receipts: {userA: target});
+
+      expect(shape(room.readersStoppedAtByEvent(buildTimeline(room, []))), {});
+    });
+
+    test('no receipt: no reader anywhere', () {
+      final room = buildRoom();
+
+      expect(shape(room.readersStoppedAtByEvent(conversation(room))), {});
+    });
+
+    test('a reader whose receipt is on my message is under it', () {
+      final room = buildRoom(receipts: {userA: ownText});
+
+      expect(shape(room.readersStoppedAtByEvent(conversation(room))), {
+        ownText: [userA],
+      });
+    });
+
+    test('a reader whose receipt is on their message between two of mine is '
+        'under my older one', () {
+      final room = buildRoom(receipts: {userA: theirsOlder});
+
+      expect(shape(room.readersStoppedAtByEvent(conversation(room))), {
+        ownOldest: [userA],
+      });
+    });
+
+    test('a reader whose receipt is on their message after my last one is '
+        'under my last one', () {
+      final room = buildRoom(receipts: {userA: newest});
+      final timeline = MockTimeline();
+      when(timeline.events).thenReturn([
+        typedEvent(room, newest, sender: userB),
+        typedEvent(room, target),
+        typedEvent(room, older),
+      ]);
+
+      expect(shape(room.readersStoppedAtByEvent(timeline)), {
+        target: [userA],
+      });
+    });
+
+    test('my sticker is my message: a reader past it is under the sticker '
+        'only, not under my text before it too', () {
+      final room = buildRoom(receipts: {userA: theirs});
+
+      expect(shape(room.readersStoppedAtByEvent(conversation(room))), {
+        ownSticker: [userA],
+      });
+    });
+
+    test('my reaction is not a message: a reader past it is under my last '
+        'message', () {
+      const ownReaction = r'$ownReaction';
+      final room = buildRoom(receipts: {userA: ownReaction});
+      final timeline = MockTimeline();
+      when(timeline.events).thenReturn([
+        typedEvent(room, ownReaction, type: EventTypes.Reaction),
+        typedEvent(room, ownText),
+        typedEvent(room, ownOldest),
+      ]);
+
+      expect(shape(room.readersStoppedAtByEvent(timeline)), {
+        ownText: [userA],
+      });
+    });
+
+    // Review of #3842: my edit and my thread reply are events of the timeline
+    // the chat does not draw as a row. A reader stopped at one of them shows
+    // under my latest message the chat draws.
+    group('my latest events hidden in the chat', () {
+      const ownEdit = r'$ownEdit';
+      const ownThreadReply = r'$ownThreadReply';
+      final threadsWere = AppConfig.threadsEnabled;
+
+      setUp(() => AppConfig.threadsEnabled = true);
+      tearDown(() => AppConfig.threadsEnabled = threadsWere);
+
+      Event ownRelated(
+        Room room,
+        String eventId, {
+        required String relType,
+        required String target,
+      }) => Event(
+        eventId: eventId,
+        senderId: ownUserId,
+        type: EventTypes.Message,
+        content: {
+          'msgtype': 'm.text',
+          'body': '* hello again',
+          if (relType == RelationshipTypes.edit)
+            'm.new_content': {'msgtype': 'm.text', 'body': 'hello again'},
+          'm.relates_to': {'rel_type': relType, 'event_id': target},
+        },
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(0),
+        room: room,
+      );
+
+      test('a reader whose receipt is on my edit is under the message I '
+          'edited, my latest one the chat draws', () {
+        final room = buildRoom(receipts: {userA: ownEdit});
+        final timeline = MockTimeline();
+        when(timeline.events).thenReturn([
+          ownRelated(
+            room,
+            ownEdit,
+            relType: RelationshipTypes.edit,
+            target: ownText,
+          ),
+          typedEvent(room, ownText),
+          typedEvent(room, theirsOlder, sender: userB),
+          typedEvent(room, ownOldest),
+        ]);
+
+        expect(shape(room.readersStoppedAtByEvent(timeline)), {
+          ownText: [userA],
+        });
+      });
+
+      test('a reader whose receipt is on my thread reply is under my latest '
+          'message of the chat, not under the reply', () {
+        final room = buildRoom(receipts: {userA: ownThreadReply});
+        final timeline = MockTimeline();
+        when(timeline.events).thenReturn([
+          ownRelated(
+            room,
+            ownThreadReply,
+            relType: RelationshipTypes.thread,
+            target: ownOldest,
+          ),
+          typedEvent(room, ownText),
+          typedEvent(room, theirsOlder, sender: userB),
+          typedEvent(room, ownOldest),
+        ]);
+
+        expect(shape(room.readersStoppedAtByEvent(timeline)), {
+          ownText: [userA],
+        });
+      });
+    });
+
+    test('each reader is under exactly one of my events', () {
+      final room = buildRoom(
+        receipts: {userA: theirs, userB: ownText},
+        mainThreadReceipts: {userA: ownOldest},
+      );
+
+      final readers = [
+        for (final users
+            in room.readersStoppedAtByEvent(conversation(room)).values)
+          ...ids(users),
+      ];
+
+      expect(readers, unorderedEquals([userA, userB]));
+    });
+
+    test('readers who stopped at the same message are under it together', () {
+      final room = buildRoom(receipts: {userA: ownText, userB: ownText});
+
+      expect(shape(room.readersStoppedAtByEvent(conversation(room))), {
+        ownText: [userA, userB],
+      });
+    });
+
+    test('with a main thread receipt too, a reader is under the newest of my '
+        'messages they read', () {
+      final room = buildRoom(
+        receipts: {userA: ownOldest},
+        mainThreadReceipts: {userA: ownText},
+      );
+
+      expect(shape(room.readersStoppedAtByEvent(conversation(room))), {
+        ownText: [userA],
+      });
+    });
+
+    test('a receipt on an event the timeline does not hold: no reader '
+        'anywhere', () {
+      final room = buildRoom(receipts: {userA: r'$unknown'});
+
+      expect(shape(room.readersStoppedAtByEvent(conversation(room))), {});
+    });
+
+    test('their messages are never keys: only my events hold readers', () {
+      final room = buildRoom(receipts: {userA: theirs, userB: theirsOlder});
+
+      final keys = shape(room.readersStoppedAtByEvent(conversation(room))).keys;
+
+      expect(keys, everyElement(isIn([ownSticker, ownText, ownOldest])));
     });
   });
 

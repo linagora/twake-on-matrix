@@ -1,10 +1,9 @@
 import 'package:dartz/dartz.dart' hide State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
+import 'package:twake_chat/domain/profile/entities/account_profile.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile_style.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
-import 'package:twake_chat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/secondary_avatar.dart';
@@ -15,7 +14,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 typedef OnTapMultipleAccountsButton =
-    void Function(List<TwakeChatPresentationAccount> multipleAccounts);
+    void Function(List<AccountProfile> accounts);
 
 class SettingsProfileViewMobile extends StatefulWidget {
   final ValueNotifier<Either<Failure, Success>> settingsProfileUIState;
@@ -24,10 +23,13 @@ class SettingsProfileViewMobile extends StatefulWidget {
   final VoidCallback? onTapAvatar;
   final List<Widget>? menuChildren;
   final MenuController? menuController;
-  final ValueNotifier<Either<Failure, Success>> settingsMultiAccountsUIState;
+  final bool isLoadingAccounts;
+
+  /// Null when the accounts could not be read.
+  final List<AccountProfile>? accounts;
   final Client client;
   final Function(MatrixFile) onImageLoaded;
-  final ValueNotifier<Profile?> currentProfile;
+  final AccountProfile? currentProfile;
   final bool canEditAvatar;
   final AnimationController animationController;
   final VoidCallback onAvatarInfoTap;
@@ -42,7 +44,8 @@ class SettingsProfileViewMobile extends StatefulWidget {
     required this.settingsProfileUIState,
     required this.client,
     required this.onTapMultipleAccountsButton,
-    required this.settingsMultiAccountsUIState,
+    required this.isLoadingAccounts,
+    required this.accounts,
     required this.onImageLoaded,
     required this.canEditAvatar,
     required this.animationController,
@@ -178,121 +181,25 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
         ),
         const Expanded(child: SizedBox()),
         if (PlatformInfos.isMobile)
-          ValueListenableBuilder(
-            valueListenable: widget.settingsMultiAccountsUIState,
-            builder: (context, uiState, child) => uiState.fold(
-              (failure) => child!,
-              (success) {
-                if (success is GetClientsLoadingUIState) {
-                  return Container(
-                    width: double.infinity,
-                    height: SettingsProfileViewMobileStyle.bottomButtonHeight,
-                    padding: SettingsProfileViewMobileStyle.paddingBottomButton,
-                    margin: SettingsProfileViewMobileStyle.marginBottomButton,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        SettingsProfileViewMobileStyle.bottomButtonRadius,
-                      ),
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    alignment: Alignment.center,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Transform.scale(
-                          scale: SettingsProfileViewMobileStyle.indicatorScale,
-                          child: CircularProgressIndicator(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            strokeWidth: SettingsProfileViewMobileStyle
-                                .indicatorStrokeWidth,
-                          ),
-                        ),
-                        SettingsProfileViewMobileStyle.paddingIconAndText,
-                        Text(
-                          L10n.of(context)!.loadingPleaseWait,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.onPrimary,
-                              ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (success is GetClientsSuccessUIState) {
-                  return InkWell(
-                    onTap: () => widget.onTapMultipleAccountsButton.call(
-                      success.multipleAccounts,
-                    ),
-                    highlightColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    child: Container(
-                      width: double.infinity,
-                      height: SettingsProfileViewMobileStyle.bottomButtonHeight,
-                      padding:
-                          SettingsProfileViewMobileStyle.paddingBottomButton,
-                      margin: SettingsProfileViewMobileStyle.marginBottomButton,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                          SettingsProfileViewMobileStyle.bottomButtonRadius,
-                        ),
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            success.haveMultipleAccounts
-                                ? Icons.group_outlined
-                                : Icons.person_add_alt_outlined,
-                            size: SettingsProfileViewMobileStyle.iconSize,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          SettingsProfileViewMobileStyle.paddingIconAndText,
-                          Text(
-                            success.haveMultipleAccounts
-                                ? L10n.of(context)!.switchAccounts
-                                : L10n.of(context)!.addAnotherAccount,
-                            style: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimary,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                return child!;
-              },
-            ),
-            child: const SizedBox.shrink(),
+          _AccountsButton(
+            isLoading: widget.isLoadingAccounts,
+            accounts: widget.accounts,
+            onTap: widget.onTapMultipleAccountsButton,
           ),
       ],
     );
   }
 
   Widget _buildAvatarBackground(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: widget.currentProfile,
-      builder: (context, profile, _) {
-        final displayName =
-            profile?.displayName ??
-            widget.client.mxid(context).localpart ??
-            widget.client.mxid(context);
-        return SecondaryAvatar(
-          animationController: widget.animationController,
-          mxContent: profile?.avatarUrl,
-          name: displayName,
-          fontSize: SettingsProfileViewMobileStyle.avatarFontSize,
-        );
-      },
+    final profile = widget.currentProfile;
+    return SecondaryAvatar(
+      animationController: widget.animationController,
+      mxContent: profile?.avatarUrl,
+      name:
+          profile?.displayName ??
+          widget.client.mxid(context).localpart ??
+          widget.client.mxid(context),
+      fontSize: SettingsProfileViewMobileStyle.avatarFontSize,
     );
   }
 
@@ -315,71 +222,156 @@ class _SettingsProfileViewMobileState extends State<SettingsProfileViewMobile> {
   }
 
   Widget _buildProfileInformation(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: widget.currentProfile,
-      builder: (context, profile, _) {
-        final displayName =
-            profile?.displayName ??
-            widget.client.mxid(context).localpart ??
-            widget.client.mxid(context);
-        final sysColors = LinagoraSysColors.material();
+    final profile = widget.currentProfile;
+    final displayName =
+        profile?.displayName ??
+        widget.client.mxid(context).localpart ??
+        widget.client.mxid(context);
+    final sysColors = LinagoraSysColors.material();
 
-        return SelectionArea(
-          onSelectionChanged: (value) {
-            final newSelected = value != null && value.plainText.isNotEmpty;
-            if (newSelected != isTextSelected) {
-              setState(() => isTextSelected = newSelected);
-            }
-          },
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              if (!isTextSelected) {
-                widget.onAvatarInfoTap.call();
-                return;
-              }
+    return SelectionArea(
+      onSelectionChanged: (value) {
+        final newSelected = value != null && value.plainText.isNotEmpty;
+        if (newSelected != isTextSelected) {
+          setState(() => isTextSelected = newSelected);
+        }
+      },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (!isTextSelected) {
+            widget.onAvatarInfoTap.call();
+            return;
+          }
 
-              FocusScope.of(context).unfocus();
-            },
-            child: Container(
-              height: Tween<double>(
-                begin: SettingsProfileViewMobileStyle.minAvatarBackgroundHeight,
-                end: SettingsProfileViewMobileStyle.maxAvatarBackgroundHeight,
-              ).transform(widget.animationController.value),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const SizedBox(
-                    height: SettingsProfileViewMobileStyle.avatarSize,
-                    width: SettingsProfileViewMobileStyle.avatarSize,
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Tween<Alignment>(
-                      begin: Alignment.center,
-                      end: Alignment.centerLeft,
-                    ).transform(widget.animationController.value),
-                    child: Text(
-                      displayName,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: ColorTween(
-                          begin: sysColors.onSurface,
-                          end: sysColors.onPrimary,
-                        ).transform(widget.animationController.value),
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
+          FocusScope.of(context).unfocus();
+        },
+        child: Container(
+          height: Tween<double>(
+            begin: SettingsProfileViewMobileStyle.minAvatarBackgroundHeight,
+            end: SettingsProfileViewMobileStyle.maxAvatarBackgroundHeight,
+          ).transform(widget.animationController.value),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const SizedBox(
+                height: SettingsProfileViewMobileStyle.avatarSize,
+                width: SettingsProfileViewMobileStyle.avatarSize,
               ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Tween<Alignment>(
+                  begin: Alignment.center,
+                  end: Alignment.centerLeft,
+                ).transform(widget.animationController.value),
+                child: Text(
+                  displayName,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: ColorTween(
+                      begin: sysColors.onSurface,
+                      end: sysColors.onPrimary,
+                    ).transform(widget.animationController.value),
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountsButton extends StatelessWidget {
+  const _AccountsButton({
+    required this.isLoading,
+    required this.accounts,
+    required this.onTap,
+  });
+
+  final bool isLoading;
+  final List<AccountProfile>? accounts;
+  final OnTapMultipleAccountsButton onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final accounts = this.accounts;
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
+    final labelStyle = Theme.of(
+      context,
+    ).textTheme.labelLarge?.copyWith(color: onPrimary);
+    if (isLoading) {
+      return _AccountsButtonFrame(
+        children: [
+          Transform.scale(
+            scale: SettingsProfileViewMobileStyle.indicatorScale,
+            child: CircularProgressIndicator(
+              color: onPrimary,
+              strokeWidth: SettingsProfileViewMobileStyle.indicatorStrokeWidth,
             ),
           ),
-        );
-      },
+          SettingsProfileViewMobileStyle.paddingIconAndText,
+          Text(L10n.of(context)!.loadingPleaseWait, style: labelStyle),
+        ],
+      );
+    }
+    if (accounts == null) return const SizedBox.shrink();
+    final hasMultipleAccounts = accounts.length > 1;
+    return InkWell(
+      onTap: () => onTap(accounts),
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      child: _AccountsButtonFrame(
+        children: [
+          Icon(
+            hasMultipleAccounts
+                ? Icons.group_outlined
+                : Icons.person_add_alt_outlined,
+            size: SettingsProfileViewMobileStyle.iconSize,
+            color: onPrimary,
+          ),
+          SettingsProfileViewMobileStyle.paddingIconAndText,
+          Text(
+            hasMultipleAccounts
+                ? L10n.of(context)!.switchAccounts
+                : L10n.of(context)!.addAnotherAccount,
+            style: labelStyle,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountsButtonFrame extends StatelessWidget {
+  const _AccountsButtonFrame({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: SettingsProfileViewMobileStyle.bottomButtonHeight,
+      padding: SettingsProfileViewMobileStyle.paddingBottomButton,
+      margin: SettingsProfileViewMobileStyle.marginBottomButton,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(
+          SettingsProfileViewMobileStyle.bottomButtonRadius,
+        ),
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: children,
+      ),
     );
   }
 }

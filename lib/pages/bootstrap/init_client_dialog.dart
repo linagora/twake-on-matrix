@@ -3,17 +3,19 @@ import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_mobile_view.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_web_view.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-class InitClientDialog extends StatefulWidget {
+class InitClientDialog extends ConsumerStatefulWidget {
   final Future Function() future;
 
   /// The account this dialog is logging in. A login event of another account
@@ -32,10 +34,10 @@ class InitClientDialog extends StatefulWidget {
   });
 
   @override
-  State<InitClientDialog> createState() => _InitClientDialogState();
+  ConsumerState<InitClientDialog> createState() => _InitClientDialogState();
 }
 
-class _InitClientDialogState extends State<InitClientDialog>
+class _InitClientDialogState extends ConsumerState<InitClientDialog>
     with TickerProviderStateMixin {
   late AnimationController loginSSOProgressController;
 
@@ -132,8 +134,8 @@ class _InitClientDialogState extends State<InitClientDialog>
   }
 
   void _handleSlowLogin(Client account) {
-    final hasOtherAccount = Matrix.of(context).currentClients
-        .whereType<Client>()
+    final hasOtherAccount = ref
+        .read(accountClientsProvider)
         .any((client) => !identical(client, account) && client.isLogged());
     if (hasOtherAccount) {
       _handleAddAnotherAccount(account);

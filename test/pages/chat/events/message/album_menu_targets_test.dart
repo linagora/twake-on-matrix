@@ -19,6 +19,12 @@ void main() {
     expect(of(MessageContextMenuAction.edit), ['caption']);
   });
 
+  // Need (iOS report 2026-11-26, web reference D89): an album's « Start a
+  // thread » starts the thread on its last image, wherever the finger is.
+  test('start a thread goes to the last image', () {
+    expect(of(MessageContextMenuAction.startThread), ['caption']);
+  });
+
   test('select goes to the pressed image', () {
     expect(of(MessageContextMenuAction.select), ['middle']);
   });
