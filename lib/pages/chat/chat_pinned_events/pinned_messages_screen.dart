@@ -120,6 +120,8 @@ class PinnedMessagesScreen extends StatelessWidget {
                                       event,
                                     ),
                                 onRetryTextMessage: controller.retryTextMessage,
+                                pageColor:
+                                    LinagoraSysColors.material().onPrimary,
                               );
                             },
                           );

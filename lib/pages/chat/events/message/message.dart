@@ -21,6 +21,7 @@ import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/swipeable.dart';
 import 'package:flutter/material.dart';
+import 'package:twake_chat/pages/chat/chat_view_body_style.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -84,6 +85,10 @@ class Message extends StatefulWidget {
 
   /// Card of the thread under this message, when it is a thread root.
   final Widget? threadCard;
+
+  /// The colour behind the messages, see
+  /// [MessageContentWithTimestampBuilder.pageColor].
+  final Color pageColor;
   final void Function(Event)? onEdit;
   final void Function(BuildContext, Event)? onDelete;
   final void Function(Event)? onForward;
@@ -143,6 +148,7 @@ class Message extends StatefulWidget {
     this.onStartThread,
     this.inThread = false,
     this.threadCard,
+    this.pageColor = ChatViewBodyStyle.backgroundColor,
     this.onEdit,
     this.onDelete,
     this.onForward,
@@ -344,6 +350,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           recentEmojiFuture: widget.recentEmojiFuture,
           onRetryTextMessage: widget.onRetryTextMessage,
           threadCard: widget.threadCard,
+          pageColor: widget.pageColor,
         ),
       ),
     ];

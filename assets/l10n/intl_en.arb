@@ -3632,5 +3632,14 @@
   "@callDecline": {
     "type": "text",
     "placeholders": {}
+  },
+  "replyToName": "Reply to {name}",
+  "@replyToName": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

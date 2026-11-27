@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
@@ -84,11 +83,7 @@ class EventVideoPlayer extends StatelessWidget {
           mouseCursor: SystemMouseCursors.click,
           onTap: onVideoTapped,
           child: SizedBox(
-            width: MessageStyle.mediaContentWidth(
-              context: context,
-              event: event,
-              calculatedWidth: maxWidth,
-            ),
+            width: maxWidth,
             height: MessageContentStyle.videoBubbleHeight(imageHeight),
             child: Stack(
               alignment: Alignment.center,

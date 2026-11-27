@@ -596,3 +596,17 @@ once if it is a voice message too (#2796). The run stops:
 Events the chat does not show (reactions, edits) do not stop the run. On the
 thread screen, the run plays the replies of that thread only, from its root
 too; in the chat, it skips the thread replies, as the chat does.
+
+## D34. A reply shows its quote above the message bubble (decided by Clément, 2026-11-27)
+
+The quoted message moves out of the message bubble. From top to bottom, a reply
+shows:
+
+- a caption, "Reply to {name}", naming the author of the quoted message;
+- the quoted message in a pale bubble;
+- the message bubble, which overlaps the quoted bubble by 12 and has a 2px
+  ring.
+
+When the quoted message is not loaded, the caption is "Reply", with no name.
+
+Known limit: the ring has the flat background colour of the chat.

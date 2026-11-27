@@ -2740,5 +2740,14 @@
         "type": "int"
       }
     }
+  },
+  "replyToName": "Réponse à {name}",
+  "@replyToName": {
+    "type": "text",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

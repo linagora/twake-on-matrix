@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
 import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:twake_chat/presentation/model/chat/upload_file_ui_state.dart';
@@ -95,11 +94,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
         alignment: Alignment.center,
         children: [
           SizedBox(
-            width: MessageStyle.mediaContentWidth(
-              context: context,
-              event: event,
-              calculatedWidth: maxWidth,
-            ),
+            width: maxWidth,
             height: bubbleHeight,
             child: const BlurHashBackground(
               hash: MessageContentStyle.defaultBlurHash,
