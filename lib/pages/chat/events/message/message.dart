@@ -3,6 +3,7 @@ import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:twake_chat/pages/chat/context_item_chat_action.dart';
+import 'package:twake_chat/pages/chat/events/call_line_bubble.dart';
 import 'package:twake_chat/pages/chat/events/message/message_container.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
@@ -243,6 +244,24 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
 
   @override
   Widget build(BuildContext context) {
+    final displayTime =
+        widget.event.type == EventTypes.RoomCreate ||
+        widget.nextEvent == null ||
+        !widget.event.originServerTs.sameEnvironment(
+          widget.nextEvent!.originServerTs,
+        );
+    if (widget.event.callLine case final line?) {
+      return VisibilityDetector(
+        key: Key('visibility_${widget.event.eventId}'),
+        onVisibilityChanged: _onVisibilityChangedForMarkAsRead,
+        child: Column(
+          children: [
+            ..._separators(displayTime),
+            CallLineBubble(line: line, sentAt: widget.event.originServerTs),
+          ],
+        ),
+      );
+    }
     if (!EventTypeRules.userContentTypes.contains(widget.event.type)) {
       if (widget.event.isJoinedByRoomCreator()) {
         return const SizedBox.shrink();
@@ -264,12 +283,6 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       );
     }
 
-    final displayTime =
-        widget.event.type == EventTypes.RoomCreate ||
-        widget.nextEvent == null ||
-        !widget.event.originServerTs.sameEnvironment(
-          widget.nextEvent!.originServerTs,
-        );
     final rowMainAxisAlignment = widget.event.isOwnMessage
         ? MainAxisAlignment.end
         : MainAxisAlignment.start;
@@ -358,38 +371,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
         context,
       ),
       children: [
-        if (displayTime)
-          ValueListenableBuilder(
-            valueListenable: inviewNotifier,
-            builder: (context, inView, _) {
-              return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isDesktop,
-                child: StickyTimestampWidget(
-                  content: !inView
-                      ? widget.event.originServerTs.relativeTime(context)
-                      : '',
-                ),
-              );
-            },
-          ),
-        if (widget.markedUnreadLocation != null &&
-            widget.markedUnreadLocation == widget.event.eventId) ...[
-          Padding(
-            padding: MessageStyle.paddingDividerUnreadMessage,
-            child: Divider(
-              height: MessageStyle.heightDivider,
-              color: LinagoraStateLayer(
-                LinagoraSysColors.material().surfaceTint,
-              ).opacityLayer3,
-            ),
-          ),
-          OptionalSelectionContainerDisabled(
-            isEnabled: PlatformInfos.isDesktop,
-            child: StickyTimestampWidget(
-              content: L10n.of(context)!.unreadMessages,
-            ),
-          ),
-        ],
+        ..._separators(displayTime),
         MessageContainer(
           event: widget.event,
           row: row,
@@ -412,4 +394,37 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
       child: column,
     );
   }
+
+  List<Widget> _separators(bool displayTime) => [
+    if (displayTime)
+      ValueListenableBuilder(
+        valueListenable: inviewNotifier,
+        builder: (context, inView, _) {
+          return OptionalSelectionContainerDisabled(
+            isEnabled: PlatformInfos.isDesktop,
+            child: StickyTimestampWidget(
+              content: !inView
+                  ? widget.event.originServerTs.relativeTime(context)
+                  : '',
+            ),
+          );
+        },
+      ),
+    if (widget.markedUnreadLocation != null &&
+        widget.markedUnreadLocation == widget.event.eventId) ...[
+      Padding(
+        padding: MessageStyle.paddingDividerUnreadMessage,
+        child: Divider(
+          height: MessageStyle.heightDivider,
+          color: LinagoraStateLayer(
+            LinagoraSysColors.material().surfaceTint,
+          ).opacityLayer3,
+        ),
+      ),
+      OptionalSelectionContainerDisabled(
+        isEnabled: PlatformInfos.isDesktop,
+        child: StickyTimestampWidget(content: L10n.of(context)!.unreadMessages),
+      ),
+    ],
+  ];
 }

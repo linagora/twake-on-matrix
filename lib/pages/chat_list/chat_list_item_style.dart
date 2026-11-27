@@ -19,8 +19,6 @@ class ChatListItemStyle {
 
   static const double childAvatarSize = 32;
 
-  static const double spaceAvatarSize = 48;
-
   static double unreadBadgeSize(
     bool unread,
     bool hasNewMessages,
@@ -40,10 +38,6 @@ class ChatListItemStyle {
   static const EdgeInsetsDirectional paddingAvatar = EdgeInsetsDirectional.only(
     end: 8,
   );
-
-  // Keeps the title of a space aligned with the titles of the rooms.
-  static const EdgeInsetsDirectional paddingSpaceAvatar =
-      EdgeInsetsDirectional.only(end: 16);
 
   static const EdgeInsetsDirectional paddingBody =
       EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4);

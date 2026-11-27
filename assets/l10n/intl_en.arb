@@ -2590,6 +2590,19 @@
   "unblockDescriptionDialog": "This person will be able to message you and see when you're online. They won't be notified that you unblocked them.",
   "report": "Report",
   "reportDesc": "What’s the issue with this message?",
+  "reportChatDesc": "What’s the issue with this chat?",
+  "reportConfirmTitle": "Send this report?",
+  "reportConfirmMessage": "Reason: {reason}",
+  "@reportConfirmMessage": {
+    "type": "text",
+    "placeholders": {
+      "reason": {}
+    }
+  },
+  "reportChat": "Report chat",
+  "reportUser": "Report user",
+  "reportUserDesc": "What’s the issue with this user?",
+  "reportNotSupported": "Your server doesn’t support this report yet",
   "sendReport": "Send Report",
   "addComment": "Add comment",
   "spam": "Spam",
@@ -3798,6 +3811,46 @@
   },
   "scribeResultDroppedClosed": "The message box closed, so Scribe's text was not used.",
   "@scribeResultDroppedClosed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineIncoming": "Incoming call",
+  "@callLineIncoming": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineIncomingVideo": "Incoming video call",
+  "@callLineIncomingVideo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineOutgoing": "Outgoing call",
+  "@callLineOutgoing": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineOutgoingVideo": "Outgoing video call",
+  "@callLineOutgoingVideo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineMissed": "Missed",
+  "@callLineMissed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineCanceled": "Canceled",
+  "@callLineCanceled": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineMissedCall": "Missed call",
+  "@callLineMissedCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLineMissedVideoCall": "Missed video call",
+  "@callLineMissedVideoCall": {
     "type": "text",
     "placeholders": {}
   }

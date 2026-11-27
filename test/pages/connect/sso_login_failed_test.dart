@@ -69,11 +69,6 @@ class _FakeLoginClient extends Fake implements Client {
 }
 
 class _FakeMatrixState extends Fake implements MatrixState {
-  List<Client?> clients = [];
-
-  @override
-  List<Client?> get currentClients => clients;
-
   @override
   String? loginType;
 
@@ -109,6 +104,7 @@ void main() {
   late _FakeLoginClient client;
   late _FakeMatrixState matrix;
   late FakeLoginSessions sessions;
+  late List<Client> accountClients;
   late _Host host;
 
   setUp(() {
@@ -116,6 +112,7 @@ void main() {
     client = _FakeLoginClient();
     matrix = _FakeMatrixState();
     sessions = FakeLoginSessions();
+    accountClients = [];
     host = _Host();
     TwakeApp.routerKey = GlobalKey<NavigatorState>();
   });
@@ -130,14 +127,19 @@ void main() {
     tester.view.devicePixelRatio = 2;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: TwakeApp.routerKey,
-        theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-        localizationsDelegates: L10n.localizationsDelegates,
-        supportedLocales: L10n.supportedLocales,
-        builder: (context, child) =>
-            Provider<MatrixState>.value(value: matrix, child: child),
-        home: const Scaffold(body: SizedBox()),
+      ProviderScope(
+        overrides: [
+          accountClientsProvider.overrideWithBuild((_, _) => accountClients),
+        ],
+        child: MaterialApp(
+          navigatorKey: TwakeApp.routerKey,
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          builder: (context, child) =>
+              Provider<MatrixState>.value(value: matrix, child: child),
+          home: const Scaffold(body: SizedBox()),
+        ),
       ),
     );
   }
@@ -277,7 +279,7 @@ void main() {
       tester,
     ) async {
       client.logged = true;
-      matrix.clients = [client];
+      accountClients = [client];
       final went = await openDialog(tester);
 
       await tester.pump(const Duration(seconds: 31));
@@ -296,7 +298,7 @@ void main() {
     ) async {
       final other = _FakeLoginClient()..logged = true;
       client.logged = true;
-      matrix.clients = [other, client];
+      accountClients = [other, client];
       final went = await openDialog(tester);
 
       await tester.pump(const Duration(seconds: 31));
@@ -311,7 +313,7 @@ void main() {
       tester,
     ) async {
       client.logged = true;
-      matrix.clients = [client];
+      accountClients = [client];
       final went = await openDialog(tester);
 
       await tester.pump(const Duration(seconds: 31));

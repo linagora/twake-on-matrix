@@ -96,6 +96,14 @@ class _FakeRtc implements MatrixRtcDatasource {
   Future<void> leaveMembership(CallRoom room) async =>
       calls.add('leave ${room.id}');
 
+  @override
+  void closeCall(CallRoom room, {required DateTime endedAt}) =>
+      calls.add('close ${room.id}');
+
+  @override
+  Future<void> sendCallLine(CallRoom room) async =>
+      calls.add('line ${room.id}');
+
   final keys = StreamController<CallMediaKey>();
 
   @override
@@ -186,10 +194,18 @@ void main() {
     await repository.endStaleOwnMembership(_room);
     await repository.joinMembership(_join);
     await repository.leaveMembership(_room);
+    repository.closeCall(_room, endedAt: DateTime.now());
+    await repository.sendCallLine(_room);
 
     // Assert
     expect(info.isDirect, isTrue);
-    expect(rtc.calls, ['endStale !r', 'join !r https://rtc true', 'leave !r']);
+    expect(rtc.calls, [
+      'endStale !r',
+      'join !r https://rtc true',
+      'leave !r',
+      'close !r',
+      'line !r',
+    ]);
     expect(token.calls, isEmpty);
     expect(media.calls, isEmpty);
   });

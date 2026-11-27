@@ -19,6 +19,7 @@ import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/activity/activity_page.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
@@ -374,14 +375,29 @@ Future<void> _pumpWhileLoading(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 300));
 }
 
-/// Picks the filter chip labelled [label] of the Activity.
+/// The test font makes the filters wider than a phone: the row is scrolled
+/// back to its start, then to [label].
+Future<void> _revealFilter(WidgetTester tester, String label) async {
+  final row = find.descendant(
+    of: find.byType(FilterPills),
+    matching: find.byType(Scrollable),
+  );
+  await tester.drag(row, const Offset(2000, 0));
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.ensureVisible(find.text(label).first);
+  await tester.pump(const Duration(milliseconds: 500));
+}
+
+/// Picks the filter pill labelled [label] of the Activity.
 Future<void> selectFilter(WidgetTester tester, String label) async {
+  await _revealFilter(tester, label);
   await tester.tap(find.text(label).first);
   await tester.pumpAndSettle();
 }
 
 /// As [selectFilter], while something keeps loading: no settling.
 Future<void> selectFilterWhileLoading(WidgetTester tester, String label) async {
+  await _revealFilter(tester, label);
   await tester.tap(find.text(label).first);
   await _pumpWhileLoading(tester);
 }
