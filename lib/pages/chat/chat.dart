@@ -1442,43 +1442,11 @@ class ChatController extends ConsumerState<Chat>
     TwakeSnackBar.show(context, l10n.contentHasBeenReported);
   }
 
-  void redactEventsAction() async {
-    final confirmed =
-        await showOkCancelAlertDialog(
-          useRootNavigator: false,
-          context: context,
-          title: L10n.of(context)!.messageWillBeRemovedWarning,
-          okLabel: L10n.of(context)!.remove,
-          cancelLabel: L10n.of(context)!.cancel,
-        ) ==
-        OkCancelResult.ok;
-    if (!confirmed) return;
-    for (final event in selectedEvents) {
-      await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () async {
-          if (event.status.isSent) {
-            if (event.canRedact) {
-              await event.redactEvent();
-            } else {
-              final client = clientsInRoom.firstWhere(
-                (cl) => selectedEvents.first.senderId == cl!.userID,
-                orElse: () => null,
-              );
-              if (client == null) {
-                return;
-              }
-              final room = client.getRoomById(roomId!)!;
-              await Event.fromJson(event.toJson(), room).redactEvent();
-            }
-          } else {
-            await event.remove();
-          }
-        },
-      );
-    }
-    showEmojiPickerNotifier.value = false;
-    _clearSelectEvent();
-  }
+  void deleteSelectedEventsAction() => deleteEventsAction(
+    context,
+    selectedEvents.toList(),
+    onConfirmed: clearSelectedEvents,
+  );
 
   List<Client?> get clientsInRoom {
     final clients = matrix!.currentClients;
@@ -1486,17 +1454,10 @@ class ChatController extends ConsumerState<Chat>
     return clients;
   }
 
-  bool get canRedactSelectedEvents {
-    if (isArchived) return false;
-    final clients = matrix!.currentClients;
-    for (final event in selectedEvents) {
-      if (event.canRedact == false &&
-          !(clients.any((cl) => event.senderId == cl!.userID))) {
-        return false;
-      }
-    }
-    return true;
-  }
+  bool get canDeleteSelectedEvents =>
+      !isArchived &&
+      selectedEvents.isNotEmpty &&
+      selectedEvents.every((event) => event.canDelete);
 
   bool get canEditSelectedEvents {
     if (isArchived ||

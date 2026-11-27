@@ -47,16 +47,47 @@ mixin DeleteEventMixin {
     // The bubble may be gone when the menu closes (its image was deleted).
     if (!context.mounted) return;
     final l10n = L10n.of(context)!;
+    await _deleteEventsAfterConfirmation(
+      context,
+      events.reversed.toList(),
+      l10n.deleteAlbumConfirmationTitle(events.length),
+    );
+  }
+
+  Future<void> deleteEventsAction(
+    BuildContext context,
+    List<Event> events, {
+    VoidCallback? onConfirmed,
+  }) async {
+    final l10n = L10n.of(context)!;
+    await _deleteEventsAfterConfirmation(
+      context,
+      events,
+      events.length == 1
+          ? l10n.deleteMessageConfirmationTitle
+          : l10n.deleteMessagesConfirmationTitle(events.length),
+      onConfirmed: onConfirmed,
+    );
+  }
+
+  Future<void> _deleteEventsAfterConfirmation(
+    BuildContext context,
+    List<Event> events,
+    String title, {
+    VoidCallback? onConfirmed,
+  }) async {
+    final l10n = L10n.of(context)!;
     final confirmResult = await showConfirmAlertDialog(
       context: context,
-      title: l10n.deleteAlbumConfirmationTitle(events.length),
+      title: title,
       okLabel: l10n.delete,
       cancelLabel: l10n.cancel,
       showCloseButton: PlatformInfos.isDesktop,
     );
     if (confirmResult == ConfirmResult.cancel) return;
+    onConfirmed?.call();
     var failureShown = false;
-    for (final event in events.reversed) {
+    for (final event in events) {
       final state = await deleteEventInteractor.execute(event).last;
       state.fold((failure) {
         if (failureShown || !context.mounted) return;

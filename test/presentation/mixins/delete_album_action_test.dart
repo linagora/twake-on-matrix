@@ -18,16 +18,25 @@ import 'package:twake_chat/widgets/theme_builder.dart';
 
 import '../../lenient_database.dart';
 
-/// Records which events it was asked to delete; fails those in [failing].
+/// Records which events it was asked to delete; fails those in [failing]
+/// and refuses those in [forbidden].
 class _FakeDeleteEventInteractor extends DeleteEventInteractor {
-  _FakeDeleteEventInteractor({this.failing = const {}});
+  _FakeDeleteEventInteractor({
+    this.failing = const {},
+    this.forbidden = const {},
+  });
 
   final Set<String> failing;
+  final Set<String> forbidden;
   final deletedIds = <String>[];
 
   @override
   Stream<Either<Failure, Success>> execute(Event event) async* {
     deletedIds.add(event.eventId);
+    if (forbidden.contains(event.eventId)) {
+      yield Left(NoPermissionToDeleteEvent());
+      return;
+    }
     yield failing.contains(event.eventId)
         ? Left(DeleteEventFailure())
         : Right(DeleteEventSuccess());
@@ -46,13 +55,33 @@ class _DeleteAlbumHost extends StatefulWidget {
 class _DeleteAlbumHostState extends State<_DeleteAlbumHost>
     with DeleteEventMixin {
   @override
-  Widget build(BuildContext context) => TextButton(
-    onPressed: () => deleteAlbumAction(context, widget.events),
-    child: const Text('delete-album'),
+  Widget build(BuildContext context) => Column(
+    children: [
+      TextButton(
+        onPressed: () => deleteAlbumAction(context, widget.events),
+        child: const Text('delete-album'),
+      ),
+      TextButton(
+        onPressed: () => deleteEventsAction(context, widget.events),
+        child: const Text('delete-selection'),
+      ),
+    ],
   );
 }
 
 late Room _room;
+
+List<Event> _messages(int count) => [
+  for (var i = 0; i < count; i++)
+    Event(
+      senderId: '@bob:example.com',
+      type: 'm.room.message',
+      room: _room,
+      eventId: 'message-$i',
+      content: {'msgtype': 'm.text', 'body': 'message-$i'},
+      originServerTs: DateTime.utc(2026, 11, 27),
+    ),
+];
 
 List<Event> _album(int count) => [
   for (var i = 0; i < count; i++)
@@ -95,10 +124,14 @@ Future<void> _pumpHost(WidgetTester tester, List<Event> events) async {
 }
 
 /// Pumps the host, taps it, and returns the strings the dialog uses.
-Future<L10n> _pumpAndTapDelete(WidgetTester tester, List<Event> events) async {
+Future<L10n> _pumpAndTapDelete(
+  WidgetTester tester,
+  List<Event> events, {
+  String button = 'delete-album',
+}) async {
   await _pumpHost(tester, events);
   final l10n = L10n.of(tester.element(find.byType(_DeleteAlbumHost)))!;
-  await tester.tap(find.text('delete-album'));
+  await tester.tap(find.text(button));
   await tester.pumpAndSettle();
   return l10n;
 }
@@ -170,5 +203,80 @@ void main() {
     await host.deleteAlbumAction(staleContext, _album(2));
 
     expect(interactor.deletedIds, isEmpty);
+  });
+
+  group('deleteEventsAction', () {
+    testWidgets('one confirmation, then every selected message is deleted', (
+      tester,
+    ) async {
+      final interactor = _FakeDeleteEventInteractor();
+      _useInteractor(interactor);
+
+      final l10n = await _pumpAndTapDelete(
+        tester,
+        _messages(3),
+        button: 'delete-selection',
+      );
+      expect(
+        find.text(l10n.deleteMessagesConfirmationTitle(3)),
+        findsOneWidget,
+      );
+      expect(interactor.deletedIds, isEmpty);
+
+      await tester.tap(find.text(l10n.delete));
+      await tester.pumpAndSettle();
+
+      expect(interactor.deletedIds, ['message-0', 'message-1', 'message-2']);
+      expect(find.text(l10n.failedToDeleteMessage), findsNothing);
+    });
+
+    testWidgets('one selected message asks the single-message question', (
+      tester,
+    ) async {
+      _useInteractor(_FakeDeleteEventInteractor());
+
+      final l10n = await _pumpAndTapDelete(
+        tester,
+        _messages(1),
+        button: 'delete-selection',
+      );
+
+      expect(find.text(l10n.deleteMessageConfirmationTitle), findsOneWidget);
+    });
+
+    testWidgets('cancelling the confirmation deletes nothing', (tester) async {
+      final interactor = _FakeDeleteEventInteractor();
+      _useInteractor(interactor);
+
+      final l10n = await _pumpAndTapDelete(
+        tester,
+        _messages(3),
+        button: 'delete-selection',
+      );
+      await tester.tap(find.text(l10n.cancel));
+      await tester.pumpAndSettle();
+
+      expect(interactor.deletedIds, isEmpty);
+    });
+
+    testWidgets('a refused message shows the permission error once', (
+      tester,
+    ) async {
+      final interactor = _FakeDeleteEventInteractor(
+        forbidden: {'message-0', 'message-1'},
+      );
+      _useInteractor(interactor);
+
+      final l10n = await _pumpAndTapDelete(
+        tester,
+        _messages(3),
+        button: 'delete-selection',
+      );
+      await tester.tap(find.text(l10n.delete));
+      await tester.pumpAndSettle();
+
+      expect(interactor.deletedIds, ['message-0', 'message-1', 'message-2']);
+      expect(find.text(l10n.noDeletePermissionMessage), findsOneWidget);
+    });
   });
 }

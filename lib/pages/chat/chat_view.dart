@@ -39,14 +39,12 @@ class ChatView extends StatelessWidget with MessageContentMixin {
               controller.copySelectedEventsAction,
             ),
           ),
-          // #777 Hide Delete Message functionality
-          // if (controller.canRedactSelectedEvents)
-          //   TwakeIconButton(
-          //     icon: Icons.delete_outlined,
-          //     tooltip: L10n.of(context)!.redactMessage,
-          //     onTap: () => controller
-          //         .actionWithClearSelections(controller.redactEventsAction),
-          //   ),
+          if (controller.canDeleteSelectedEvents)
+            TwakeIconButton(
+              icon: Icons.delete_outlined,
+              tooltip: L10n.of(context)!.delete,
+              onTap: controller.deleteSelectedEventsAction,
+            ),
           if (controller.selectedEvents.length == 1)
             TwakeIconButton(
               icon: !controller.isUnpinEvent(controller.selectedEvents.first)
