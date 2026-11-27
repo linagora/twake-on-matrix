@@ -662,6 +662,8 @@ extension SendFileExtension on Room {
         await source.copy(targetPath);
         await source.delete();
       }
+      // A move keeps the source's date; the cache cleanup counts from now.
+      await target.setLastModified(DateTime.now());
       Logs().d('File moved in app downloads folder');
     } on FileSystemException catch (e) {
       // The file is sent: a copy that cannot be kept only costs a download.

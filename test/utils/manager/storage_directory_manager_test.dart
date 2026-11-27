@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -262,5 +263,164 @@ void main() {
       expect(decrypted.existsSync(), isFalse);
       expect(downloaded.existsSync(), isFalse);
     });
+  });
+
+  group('deleteFilesCachedBefore', () {
+    final now = DateTime(2026, 11, 27, 12);
+    final cutoff = now.subtract(const Duration(days: 7));
+    final old = now.subtract(const Duration(days: 8));
+
+    File place(String path, DateTime modified) =>
+        File(p.join(tempDir.path, path))
+          ..createSync(recursive: true)
+          ..setLastModifiedSync(modified);
+
+    test(
+      'deleteFilesCachedBefore_always_deletesOnlyTheCachedFilesOlderThanTheCutoff',
+      () async {
+        // Arrange
+        final oldDecrypted = place('decrypted/\$old/a.pdf', old);
+        final oldDownloaded = place('\$old/a.pdf', old);
+        final newDecrypted = place('decrypted/\$new/b.pdf', now);
+        final newDownloaded = place('\$new/b.pdf', now);
+
+        // Act
+        await StorageDirectoryManager.instance.deleteFilesCachedBefore(cutoff);
+
+        // Assert
+        expect(oldDecrypted.existsSync(), isFalse);
+        expect(oldDownloaded.existsSync(), isFalse);
+        expect(newDecrypted.existsSync(), isTrue);
+        expect(newDownloaded.existsSync(), isTrue);
+        expect(oldDecrypted.parent.existsSync(), isFalse);
+        expect(oldDownloaded.parent.existsSync(), isFalse);
+        expect(
+          Directory(p.join(tempDir.path, 'decrypted')).existsSync(),
+          isTrue,
+        );
+      },
+    );
+
+    test(
+      'deleteFilesCachedBefore_always_keepsSavedFilesAndOtherLibraries',
+      () async {
+        // Arrange
+        final twakeFolder = await StorageDirectoryManager.instance
+            .getTwakeDownloadsFolderInDevice();
+        final saved = File(p.join(twakeFolder!, 'saved.pdf'))
+          ..createSync(recursive: true)
+          ..setLastModifiedSync(old);
+        final other = place('image_picker/photo.jpg', old);
+        final topLevel = place('\$budget.pdf', old);
+
+        // Act
+        await StorageDirectoryManager.instance.deleteFilesCachedBefore(cutoff);
+
+        // Assert
+        expect(saved.existsSync(), isTrue);
+        expect(other.existsSync(), isTrue);
+        expect(topLevel.existsSync(), isTrue);
+      },
+    );
+
+    test(
+      'deleteFilesCachedBefore_whenOnlyDownloadsIsAvailable_deletesNothing',
+      () async {
+        // Arrange
+        final downloads = Directory(p.join(tempDir.path, 'Downloads'));
+        final userFile = File(p.join(downloads.path, r'$photos', 'a.jpg'))
+          ..createSync(recursive: true)
+          ..setLastModifiedSync(old);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(pathProviderChannel, (call) async {
+              if (call.method == 'getDownloadsDirectory') return downloads.path;
+              throw PlatformException(code: 'unavailable');
+            });
+
+        // Act
+        await StorageDirectoryManager.instance.deleteFilesCachedBefore(cutoff);
+
+        // Assert
+        expect(userFile.existsSync(), isTrue);
+      },
+    );
+
+    test(
+      'deleteFilesCachedBefore_whenAFileCannotBeDeleted_deletesTheOthersAndLogs',
+      () async {
+        // Arrange
+        final locked = place('\$locked/a.pdf', old);
+        final deletable = place('\$other/b.pdf', old);
+        Process.runSync('chmod', ['555', locked.parent.path]);
+        addTearDown(
+          () => Process.runSync('chmod', ['755', locked.parent.path]),
+        );
+        Logs().outputEvents.clear();
+
+        // Act
+        await StorageDirectoryManager.instance.deleteFilesCachedBefore(cutoff);
+
+        // Assert
+        expect(locked.existsSync(), isTrue);
+        expect(deletable.existsSync(), isFalse);
+        expect(
+          Logs().outputEvents.map((e) => e.level),
+          contains(Level.warning),
+        );
+      },
+    );
+
+    test(
+      'getFilePathInAppDownloads_duringTheSweep_resolvesOnceItIsDone',
+      () async {
+        // Arrange
+        final cached = place('\$old/a.pdf', old);
+
+        // Act
+        final sweep = StorageDirectoryManager.instance.deleteFilesCachedBefore(
+          cutoff,
+        );
+        await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+          eventId: r'$old',
+          fileName: 'a.pdf',
+        );
+
+        // Assert
+        expect(cached.existsSync(), isFalse);
+        await sweep;
+      },
+    );
+
+    test(
+      'getFilePathInAppDownloads_whenASecondSweepEndsFirst_waitsForTheFirst',
+      () async {
+        // Arrange
+        final release = Completer<void>();
+        var calls = 0;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(pathProviderChannel, (_) async {
+              if (calls++ == 0) await release.future;
+              return tempDir.path;
+            });
+        final first = StorageDirectoryManager.instance.deleteFilesCachedBefore(
+          cutoff,
+        );
+        await StorageDirectoryManager.instance.deleteFilesCachedBefore(cutoff);
+        var resolved = false;
+
+        // Act
+        final path = StorageDirectoryManager.instance
+            .getFilePathInAppDownloads(eventId: r'$e', fileName: 'a.pdf')
+            .whenComplete(() => resolved = true);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        final resolvedDuringTheFirst = resolved;
+        release.complete();
+        await first;
+        await path;
+
+        // Assert
+        expect(resolvedDuringTheFirst, isFalse);
+      },
+    );
   });
 }

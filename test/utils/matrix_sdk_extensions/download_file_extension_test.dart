@@ -251,6 +251,40 @@ void main() {
         expect(kept.existsSync(), isTrue);
       },
     );
+
+    test(
+      'deleteDownloadedFilesAtLastLogout_whenAnAccountLogsInDuringTheCacheSweep_keepsTheFiles',
+      () async {
+        // Arrange
+        final kept = File(p.join(tempDir.path, r'$new:example.org', 'a.pdf'))
+          ..createSync(recursive: true);
+        final release = Completer<void>();
+        var calls = 0;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(pathProviderChannel, (_) async {
+              if (calls++ == 0) await release.future;
+              return tempDir.path;
+            });
+        final sweep = StorageDirectoryManager.instance.deleteFilesCachedBefore(
+          DateTime.now().subtract(const Duration(days: 7)),
+        );
+        var loggedOut = true;
+
+        // Act
+        final deleting =
+            DownloadFileExtension.deleteDownloadedFilesAtLastLogout(
+              isStillLoggedOut: () => loggedOut,
+            );
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        loggedOut = false;
+        release.complete();
+        await sweep;
+        await deleting;
+
+        // Assert
+        expect(kept.existsSync(), isTrue);
+      },
+    );
   });
 
   group('writeDecryptedAttachment', () {

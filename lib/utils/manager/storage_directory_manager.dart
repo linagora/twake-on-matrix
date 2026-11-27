@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
@@ -20,7 +21,20 @@ class StorageDirectoryManager {
   Future<String> getFileStoreDirectory() async =>
       await _appFileStoreDirectory() ?? (await getDownloadsDirectory())!.path;
 
+  final _cacheSweeps = <Future<void>>{};
+
+  /// A path handed out during a sweep could be deleted by it.
+  Future<void> waitForCacheSweeps() async {
+    if (_cacheSweeps.isEmpty) return;
+    await Future.wait(_cacheSweeps.toList());
+  }
+
   Future<String?> _appFileStoreDirectory() async {
+    await waitForCacheSweeps();
+    return _appOwnedRoot();
+  }
+
+  Future<String?> _appOwnedRoot() async {
     try {
       return (await getTemporaryDirectory()).path;
     } catch (_) {}
@@ -45,6 +59,86 @@ class StorageDirectoryManager {
       } on PathNotFoundException {
         // Two last logouts can run at once.
       }
+    }
+  }
+
+  /// Only the manager's own folders, never the public Downloads fallback.
+  Future<void> deleteFilesCachedBefore(DateTime cutoff) {
+    final sweep = _sweepFilesCachedBefore(cutoff);
+    final gate = sweep.then<void>((_) {}, onError: (_) {});
+    _cacheSweeps.add(gate);
+    gate.whenComplete(() => _cacheSweeps.remove(gate));
+    return sweep;
+  }
+
+  Future<void> _sweepFilesCachedBefore(DateTime cutoff) async {
+    final root = await _appOwnedRoot();
+    if (root == null) return;
+    final failures = await Isolate.run(
+      () => _deleteFilesCachedBefore(root, cutoff),
+    );
+    if (failures.isNotEmpty) {
+      // Error codes only: a path holds the file name.
+      Logs().w(
+        'StorageDirectoryManager::deleteFilesCachedBefore: '
+        '${failures.length} cached files kept, errors $failures',
+      );
+    }
+  }
+
+  static List<int?> _deleteFilesCachedBefore(String root, DateTime cutoff) => [
+    for (final folder in _eventFolders(Directory(root)))
+      ..._deleteOldFiles(folder, cutoff),
+  ];
+
+  static Iterable<Directory> _eventFolders(Directory root) sync* {
+    if (!root.existsSync()) return;
+    for (final folder in root.listSync(followLinks: false)) {
+      if (folder is! Directory) continue;
+      final name = p.basename(folder.path);
+      if (name.startsWith(r'$')) yield folder;
+      if (name == _decryptedFolder) {
+        yield* folder.listSync(followLinks: false).whereType<Directory>();
+      }
+    }
+  }
+
+  /// The error codes of the files that could not be deleted.
+  static List<int?> _deleteOldFiles(Directory folder, DateTime cutoff) {
+    final failures = <int?>[];
+    try {
+      final files = folder
+          .listSync(recursive: true, followLinks: false)
+          .whereType<File>();
+      for (final file in files) {
+        final failure = _deleteIfBefore(file, cutoff);
+        if (failure != null) failures.add(failure.osError?.errorCode);
+      }
+      _deleteEmptyFolders(folder);
+    } on FileSystemException catch (e) {
+      failures.add(e.osError?.errorCode);
+    }
+    return failures;
+  }
+
+  static FileSystemException? _deleteIfBefore(File file, DateTime cutoff) {
+    try {
+      if (file.lastModifiedSync().isBefore(cutoff)) file.deleteSync();
+      return null;
+    } on FileSystemException catch (e) {
+      return e;
+    }
+  }
+
+  // Bottom-up, and never a folder that a write fills meanwhile.
+  static void _deleteEmptyFolders(Directory folder) {
+    for (final child in folder.listSync(followLinks: false)) {
+      if (child is Directory) _deleteEmptyFolders(child);
+    }
+    try {
+      folder.deleteSync();
+    } on FileSystemException {
+      // Not empty.
     }
   }
 

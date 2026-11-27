@@ -35,6 +35,7 @@ extension DownloadFileExtension on Event {
     required bool Function() isStillLoggedOut,
   }) async {
     await cancelDownloadsInFlight();
+    await StorageDirectoryManager.instance.waitForCacheSweeps();
     if (!isStillLoggedOut()) return;
     await StorageDirectoryManager.instance.deleteDownloadedFiles();
   }
