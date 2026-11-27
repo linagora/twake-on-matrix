@@ -1,14 +1,19 @@
 // ignore_for_file: implementation_imports
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/models/timeline_chunk.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -45,12 +50,20 @@ class _FakeUploadManager implements UploadManager {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
+/// A local store that answers for the quoted message when the test says so.
+class _SlowDatabase extends MockDatabase {
+  final stored = Completer<Event?>();
+
+  @override
+  Future<Event?> getEventById(String eventId, Room room) => stored.future;
+}
+
 class _FakeClient extends Client {
-  _FakeClient()
+  _FakeClient({http.Client? httpClient, DatabaseApi? database})
     : super(
         'reply-bubble-test',
-        httpClient: FakeMatrixApi(),
-        database: MockDatabase(),
+        httpClient: httpClient ?? FakeMatrixApi(),
+        database: database ?? MockDatabase(),
       );
 
   @override
@@ -99,10 +112,12 @@ void main() {
   );
 
   /// A reply to the quoted message, inside the thread of [thread] if given.
+  /// With [fallingBack], a plain thread message: its reply id is a fallback.
   Event reply({
     String sender = _bob,
     Map<String, Object?>? content,
     String? thread,
+    bool fallingBack = false,
   }) => message(
     r'$reply:example.org',
     sender: sender,
@@ -110,6 +125,7 @@ void main() {
       ...content ?? {'msgtype': MessageTypes.Text, 'body': _replyBody},
       'm.relates_to': {
         if (thread != null) ...{'rel_type': 'm.thread', 'event_id': thread},
+        if (fallingBack) 'is_falling_back': true,
         'm.in_reply_to': {'event_id': _quotedId},
       },
     },
@@ -158,6 +174,7 @@ void main() {
     Event? quotedEvent,
     Locale locale = const Locale('en'),
     Widget Function(Widget row)? wrap,
+    Timeline? timeline,
   }) async {
     final isHoverNotifier = ValueNotifier<String?>(null);
     addTearDown(isHoverNotifier.dispose);
@@ -165,10 +182,12 @@ void main() {
 
     final row = MessageContentWithTimestampBuilder(
       event: event,
-      timeline: Timeline(
-        room: room,
-        chunk: TimelineChunk(events: [event, ?quotedEvent]),
-      ),
+      timeline:
+          timeline ??
+          Timeline(
+            room: room,
+            chunk: TimelineChunk(events: [event, ?quotedEvent]),
+          ),
       isHoverNotifier: isHoverNotifier,
       listHorizontalActionMenu: const [],
       maxWidth: 400,
@@ -608,6 +627,265 @@ void main() {
       if (!selected && !highlighted) {
         expect(ring, looksLike(ChatViewBodyStyle.backgroundColor));
       }
+    });
+  }
+
+  /// The generic caption: "Reply", with no name (the icon is a placeholder
+  /// character of the same text).
+  Finder genericCaption() =>
+      find.textContaining(RegExp('^￼?Reply\$'), findRichText: true);
+
+  /// A room whose quoted message is neither in the timeline nor in the local
+  /// store [database]; [server] answers when it is asked for it.
+  void useRoom({
+    required Future<http.Response> Function() server,
+    DatabaseApi? database,
+    List<Uri>? asked,
+  }) {
+    final client = _FakeClient(
+      // By default the local store answers at once that it has nothing.
+      database: database ?? (_SlowDatabase()..stored.complete(null)),
+      httpClient: MockClient((request) {
+        if (request.url.pathSegments.last != _quotedId) {
+          return Future.value(http.Response('{}', 200));
+        }
+        asked?.add(request.url);
+        return server();
+      }),
+    );
+    client.homeserver = Uri.parse('https://example.org');
+    client.accessToken = 'token';
+    room = Room(id: '!room:example.org', client: client);
+    for (final (id, name) in [(_bob, 'Bob'), (_carol, 'Carol')]) {
+      room.setState(
+        User(id, displayName: name, membership: 'join', room: room),
+      );
+    }
+  }
+
+  Future<http.Response> notFound() async =>
+      http.Response('{"errcode":"M_NOT_FOUND","error":"Not found"}', 404);
+
+  Timeline timelineOf(List<Event> events) => Timeline(
+    room: room,
+    chunk: TimelineChunk(events: events),
+  );
+
+  testWidgets('while the quote is loading, no placeholder and no generic '
+      '"Reply" caption show, then the quote does', (tester) async {
+    final database = _SlowDatabase();
+    useRoom(server: notFound, database: database);
+
+    await pumpRow(tester, reply());
+
+    expect(bubbleOf(_replyBody), findsOneWidget);
+    expect(text('...'), findsNothing);
+    expect(genericCaption(), findsNothing);
+
+    database.stored.complete(quoted());
+    await tester.pumpAndSettle();
+
+    expectOutsideAndAbove(tester, text(_caption));
+    expectOutsideAndAbove(tester, text(_quotedBody));
+  });
+
+  testWidgets('once loading is over with no quote found, the placeholder '
+      'shows', (tester) async {
+    final database = _SlowDatabase();
+    useRoom(server: notFound, database: database);
+    await pumpRow(tester, reply());
+
+    database.stored.complete(null);
+    await tester.pumpAndSettle();
+
+    expect(text('...'), findsOneWidget);
+    expect(genericCaption(), findsOneWidget);
+  });
+
+  testWidgets('a quote already in the timeline never flashes the placeholder '
+      'when its row appears', (tester) async {
+    final shown = ValueNotifier(false);
+    addTearDown(shown.dispose);
+    await pumpRow(
+      tester,
+      reply(),
+      quotedEvent: quoted(),
+      wrap: (row) => ValueListenableBuilder(
+        valueListenable: shown,
+        builder: (context, value, _) => value ? row : const SizedBox(),
+      ),
+    );
+
+    // The first frame of the row, as when it scrolls into view.
+    shown.value = true;
+    await tester.pump();
+
+    expect(bubbleOf(_replyBody), findsOneWidget);
+    expect(text('...'), findsNothing);
+    expect(genericCaption(), findsNothing);
+  });
+
+  testWidgets('a quote that cannot be fetched offline ends on the '
+      'placeholder, which still jumps', (tester) async {
+    useRoom(server: () async => throw http.ClientException('offline'));
+    final jumps = await pumpRow(tester, reply());
+
+    expect(tester.takeException(), isNull);
+    await tester.tap(text('...'));
+    await tester.pumpAndSettle();
+
+    expect(jumps, [_quotedId]);
+  });
+
+  testWidgets('a quote whose original is gone is asked to the server once, '
+      'however often its row is rebuilt', (tester) async {
+    final asked = <Uri>[];
+    useRoom(server: notFound, asked: asked);
+    final event = reply();
+    final timeline = timelineOf([event]);
+
+    for (var build = 0; build < 4; build++) {
+      await pumpRow(tester, event, timeline: timeline);
+    }
+
+    expect(text('...'), findsOneWidget);
+    expect(asked, hasLength(1));
+  });
+
+  testWidgets('a rebuild does not blink the placeholder of a quote not found', (
+    tester,
+  ) async {
+    useRoom(server: notFound);
+    final event = reply();
+    final timeline = timelineOf([event]);
+    final redraw = ValueNotifier(0);
+    addTearDown(redraw.dispose);
+    await pumpRow(
+      tester,
+      event,
+      timeline: timeline,
+      wrap: (row) => ValueListenableBuilder(
+        valueListenable: redraw,
+        builder: (context, _, _) => MessageContentWithTimestampBuilder(
+          event: event,
+          timeline: timeline,
+          isHoverNotifier:
+              (row as MessageContentWithTimestampBuilder).isHoverNotifier,
+          listHorizontalActionMenu: const [],
+          maxWidth: 400,
+          listActions: const [],
+          selectMode: false,
+          scrollToEventId: row.scrollToEventId,
+        ),
+      ),
+    );
+    expect(text('...'), findsOneWidget);
+
+    redraw.value++;
+    await tester.pump();
+
+    expect(text('...'), findsOneWidget);
+  });
+
+  testWidgets('a quote not found shows once its message reaches the timeline', (
+    tester,
+  ) async {
+    useRoom(server: notFound);
+    final event = reply();
+    final timeline = timelineOf([event]);
+    await pumpRow(tester, event, timeline: timeline);
+    expect(text('...'), findsOneWidget);
+
+    // Older history is loaded: the quoted message is now in the timeline.
+    timeline.events.add(quoted());
+    await pumpRow(tester, event, timeline: timeline);
+
+    expect(text('...'), findsNothing);
+    expectOutsideAndAbove(tester, text(_caption));
+    expectOutsideAndAbove(tester, text(_quotedBody));
+  });
+
+  for (final (side, sender) in [('an incoming', _bob), ('an own', _me)]) {
+    testWidgets('on $side reply, a tap on the strip of the quote showing '
+        'beside the bubble jumps to the quoted message', (tester) async {
+      final event = reply(
+        sender: sender,
+        content: {'msgtype': MessageTypes.Text, 'body': 'ok'},
+      );
+      final jumps = await pumpRow(
+        tester,
+        event,
+        quotedEvent: quoted(body: '$_quotedBody, by the main entrance'),
+      );
+      final bubble = tester.getRect(bubbleOf('ok'));
+      final quote = tester.getRect(quotedBubble());
+      // The side where the quote is wider than the bubble below it.
+      final x = sender == _me
+          ? (quote.left + bubble.left) / 2
+          : (bubble.right + quote.right) / 2;
+      expect((x - bubble.center.dx).abs(), greaterThan(bubble.width / 2 + 4));
+      expect(quote.bottom, moreOrLessEquals(bubble.top + _overlap));
+
+      for (final y in [bubble.top + 1, quote.bottom - 2]) {
+        jumps.clear();
+        await tester.tapAt(Offset(x, y));
+        await tester.pumpAndSettle();
+
+        expect(jumps, [_quotedId], reason: 'tap at ($x, $y), quote $quote');
+      }
+    });
+
+    testWidgets('on $side reply, a tap on the bubble where it covers the '
+        'quote does not jump', (tester) async {
+      final jumps = await pumpRow(
+        tester,
+        reply(sender: sender),
+        quotedEvent: quoted(),
+      );
+      final bubble = tester.getRect(bubbleOf(_replyBody));
+      final overlap = bubble.intersect(tester.getRect(quotedBubble()));
+      expect(overlap.height, greaterThan(0));
+
+      await tester.tapAt(overlap.center);
+      await tester.pumpAndSettle();
+
+      expect(jumps, isEmpty);
+    });
+  }
+
+  testWidgets('an emoji-only reply keeps its bubble, overlapping the quote by '
+      '12', (tester) async {
+    const emoji = '\u{1F600}';
+    await pumpRow(
+      tester,
+      reply(content: {'msgtype': MessageTypes.Text, 'body': emoji}),
+      quotedEvent: quoted(),
+    );
+
+    expectOutsideAndAbove(tester, text(_caption), body: emoji);
+    expect(
+      tester.getRect(quotedBubble()).bottom -
+          tester.getRect(bubbleOf(emoji)).top,
+      moreOrLessEquals(_overlap, epsilon: 0.5),
+    );
+  });
+
+  for (final threads in [true, false]) {
+    testWidgets('with threads ${threads ? 'on' : 'off'}, a thread fallback '
+        '${threads ? 'shows no quote' : 'keeps its quote'}', (tester) async {
+      final previous = AppConfig.threadsEnabled;
+      AppConfig.threadsEnabled = threads;
+      addTearDown(() => AppConfig.threadsEnabled = previous);
+
+      await pumpRow(
+        tester,
+        reply(thread: r'$root:example.org', fallingBack: true),
+        quotedEvent: quoted(),
+      );
+
+      expect(find.byType(MessageBubble), findsOneWidget);
+      expect(text(_caption), threads ? findsNothing : findsOneWidget);
+      expect(text(_quotedBody), threads ? findsNothing : findsOneWidget);
     });
   }
 
