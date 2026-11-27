@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
@@ -41,18 +42,21 @@ void main() {
       profile.dispose();
       room.dispose();
     });
+    // The tabs read the display choices (the search style of the chat list).
     await tester.pumpWidget(
-      MaterialApp(
-        home: AppAdaptiveScaffoldBodyView(
-          activeRoomIdNotifier: room,
-          pageController: pages,
-          activeNavigationBarNotifier: selected,
-          onDestinationSelected: (_) {},
-          onClientSelected: (_, _) {},
-          destinations: barTabs(),
-          onPopInvoked: (_) {},
-          onOpenSettings: () {},
-          currentProfile: profile,
+      ProviderScope(
+        child: MaterialApp(
+          home: AppAdaptiveScaffoldBodyView(
+            activeRoomIdNotifier: room,
+            pageController: pages,
+            activeNavigationBarNotifier: selected,
+            onDestinationSelected: (_) {},
+            onClientSelected: (_, _) {},
+            destinations: barTabs(),
+            onPopInvoked: (_) {},
+            onOpenSettings: () {},
+            currentProfile: profile,
+          ),
         ),
       ),
     );
