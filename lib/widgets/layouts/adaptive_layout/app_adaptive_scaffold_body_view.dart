@@ -14,6 +14,8 @@ import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_b
 import 'package:twake_chat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
     hide WidgetBuilder;
@@ -173,7 +175,7 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
   }
 }
 
-class _ColumnPageView extends StatelessWidget {
+class _ColumnPageView extends ConsumerWidget {
   final List<AdaptiveDestinationEnum> destinations;
   final ValueNotifier<AdaptiveDestinationEnum> activeNavigationBarNotifier;
   final PageController pageController;
@@ -199,7 +201,7 @@ class _ColumnPageView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return PageView(
       controller: pageController,
       physics: const NeverScrollableScrollPhysics(),
@@ -222,6 +224,7 @@ class _ColumnPageView extends StatelessWidget {
           onOpenSettings: onOpenSettings,
           adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
           searchOpen: searchOpen,
+          searchStyle: ref.watch(displayPreferencesProvider).searchStyle,
           searchResults: Search(
             embedded: true,
             textEditingController: searchQuery,

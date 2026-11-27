@@ -15,7 +15,7 @@ class SettingsPersonalization extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    // A phone keeps its own message field: no choice of it there.
+    // Some choices apply to one width only (see PersonalizeStep.isAskedOn).
     final isWide = !ChatInputRowStyle.responsiveUtils.isMobile(context);
     return Scaffold(
       appBar: TwakeAppBar(
@@ -34,7 +34,7 @@ class SettingsPersonalization extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           for (final step in PersonalizeStep.values)
-            if (isWide || !step.isWideOnly)
+            if (step.isAskedOn(isWide: isWide))
               Padding(
                 padding: const EdgeInsets.only(bottom: 24),
                 child: Column(

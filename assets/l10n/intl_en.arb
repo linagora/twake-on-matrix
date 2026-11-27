@@ -3896,6 +3896,21 @@
     "type": "text",
     "placeholders": {}
   },
+  "personalizeSearchBarQuestion": "Where should the search sit?",
+  "@personalizeSearchBarQuestion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchBarBottom": "In the bottom bar",
+  "@searchBarBottom": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchBarCollapsing": "At the top of the list",
+  "@searchBarCollapsing": {
+    "type": "text",
+    "placeholders": {}
+  },
   "personalizeComposerQuestion": "Which message field?",
   "@personalizeComposerQuestion": {
     "type": "text",

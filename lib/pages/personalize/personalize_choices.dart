@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 import 'package:twake_chat/domain/personalization/personalize_step.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
 import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 
 /// One choice of a step: its stored name, its label, whether it is the
@@ -52,6 +53,18 @@ class PersonalizeChoices {
           switch (order) {
             RoomOrder.recent => l10n.roomOrderRecent,
             RoomOrder.sections => l10n.roomOrderSections,
+          },
+        ),
+    ],
+    PersonalizeStep.searchBar => [
+      for (final style in ChatListSearchStyle.values)
+        _choice(
+          style,
+          preferences.searchStyle,
+          controller.setSearchStyle,
+          switch (style) {
+            ChatListSearchStyle.bottomBar => l10n.searchBarBottom,
+            ChatListSearchStyle.collapsing => l10n.searchBarCollapsing,
           },
         ),
     ],

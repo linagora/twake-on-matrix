@@ -32,6 +32,7 @@ abstract class SettingKeys {
   static const String personalizedSteps = 'chat.twake.personalized';
   static const String chatListDensity = 'chat.twake.chat_list_density';
   static const String roomOrder = 'chat.twake.room_order';
+  static const String searchStyle = 'chat.twake.search_style';
   static const String seenStyle = 'chat.twake.seen_style';
   static const String composerStyle = 'chat.twake.composer_style';
   static const String bubbleAlign = 'chat.twake.bubble_align';

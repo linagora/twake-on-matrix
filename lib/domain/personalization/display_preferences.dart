@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
 
 part 'display_preferences.freezed.dart';
 
@@ -29,6 +30,7 @@ abstract class DisplayPreferencesState with _$DisplayPreferencesState {
   const factory DisplayPreferencesState({
     @Default(ChatListDensity.comfortable) ChatListDensity density,
     @Default(RoomOrder.recent) RoomOrder roomOrder,
+    @Default(ChatListSearchStyle.bottomBar) ChatListSearchStyle searchStyle,
     @Default(SeenStyle.ticks) SeenStyle seenStyle,
     @Default(ComposerStyle.classic) ComposerStyle composerStyle,
     @Default(BubbleAlign.ownRight) BubbleAlign bubbleAlign,

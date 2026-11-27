@@ -5,6 +5,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 String personalizeQuestion(L10n l10n, PersonalizeStep step) => switch (step) {
   PersonalizeStep.density => l10n.personalizeDensityQuestion,
   PersonalizeStep.order => l10n.personalizeOrderQuestion,
+  PersonalizeStep.searchBar => l10n.personalizeSearchBarQuestion,
   PersonalizeStep.seenStyle => l10n.personalizeSeenStyleQuestion,
   PersonalizeStep.composer => l10n.personalizeComposerQuestion,
   PersonalizeStep.align => l10n.personalizeAlignQuestion,

@@ -6,6 +6,7 @@ import 'dart:convert';
 enum PersonalizeStep {
   density('density'),
   order('order'),
+  searchBar('search-bar'),
   seenStyle('seen-style'),
   composer('composer'),
   align('align');
@@ -14,8 +15,17 @@ enum PersonalizeStep {
 
   final String id;
 
-  /// Asked on a wide screen only: a phone keeps its own message field.
-  bool get isWideOnly => this == PersonalizeStep.composer;
+  /// Whether the step is asked on this width: the message field on a wide
+  /// screen only (a phone keeps its own), the search bar on a phone only (a
+  /// wide screen keeps its header search).
+  bool isAskedOn({required bool isWide}) => switch (this) {
+    PersonalizeStep.composer => isWide,
+    PersonalizeStep.searchBar => !isWide,
+    PersonalizeStep.density ||
+    PersonalizeStep.order ||
+    PersonalizeStep.seenStyle ||
+    PersonalizeStep.align => true,
+  };
 }
 
 /// The steps not in [seen], in order, whatever the width of the screen. Ids
@@ -28,14 +38,13 @@ List<PersonalizeStep> unseenSteps(Iterable<String> seen) {
   ];
 }
 
-/// The steps to ask: [unseenSteps], without the wide-only ones on a narrow
-/// screen ([isWide] false).
+/// The steps to ask: [unseenSteps] that apply to this width ([isWide]).
 List<PersonalizeStep> pendingSteps(
   Iterable<String> seen, {
   required bool isWide,
 }) => [
   for (final step in unseenSteps(seen))
-    if (isWide || !step.isWideOnly) step,
+    if (step.isAskedOn(isWide: isWide)) step,
 ];
 
 /// [seen] with the ids of [shown], each id once. The ids of a newer version

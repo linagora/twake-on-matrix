@@ -721,4 +721,10 @@ The flow never opens over a chat. On a phone, after a start from a notification
 or a share, it waits until the chat list is the top route, then opens once. On
 a wide screen the list stays visible beside the chat, so it opens at once.
 
+On a phone only, the search of the chat list is one more option, asked after the
+room order: the round button in the bottom bar (the default, today's search, D37)
+or the thin field at the top of the list, which scrolls away and leaves the
+button in the bar (`ChatListSearchStyle.collapsing`, D37). A wide screen keeps
+its header search and is not asked.
+
 Out of scope: dark mode (a later step, id `theme` kept).
