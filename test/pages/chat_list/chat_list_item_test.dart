@@ -391,6 +391,39 @@ void main() {
       expect(badge.bottom, lessThanOrEqualTo(row.bottom - 1));
     });
 
+    testWidgets('build_whenSpace_matchesTheRoomAvatarAndRowSize', (
+      tester,
+    ) async {
+      // Arrange
+      final space = buildRoom(name: 'Team', id: '!space:server.tld');
+      when(space.isDirectChat).thenReturn(false);
+      when(space.isSpace).thenReturn(true);
+      final room = buildRoom(name: 'General');
+      when(room.isDirectChat).thenReturn(false);
+
+      // Act
+      await tester.pumpWidget(
+        wrap(
+          Column(
+            children: [
+              ChatListItem(space, space: spaceData()),
+              ChatListItem(room),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Assert
+      final avatars = find.byType(AvatarWithKindBadge);
+      final rows = find.byType(TwakeListItem);
+      expect(tester.getSize(avatars.at(0)), tester.getSize(avatars.at(1)));
+      expect(
+        tester.getSize(rows.at(0)).height,
+        tester.getSize(rows.at(1)).height,
+      );
+    });
+
     testWidgets('build_whenSpace_alignsTheTitleWithTheRooms', (tester) async {
       // Arrange
       final space = buildRoom(name: 'Team', id: '!space:server.tld');
