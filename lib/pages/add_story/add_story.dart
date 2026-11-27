@@ -19,15 +19,17 @@ import 'package:twake_chat/utils/story_theme_data.dart';
 import 'package:twake_chat/utils/string_color.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import '../../utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class AddStoryPage extends StatefulWidget {
+class AddStoryPage extends ConsumerStatefulWidget {
   const AddStoryPage({super.key});
 
   @override
   AddStoryController createState() => AddStoryController();
 }
 
-class AddStoryController extends State<AddStoryPage> {
+class AddStoryController extends ConsumerState<AddStoryPage> {
   final TextEditingController controller = TextEditingController();
   final FocusNode focusNode = FocusNode();
   late Color backgroundColor;
@@ -124,7 +126,7 @@ class AddStoryController extends State<AddStoryPage> {
 
   void postStory() async {
     if (video == null && image == null && controller.text.isEmpty) return;
-    final client = Matrix.of(context).client;
+    final client = ref.read(matrixClientProvider);
     var storiesRoom = await client.getStoriesRoom(context);
 
     // Invite contacts if necessary
@@ -261,7 +263,7 @@ class AddStoryController extends State<AddStoryPage> {
         Event(
           content: shareContent,
           type: EventTypes.Message,
-          room: Room(id: '!tmproom', client: Matrix.of(context).client),
+          room: Room(id: '!tmproom', client: ref.read(matrixClientProvider)),
           eventId: 'tmpevent',
           senderId: '@tmpsender:example',
           originServerTs: DateTime.now(),
@@ -274,7 +276,7 @@ class AddStoryController extends State<AddStoryPage> {
         Event(
           content: shareContent,
           type: EventTypes.Message,
-          room: Room(id: '!tmproom', client: Matrix.of(context).client),
+          room: Room(id: '!tmproom', client: ref.read(matrixClientProvider)),
           eventId: 'tmpevent',
           senderId: '@tmpsender:example',
           originServerTs: DateTime.now(),

@@ -2,6 +2,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart'
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
+import 'package:twake_chat/pages/chat/events/message/reply_content_widget.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
@@ -706,7 +707,6 @@ class _MessageContentWithTimestampBuilderState
       timeline: widget.timeline,
       onSelect: widget.onSelect,
       nextEvent: widget.nextEvent,
-      scrollToEventId: widget.scrollToEventId,
       selectMode: widget.selectMode,
       onRetryTextMessage: widget.onRetryTextMessage,
       inThread: widget.inThread,
@@ -797,7 +797,7 @@ class _MessageContentWithTimestampBuilderState
         child: bubbleContent,
       );
     }
-    return MessageBubble(
+    final bubble = MessageBubble(
       key: key,
       isOwnMessage: widget.event.isOwnMessage,
       tailDirection: tailDirection,
@@ -807,6 +807,26 @@ class _MessageContentWithTimestampBuilderState
       isAlignedToEnd: alignOwnMessageRight,
       reactions: reactions,
       child: bubbleContent,
+    );
+    if (!widget.event.isReplyEvent()) return bubble;
+
+    final alignment = alignOwnMessageRight
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start;
+    return ReplyColumn(
+      crossAxisAlignment: alignment,
+      children: [
+        ConstrainedBox(
+          constraints: bubbleConstraints,
+          child: ReplyContentWidget(
+            event: widget.event,
+            timeline: widget.timeline,
+            scrollToEventId: widget.scrollToEventId,
+            alignment: alignment,
+          ),
+        ),
+        bubble,
+      ],
     );
   }
 

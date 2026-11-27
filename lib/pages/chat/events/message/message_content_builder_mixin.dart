@@ -82,7 +82,7 @@ mixin MessageContentBuilderMixin {
       textScaler: MediaQuery.textScalerOf(context),
       text: TextSpan(
         text: event.isCaptionModeOrReply()
-            ? event.body
+            ? event.bodyWithoutReplyFallback
             : event.senderFromMemoryOrFallback
                   .calcDisplayname()
                   .shortenDisplayName(
@@ -113,7 +113,7 @@ mixin MessageContentBuilderMixin {
       textScaler: MediaQuery.textScalerOf(context),
       text: TextSpan(
         text: displayEvent.isCaptionModeOrReply()
-            ? displayEvent.body
+            ? displayEvent.bodyWithoutReplyFallback
             : displayEvent.calcLocalizedBodyFallback(
                 MatrixLocals(L10n.of(context)!),
                 hideReply: true,

@@ -14,6 +14,7 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/widgets/avatar/person_presence_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
@@ -103,7 +104,6 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   @override
   Widget build(BuildContext context) {
     final isChild = depth > 0;
-    final isTopSpace = space != null && !isChild;
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
@@ -119,7 +119,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                 MatrixLocals(L10n.of(context)!),
               );
               return Container(
-                height: space != null
+                height: space != null && isChild
                     ? ChatListItemStyle.spaceItemHeight
                     : ChatListItemStyle.chatItemHeight,
                 padding: ChatListItemStyle.paddingBody.add(
@@ -132,16 +132,12 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                   children: [
                     if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
                     Padding(
-                      padding: isTopSpace
-                          ? ChatListItemStyle.paddingSpaceAvatar
-                          : ChatListItemStyle.paddingAvatar,
+                      padding: ChatListItemStyle.paddingAvatar,
                       child: _ChatListAvatar(
                         room: room,
                         name: displayName,
                         size: isChild
                             ? ChatListItemStyle.childAvatarSize
-                            : isTopSpace
-                            ? ChatListItemStyle.spaceAvatarSize
                             : AvatarStyle.defaultSize,
                         onTap: onTapAvatar,
                       ),
@@ -280,13 +276,16 @@ class _ChatListAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final badge = _badge;
     if (badge == null) {
-      return Avatar(
+      final avatar = Avatar(
         mxContent: room.avatar,
         name: name,
         size: size,
         onTap: onTap,
         keepAlive: true,
       );
+      final peerId = room.directChatMatrixID;
+      if (peerId == null) return avatar;
+      return PersonPresenceBadge(userId: peerId, size: size, child: avatar);
     }
     return AvatarWithKindBadge(
       badge: badge,

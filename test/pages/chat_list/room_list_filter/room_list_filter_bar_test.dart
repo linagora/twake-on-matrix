@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:twake_chat/domain/spaces/folders.dart';
 import 'package:twake_chat/domain/spaces/room_list_filter.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_bar.dart';
 import 'package:twake_chat/providers/room_list/folders_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills.dart';
 
 import '../../../utils/pump_localized.dart';
 import '../../../providers/fake_active_account.dart';
@@ -24,6 +26,7 @@ Future<void> _pump(
   WidgetTester tester,
   List<Folder> folders, {
   bool enabled = true,
+  double textScale = 1,
 }) async {
   _container = ProviderContainer.test(
     retry: (_, _) => null,
@@ -35,7 +38,10 @@ Future<void> _pump(
   await pumpLocalized(
     tester,
     _container,
-    Scaffold(body: RoomListFilterBar(enabled: enabled)),
+    MediaQuery(
+      data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+      child: Scaffold(body: RoomListFilterBar(enabled: enabled)),
+    ),
   );
 }
 
@@ -203,7 +209,7 @@ void _roomListFilterBarOverflowTests() {
       addTearDown(tester.view.reset);
       await _pump(tester, [Folder.user('W' * 60)]);
 
-      final chip = find.byType(FilterChip);
+      final chip = find.byType(FilterPill);
       expect(tester.getSize(chip.last).width, lessThanOrEqualTo(240));
     });
   });
@@ -223,13 +229,40 @@ void _roomListFilterBarScrollTests() {
 
       // The chip starts in view and its menu button is far out of it.
       await tester.tapAt(
-        tester.getTopLeft(find.byType(FilterChip).last) + const Offset(20, 10),
+        tester.getTopLeft(find.byType(FilterPill).last) + const Offset(20, 10),
       );
       await tester.pumpAndSettle();
 
       expect(
         tester.getRect(find.byIcon(Icons.more_vert)).right,
         lessThanOrEqualTo(360),
+      );
+    });
+
+    testWidgets('always_showsThePillsOfThePhone', (tester) async {
+      await _pump(tester, const [Folder.user('Work')]);
+      final colors = LinagoraSysColors.material();
+      Material pill(String label) => tester.widget<Material>(
+        find
+            .descendant(
+              of: find.widgetWithText(FilterPill, label),
+              matching: find.byType(Material),
+            )
+            .first,
+      );
+
+      expect(find.byType(FilterChip), findsNothing);
+      expect(pill('All').color, colors.primary);
+      expect(pill('Work').color, colors.surface);
+      expect(pill('Work').shape, const StadiumBorder());
+    });
+
+    testWidgets('whenTextIsVeryLarge_capsItLikeThePhone', (tester) async {
+      await _pump(tester, const [Folder.user('Work')], textScale: 2);
+
+      expect(
+        MediaQuery.textScalerOf(tester.element(find.text('Work'))).scale(10),
+        moreOrLessEquals(13),
       );
     });
 

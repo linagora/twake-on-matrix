@@ -9,6 +9,8 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart' show Provider;
+import 'package:twake_chat/domain/drive/entities/drive_config.dart';
+import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/data/room_access/repositories/room_access_repository.provider.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
@@ -21,6 +23,7 @@ import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -128,6 +131,10 @@ void main() {
       retry: (_, _) => null,
       overrides: [
         roomAccessRepositoryProvider.overrideWithValue(repository),
+        driveConfigProvider.overrideWithValue(
+          const DriveConfig(ssoUrl: '', ssoClientId: ''),
+        ),
+        matrixClientProvider.overrideWithValue(client),
         loginHomeserverSummaryProvider.overrideWithBuild(
           (_, _) => summaryWith(isPublicGroupsEnabled: true),
         ),

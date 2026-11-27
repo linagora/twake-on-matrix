@@ -6,12 +6,12 @@ import 'package:twake_chat/pages/new_group/selected_contacts_map_change_notifier
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 abstract class ContactsSelectionController<T extends ConsumerStatefulWidget>
     extends ConsumerState<T>
@@ -42,7 +42,7 @@ abstract class ContactsSelectionController<T extends ConsumerStatefulWidget>
   bool get isInvitationEnabled =>
       mounted && ref.read(loginHomeserverSummaryProvider).isInvitationEnabled;
 
-  Client get client => Matrix.of(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   @override
   void initState() {

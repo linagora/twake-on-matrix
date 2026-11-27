@@ -13,6 +13,7 @@ import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dar
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
+import 'package:twake_chat/pages/report/report_user_mixin.dart';
 import 'package:twake_chat/presentation/enum/profile_info/profile_info_body_enum.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
@@ -52,7 +53,7 @@ class ProfileInfoBody extends ConsumerStatefulWidget {
 }
 
 class ProfileInfoBodyController extends ConsumerState<ProfileInfoBody>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, ReportUserMixin<ProfileInfoBody> {
   static const int _animationDuration = 100;
 
   final ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
@@ -180,6 +181,7 @@ class ProfileInfoBodyController extends ConsumerState<ProfileInfoBody>
         ProfileInfoActions.removeFromGroup,
       if (user?.room.canTransferOwnership == true && user?.isBanned == false)
         ProfileInfoActions.transferOwnership,
+      if (user != null) ProfileInfoActions.reportUser,
     ];
   }
 
@@ -193,6 +195,10 @@ class ProfileInfoBodyController extends ConsumerState<ProfileInfoBody>
         break;
       case ProfileInfoActions.transferOwnership:
         transferOwnership();
+        break;
+      case ProfileInfoActions.reportUser:
+        final userId = user?.id;
+        if (userId != null) reportUser(context, userId);
         break;
       default:
         break;

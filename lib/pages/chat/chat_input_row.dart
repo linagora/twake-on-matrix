@@ -5,6 +5,8 @@ import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_style.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_web.dart';
 import 'package:twake_chat/pages/chat/reply_display.dart';
+import 'package:twake_chat/pages/scribe/widgets/scribe_button.dart';
+import 'package:twake_chat/pages/scribe/widgets/scribe_send_hold.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/android_utils.dart';
@@ -89,15 +91,26 @@ class ChatInputRow extends StatelessWidget {
 
                               // Single "+" button. Gallery, Documents and Camera
                               // all live inside its popup menu now.
-                              return SizedBox(
-                                height: ChatInputRowStyle.chatInputRowHeight,
-                                child: AttachmentMenuButton(
-                                  onSelected: (action) =>
-                                      controller.onAttachmentMenuSelected(
-                                        context,
-                                        action,
-                                      ),
-                                ),
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    height:
+                                        ChatInputRowStyle.chatInputRowHeight,
+                                    child: AttachmentMenuButton(
+                                      onSelected: (action) =>
+                                          controller.onAttachmentMenuSelected(
+                                            context,
+                                            action,
+                                          ),
+                                    ),
+                                  ),
+                                  ScribeButton(
+                                    roomId: controller.room!.id,
+                                    draft: controller.sendController,
+                                    onRewritten: controller.replaceDraft,
+                                  ),
+                                ],
                               );
                             },
                           ),
@@ -142,15 +155,18 @@ class ChatInputRow extends StatelessWidget {
                             );
                           },
                         ),
-                        ChatInputRowSendBtn(
-                          inputText: controller.inputText,
-                          onTap: controller.onInputBarSubmitted,
-                          onTapRecorderWeb: () =>
-                              controller.onTapRecorderWeb(context: context),
-                          audioRecordStateNotifier:
-                              controller.audioRecordStateNotifier,
-                          onDeleteRecorderWeb: controller.discardRecordWeb,
-                          onFinishRecorderWeb: controller.sendVoiceMessageWeb,
+                        ScribeSendHold(
+                          roomId: controller.room!.id,
+                          child: ChatInputRowSendBtn(
+                            inputText: controller.inputText,
+                            onTap: controller.onInputBarSubmitted,
+                            onTapRecorderWeb: () =>
+                                controller.onTapRecorderWeb(context: context),
+                            audioRecordStateNotifier:
+                                controller.audioRecordStateNotifier,
+                            onDeleteRecorderWeb: controller.discardRecordWeb,
+                            onFinishRecorderWeb: controller.sendVoiceMessageWeb,
+                          ),
                         ),
                       ],
               ),
