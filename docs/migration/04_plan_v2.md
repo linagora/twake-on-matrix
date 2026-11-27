@@ -69,9 +69,8 @@ with their module in Step 3. `getIt` is not swept: it goes module by module
 
 - `Matrix.of(context).client` → `ref.watch(matrixClientProvider)` in
   `build()`, `ref.read(matrixClientProvider)` in callbacks and `initState`
-- Every other `MatrixState` member read by the UI (`shareContent`,
-  `showToMBootstrap`, `loginType`…) → its own
-  provider, one small pull request each
+- A `MatrixState` member that one screen sets and reads → local to that
+  screen
 - Rename the existing `ViewModel`s to `Controller`s
 
 Measured on 2026-10-20 with `scripts/migration_status.sh`'s patterns; the
@@ -88,6 +87,10 @@ For each module:
    only for a singleton whose state legacy code shares (ADR 0037 §3).
 4. Controller + `@freezed` state; the screen becomes a Consumer widget.
 5. Delete its `app_state/` files, mixins and GetIt registrations.
+6. The `MatrixState` members it produces (`authUrl` and `loginType` with
+   login, `showToMBootstrap` with bootstrap, `shareContent` with share…) move
+   with it: its controller computes them, or a provider derives them. Never
+   a push from `MatrixState` into a provider (ADR 0037 §3).
 
 | Wave | Modules |
 |---|---|
