@@ -89,8 +89,8 @@ For each module:
 5. Delete its `app_state/` files, mixins and GetIt registrations.
 6. The `MatrixState` members it produces (`authUrl` and `loginType` with
    login, `showToMBootstrap` with bootstrap, `shareContent` with share…) move
-   with it: its controller computes them, or a provider derives them. Never
-   a push from `MatrixState` into a provider (ADR 0037 §3).
+   with it: its controller computes them, or a provider derives them. No
+   new push from `MatrixState` into a provider (ADR 0037 §3).
 
 | Wave | Modules |
 |---|---|
