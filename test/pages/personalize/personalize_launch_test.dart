@@ -130,6 +130,51 @@ void main() {
   _whenAndWhatTests();
   _onceOnlyTests();
   _overAChatTests();
+  _resizedWhileLoadingTests();
+}
+
+// Review of #3844 (CodeRabbit): the width that counts is the one of the
+// screen when the flow opens, not when the storage was asked.
+void _resizedWhileLoadingTests() {
+  group('the screen turned from wide to phone before the storage answered', () {
+    testWidgets('the flow opens with the four phone steps, no composer', (
+      tester,
+    ) async {
+      final chatList = _ChatList(tester);
+      await chatList.show(size: _wide);
+      chatList.storage.holdLoads();
+      chatList.launch();
+
+      tester.view.physicalSize = _phone;
+      await tester.pump();
+      chatList.storage.answer();
+      await chatList.settle();
+
+      expect(chatList.flowIsOpen, isTrue);
+      expect(chatList.counter, _saysStep(1, 4));
+    });
+
+    testWidgets('a chat on top: waits for the chat list, then the four phone '
+        'steps', (tester) async {
+      final chatList = _ChatList(tester);
+      await chatList.show(size: _wide);
+      await chatList.openChat();
+      chatList.storage.holdLoads();
+      chatList.launch();
+
+      tester.view.physicalSize = _phone;
+      await tester.pump();
+      chatList.storage.answer();
+      await chatList.settle();
+
+      expect(chatList.flowIsOpen, isFalse);
+      expect(find.text(_aChat), findsOneWidget);
+
+      await chatList.back();
+
+      expect(chatList.counter, _saysStep(1, 4));
+    });
+  });
 }
 
 void _whenAndWhatTests() {

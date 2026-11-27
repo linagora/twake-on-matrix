@@ -51,6 +51,8 @@ class _App {
 void main() {
   _pendingTests();
   _markSeenTests();
+  _markSeenAgainTests();
+  _failedLoadTests();
 }
 
 void _pendingTests() {
@@ -272,6 +274,73 @@ void _markSeenTests() {
       await app.markSeen(PersonalizeStep.values);
 
       expect(await app.pending(), isEmpty);
+    });
+  });
+}
+
+// Review of #3844 (CodeRabbit): each marking adds to what was marked before
+// it, never to what the device held at start.
+void _markSeenAgainTests() {
+  group('marking steps seen twice', () {
+    test(
+      'one after the other: the running app and the device hold both',
+      () async {
+        final app = _App.seen({});
+
+        await app.markSeen(const [PersonalizeStep.density]);
+        await app.markSeen(const [PersonalizeStep.order]);
+
+        expect(app.seen, {'density', 'order'});
+        expect(app.storage.seen, {'density', 'order'});
+        expect(await app.restart().pending(), [
+          PersonalizeStep.seenStyle,
+          PersonalizeStep.composer,
+          PersonalizeStep.align,
+        ]);
+      },
+    );
+
+    test(
+      'at the same time: the running app and the device hold both',
+      () async {
+        final app = _App.seen({});
+
+        await Future.wait([
+          app.controller.markSeen(const [PersonalizeStep.density]),
+          app.controller.markSeen(const [PersonalizeStep.order]),
+        ]);
+        await pumpEventQueue();
+
+        expect(app.seen, {'density', 'order'});
+        expect(app.storage.seen, {'density', 'order'});
+      },
+    );
+  });
+}
+
+// Review of #3844 (CodeRabbit): a load that failed says nothing about what
+// the device holds; the steps it saw before stay seen.
+void _failedLoadTests() {
+  group('the storage could not be read at start', () {
+    test('marking a step seen keeps the steps the device had stored', () async {
+      final storage = FakeDisplayPreferencesRepository(
+        seen: {'density'},
+        failLoad: true,
+      );
+      final app = _App(storage);
+      await app.pending();
+      storage.failLoad = false;
+
+      await app.markSeen(const [PersonalizeStep.align]);
+
+      expect(storage.seen, contains('density'));
+      for (final written in storage.savedSeen) {
+        expect(written, contains('density'));
+      }
+      expect(
+        await app.restart().pending(),
+        isNot(contains(PersonalizeStep.density)),
+      );
     });
   });
 }
