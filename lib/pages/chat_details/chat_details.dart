@@ -1,4 +1,5 @@
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/pages/report/report_room_mixin.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit.dart';
@@ -48,7 +49,8 @@ class ChatDetailsController extends ConsumerState<ChatDetails>
         TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatDetails>,
         TwakeContextMenuMixin,
-        LeaveChatMixin {
+        LeaveChatMixin,
+        ReportRoomMixin<ChatDetails> {
   final actionsMobileAndTabletKey = ChatKeys.actionsMobileAndTablet.key;
 
   final actionsWebAndDesktopKey = ChatKeys.actionsWebAndDesktop.key;
@@ -129,27 +131,13 @@ class ChatDetailsController extends ConsumerState<ChatDetails>
     );
     switch (result) {
       case 0:
-        await _reportRoom(context);
+        await reportRoom(context, roomId);
         break;
       case 1:
         await leaveChat(context, room);
         break;
       default:
         break;
-    }
-  }
-
-  Future<void> _reportRoom(BuildContext context) async {
-    try {
-      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () async {
-          await ref.read(matrixClientProvider).reportRoom(roomId, 'No reason');
-        },
-      );
-      if (result.error != null) throw result.error;
-    } catch (e) {
-      Logs().e('ChatDetailsController._reportRoom', e);
-      TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
     }
   }
 

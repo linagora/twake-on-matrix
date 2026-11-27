@@ -2590,6 +2590,19 @@
   "unblockDescriptionDialog": "This person will be able to message you and see when you're online. They won't be notified that you unblocked them.",
   "report": "Report",
   "reportDesc": "What’s the issue with this message?",
+  "reportChatDesc": "What’s the issue with this chat?",
+  "reportConfirmTitle": "Send this report?",
+  "reportConfirmMessage": "Reason: {reason}",
+  "@reportConfirmMessage": {
+    "type": "text",
+    "placeholders": {
+      "reason": {}
+    }
+  },
+  "reportChat": "Report chat",
+  "reportUser": "Report user",
+  "reportUserDesc": "What’s the issue with this user?",
+  "reportNotSupported": "Your server doesn’t support this report yet",
   "sendReport": "Send Report",
   "addComment": "Add comment",
   "spam": "Spam",
