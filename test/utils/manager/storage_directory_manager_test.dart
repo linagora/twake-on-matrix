@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -387,6 +388,38 @@ void main() {
         // Assert
         expect(cached.existsSync(), isFalse);
         await sweep;
+      },
+    );
+
+    test(
+      'getFilePathInAppDownloads_whenASecondSweepEndsFirst_waitsForTheFirst',
+      () async {
+        // Arrange
+        final release = Completer<void>();
+        var calls = 0;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(pathProviderChannel, (_) async {
+              if (calls++ == 0) await release.future;
+              return tempDir.path;
+            });
+        final first = StorageDirectoryManager.instance.deleteFilesCachedBefore(
+          cutoff,
+        );
+        await StorageDirectoryManager.instance.deleteFilesCachedBefore(cutoff);
+        var resolved = false;
+
+        // Act
+        final path = StorageDirectoryManager.instance
+            .getFilePathInAppDownloads(eventId: r'$e', fileName: 'a.pdf')
+            .whenComplete(() => resolved = true);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        final resolvedDuringTheFirst = resolved;
+        release.complete();
+        await first;
+        await path;
+
+        // Assert
+        expect(resolvedDuringTheFirst, isFalse);
       },
     );
   });

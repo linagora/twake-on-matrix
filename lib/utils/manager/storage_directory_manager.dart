@@ -21,11 +21,16 @@ class StorageDirectoryManager {
   Future<String> getFileStoreDirectory() async =>
       await _appFileStoreDirectory() ?? (await getDownloadsDirectory())!.path;
 
-  Future<void>? _cacheSweep;
+  final _cacheSweeps = <Future<void>>{};
 
-  // Waits for the launch sweep: a path handed out during it could be deleted.
+  /// A path handed out during a sweep could be deleted by it.
+  Future<void> waitForCacheSweeps() async {
+    if (_cacheSweeps.isEmpty) return;
+    await Future.wait(_cacheSweeps.toList());
+  }
+
   Future<String?> _appFileStoreDirectory() async {
-    if (_cacheSweep case final sweep?) await sweep;
+    await waitForCacheSweeps();
     return _appOwnedRoot();
   }
 
@@ -61,10 +66,8 @@ class StorageDirectoryManager {
   Future<void> deleteFilesCachedBefore(DateTime cutoff) {
     final sweep = _sweepFilesCachedBefore(cutoff);
     final gate = sweep.then<void>((_) {}, onError: (_) {});
-    _cacheSweep = gate;
-    gate.whenComplete(() {
-      if (identical(_cacheSweep, gate)) _cacheSweep = null;
-    });
+    _cacheSweeps.add(gate);
+    gate.whenComplete(() => _cacheSweeps.remove(gate));
     return sweep;
   }
 
