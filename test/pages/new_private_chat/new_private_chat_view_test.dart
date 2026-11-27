@@ -6,6 +6,13 @@ import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/loading_contact_widget.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_empty.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact_success.dart';
 import 'package:twake_chat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:twake_chat/domain/usecase/invitation/get_invitation_status_interactor.dart';
@@ -76,25 +83,13 @@ void main() {
 
   tearDown(() => getIt.reset());
 
-  testWidgets('builds only the contact tiles that fit on screen', (
-    tester,
+  Future<NewPrivateChatScreenState> pumpView(
+    WidgetTester tester,
+    Either<Failure, Success> contacts,
   ) async {
-    const contactCount = 300;
     final controller = NewPrivateChatScreenState();
-    controller.presentationContactNotifier.value = Right(
-      GetPresentationContactsSuccess(
-        keyword: '',
-        contacts: List.generate(
-          contactCount,
-          (index) => PresentationContact(
-            matrixId: '@user$index:server',
-            displayName: 'Contact $index',
-          ),
-        ),
-      ),
-    );
+    controller.presentationContactNotifier.value = contacts;
     addTearDown(controller.disposeContactsMixin);
-
     await tester.pumpWidget(
       ProviderScope(
         retry: (_, _) => null,
@@ -112,6 +107,28 @@ void main() {
         ),
       ),
     );
+    return controller;
+  }
+
+  testWidgets('builds only the contact tiles that fit on screen', (
+    tester,
+  ) async {
+    const contactCount = 300;
+    await pumpView(
+      tester,
+      Right(
+        GetPresentationContactsSuccess(
+          keyword: '',
+          contacts: List.generate(
+            contactCount,
+            (index) => PresentationContact(
+              matrixId: '@user$index:server',
+              displayName: 'Contact $index',
+            ),
+          ),
+        ),
+      ),
+    );
 
     final builtTiles = find
         .byType(ExpansionContactListTile, skipOffstage: false)
@@ -119,5 +136,50 @@ void main() {
         .length;
     expect(builtTiles, greaterThan(0));
     expect(builtTiles, lessThan(contactCount ~/ 10));
+  });
+
+  testWidgets('shows the loader while the contacts load', (tester) async {
+    await pumpView(tester, const Right(ContactsLoading()));
+
+    expect(find.byType(LoadingContactWidget), findsOneWidget);
+    expect(find.byType(ExpansionContactListTile), findsNothing);
+  });
+
+  testWidgets('shows no results when no contact matches', (tester) async {
+    await pumpView(
+      tester,
+      const Left(GetPresentationContactsEmpty(keyword: 'nobody')),
+    );
+
+    expect(find.byType(NoContactsFound), findsOneWidget);
+    expect(find.byType(ExpansionContactListTile), findsNothing);
+  });
+
+  testWidgets('shows the typed Matrix ID as an external contact', (
+    tester,
+  ) async {
+    const matrixId = '@typed:server';
+    await pumpView(
+      tester,
+      const Right(
+        PresentationExternalContactSuccess(
+          contact: PresentationContact(
+            matrixId: matrixId,
+            displayName: 'typed',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(ExpansionContactListTile), findsOneWidget);
+    expect(
+      tester
+          .widget<ExpansionContactListTile>(
+            find.byType(ExpansionContactListTile),
+          )
+          .contact
+          .matrixId,
+      matrixId,
+    );
   });
 }
