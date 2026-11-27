@@ -416,6 +416,27 @@ Future<void> main() async {
             hideDisplayName: false,
           );
         });
+
+        testWidgets('GIVEN a display name wider than maxWidth\n'
+            'THEN the bubble keeps within maxWidth\n', (
+          WidgetTester tester,
+        ) async {
+          final eventToTest = Event(
+            content: {'msgtype': 'm.text', 'body': 'Hi'},
+            type: 'm.room.message',
+            eventId: '\$143273582443PhrSn:example.org',
+            senderId: '@averyveryverylongdisplaynameforabubble:example.org',
+            originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
+            room: room,
+          );
+          await runTest(
+            tester,
+            event: eventToTest,
+            maxWidth: 100,
+            regime: BubbleRegime.displayNameDriven,
+            hideDisplayName: false,
+          );
+        });
       });
     });
 
