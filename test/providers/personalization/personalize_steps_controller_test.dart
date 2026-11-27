@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/data/local/personalization/display_preferences_repository.dart';
+import 'package:twake_chat/data/local/personalization/display_preferences_repository.provider.dart';
 import 'package:twake_chat/domain/personalization/personalize_step.dart';
 import 'package:twake_chat/providers/personalization/personalize_steps_controller.dart';
 
@@ -29,9 +29,9 @@ class _App {
   PersonalizeStepsController get controller =>
       container.read(personalizeStepsControllerProvider.notifier);
 
-  /// The seen step ids the app holds now.
-  AsyncValue<Set<String>> get state =>
-      container.read(personalizeStepsControllerProvider);
+  /// The seen step ids the app holds now, in its `PersonalizeStepsState`.
+  Set<String> get seen =>
+      container.read(personalizeStepsControllerProvider).requireValue.seen;
 
   /// What the app is handed when it opens the flow, on a wide screen unless
   /// [isWide] says otherwise.
@@ -142,7 +142,7 @@ void _pendingTests() {
 
       await app.pending();
 
-      expect(app.state.requireValue, {'density', 'wallpaper'});
+      expect(app.seen, {'density', 'wallpaper'});
     });
 
     test('loading them never writes to the device', () async {
@@ -173,7 +173,7 @@ void _markSeenTests() {
         PersonalizeStep.order,
       ]);
 
-      expect(app.state.requireValue, {'density', 'order'});
+      expect(app.seen, {'density', 'order'});
       expect(await app.pending(), [
         PersonalizeStep.seenStyle,
         PersonalizeStep.composer,
@@ -215,7 +215,7 @@ void _markSeenTests() {
       await app.markSeen(PersonalizeStep.values);
 
       expect(app.storage.savedSeen.last, {'wallpaper', ..._allIds});
-      expect(app.state.requireValue, {'wallpaper', ..._allIds});
+      expect(app.seen, {'wallpaper', ..._allIds});
     });
 
     test('before the storage has answered: what was stored is kept', () async {
@@ -229,7 +229,40 @@ void _markSeenTests() {
       await pumpEventQueue();
 
       expect(storage.savedSeen.last, {'wallpaper', 'align'});
-      expect(app.state.requireValue, {'wallpaper', 'align'});
+      expect(app.seen, {'wallpaper', 'align'});
+    });
+
+    // Review of #3844: the state is a value; marking again what is seen
+    // already leaves it equal, and nothing that listens is woken.
+    test('marking steps seen already: the state stays equal, no listener is '
+        'told', () async {
+      final app = _App.seen({'density', 'order'});
+      await app.pending();
+      var notified = 0;
+      app.container.listen(
+        personalizeStepsControllerProvider,
+        (_, _) => notified++,
+      );
+
+      await app.markSeen(const [PersonalizeStep.order]);
+
+      expect(notified, 0);
+      expect(app.seen, {'density', 'order'});
+    });
+
+    test('marking a new step seen: listeners are told once', () async {
+      final app = _App.seen({'density'});
+      await app.pending();
+      var notified = 0;
+      app.container.listen(
+        personalizeStepsControllerProvider,
+        (_, _) => notified++,
+      );
+
+      await app.markSeen(const [PersonalizeStep.order]);
+
+      expect(notified, 1);
+      expect(app.seen, {'density', 'order'});
     });
 
     test('a storage that refuses the write: no error, and the running app '

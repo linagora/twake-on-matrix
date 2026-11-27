@@ -84,8 +84,7 @@ class _ScreenTitle extends StatelessWidget {
       child: Text(
         title,
         textScaler: TextScaler.noScaling,
-        style: TextStyle(
-          fontSize: 14,
+        style: LinagoraTextStyle.material().titleSmall.copyWith(
           fontWeight: FontWeight.w600,
           color: scheme.onSurface,
         ),
@@ -169,17 +168,13 @@ class _NamedRoom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final avatar = compact ? 24.0 : 36.0;
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: compact ? 4 : 8),
       child: Row(
         spacing: 10,
         children: [
-          RoundAvatar(
-            size: avatar,
-            text: name.characters.first,
-            textStyle: TextStyle(fontSize: avatar / 2.4),
-          ),
+          RoundAvatar(size: compact ? 24 : 36, text: name.characters.first),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,8 +183,7 @@ class _NamedRoom extends StatelessWidget {
                 Text(
                   name,
                   textScaler: TextScaler.noScaling,
-                  style: TextStyle(
-                    fontSize: 12,
+                  style: LinagoraTextStyle.material().labelMedium.copyWith(
                     fontWeight: unread ? FontWeight.w700 : FontWeight.w500,
                     color: scheme.onSurface,
                   ),

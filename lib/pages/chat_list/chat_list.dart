@@ -381,7 +381,7 @@ class ChatListController extends ConsumerState<ChatList>
 
   Future<void> _askPersonalization() async {
     if (!mounted) return;
-    await PersonalizeLaunch.afterFirstSync(context, firstSync: Future.value());
+    await PersonalizeLaunch.afterFirstSync(context);
   }
 
   void _onTapBottomNavigation(

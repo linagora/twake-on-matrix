@@ -709,3 +709,16 @@ names under the last message a reader has read, one line if useful.
 On wide screens only (905 px and more), the message field is a fourth option:
 tools under the text, or around it as before (the default). A phone keeps its
 own message field.
+
+At launch, once the first sync is done, the app opens a full-screen flow with
+every option this device has not seen yet, one step at a time. The user picks a
+choice or closes the flow: closing it at any step marks every step of that flow
+as seen, including the steps not reached, and they do not come back. A step
+added later shows up once, at the next launch. When the feature ships, every
+user goes through every step once. Seen steps are stored on the device only.
+
+The flow never opens over a chat. On a phone, after a start from a notification
+or a share, it waits until the chat list is the top route, then opens once. On
+a wide screen the list stays visible beside the chat, so it opens at once.
+
+Out of scope: dark mode (a later step, id `theme` kept).

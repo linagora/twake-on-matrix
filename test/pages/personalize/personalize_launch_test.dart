@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
-import 'package:twake_chat/data/local/personalization/display_preferences_repository.dart';
+import 'package:twake_chat/data/local/personalization/display_preferences_repository.provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/personalize/personalize_launch.dart';
@@ -13,9 +13,13 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import '../../providers/personalization/fake_display_preferences_repository.dart';
 
 // The trigger the chat list runs at start (ChatList._askPersonalization):
-// once per run of the app, after the first sync, with the steps pending for
-// the width of the screen. The chat list hands it the first sync; these
-// specs hand it one they complete themselves.
+// once per run of the app, with the steps pending for the width of the
+// screen. The chat list runs it once its first sync is done; these specs run
+// it once their own sync is done, as the app does (review of #3844).
+//
+// The flow never opens over a chat: after a start from a notification or a
+// share, the chat is open on top of the list; the flow waits until the user
+// is back on the chat list, then opens once.
 
 const _counter = ValueKey<String>('personalize-step-counter');
 const _close = ValueKey<String>('personalize-close');
@@ -23,27 +27,29 @@ const _close = ValueKey<String>('personalize-close');
 const _phone = Size(390, 844);
 const _wide = Size(1200, 900);
 
+const _aChat = 'a chat';
+
 const _allIds = {'density', 'order', 'seen-style', 'composer', 'align'};
 
-/// The chat list of a started app, over a device that saw [seen], on a
-/// screen of [size]. [launch] runs the trigger, as the chat list does.
+/// The chat list of a started app, its first sync done, over a device that
+/// saw [seen], on a screen of [size]. [launch] runs the trigger, as the chat
+/// list does.
 class _ChatList {
   _ChatList(this.tester);
 
   final WidgetTester tester;
-  final firstSync = Completer<void>();
+  late FakeDisplayPreferencesRepository storage;
   late BuildContext _context;
 
   Future<void> show({Set<String> seen = const {}, Size size = _phone}) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    storage = FakeDisplayPreferencesRepository(seen: seen);
     final container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
-        displayPreferencesRepositoryProvider.overrideWithValue(
-          FakeDisplayPreferencesRepository(seen: seen),
-        ),
+        displayPreferencesRepositoryProvider.overrideWithValue(storage),
       ],
     );
     await tester.pumpWidget(
@@ -68,12 +74,23 @@ class _ChatList {
     );
   }
 
-  void launch() => unawaited(
-    PersonalizeLaunch.afterFirstSync(_context, firstSync: firstSync.future),
-  );
+  void launch() => unawaited(PersonalizeLaunch.afterFirstSync(_context));
 
-  Future<void> sync() async {
-    if (!firstSync.isCompleted) firstSync.complete();
+  /// A chat opened on top of the list, as a notification or a share does.
+  Future<void> openChat() async {
+    unawaited(
+      Navigator.of(_context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => const Scaffold(body: Text(_aChat)),
+        ),
+      ),
+    );
+    await settle();
+  }
+
+  /// Back from the chat to the list.
+  Future<void> back() async {
+    Navigator.of(_context).pop();
     await settle();
   }
 
@@ -110,18 +127,20 @@ void main() {
 
   setUp(PersonalizeLaunch.resetForTesting);
 
+  _whenAndWhatTests();
+  _onceOnlyTests();
+  _overAChatTests();
+}
+
+void _whenAndWhatTests() {
   group('the personalization asked at start', () {
-    testWidgets('waits for the first sync, then opens over the chat list', (
-      tester,
-    ) async {
+    testWidgets('opens over the chat list', (tester) async {
       final chatList = _ChatList(tester);
       await chatList.show();
 
       chatList.launch();
       await chatList.settle();
-      expect(chatList.flowIsOpen, isFalse, reason: 'before the first sync');
 
-      await chatList.sync();
       expect(chatList.flowIsOpen, isTrue);
     });
 
@@ -130,7 +149,7 @@ void main() {
       await chatList.show();
 
       chatList.launch();
-      await chatList.sync();
+      await chatList.settle();
 
       expect(chatList.counter, _saysStep(1, 4));
     });
@@ -142,7 +161,7 @@ void main() {
       await chatList.show(size: _wide);
 
       chatList.launch();
-      await chatList.sync();
+      await chatList.settle();
 
       expect(chatList.counter, _saysStep(1, 5));
     });
@@ -153,7 +172,7 @@ void main() {
       await chatList.show(seen: _allIds.difference({'composer'}));
 
       chatList.launch();
-      await chatList.sync();
+      await chatList.settle();
 
       expect(chatList.flowIsOpen, isFalse);
       expect(find.text('the chat list'), findsOneWidget);
@@ -164,12 +183,16 @@ void main() {
       await chatList.show(seen: _allIds, size: _wide);
 
       chatList.launch();
-      await chatList.sync();
+      await chatList.settle();
 
       expect(chatList.flowIsOpen, isFalse);
       expect(tester.takeException(), isNull);
     });
+  });
+}
 
+void _onceOnlyTests() {
+  group('the personalization asked at start', () {
     testWidgets('asked twice in the same run: one flow only', (tester) async {
       final chatList = _ChatList(tester);
       await chatList.show();
@@ -177,7 +200,7 @@ void main() {
       chatList
         ..launch()
         ..launch();
-      await chatList.sync();
+      await chatList.settle();
       expect(find.byKey(_counter), findsOneWidget);
 
       await tester.tap(find.byKey(_close));
@@ -192,7 +215,7 @@ void main() {
       final first = _ChatList(tester);
       await first.show();
       first.launch();
-      await first.sync();
+      await first.settle();
       await tester.tap(find.byKey(_close));
       await first.settle();
 
@@ -200,22 +223,76 @@ void main() {
       final again = _ChatList(tester);
       await again.show();
       again.launch();
-      await again.sync();
+      await again.settle();
 
       expect(again.flowIsOpen, isFalse);
     });
 
-    testWidgets('the chat list gone before the first sync: nothing opens, no '
-        'error', (tester) async {
+    testWidgets('the chat list gone before the storage answers: nothing '
+        'opens, no error', (tester) async {
       final chatList = _ChatList(tester);
       await chatList.show();
+      chatList.storage.holdLoads();
       chatList.launch();
 
       await tester.pumpWidget(const SizedBox.shrink());
-      await chatList.sync();
+      chatList.storage.answer();
+      await chatList.settle();
 
       expect(chatList.flowIsOpen, isFalse);
       expect(tester.takeException(), isNull);
     });
   });
+}
+
+void _overAChatTests() {
+  group(
+    'the personalization asked at start, a chat open on top of the list',
+    () {
+      testWidgets('does not open over the chat', (tester) async {
+        final chatList = _ChatList(tester);
+        await chatList.show();
+        await chatList.openChat();
+
+        chatList.launch();
+        await chatList.settle();
+
+        expect(chatList.flowIsOpen, isFalse);
+        expect(find.text(_aChat), findsOneWidget);
+      });
+
+      testWidgets('opens once the user is back on the chat list', (
+        tester,
+      ) async {
+        final chatList = _ChatList(tester);
+        await chatList.show();
+        await chatList.openChat();
+        chatList.launch();
+        await chatList.settle();
+
+        await chatList.back();
+
+        expect(find.byKey(_counter), findsOneWidget);
+        expect(chatList.counter, _saysStep(1, 4));
+      });
+
+      testWidgets('once only: closed, then a chat opened and left again, it '
+          'does not come back', (tester) async {
+        final chatList = _ChatList(tester);
+        await chatList.show();
+        await chatList.openChat();
+        chatList.launch();
+        await chatList.settle();
+        await chatList.back();
+        await tester.tap(find.byKey(_close));
+        await chatList.settle();
+
+        await chatList.openChat();
+        await chatList.back();
+
+        expect(chatList.flowIsOpen, isFalse);
+        expect(find.text('the chat list'), findsOneWidget);
+      });
+    },
+  );
 }

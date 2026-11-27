@@ -136,8 +136,73 @@ class _FullDisk extends Store {
       throw Exception('disk full');
 }
 
-/// The flow, opened full screen over the chat list (or over the page at
-/// [at]), on a phone unless [size] says otherwise.
+/// The device the flow opens on: a phone unless [size] says otherwise, what
+/// it [stored] already, its [store] if not the default one, and the page
+/// [at] which the flow opens (the chat list unless said).
+class _Device {
+  const _Device({
+    this.size = _phone,
+    this.stored = const {},
+    this.store,
+    this.at = '/rooms',
+  });
+
+  final Size size;
+  final Map<String, Object> stored;
+  final Store? store;
+  final String at;
+}
+
+const _onWide = _Device(size: _wide);
+
+/// A page titled [title] with a button that opens the flow of [steps] full
+/// screen, as the chat list does.
+Widget _launcher(
+  BuildContext context,
+  String title,
+  List<PersonalizeStep> steps,
+) => Scaffold(
+  body: Column(
+    children: [
+      Text(title),
+      TextButton(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            fullscreenDialog: true,
+            builder: (_) => PersonalizeFlow(steps: steps),
+          ),
+        ),
+        child: const Text('start'),
+      ),
+    ],
+  ),
+);
+
+/// The pages of the app the flow can open over or lead to, starting at [at].
+GoRouter _router(String at, List<PersonalizeStep> steps) => GoRouter(
+  initialLocation: at,
+  errorBuilder: (_, state) =>
+      Scaffold(body: Text('no such page: ${state.uri}')),
+  routes: [
+    GoRoute(
+      path: '/rooms',
+      builder: (context, _) => _launcher(context, _chatList, steps),
+      routes: [
+        GoRoute(
+          path: 'personalization',
+          builder: (_, _) =>
+              const Scaffold(body: Text(_settingsPersonalization)),
+        ),
+        GoRoute(
+          path: 'room',
+          builder: (context, _) => _launcher(context, _openChat, steps),
+        ),
+      ],
+    ),
+  ],
+);
+
+/// The flow, opened full screen over the page of the [_Device].
 class _Flow {
   _Flow(this.tester);
 
@@ -145,59 +210,26 @@ class _Flow {
   late final ProviderContainer container;
 
   Future<void> open(
-    List<PersonalizeStep> steps, {
-    Size size = _phone,
-    Map<String, Object> stored = const {},
-    Store? store,
-    String at = '/rooms',
-  }) async {
-    SharedPreferences.setMockInitialValues(stored);
-    tester.view.physicalSize = size;
+    List<PersonalizeStep> steps, [
+    _Device device = const _Device(),
+  ]) async {
+    SharedPreferences.setMockInitialValues(device.stored);
+    tester.view.physicalSize = device.size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    final store = device.store;
     container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [if (store != null) storeProvider.overrideWithValue(store)],
     );
-    Widget launcher(BuildContext context, String title) => Scaffold(
-      body: Column(
-        children: [
-          Text(title),
-          TextButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                fullscreenDialog: true,
-                builder: (_) => PersonalizeFlow(steps: steps),
-              ),
-            ),
-            child: const Text('start'),
-          ),
-        ],
-      ),
-    );
-    final router = GoRouter(
-      initialLocation: at,
-      errorBuilder: (_, state) =>
-          Scaffold(body: Text('no such page: ${state.uri}')),
-      routes: [
-        GoRoute(
-          path: '/rooms',
-          builder: (context, _) => launcher(context, _chatList),
-          routes: [
-            GoRoute(
-              path: 'personalization',
-              builder: (_, _) =>
-                  const Scaffold(body: Text(_settingsPersonalization)),
-            ),
-            GoRoute(
-              path: 'room',
-              builder: (context, _) => launcher(context, _openChat),
-            ),
-          ],
-        ),
-      ],
-    );
+    final router = _router(device.at, steps);
     addTearDown(router.dispose);
+    await _pumpApp(router);
+    await tester.tap(find.text('start'));
+    await settle();
+  }
+
+  Future<void> _pumpApp(GoRouter router) async {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -210,8 +242,6 @@ class _Flow {
         ),
       ),
     );
-    await settle();
-    await tester.tap(find.text('start'));
     await settle();
   }
 
@@ -547,7 +577,7 @@ void _wideFlowTests() {
     testWidgets('Next walks the five steps in order, the composer between '
         'the seen style and the align', (tester) async {
       final flow = _Flow(tester);
-      await flow.open(_wideAll, size: _wide);
+      await flow.open(_wideAll, _onWide);
 
       await flow.expectWalk(_wideAll);
     });
@@ -555,7 +585,7 @@ void _wideFlowTests() {
     testWidgets('the composer offers « compact » and « classic », « classic » '
         'chosen on arrival', (tester) async {
       final flow = _Flow(tester);
-      await flow.open(const [PersonalizeStep.composer], size: _wide);
+      await flow.open(const [PersonalizeStep.composer], _onWide);
 
       expect(flow.counter, _saysStep(1, 1));
       expect(find.byKey(_option('composer', 'compact')), findsOneWidget);
@@ -568,7 +598,7 @@ void _wideFlowTests() {
       tester,
     ) async {
       final flow = _Flow(tester);
-      await flow.open(const [PersonalizeStep.composer], size: _wide);
+      await flow.open(const [PersonalizeStep.composer], _onWide);
 
       await flow.tap(_close);
 
@@ -580,7 +610,7 @@ void _wideFlowTests() {
     ) async {
       final flow = _Flow(tester);
       final three = _wideAll.skip(2).toList();
-      await flow.open(three, size: _wide);
+      await flow.open(three, _onWide);
 
       await flow.expectWalk(three);
     });
@@ -591,7 +621,7 @@ void _wideFlowTests() {
       final flow = _Flow(tester);
       tester.platformDispatcher.textScaleFactorTestValue = 1.5;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      await flow.open(_wideAll, size: _wide);
+      await flow.open(_wideAll, _onWide);
 
       await flow.walkThrough(
         _wideAll,
@@ -642,7 +672,7 @@ void _choiceTests() {
     testWidgets('a device never asked shows the default of each step as '
         'chosen', (tester) async {
       final flow = _Flow(tester);
-      await flow.open(_wideAll, size: _wide);
+      await flow.open(_wideAll, _onWide);
 
       await flow.expectChosenOnEach(_wideAll, (step) => step.defaultKey);
     });
@@ -653,8 +683,10 @@ void _choiceTests() {
       final flow = _Flow(tester);
       await flow.open(
         _wideAll,
-        size: _wide,
-        stored: {for (final step in _steps) step.storeKey: step.other},
+        _Device(
+          size: _wide,
+          stored: {for (final step in _steps) step.storeKey: step.other},
+        ),
       );
 
       await flow.expectChosenOnEach(_wideAll, (step) => step.otherKey);
@@ -665,7 +697,7 @@ void _choiceTests() {
         tester,
       ) async {
         final flow = _Flow(tester);
-        await flow.open(_wideAll, size: _wide);
+        await flow.open(_wideAll, _onWide);
         await flow.forward(index);
 
         await flow.tap(_option(step.id, step.other));
@@ -750,7 +782,7 @@ void _closingTests() {
       tester,
     ) async {
       final flow = _Flow(tester);
-      await flow.open(_wideAll, size: _wide);
+      await flow.open(_wideAll, _onWide);
       await flow.forward(4);
 
       await flow.tap(_done);
@@ -788,7 +820,7 @@ void _closingTests() {
     testWidgets('a storage that refuses the write does not keep the user in '
         'the flow', (tester) async {
       final flow = _Flow(tester);
-      await flow.open(_phoneAll, store: _FullDisk());
+      await flow.open(_phoneAll, _Device(store: _FullDisk()));
       await flow.forward(3);
 
       await flow.tap(_done);
@@ -809,8 +841,10 @@ void _rememberingTests() {
       final flow = _Flow(tester);
       await flow.open(
         _wideAll.skip(2).toList(),
-        size: _wide,
-        stored: {SettingKeys.personalizedSteps: '["density","order"]'},
+        const _Device(
+          size: _wide,
+          stored: {SettingKeys.personalizedSteps: '["density","order"]'},
+        ),
       );
 
       await flow.tap(_close);
@@ -823,7 +857,9 @@ void _rememberingTests() {
       final flow = _Flow(tester);
       await flow.open(
         const [PersonalizeStep.align],
-        stored: {SettingKeys.personalizedSteps: '["wallpaper","density"]'},
+        const _Device(
+          stored: {SettingKeys.personalizedSteps: '["wallpaper","density"]'},
+        ),
       );
 
       await flow.tap(_done);
@@ -848,7 +884,7 @@ void _rememberingTests() {
     testWidgets('closed on a wide screen: nothing is asked at the next start, '
         'on a phone either', (tester) async {
       final flow = _Flow(tester);
-      await flow.open(_wideAll, size: _wide);
+      await flow.open(_wideAll, _onWide);
 
       await flow.tap(_close);
 
@@ -903,7 +939,7 @@ void _moreOptionsTests() {
     testWidgets('opened over a chat: back from the personalization settings '
         'returns to that chat, not to the chat list', (tester) async {
       final flow = _Flow(tester);
-      await flow.open(_phoneAll, at: _openChatLocation);
+      await flow.open(_phoneAll, const _Device(at: _openChatLocation));
       // Under the flow: the chat the user was in.
       expect(find.text(_openChat, skipOffstage: false), findsOneWidget);
       await flow.tap(_more);
