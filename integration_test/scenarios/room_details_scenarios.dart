@@ -36,6 +36,7 @@ abstract class _ThrowawayGroupScenario extends BaseTestScenario {
       invite: [_memberMatrixId],
       preset: CreateRoomPreset.privateChat,
     );
+    var passed = false;
     try {
       final room = await _waitForRoom(roomId);
       await robots.chatListRobot().openSearchScreen();
@@ -44,13 +45,20 @@ abstract class _ThrowawayGroupScenario extends BaseTestScenario {
       }
       await robots.chatGroupDetailRobot().tapOnChatBarTitle();
       await runOnGroupInfo(room, GroupInformationRobot($));
+      passed = true;
     } finally {
-      try {
-        for (final userId in invitedUserIds) {
+      (Object, StackTrace)? cleanupError;
+      for (final userId in invitedUserIds) {
+        try {
           await _retractInvite(client, roomId, userId);
+        } catch (error, stackTrace) {
+          cleanupError ??= (error, stackTrace);
         }
-      } finally {
-        await client.leaveRoom(roomId);
+      }
+      await client.leaveRoom(roomId);
+      // A failed test keeps its own error: a cleanup one would hide it.
+      if (passed && cleanupError != null) {
+        Error.throwWithStackTrace(cleanupError.$1, cleanupError.$2);
       }
     }
   }
