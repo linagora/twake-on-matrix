@@ -3641,5 +3641,164 @@
         "type": "String"
       }
     }
+  },
+  "scribe": "Scribe",
+  "@scribe": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeCorrect": "Correct",
+  "@scribeCorrect": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeImprove": "Improve",
+  "@scribeImprove": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeMakeShorter": "Make shorter",
+  "@scribeMakeShorter": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeExpand": "Expand",
+  "@scribeExpand": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeAddEmojis": "Add emojis",
+  "@scribeAddEmojis": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeBulletPoints": "Bullet points",
+  "@scribeBulletPoints": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeTone": "Tone",
+  "@scribeTone": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeToneProfessional": "Professional",
+  "@scribeToneProfessional": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeToneCasual": "Casual",
+  "@scribeToneCasual": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeTonePolite": "Polite",
+  "@scribeTonePolite": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeTranslate": "Translate",
+  "@scribeTranslate": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeTranslateFrench": "French",
+  "@scribeTranslateFrench": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeTranslateEnglish": "English",
+  "@scribeTranslateEnglish": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeTranslateRussian": "Russian",
+  "@scribeTranslateRussian": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeTranslateVietnamese": "Vietnamese",
+  "@scribeTranslateVietnamese": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeSummarize": "Summarize",
+  "@scribeSummarize": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeSentOutsideEncryptionTo": "Sent outside the encryption to {host}",
+  "@scribeSentOutsideEncryptionTo": {
+    "type": "text",
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "scribeSentOutsideEncryption": "Sent outside the encryption",
+  "@scribeSentOutsideEncryption": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeRewriteFailed": "Couldn't rewrite your message. Try again.",
+  "@scribeRewriteFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeOffline": "No connection. Your message wasn't rewritten.",
+  "@scribeOffline": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeTimedOut": "Scribe took too long to answer. Try again.",
+  "@scribeTimedOut": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeRateLimited": "Too many requests to Scribe. Try again in a moment.",
+  "@scribeRateLimited": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeSignInFailed": "Couldn't sign in to your workplace.",
+  "@scribeSignInFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeNotOffered": "Scribe is off in this conversation.",
+  "@scribeNotOffered": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeSettingTitle": "Writing help (Scribe)",
+  "@scribeSettingTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeSettingOn": "A draft that a member rewrites with Scribe leaves the end-to-end encryption and goes to the AI of the organisation's workplace, one text at a time.",
+  "@scribeSettingOn": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeSettingOff": "Drafts stay under the end-to-end encryption: Scribe is off here.",
+  "@scribeSettingOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeSettingFailed": "Couldn't change Scribe. Try again.",
+  "@scribeSettingFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeResultDroppedTyped": "Your message changed, so Scribe left it as it is.",
+  "@scribeResultDroppedTyped": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "scribeResultDroppedClosed": "The message box closed, so Scribe's text was not used.",
+  "@scribeResultDroppedClosed": {
+    "type": "text",
+    "placeholders": {}
   }
 }
