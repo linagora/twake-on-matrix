@@ -44,11 +44,11 @@ const wideSize = Size(1400, 900);
 /// Status bar of an iPhone with a notch, in logical pixels.
 const statusBar = 47.0;
 
-/// The phone header: app bar, new chat capsule gap, search, pills, status bar.
+/// The phone header: app bar, new chat capsule gap, pills, status bar. No
+/// search field: on a phone the search lives in the bottom bar.
 const headerBlockHeight =
     48 +
     ChatListHeaderStyle.newChatCapsuleGap +
-    ChatListHeaderStyle.searchBarContainerHeight +
     FilterPillsStyle.height +
     statusBar;
 
@@ -174,10 +174,13 @@ class HeaderHarness {
     await tester.pumpAndSettle();
   }
 
+  /// [buildView]: the screen under test when it is not the plain
+  /// [ChatListView] of the harness (a bottom bar of its own, a search).
   static Future<HeaderHarness> pump(
     WidgetTester tester,
-    HeaderView view,
-  ) async {
+    HeaderView view, {
+    Widget Function(FakeChatListController controller)? buildView,
+  }) async {
     final rooms = view.roomCount;
     final skeleton = view.skeleton;
     _setView(tester, view);
@@ -192,7 +195,19 @@ class HeaderHarness {
     final controller = FakeChatListController(matrix, client);
 
     await tester.pumpWidget(
-      _screen(matrix, controller, client, rooms, view.bottomBarHeight),
+      _screen(
+        matrix,
+        client,
+        rooms,
+        buildView?.call(controller) ??
+            ChatListView(
+              controller: controller,
+              onTapBottomNavigation: (_) {},
+              bottomNavigationBar: view.bottomBarHeight > 0
+                  ? SizedBox(key: bottomBarKey, height: view.bottomBarHeight)
+                  : null,
+            ),
+      ),
     );
     await _settle(tester, skeleton: skeleton);
     // Precondition of every case: without it a "hidden" check would pass on
@@ -227,10 +242,9 @@ Future<void> _settle(WidgetTester tester, {required bool skeleton}) async {
 
 Widget _screen(
   FakeMatrixState matrix,
-  FakeChatListController controller,
   Client client,
   int roomCount,
-  double bottomBarHeight,
+  Widget home,
 ) {
   return provider.Provider<MatrixState>.value(
     value: matrix,
@@ -245,13 +259,7 @@ Widget _screen(
           locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          home: ChatListView(
-            controller: controller,
-            onTapBottomNavigation: (_) {},
-            bottomNavigationBar: bottomBarHeight > 0
-                ? SizedBox(key: bottomBarKey, height: bottomBarHeight)
-                : null,
-          ),
+          home: home,
         ),
       ),
     ),
@@ -317,6 +325,7 @@ class FakeChatListController extends Mock implements ChatListController {
   final sortingRoomsNotifier = ValueNotifier(true);
   @override
   final activeRoomIdNotifier = ValueNotifier<String?>(null);
+
   @override
   late final ChatList widget = ChatList(
     activeRoomIdNotifier: activeRoomIdNotifier,
@@ -333,6 +342,12 @@ class FakeChatListController extends Mock implements ChatListController {
   void onClickClearSelection() {}
   @override
   void onClickAvatar() {}
+  @override
+  List<Widget> bottomNavigationActionsWidget({
+    required EdgeInsetsDirectional paddingIcon,
+    double? width,
+    double? iconSize,
+  }) => const [Text('selection actions')];
   @override
   List<Widget> getSlidables(BuildContext context, Room room) => const [];
   @override

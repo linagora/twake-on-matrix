@@ -46,6 +46,10 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
       ValueNotifier<AdaptiveDestinationEnum>(AdaptiveDestinationEnum.rooms);
 
   final activeRoomIdNotifier = ValueNotifier<String?>(null);
+
+  /// The search of the bottom bar of the Chats tab, on a phone.
+  final searchOpenNotifier = ValueNotifier(false);
+  final searchQueryController = TextEditingController();
   final currentProfileNotifier = ValueNotifier<Profile?>(Profile(userId: ''));
   StreamSubscription? onAccountDataSubscription;
 
@@ -65,6 +69,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
 
   void onDestinationSelected(int index) {
     final destinationType = destinations[index];
+    _closeSearch();
     activeNavigationBarNotifier.value = destinationType;
     pageController.jumpToPage(index);
     clearNavigatorScreen();
@@ -95,7 +100,13 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     }
   }
 
+  void _closeSearch() {
+    searchOpenNotifier.value = false;
+    searchQueryController.clear();
+  }
+
   void _onOpenSettingsPage() {
+    _closeSearch();
     activeNavigationBarNotifier.value = AdaptiveDestinationEnum.settings;
     _jumpToPageByIndex();
   }
@@ -211,6 +222,8 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   @override
   void dispose() {
     activeRoomIdNotifier.dispose();
+    searchOpenNotifier.dispose();
+    searchQueryController.dispose();
     activeNavigationBarNotifier.dispose();
     pageController.dispose();
     currentProfileNotifier.dispose();
@@ -228,6 +241,8 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     onClientSelected: clientSelected,
     onPopInvoked: _onPopInvoked,
     onOpenSettings: _onOpenSettingsPage,
+    searchOpen: searchOpenNotifier,
+    searchQuery: searchQueryController,
     adaptiveScaffoldBodyArgs: widget.args,
     currentProfile: currentProfileNotifier,
   );

@@ -104,7 +104,6 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   @override
   Widget build(BuildContext context) {
     final isChild = depth > 0;
-    final isTopSpace = space != null && !isChild;
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
@@ -120,7 +119,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                 MatrixLocals(L10n.of(context)!),
               );
               return Container(
-                height: space != null
+                height: space != null && isChild
                     ? ChatListItemStyle.spaceItemHeight
                     : ChatListItemStyle.chatItemHeight,
                 padding: ChatListItemStyle.paddingBody.add(
@@ -133,16 +132,12 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                   children: [
                     if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
                     Padding(
-                      padding: isTopSpace
-                          ? ChatListItemStyle.paddingSpaceAvatar
-                          : ChatListItemStyle.paddingAvatar,
+                      padding: ChatListItemStyle.paddingAvatar,
                       child: _ChatListAvatar(
                         room: room,
                         name: displayName,
                         size: isChild
                             ? ChatListItemStyle.childAvatarSize
-                            : isTopSpace
-                            ? ChatListItemStyle.spaceAvatarSize
                             : AvatarStyle.defaultSize,
                         onTap: onTapAvatar,
                       ),
