@@ -101,27 +101,32 @@ class SettingsProfileSaveDisplayNameScenario extends _SettingsProfileScenario {
   Future<void> runTestLogic() async {
     final serverName =
         (await fetchProfileAsPrimary())?['displayname'] as String?;
-    addTearDown(() => setDisplayNameAsPrimary(serverName));
-    await openProfile();
-    await profile.waitForCapabilities();
-    final original = await profile.waitForValueOf(
-      SettingsProfileEnum.displayName,
-    );
-    final edited = 'Patrol ${DateTime.now().millisecondsSinceEpoch}';
+    // Restored before the app unmounts: a sync arriving after that throws.
+    try {
+      await openProfile();
+      await profile.waitForCapabilities();
+      final original = await profile.waitForValueOf(
+        SettingsProfileEnum.displayName,
+      );
+      final edited = 'Patrol ${DateTime.now().millisecondsSinceEpoch}';
 
-    await profile.saveDisplayName(edited);
-    await profile.waitUntilValueIs(SettingsProfileEnum.displayName, edited);
-    final saved = await fetchProfileAsPrimary();
-    expect(saved?['displayname'], edited);
+      await profile.saveDisplayName(edited);
+      await profile.waitUntilValueIs(SettingsProfileEnum.displayName, edited);
+      final saved = await fetchProfileAsPrimary();
+      expect(saved?['displayname'], edited);
 
-    await profile.backToSettings();
-    await profile.openProfile();
-    await profile.waitUntilValueIs(SettingsProfileEnum.displayName, edited);
+      await profile.backToSettings();
+      await profile.openProfile();
+      await profile.waitUntilValueIs(SettingsProfileEnum.displayName, edited);
 
-    await profile.saveDisplayName(original);
-    await profile.waitUntilValueIs(SettingsProfileEnum.displayName, original);
-    final restored = await fetchProfileAsPrimary();
-    expect(restored?['displayname'], original);
+      await profile.saveDisplayName(original);
+      await profile.waitUntilValueIs(SettingsProfileEnum.displayName, original);
+      final restored = await fetchProfileAsPrimary();
+      expect(restored?['displayname'], original);
+    } catch (_) {
+      await setDisplayNameAsPrimary(serverName);
+      rethrow;
+    }
   }
 }
 
