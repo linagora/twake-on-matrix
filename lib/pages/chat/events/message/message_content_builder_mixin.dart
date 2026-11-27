@@ -61,9 +61,9 @@ mixin MessageContentBuilderMixin {
 
     final totalDisplayNameWidth = sizeWidthDisplayName + rightSpaceDisplayName;
 
-    final totalWidth = max<double>(
-      totalDisplayNameWidth,
-      messageMetrics.totalMessageWidth,
+    final totalWidth = min<double>(
+      maxWidth,
+      max<double>(totalDisplayNameWidth, messageMetrics.totalMessageWidth),
     );
 
     return MessageMetrics(
