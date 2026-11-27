@@ -689,3 +689,10 @@ A second style, `ChatListSearchStyle.collapsing`, is kept in the code but not
 wired: a thin search field at the top of the list that scrolls away, the bottom
 button showing once it has. A follow-up personalization pull request is to wire
 it.
+
+## D39. Personalization: display options in Settings, kept on the device (proposed by Clément, 2026-11-27)
+
+Settings › Personalization holds the display options of Twake Space Chat: chat
+list density and room order. The choices are stored on this device only, not in
+the account. The defaults do not change: until the user picks another, density
+and order stay as they are today.

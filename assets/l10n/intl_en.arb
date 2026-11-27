@@ -3853,5 +3853,45 @@
   "@callLineMissedVideoCall": {
     "type": "text",
     "placeholders": {}
+  },
+  "personalization": "Personalization",
+  "@personalization": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "personalizeDensityQuestion": "How should the chat list look?",
+  "@personalizeDensityQuestion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "personalizeOrderQuestion": "In what order should chats be listed?",
+  "@personalizeOrderQuestion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "densityComfortable": "Comfortable",
+  "@densityComfortable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "densityCompact": "Compact",
+  "@densityCompact": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomOrderRecent": "Most recent",
+  "@roomOrderRecent": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomOrderSections": "By type",
+  "@roomOrderSections": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomSectionSpaces": "Spaces",
+  "@roomSectionSpaces": {
+    "type": "text",
+    "placeholders": {}
   }
 }

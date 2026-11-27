@@ -13,6 +13,14 @@ class ChatListItemStyle {
 
   static const double chatItemHeight = 72;
 
+  /// The compact density: shorter rows, the last message kept.
+  static const double compactChatItemHeight = 56;
+
+  static const double compactAvatarSize = 40;
+
+  static const EdgeInsetsDirectional compactPaddingBody =
+      EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 2);
+
   static const double spaceItemHeight = 56;
 
   static const double depthIndent = 24;
