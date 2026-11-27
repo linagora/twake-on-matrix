@@ -1,9 +1,10 @@
 import 'package:twake_chat/pages/connect/connect_page.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
 
-class IdentityProviderIcon extends StatefulWidget {
+class IdentityProviderIcon extends ConsumerStatefulWidget {
   const IdentityProviderIcon({
     super.key,
     required this.identityProvider,
@@ -14,16 +15,17 @@ class IdentityProviderIcon extends StatefulWidget {
   final double size;
 
   @override
-  State<IdentityProviderIcon> createState() => _IdentityProviderIconState();
+  ConsumerState<IdentityProviderIcon> createState() =>
+      _IdentityProviderIconState();
 }
 
-class _IdentityProviderIconState extends State<IdentityProviderIcon> {
+class _IdentityProviderIconState extends ConsumerState<IdentityProviderIcon> {
   late final Future<Client> loginClientFuture;
 
   @override
   void initState() {
     super.initState();
-    loginClientFuture = Matrix.of(context).getLoginClient();
+    loginClientFuture = ref.read(loginSessionsProvider).loginClient();
   }
 
   @override

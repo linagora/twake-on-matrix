@@ -46,6 +46,12 @@ class ChatListHeaderStyle {
     );
   }
 
+  /// The thin search field of the collapsing style, and the room it takes
+  /// with its padding.
+  static const double collapsingSearchFieldHeight = 40;
+  static double get collapsingSearchExtent =>
+      collapsingSearchFieldHeight + searchInputPadding.vertical;
+
   static const double newChatCapsuleSize = 40;
   static const double newChatCapsuleEnd = 16;
   static const double newChatCapsuleBottom = 4;

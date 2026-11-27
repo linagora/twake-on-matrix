@@ -7,6 +7,7 @@ import 'package:twake_chat/domain/public_rooms/usecases/fetch_joinable_public_ro
 class PublicGroupsSearchTerm extends ValueNotifier<String?> {
   PublicGroupsSearchTerm(this._textController) : super(null) {
     _textController.addListener(_onTextChanged);
+    _onTextChanged();
   }
 
   static const debounceDuration = Duration(milliseconds: 300);

@@ -654,3 +654,25 @@ cannot be found, the caption is "Reply", with no name.
 
 The gap shows what is behind the message: the chat background, or the colour of
 a selected or highlighted row.
+
+## D37. Phone: the chat list is searched from the bottom bar (decided by Clément, 2026-11-26)
+
+On one column (narrower than 905 px), the Chats tab shows a round search button
+at the end of the floating bottom bar. A tap expands it into a search field in
+place of the tabs, with a round close button; close or Android back brings the
+tabs back and clears the query. The results replace the rooms under the title
+bar, without the filter pills. Wide layouts keep the search field of the header.
+
+On those layouts, this replaces:
+
+- D5: the planet that opens the public directory sits at the end of the bottom
+  search field while it is empty, not inside a field of the header.
+- D19: the top block that scrolls away is the title bar and the filters; it has
+  no search field any more.
+- D27: the Chats bar is the capsule of four tabs plus the search button, and the
+  white background of the header covers the title bar and the filters only.
+
+A second style, `ChatListSearchStyle.collapsing`, is kept in the code but not
+wired: a thin search field at the top of the list that scrolls away, the bottom
+button showing once it has. A follow-up personalization pull request is to wire
+it.
