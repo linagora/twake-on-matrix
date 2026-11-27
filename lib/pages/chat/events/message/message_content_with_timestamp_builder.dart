@@ -178,10 +178,12 @@ class MessageContentWithTimestampBuilder extends ConsumerStatefulWidget {
     required bool canReply,
     required bool canReport,
     required bool canEditCaption,
+    bool canStartThread = false,
   }) {
     final hasCaption = members.last.isCaptionModeOrReply();
     return [
       if (canReply) MessageContextMenuAction.reply,
+      if (canStartThread) MessageContextMenuAction.startThread,
       MessageContextMenuAction.forward,
       if (hasCaption) MessageContextMenuAction.copy,
       if (canReport) MessageContextMenuAction.report,
@@ -234,6 +236,7 @@ class _MessageContentWithTimestampBuilderState
       canReply: event.room.canSendDefaultMessages,
       canReport: event.room.canReportContent,
       canEditCaption: album.last.canEditEvents(widget.matrixState),
+      canStartThread: widget.onStartThread != null,
     );
   }
 
@@ -617,8 +620,9 @@ class _MessageContentWithTimestampBuilderState
         widget.onSaveAlbumToGallery?.call(targets);
       case MessageContextMenuAction.delete:
         widget.onDeleteAlbum?.call(context, targets);
+      case MessageContextMenuAction.startThread:
+        widget.onStartThread?.call(targets.single);
       case MessageContextMenuAction.copyLink ||
-          MessageContextMenuAction.startThread ||
           MessageContextMenuAction.saveToDownload ||
           MessageContextMenuAction.trySendAgain:
         break;

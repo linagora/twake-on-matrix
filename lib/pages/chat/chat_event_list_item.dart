@@ -84,7 +84,7 @@ class ChatEventListItem extends StatelessWidget {
           ? null
           : _summaryCard(context, threadSummary),
       onStartThread: canStartThread
-          ? (event) => _openThread(context, start: true)
+          ? (root) => _openThread(context, start: true, root: root)
           : null,
       // No reply to quote in a thread: replyAction does nothing there.
       onSwipe: controller.isThread
@@ -178,11 +178,12 @@ class ChatEventListItem extends StatelessWidget {
     );
   }
 
-  void _openThread(BuildContext context, {bool start = false}) => ThreadRoute(
-    roomid: event.room.id,
-    rootid: event.eventId,
-    start: start,
-  ).push<void>(context);
+  void _openThread(BuildContext context, {bool start = false, Event? root}) =>
+      ThreadRoute(
+        roomid: event.room.id,
+        rootid: (root ?? event).eventId,
+        start: start,
+      ).push<void>(context);
 
   Widget _summaryCard(BuildContext context, ThreadSummary summary) =>
       ListenableBuilder(

@@ -45,6 +45,9 @@ class FakePinsChatController extends Fake implements ChatController {
   @override
   String? get unreadReceivedMessageLocation => null;
 
+  @override
+  Set<String> get liveThreadRootIds => const {};
+
   /// How many times the room conversation was asked to scroll: see
   /// [tapPinnedBar]. Must stay 0 for a thread reply.
   int roomScrolls = 0;
