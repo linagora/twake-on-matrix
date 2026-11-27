@@ -655,6 +655,19 @@ cannot be found, the caption is "Reply", with no name.
 The gap shows what is behind the message: the chat background, or the colour of
 a selected or highlighted row.
 
+## D36. Every store build gets a release note, and a built tag never moves (decided by Clément, 2026-11-25)
+
+Every build that reaches a store (TestFlight for iOS or macOS, Play Store
+internal) is announced in `#twake-chat-mobile-release-notes:linagora.com`,
+including a macOS build started by hand from `macos-testflight.yaml` and a
+rebuild. The rule lives in `AGENTS.md`, so that every agent reads it, not only
+the one asked for a release note.
+
+A release tag that already built is never moved: the next build is a new
+version. On 2026-11-24 and 25, `v2.28.0` was moved six times while the macOS
+TestFlight lane was being set up; five builds reached TestFlight under 2.28.0
+with code its note did not cover, and none was announced.
+
 ## D37. Phone: the chat list is searched from the bottom bar (decided by Clément, 2026-11-26)
 
 On one column (narrower than 905 px), the Chats tab shows a round search button
