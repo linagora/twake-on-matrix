@@ -27,6 +27,9 @@ abstract class SettingKeys {
   static const String enableRightAndLeftMessageAlignmentOnWeb =
       'chat.twake.enable_right_and_left_message_alignment_on_web';
   static const String gifAutoplay = 'chat.twake.gif_autoplay';
+
+  /// The ids of the personalization steps this device has seen, a JSON list.
+  static const String personalizedSteps = 'chat.twake.personalized';
   static const String chatListDensity = 'chat.twake.chat_list_density';
   static const String roomOrder = 'chat.twake.room_order';
   static const String seenStyle = 'chat.twake.seen_style';

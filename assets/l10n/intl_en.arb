@@ -3859,6 +3859,28 @@
     "type": "text",
     "placeholders": {}
   },
+  "personalizeMoreOptions": "More options",
+  "@personalizeMoreOptions": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "personalizeHelp": "You can change these at any time in Settings › Personalization.",
+  "@personalizeHelp": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "personalizeStepCounter": "{current} of {total}",
+  "@personalizeStepCounter": {
+    "type": "text",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "personalizeDensityQuestion": "How should the chat list look?",
   "@personalizeDensityQuestion": {
     "type": "text",
@@ -3941,6 +3963,11 @@
   },
   "roomSectionSpaces": "Spaces",
   "@roomSectionSpaces": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "personalizeCompareHint": "Tap one choice, then another, to compare.",
+  "@personalizeCompareHint": {
     "type": "text",
     "placeholders": {}
   }

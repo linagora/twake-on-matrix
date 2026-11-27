@@ -7,8 +7,8 @@ import 'package:twake_chat/pages/personalize/personalize_drawings.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 
-/// Settings › Personalization: the display choices, one card list each, on one
-/// page.
+/// Settings › Personalization: the choices of the start flow, in its order,
+/// on one page.
 class SettingsPersonalization extends StatelessWidget {
   const SettingsPersonalization({super.key});
 
