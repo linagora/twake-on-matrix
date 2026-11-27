@@ -71,8 +71,7 @@ dependencies:
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
-      # TODO: back to master once linagora/flutter_matrix_html#30 merges
-      ref: 3cf5a5ecf0ea251d6666c9ea1bead3fbe1e46b7a
+      ref: master
   flutter_portal: 1.1.4
   flutter_riverpod: 3.4.3
   flutter_secure_storage: 9.2.4

@@ -1217,8 +1217,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "3cf5a5ecf0ea251d6666c9ea1bead3fbe1e46b7a"
-      resolved-ref: "3cf5a5ecf0ea251d6666c9ea1bead3fbe1e46b7a"
+      ref: master
+      resolved-ref: "70a33d6db7b9685a391d63d155021b7b4482f5fc"
       url: "https://github.com/linagora/flutter_matrix_html.git"
     source: git
     version: "1.2.0"
