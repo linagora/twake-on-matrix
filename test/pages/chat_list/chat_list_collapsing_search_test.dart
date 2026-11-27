@@ -134,109 +134,116 @@ void _atTheTop() {
 
 void _scrolled() {
   group('[ChatList] collapsing search, once the list scrolls', () {
-    testWidgets('GIVEN the list is scrolled down\n'
-        'THEN the search field has folded away', (tester) async {
-      await _pumpChats(tester);
-      expect(find.byKey(_topField).hitTestable(), findsOneWidget);
+    _scrolledHeader();
+    _scrolledSearchButton();
+  });
+}
 
-      await scrollDown(tester, 400);
+void _scrolledHeader() {
+  testWidgets('GIVEN the list is scrolled down\n'
+      'THEN the search field has folded away', (tester) async {
+    await _pumpChats(tester);
+    expect(find.byKey(_topField).hitTestable(), findsOneWidget);
 
-      expect(find.byKey(_topField).hitTestable(), findsNothing);
-    });
+    await scrollDown(tester, 400);
 
-    testWidgets('GIVEN the list is scrolled down\n'
-        'THEN the title and the folder pills stay pinned at the top', (
-      tester,
-    ) async {
-      final h = await _pumpChats(tester);
+    expect(find.byKey(_topField).hitTestable(), findsNothing);
+  });
 
-      await scrollDown(tester, 400);
+  testWidgets('GIVEN the list is scrolled down\n'
+      'THEN the title and the folder pills stay pinned at the top', (
+    tester,
+  ) async {
+    final h = await _pumpChats(tester);
 
-      expect(h.scroll.offset, greaterThan(0));
-      expect(headerVisible(tester), isTrue);
-      expect(tester.getTopLeft(headerFinder).dy, 0);
-      expect(_title.hitTestable(), findsOneWidget);
-      expect(_pills.hitTestable(), findsOneWidget);
-    });
+    await scrollDown(tester, 400);
 
-    testWidgets('GIVEN the list is scrolled down\n'
-        'THEN the header shows no search control', (tester) async {
-      final semantics = tester.ensureSemantics();
-      await _pumpChats(tester);
-      final searchInHeader = find.descendant(
-        of: headerFinder,
-        matching: find.bySemanticsLabel(RegExp('Search')),
-      );
-      expect(searchInHeader, findsWidgets, reason: 'the top field');
+    expect(h.scroll.offset, greaterThan(0));
+    expect(headerVisible(tester), isTrue);
+    expect(tester.getTopLeft(headerFinder).dy, 0);
+    expect(_title.hitTestable(), findsOneWidget);
+    expect(_pills.hitTestable(), findsOneWidget);
+  });
 
-      await scrollDown(tester, 400);
+  testWidgets('GIVEN the list is scrolled down\n'
+      'THEN the header shows no search control', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await _pumpChats(tester);
+    final searchInHeader = find.descendant(
+      of: headerFinder,
+      matching: find.bySemanticsLabel(RegExp('Search')),
+    );
+    expect(searchInHeader, findsWidgets, reason: 'the top field');
 
-      expect(headerVisible(tester), isTrue);
-      expect(searchInHeader, findsNothing);
-      semantics.dispose();
-    });
+    await scrollDown(tester, 400);
 
-    testWidgets('GIVEN the list is scrolled down\n'
-        'THEN the round search button shows at the end of the bar', (
-      tester,
-    ) async {
-      await _pumpChats(tester);
-      expect(find.byKey(_searchButton).hitTestable(), findsNothing);
+    expect(headerVisible(tester), isTrue);
+    expect(searchInHeader, findsNothing);
+    semantics.dispose();
+  });
+}
 
-      await scrollDown(tester, 400);
+void _scrolledSearchButton() {
+  testWidgets('GIVEN the list is scrolled down\n'
+      'THEN the round search button shows at the end of the bar', (
+    tester,
+  ) async {
+    await _pumpChats(tester);
+    expect(find.byKey(_searchButton).hitTestable(), findsNothing);
 
-      expect(find.byKey(_searchButton).hitTestable(), findsOneWidget);
-    });
+    await scrollDown(tester, 400);
 
-    testWidgets('GIVEN the list is scrolled down\n'
-        'WHEN the search button is tapped\n'
-        'THEN the bar field opens focused and the results replace the rows', (
-      tester,
-    ) async {
-      await _pumpChats(tester);
-      await scrollDown(tester, 400);
+    expect(find.byKey(_searchButton).hitTestable(), findsOneWidget);
+  });
 
-      await tester.tap(find.byKey(_searchButton));
-      await tester.pumpAndSettle();
+  testWidgets('GIVEN the list is scrolled down\n'
+      'WHEN the search button is tapped\n'
+      'THEN the bar field opens focused and the results replace the rows', (
+    tester,
+  ) async {
+    await _pumpChats(tester);
+    await scrollDown(tester, 400);
 
-      expect(_barFieldFocused(tester), isTrue);
-      expect(find.byKey(_results).hitTestable(), findsOneWidget);
-      expect(_rooms, findsNothing);
+    await tester.tap(find.byKey(_searchButton));
+    await tester.pumpAndSettle();
 
-      await tester.enterText(find.byKey(_searchField), 'taisiya');
-      await tester.pumpAndSettle();
-      expect(find.text('results for « taisiya »'), findsOneWidget);
-    });
+    expect(_barFieldFocused(tester), isTrue);
+    expect(find.byKey(_results).hitTestable(), findsOneWidget);
+    expect(_rooms, findsNothing);
 
-    testWidgets('GIVEN the search was opened from the bar\n'
-        'WHEN the close button is tapped\n'
-        'THEN the chat list is back', (tester) async {
-      await _pumpChats(tester);
-      await scrollDown(tester, 400);
-      await tester.tap(find.byKey(_searchButton));
-      await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(_searchField), 'taisiya');
+    await tester.pumpAndSettle();
+    expect(find.text('results for « taisiya »'), findsOneWidget);
+  });
 
-      await tester.tap(find.byKey(_closeButton));
-      await tester.pumpAndSettle();
+  testWidgets('GIVEN the search was opened from the bar\n'
+      'WHEN the close button is tapped\n'
+      'THEN the chat list is back', (tester) async {
+    await _pumpChats(tester);
+    await scrollDown(tester, 400);
+    await tester.tap(find.byKey(_searchButton));
+    await tester.pumpAndSettle();
 
-      expect(_rooms, findsWidgets);
-      expect(find.byKey(_results), findsNothing);
-    });
+    await tester.tap(find.byKey(_closeButton));
+    await tester.pumpAndSettle();
 
-    testWidgets('GIVEN the list was scrolled down\n'
-        'WHEN it goes back to the very top\n'
-        'THEN the search field is back and the search button gone', (
-      tester,
-    ) async {
-      final h = await _pumpChats(tester);
-      await scrollDown(tester, 400);
+    expect(_rooms, findsWidgets);
+    expect(find.byKey(_results), findsNothing);
+  });
 
-      h.scroll.jumpTo(0);
-      await tester.pumpAndSettle();
+  testWidgets('GIVEN the list was scrolled down\n'
+      'WHEN it goes back to the very top\n'
+      'THEN the search field is back and the search button gone', (
+    tester,
+  ) async {
+    final h = await _pumpChats(tester);
+    await scrollDown(tester, 400);
 
-      expect(find.byKey(_topField).hitTestable(), findsOneWidget);
-      expect(find.byKey(_searchButton).hitTestable(), findsNothing);
-    });
+    h.scroll.jumpTo(0);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(_topField).hitTestable(), findsOneWidget);
+    expect(find.byKey(_searchButton).hitTestable(), findsNothing);
   });
 }
 

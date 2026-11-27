@@ -23,7 +23,11 @@ bool _avatarFocused() {
 
 void main() {
   setUpHeaderTests();
+  _withoutSearchField();
+  _settingsAvatar();
+}
 
+void _withoutSearchField() {
   group('[ChatList] phone header without a search field', () {
     testWidgets('GIVEN a phone\n'
         'THEN the header has no search field', (tester) async {
@@ -45,77 +49,87 @@ void main() {
       );
     });
   });
+}
 
+void _settingsAvatar() {
   group('[ChatList] settings avatar', () {
-    testWidgets('GIVEN a phone\n'
-        'THEN the avatar of the user sits at the start of the app bar', (
-      tester,
-    ) async {
-      await HeaderHarness.pump(tester, const HeaderView.phoneWithStatusBar());
+    _avatarShown();
+    _avatarOpensSettings();
+    _avatarHidden();
+  });
+}
 
-      expect(find.byKey(_avatar), findsOneWidget);
-      expect(
-        find.descendant(of: find.byKey(_avatar), matching: find.byType(Avatar)),
-        findsOneWidget,
-      );
-      final avatar = tester.getRect(find.byKey(_avatar));
-      final appBar = tester.getRect(find.byType(TwakeHeader));
-      expect(avatar.right, lessThan(tester.getRect(find.text('Chats')).left));
-      expect(avatar.left, greaterThanOrEqualTo(0));
-      expect(avatar.top, greaterThanOrEqualTo(statusBar));
-      expect(avatar.bottom, lessThanOrEqualTo(appBar.bottom));
-    });
+void _avatarShown() {
+  testWidgets('GIVEN a phone\n'
+      'THEN the avatar of the user sits at the start of the app bar', (
+    tester,
+  ) async {
+    await HeaderHarness.pump(tester, const HeaderView.phoneWithStatusBar());
 
-    testWidgets('GIVEN a phone\n'
-        'THEN a screen reader hears the avatar as « Settings »', (
-      tester,
-    ) async {
-      await HeaderHarness.pump(tester, const HeaderView.phone());
+    expect(find.byKey(_avatar), findsOneWidget);
+    expect(
+      find.descendant(of: find.byKey(_avatar), matching: find.byType(Avatar)),
+      findsOneWidget,
+    );
+    final avatar = tester.getRect(find.byKey(_avatar));
+    final appBar = tester.getRect(find.byType(TwakeHeader));
+    expect(avatar.right, lessThan(tester.getRect(find.text('Chats')).left));
+    expect(avatar.left, greaterThanOrEqualTo(0));
+    expect(avatar.top, greaterThanOrEqualTo(statusBar));
+    expect(avatar.bottom, lessThanOrEqualTo(appBar.bottom));
+  });
 
-      expect(find.bySemanticsLabel('Settings'), findsOneWidget);
-    });
+  testWidgets('GIVEN a phone\n'
+      'THEN a screen reader hears the avatar as « Settings »', (tester) async {
+    await HeaderHarness.pump(tester, const HeaderView.phone());
 
-    testWidgets('GIVEN a phone\n'
-        'WHEN the avatar is tapped\n'
-        'THEN Settings opens', (tester) async {
-      final h = await HeaderHarness.pump(tester, const HeaderView.phone());
+    expect(find.bySemanticsLabel('Settings'), findsOneWidget);
+  });
+}
 
-      await tester.tap(find.byKey(_avatar));
+void _avatarOpensSettings() {
+  testWidgets('GIVEN a phone\n'
+      'WHEN the avatar is tapped\n'
+      'THEN Settings opens', (tester) async {
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
+
+    await tester.tap(find.byKey(_avatar));
+    await tester.pump();
+
+    expect(h.controller.settingsOpened, 1);
+  });
+
+  testWidgets('GIVEN a phone with a hardware keyboard\n'
+      'WHEN Tab reaches the avatar and Enter is pressed\n'
+      'THEN Settings opens', (tester) async {
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
+
+    for (var i = 0; i < 20 && !_avatarFocused(); i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
+    }
+    expect(_avatarFocused(), isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
 
-      expect(h.controller.settingsOpened, 1);
-    });
+    expect(h.controller.settingsOpened, 1);
+  });
+}
 
-    testWidgets('GIVEN a phone with a hardware keyboard\n'
-        'WHEN Tab reaches the avatar and Enter is pressed\n'
-        'THEN Settings opens', (tester) async {
-      final h = await HeaderHarness.pump(tester, const HeaderView.phone());
+void _avatarHidden() {
+  testWidgets('GIVEN select mode\n'
+      'THEN the avatar is hidden', (tester) async {
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
 
-      for (var i = 0; i < 20 && !_avatarFocused(); i++) {
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pump();
-      }
-      expect(_avatarFocused(), isTrue);
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pump();
+    await h.startSelectMode(tester);
 
-      expect(h.controller.settingsOpened, 1);
-    });
+    expect(find.byKey(_avatar), findsNothing);
+  });
 
-    testWidgets('GIVEN select mode\n'
-        'THEN the avatar is hidden', (tester) async {
-      final h = await HeaderHarness.pump(tester, const HeaderView.phone());
+  testWidgets('GIVEN a wide screen\n'
+      'THEN the app bar has no avatar', (tester) async {
+    await HeaderHarness.pump(tester, const HeaderView.wide());
 
-      await h.startSelectMode(tester);
-
-      expect(find.byKey(_avatar), findsNothing);
-    });
-
-    testWidgets('GIVEN a wide screen\n'
-        'THEN the app bar has no avatar', (tester) async {
-      await HeaderHarness.pump(tester, const HeaderView.wide());
-
-      expect(find.byKey(_avatar), findsNothing);
-    });
+    expect(find.byKey(_avatar), findsNothing);
   });
 }
