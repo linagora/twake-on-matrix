@@ -118,4 +118,22 @@ void main() {
 
     expect(built, [room]);
   });
+
+  testWidgets('keeps the unsorted rooms when no account is active', (
+    tester,
+  ) async {
+    FutureBuilder.debugRethrowError = true;
+    addTearDown(() => FutureBuilder.debugRethrowError = false);
+    container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [activeMatrixClientProvider.overrideWithValue(null)],
+    );
+
+    await tester.pumpWidget(sortRooms([room], hasMatrixState: true));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(sortingRoomsNotifier.value, isTrue);
+    expect(built, [room]);
+  });
 }
