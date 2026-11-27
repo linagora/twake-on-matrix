@@ -469,7 +469,7 @@ Opening the chat only marks as read the messages shown on the screen. The
 unread count drops to the messages below, and the room is read once the user
 reaches the bottom, as before.
 
-## D25. A presence dot on people, and their presence under their name (decided by Johann, 2026-11-20, following Twake Space Chat D466 and D54)
+## D25. A presence dot on people, and their presence under their name (decided by Johann, 2026-11-20, following Twake Space Chat D466, D468 and D54)
 
 A person's avatar carries a dot at its bottom right: green when online
 (Matrix presence `online`, or `currently_active`), amber when away (presence
@@ -496,7 +496,13 @@ Lists show the same dot, without the text: the direct chats of the chat list
 (not the groups), the members of a group, and the contacts on Twake (the
 contacts tab, the search and the pickers of a new chat or group, which share
 its row). A list shows the presence the `/sync` keeps, without asking the
-server for each row. The avatars of messages get the dot in a next change.
+server for each row.
+
+In a group, the avatar beside a message carries the dot of its author, from
+the same `/sync` presence (Twake Space Chat D468). Never in a direct chat,
+whose header already says it: its messages have no avatar. Never on one's own
+messages either, where a wide screen draws an avatar that Twake Space Chat
+does not.
 
 ## D26. Calls start audio-only; the camera and the speaker are buttons (decided by Johann, 2026-11-23)
 

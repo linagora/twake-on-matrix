@@ -9,15 +9,19 @@ import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/presence/entities/person_presence.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
+import 'package:twake_chat/widgets/avatar/person_presence_badge.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'message_avatar_mixin_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<User>(), MockSpec<Room>()])
+@GenerateNiceMocks([MockSpec<User>(), MockSpec<Room>(), MockSpec<Client>()])
 class MockMessageAvatarUtils with MessageAvatarMixin {}
 
 Future<void> main() async {
@@ -52,7 +56,13 @@ Future<void> main() async {
       required bool sameSender,
       required Size screenSize,
       required bool isDirectChat,
+      bool ownMessage = false,
     }) async {
+      final client = MockClient();
+      when(room.client).thenReturn(client);
+      when(
+        client.userID,
+      ).thenReturn(ownMessage ? event.senderId : '@me:example.com');
       when(
         room.requestUser(event.senderId, ignoreErrors: true),
       ).thenAnswer((_) async => user);
@@ -64,38 +74,48 @@ Future<void> main() async {
       when(event.room.isDirectChat).thenReturn(isDirectChat);
       Widget? widget;
       await tester.pumpWidget(
-        ThemeBuilder(
-          builder: (context, themeMode, primaryColor) => MaterialApp(
-            locale: const Locale('en'),
-            localizationsDelegates: const [
-              LocaleNamesLocalizationsDelegate(),
-              L10n.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: LocalizationService.supportedLocales,
-            theme: TwakeThemes.buildTheme(
-              context,
-              Brightness.light,
-              primaryColor,
+        ProviderScope(
+          retry: (_, _) => null,
+          overrides: [
+            syncedPersonPresenceProvider(event.senderId).overrideWith(
+              (ref) => Stream.value(
+                const PersonPresence(status: PresenceStatus.online),
+              ),
             ),
-            builder: (context, child) => MediaQuery(
-              data: MediaQueryData(size: screenSize),
-              child: child!,
-            ),
-            home: Scaffold(
-              body: Builder(
-                builder: (context) {
-                  widget = mockMessageAvatarUtils.placeHolderWidget(
-                    (_) {},
-                    sameSender: sameSender,
-                    event: event,
-                    context: context,
-                    selectMode: selectMode,
-                  );
-                  return widget!;
-                },
+          ],
+          child: ThemeBuilder(
+            builder: (context, themeMode, primaryColor) => MaterialApp(
+              locale: const Locale('en'),
+              localizationsDelegates: const [
+                LocaleNamesLocalizationsDelegate(),
+                L10n.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              supportedLocales: LocalizationService.supportedLocales,
+              theme: TwakeThemes.buildTheme(
+                context,
+                Brightness.light,
+                primaryColor,
+              ),
+              builder: (context, child) => MediaQuery(
+                data: MediaQueryData(size: screenSize),
+                child: child!,
+              ),
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) {
+                    widget = mockMessageAvatarUtils.placeHolderWidget(
+                      (_) {},
+                      sameSender: sameSender,
+                      event: event,
+                      context: context,
+                      selectMode: selectMode,
+                    );
+                    return widget!;
+                  },
+                ),
               ),
             ),
           ),
@@ -104,6 +124,58 @@ Future<void> main() async {
 
       await tester.pumpAndSettle();
     }
+
+    testWidgets(
+      'Should show the sender presence when not my message in group chat',
+      (tester) async {
+        await runTest(
+          tester,
+          event: event,
+          selectMode: false,
+          sameSender: true,
+          screenSize: const Size(400, 800),
+          isDirectChat: false,
+        );
+
+        final badge = tester.widget<PersonPresenceBadge>(
+          find.byType(PersonPresenceBadge),
+        );
+        expect(badge.userId, '@bob:example.com');
+        expect(find.byKey(const ValueKey('linagora-presence-dot')), findsOne);
+      },
+    );
+
+    testWidgets('Should show no presence when Own message in group chat', (
+      tester,
+    ) async {
+      await runTest(
+        tester,
+        event: event,
+        selectMode: false,
+        sameSender: true,
+        ownMessage: true,
+        screenSize: const Size(1200, 800),
+        isDirectChat: false,
+      );
+
+      expect(find.byType(Avatar), findsOneWidget);
+      expect(find.byType(PersonPresenceBadge), findsNothing);
+    });
+
+    testWidgets('Should show no presence when not my message in direct chat', (
+      tester,
+    ) async {
+      await runTest(
+        tester,
+        event: event,
+        selectMode: false,
+        sameSender: true,
+        screenSize: const Size(400, 800),
+        isDirectChat: true,
+      );
+
+      expect(find.byType(PersonPresenceBadge), findsNothing);
+    });
 
     group('Web-sized screens', () {
       const webSize = Size(1200, 800);
