@@ -159,10 +159,14 @@ void main() {
         );
       });
 
-      test('showInChatListTypes = message + encrypted', () {
+      test('showInChatListTypes = message + encrypted + call line', () {
         expect(
           EventTypeRules.showInChatListTypes,
-          equals({EventTypes.Message, EventTypes.Encrypted}),
+          equals({
+            EventTypes.Message,
+            EventTypes.Encrypted,
+            CallEventTypes.callLine,
+          }),
         );
       });
     });

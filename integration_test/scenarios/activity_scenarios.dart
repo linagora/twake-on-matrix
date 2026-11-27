@@ -82,7 +82,7 @@ class ActivityOpenFollowedThreadScenario extends BaseTestScenario {
     await receiverThread(roomId: fixture.roomId, root: root, reply: webReply);
     await waitForThreadMessage(this, root);
     // Replying makes the user follow the thread.
-    await threads.openFromCard(lastReply: webReply);
+    await threads.openFromCard(root: root);
     await threads.sendInThread(myReply);
     await threads.expectMessageInThread(myReply);
     await threads.closeThread();

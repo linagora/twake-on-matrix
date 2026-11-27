@@ -1,8 +1,11 @@
 import 'package:twake_chat/pages/chat/chat_app_bar_title.dart';
 import 'package:twake_chat/pages/chat/chat_event_list.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
+import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
+import 'package:twake_chat/pages/chat/events/reply_content.dart';
 import 'package:twake_chat/pages/chat/input_bar/input_bar.dart';
+import 'package:twake_chat/pages/chat/reply_display.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_details.dart';
 import 'package:twake_chat/utils/permission_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -172,6 +175,45 @@ class ChatGroupDetailRobot extends CoreRobot
 
   Future<void> closePullDownMenu() async {
     await PullDownMenuRobot($).close();
+  }
+
+  PatrolFinder composerReplyPreview(String original) => $(ReplyDisplay)
+      .$(ReplyContent)
+      .containing(find.textContaining(original, findRichText: true));
+
+  /// Swipes [message] towards the start edge until the composer quotes it.
+  Future<void> swipeToReply(String message) async {
+    // A message still sending ignores the swipe, so retry like a long-press.
+    final bubble = await getText(message);
+    await $.waitUntilVisible(bubble, timeout: const Duration(seconds: 30));
+    final preview = composerReplyPreview(message);
+    final width =
+        $.tester.view.physicalSize.width / $.tester.view.devicePixelRatio;
+    final deadline = DateTime.now().add(const Duration(seconds: 60));
+    while (!preview.exists && DateTime.now().isBefore(deadline)) {
+      await $.tester.timedDrag(
+        bubble.first,
+        Offset(-width * 0.4, 0),
+        const Duration(milliseconds: 600),
+      );
+      await $.pump(const Duration(milliseconds: 700));
+    }
+    await $.waitUntilVisible(preview, timeout: const Duration(seconds: 10));
+  }
+
+  @override
+  Future<void> expectReplyTo({
+    required String reply,
+    required String original,
+  }) async {
+    final bubble = $(
+      Message,
+    ).containing(find.textContaining(reply, findRichText: true));
+    await $.waitUntilExists(bubble, timeout: const Duration(seconds: 60));
+    final quote = bubble
+        .$(ReplyContent)
+        .containing(find.textContaining(original, findRichText: true));
+    await $.waitUntilExists(quote, timeout: const Duration(seconds: 30));
   }
 
   /// Taps [text] inside a message bubble. Links are spans of a `RichText`,

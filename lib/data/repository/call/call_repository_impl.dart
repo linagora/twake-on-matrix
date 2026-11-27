@@ -48,6 +48,9 @@ class CallRepositoryImpl implements CallRepository {
       _rtc.sendRing(join, membershipEventId: membershipEventId);
 
   @override
+  Stream<void> watchRingDeclined(CallRoom room) => _rtc.watchRingDeclined(room);
+
+  @override
   Future<void> declineRing(CallRing ring) => _rtc.declineRing(ring);
 
   @override
@@ -61,6 +64,13 @@ class CallRepositoryImpl implements CallRepository {
 
   @override
   Future<void> leaveMembership(CallRoom room) => _rtc.leaveMembership(room);
+
+  @override
+  void closeCall(CallRoom room, {required DateTime endedAt}) =>
+      _rtc.closeCall(room, endedAt: endedAt);
+
+  @override
+  Future<void> sendCallLine(CallRoom room) => _rtc.sendCallLine(room);
 
   @override
   Future<void> connectMedia(CallServer server, CallMediaState media) =>

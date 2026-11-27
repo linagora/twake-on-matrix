@@ -130,10 +130,10 @@ class ReceivedThreadScenario extends BaseTestScenario {
     );
 
     await waitForThreadMessage(this, root);
-    await threads.expectCard(lastReply: webReply, messageCount: 1);
+    await threads.expectCard(root: root, commentCount: 1);
     await threads.expectNotInMainTimeline(webReply);
 
-    await threads.openFromCard(lastReply: webReply);
+    await threads.openFromCard(root: root);
     await threads.expectThreadScreenOn(root);
     await threads.expectMessageInThread(root);
     await threads.expectMessageInThread(webReply);
@@ -150,7 +150,7 @@ class ReceivedThreadScenario extends BaseTestScenario {
 
     await threads.closeThread();
     await waitForThreadMessage(this, root);
-    await threads.expectCard(lastReply: mobileReply, messageCount: 2);
+    await threads.expectCard(root: root, commentCount: 2);
     await threads.expectNotInMainTimeline(mobileReply);
 
     // What the web reads: the mobile reply is a thread relation of the root.
@@ -215,7 +215,7 @@ class StartThreadScenario extends BaseTestScenario {
     await threads.expectMessageInThread(firstReply);
     await threads.closeThread();
 
-    await threads.expectCard(lastReply: firstReply, messageCount: 1);
+    await threads.expectCard(root: root, commentCount: 1);
     await threads.expectNotInMainTimeline(firstReply);
     await threads.expectNoStartThreadItemOn(root);
   }

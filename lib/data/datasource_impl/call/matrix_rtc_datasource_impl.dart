@@ -6,6 +6,7 @@ import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/data/datasource_impl/call/call_membership_extender.dart';
 import 'package:twake_chat/data/datasource_impl/call/call_ring_tracker.dart';
 import 'package:twake_chat/data/datasource_impl/call/matrix_rtc_media_keys.dart';
+import 'package:twake_chat/data/datasource_impl/call/outgoing_calls.dart';
 import 'package:twake_chat/data/model/call/call_member_content.dart';
 import 'package:twake_chat/data/model/call/sfu_token_request.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
@@ -72,6 +73,9 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   Timer? _restartTimer;
   CallMembershipExtender? _extender;
   final _trackers = <CallRingTracker>{};
+  final _disposed = Completer<void>();
+  final _outgoing = OutgoingCalls();
+  StreamSubscription<SyncUpdate>? _answerWatch;
 
   Client get _client => _maybeClient ?? (throw const CallNoClientException());
 
@@ -166,6 +170,8 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     }
     final slot = _ownSlot(room);
     final device = _device;
+    // A ring of an earlier call that left no line must not end this one.
+    _outgoing.forget(join.room);
     await _scheduleDelayedLeave(slot);
     final String eventId;
     try {
@@ -284,6 +290,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
 
   @override
   Future<void> leaveMembership(CallRoom call) async {
+    _outgoing.close(call, DateTime.now());
     final (:delayId, :extended) = _endSession();
     // A write still in flight would otherwise land after the leave.
     final restarting = _restarting;
@@ -316,52 +323,101 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     );
   }
 
-  /// A direct chat rings its partner, even before they join. A group, or a
-  /// direct chat with 3+ joined members, only notifies: nobody is rung by
-  /// `room: true`.
+  /// DECISION.md D21: the whole room rings, direct chats and groups alike.
+  /// No room mention: `.m.rule.is_room_mention` would take the push of a
+  /// caller allowed to mention the room, without the ring sound.
   @override
   Future<void> sendRing(
     CallJoin join, {
     required String membershipEventId,
   }) async {
-    final room = _room(join.room);
-    final callee = _ringee(room);
-    // The slot of the room, as the web client sends it (matrix-js-sdk 43).
-    return _logged(
-      'ring not sent',
-      () => _send(join.room, RtcNotificationContent.eventType, {
+    final sentAt = DateTime.now();
+    final outgoing = _outgoing.start(
+      join.room,
+      isVideo: join.isVideo,
+      startedAt: sentAt,
+    );
+    _answerWatch ??= _client.onSync.stream.listen((_) => _watchAnswers());
+    late final String ringId;
+    // The slot of the room, as the web client sends it.
+    await _logged('ring not sent', () async {
+      ringId = await _send(join.room, RtcNotificationContent.eventType, {
         'slot_id': 'm.call#ROOM',
-        'notification_type': callee != null ? 'ring' : 'notification',
-        'sender_ts': DateTime.now().millisecondsSinceEpoch,
+        'notification_type': 'ring',
+        'sender_ts': sentAt.millisecondsSinceEpoch,
         'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
-        'm.mentions': {
-          'user_ids': <String>[?callee],
-        },
+        'm.mentions': <String, Object?>{},
         'm.relates_to': {
           'rel_type': 'm.reference',
           'event_id': membershipEventId,
         },
         'm.call.intent': join.isVideo ? 'video' : 'audio',
-      }),
+      });
+    }, onError: () => _outgoing.dropRing(join.room, outgoing));
+    // The caller hung up while the ring was being sent.
+    await _publishLine(join.room, _outgoing.rang(outgoing, ringId));
+  }
+
+  void _watchAnswers() {
+    final now = DateTime.now();
+    for (final room in _outgoing.rooms.toList()) {
+      final members = _client.getRoomById(room.id)?.states[memberEventType];
+      final answered = members?.values.any(
+        (member) =>
+            member.senderId != _client.userID &&
+            CallRingTracker.isLiveMembership(member),
+      );
+      if (answered ?? false) _outgoing.answer(room, now);
+    }
+  }
+
+  @override
+  void closeCall(CallRoom call, {required DateTime endedAt}) =>
+      _outgoing.close(call, endedAt);
+
+  @override
+  Future<void> sendCallLine(CallRoom call) async {
+    await _publishLine(call, _outgoing.end(call));
+  }
+
+  Future<void> _publishLine(
+    CallRoom call,
+    Map<String, Object?>? content,
+  ) async {
+    if (content == null) return;
+    await _logged(
+      'call line not sent',
+      () => _send(call, CallEventTypes.callLine, content),
     );
   }
 
-  /// `m.direct` alone does not tell a third member in. An unknown count of
-  /// members is not held against the room; a lone member (partner invited or
-  /// gone) still rings the partner.
-  String? _ringee(Room room) {
-    if (!room.isDirectChat) return null;
-    final joined = room.summary.mJoinedMemberCount ?? 0;
-    if (joined > 2) return null;
-    final partner = room.directChatMatrixID;
-    if (partner == null || partner.isEmpty) return null;
-    return partner == _client.userID ? null : partner;
+  @override
+  Stream<void> watchRingDeclined(CallRoom call) {
+    final client = _maybeClient;
+    if (client == null) return const Stream.empty();
+    return client.onTimelineEvent.stream
+        .where(
+          (event) =>
+              event.roomId == call.id &&
+              event.senderId != client.userID &&
+              CallRingTracker.isDecline(event) &&
+              _isLiveRing(call, CallRingTracker.ringIdOf(event)),
+        )
+        .map((_) {});
   }
 
-  Future<void> _logged(String what, Future<void> Function() action) async {
+  bool _isLiveRing(CallRoom call, String? ringId) =>
+      ringId != null && ringId == _outgoing.ringIdOf(call);
+
+  Future<void> _logged(
+    String what,
+    Future<void> Function() action, {
+    void Function()? onError,
+  }) async {
     try {
       await action();
     } on Exception catch (error, stackTrace) {
+      onError?.call();
       Logs().w('MatrixRtcDatasource: $what', error, stackTrace);
       rethrow;
     }
@@ -379,14 +435,14 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
 
   /// In the clear, as `Room.sendEvent` would encrypt it: the push gateway and
   /// the other devices read a ring without the keys of the room.
-  Future<void> _send(
+  Future<String> _send(
     CallRoom call,
     String type,
     Map<String, Object?> content,
   ) async {
     final client = _client;
     try {
-      await client.sendMessage(
+      return await client.sendMessage(
         _room(call).id,
         type,
         client.generateUniqueTransactionId(),
@@ -411,8 +467,12 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     }
   }
 
+  /// Empty first: the tracker emits only on a change.
   @override
-  Stream<List<CallRing>> watchRings() => _watch((tracker) => tracker.rings);
+  Stream<List<CallRing>> watchRings() async* {
+    yield const [];
+    yield* _watch((tracker) => tracker.rings);
+  }
 
   @override
   Stream<MissedCall> watchMissedCalls() =>
@@ -421,11 +481,18 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   @override
   Future<void> ensureCallRingPushRules() =>
       _logged('push rules not set', () async {
-        final underride = _client.globalPushRules?.underride ?? const [];
+        final client = _client;
+        // Unknown before the first sync, however late: a rule of its owner
+        // would be written over.
+        await _untilPushRulesKnown(client);
+        // Disposed before any sync.
+        final rules = client.globalPushRules;
+        if (rules == null) return;
+        final underride = rules.underride ?? const [];
         for (final rule in _ringPushRules) {
           // Only when absent: a rule that differs is left to its owner.
           if (underride.any((r) => r.ruleId == rule.id)) continue;
-          await _client.setPushRule(
+          await client.setPushRule(
             PushRuleKind.underride,
             rule.id,
             _RingPushRule.actions,
@@ -433,6 +500,19 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
           );
         }
       });
+
+  /// A disposed client sends no more syncs: its datasource ends the wait.
+  Future<void> _untilPushRulesKnown(Client client) async {
+    if (client.globalPushRules != null) return;
+    final known = Completer<void>();
+    final syncs = client.onSync.stream.listen((_) {
+      if (client.globalPushRules != null && !known.isCompleted) {
+        known.complete();
+      }
+    });
+    await Future.any([known.future, _disposed.future]);
+    unawaited(syncs.cancel());
+  }
 
   @override
   Stream<void> watchRoomEncrypted(CallRoom call) async* {
@@ -466,7 +546,9 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   void dispose() {
+    if (!_disposed.isCompleted) _disposed.complete();
     _endSession().extended.ignore();
+    _answerWatch?.cancel().ignore();
     _trackers.toList().forEach((tracker) => tracker.dispose());
   }
 }

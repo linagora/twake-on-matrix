@@ -28,6 +28,10 @@ abstract class MatrixRtcDatasource {
   /// joined with the membership [membershipEventId].
   Future<void> sendRing(CallJoin join, {required String membershipEventId});
 
+  /// Emits when someone else declines the last ring this device sent in
+  /// [room] (MSC4310).
+  Stream<void> watchRingDeclined(CallRoom room);
+
   /// Tells the other devices of the account, and the caller, that the account
   /// does not take the call (MSC4310).
   Future<void> declineRing(CallRing ring);
@@ -41,6 +45,13 @@ abstract class MatrixRtcDatasource {
   Future<void> ensureCallRingPushRules();
 
   Future<void> leaveMembership(CallRoom room);
+
+  /// Writes, in the clear, the line of the call this device rang in [room],
+  /// once it ends; nothing for a call it did not ring.
+  /// At hang-up, before anything is awaited: no answer counts after [endedAt].
+  void closeCall(CallRoom room, {required DateTime endedAt});
+
+  Future<void> sendCallLine(CallRoom room);
 
   /// Emits once [room] is encrypted, at once if it already is; fails with
   /// `CallRoomNotFoundException` once the account is no longer in it.

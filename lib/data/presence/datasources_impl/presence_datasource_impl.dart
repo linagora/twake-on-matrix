@@ -10,7 +10,10 @@ class PresenceDatasourceImpl implements PresenceDatasource {
   final Client? _client;
 
   @override
-  Stream<PersonPresence?> watchPresence(String userId) {
+  Stream<PersonPresence?> watchPresence(
+    String userId, {
+    required bool readFromServer,
+  }) {
     final client = _client;
     if (client == null) return Stream.value(null);
     StreamSubscription<CachedPresence>? changes;
@@ -29,7 +32,12 @@ class PresenceDatasourceImpl implements PresenceDatasource {
               hasChanged = true;
               controller.add(toPersonPresence(presence));
             });
-        _read(client, userId, addRead).catchError(controller.addError);
+        _read(
+          client,
+          userId,
+          addRead,
+          readFromServer: readFromServer,
+        ).catchError(controller.addError);
       },
       onCancel: () => changes?.cancel(),
     );
@@ -40,12 +48,17 @@ class PresenceDatasourceImpl implements PresenceDatasource {
   static Future<void> _read(
     Client client,
     String userId,
-    void Function(CachedPresence) add,
-  ) async {
+    void Function(CachedPresence) add, {
+    required bool readFromServer,
+  }) async {
     final cached = await client.fetchCurrentPresence(
       userId,
       fetchOnlyFromCached: true,
     );
+    if (!readFromServer) {
+      add(cached);
+      return;
+    }
     final isKnown = !_isNeverSeen(cached);
     if (isKnown) add(cached);
     try {

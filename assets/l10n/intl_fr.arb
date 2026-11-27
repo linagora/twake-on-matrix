@@ -2731,5 +2731,14 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
+  },
+  "threadCommentsCount": "{n, plural, =1{1 commentaire} other{{n} commentaires}}",
+  "@threadCommentsCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

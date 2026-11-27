@@ -236,7 +236,7 @@ jobs:
             targets: >-
               integration_test/tests/chat/chat_list_test.dart
               integration_test/tests/setting/device_settings_test.dart
-          # 11 repeatable message test cases. transfer_ownership_test is
+          # 14 repeatable message test cases. transfer_ownership_test is
           # intentionally excluded: it transfers the persistent fixture to a
           # different owner.
           - shard: shard_3_chat_messages
@@ -248,6 +248,7 @@ jobs:
               integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
               integration_test/tests/chat/custom_scheme_link_test.dart
               integration_test/tests/chat/message_reactions_mobile_test.dart
+              integration_test/tests/chat/chat_screen_mobile_test.dart
           # 19 stateful chat flows (thread_mobile_test runs 5 cases, thread_prefs_mobile_test 4, chat_media_download_mobile_test 4, activity_mobile_test 3, thread_pins_mobile_test 2), isolated from the message scenarios above.
           - shard: shard_4_chat_flows
             targets: >-
@@ -264,7 +265,7 @@ jobs:
               integration_test/tests/chat/activity_mobile_test.dart
               integration_test/tests/chat/thread_pins_mobile_test.dart
               integration_test/tests/chat/chat_media_download_mobile_test.dart
-          # 14 test cases (~30 min, build included).
+          # 18 test cases (~30 min, build included).
           - shard: shard_5_misc
             targets: >-
               integration_test/tests/contact/contact_test.dart
@@ -277,6 +278,7 @@ jobs:
               integration_test/tests/app_grid/app_grid_mobile_test.dart
               integration_test/tests/setting/settings_profile_test.dart
               integration_test/tests/setting/settings_profile_capabilities_test.dart
+              integration_test/tests/setting/settings_profile_save_mobile_test.dart
               integration_test/tests/setting/settings_chat_test.dart
 
     steps:

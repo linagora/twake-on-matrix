@@ -27,4 +27,7 @@ abstract class AbstractChatGroupDetailRobot {
   /// Jumps to the live bottom of the timeline (taps the scroll-down button),
   /// which is what marks the room read. No-op when already at the bottom.
   Future<void> scrollToLiveBottom();
+
+  /// Waits for the [reply] bubble to quote [original].
+  Future<void> expectReplyTo({required String reply, required String original});
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
@@ -8,7 +10,9 @@ import 'package:twake_chat/pages/personal_qr/personal_qr.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_profile_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/secondary_avatar.dart';
 
 import '../home_robot.dart';
 
@@ -76,6 +80,22 @@ class SettingsProfileRobot extends HomeRobot {
         );
   }
 
+  PatrolFinder doneButton() {
+    return profileView().$(AppBar).$(_l10n.done);
+  }
+
+  PatrolFinder removeAvatarAction() {
+    return $(_l10n.removeYourAvatar);
+  }
+
+  bool hasAvatar() {
+    return profileView()
+        .$(SecondaryAvatar)
+        .evaluate()
+        .map((element) => (element.widget as SecondaryAvatar).mxContent)
+        .any((uri) => uri != null && uri.toString().isNotEmpty);
+  }
+
   PatrolFinder backButton() {
     return profileView().$(AppBar).$(find.byIcon(Icons.arrow_back_ios));
   }
@@ -124,6 +144,54 @@ class SettingsProfileRobot extends HomeRobot {
             widget is SettingsProfileView && widget.capabilities != null,
       ),
     ).waitUntilExists(timeout: const Duration(seconds: 15));
+  }
+
+  Future<void> _pumpUntil(
+    bool Function() condition,
+    String reason, {
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    while (!condition()) {
+      if (DateTime.now().isAfter(deadline)) {
+        throw TimeoutException('Timed out: $reason', timeout);
+      }
+      await $.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  Future<void> waitUntilValueIs(
+    SettingsProfileEnum settingsProfileEnum,
+    String expected,
+  ) async {
+    await item(settingsProfileEnum).waitUntilExists();
+    await _pumpUntil(
+      () => getValueOf(settingsProfileEnum) == expected,
+      '$settingsProfileEnum is "${getValueOf(settingsProfileEnum)}", '
+      'expected "$expected"',
+    );
+  }
+
+  Future<void> waitUntilHasAvatar(bool expected) =>
+      _pumpUntil(() => hasAvatar() == expected, 'hasAvatar != $expected');
+
+  /// The loading dialog is up while the save runs; Done leaves once the
+  /// profile matches the field again.
+  Future<void> _waitForSave() => _pumpUntil(
+    () => !$(ProgressDialog).exists && !doneButton().exists,
+    'the profile save did not finish',
+  );
+
+  Future<void> saveDisplayName(String name) async {
+    await displayNameField().enterText(name);
+    await doneButton().tap();
+    await _waitForSave();
+  }
+
+  Future<void> removeAvatar() async {
+    await avatarEditBadge().tap();
+    await removeAvatarAction().tap();
+    await _waitForSave();
   }
 
   Future<void> copyMatrixId() async {

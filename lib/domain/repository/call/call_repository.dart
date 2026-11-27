@@ -19,6 +19,10 @@ abstract class CallRepository {
 
   Future<void> sendRing(CallJoin join, {required String membershipEventId});
 
+  /// Emits when someone else declines the last ring this device sent in
+  /// [room].
+  Stream<void> watchRingDeclined(CallRoom room);
+
   Future<void> declineRing(CallRing ring);
 
   /// The rings that ring now, on each change.
@@ -29,6 +33,12 @@ abstract class CallRepository {
   Future<void> ensureCallRingPushRules();
 
   Future<void> leaveMembership(CallRoom room);
+
+  /// The line of the call this device rang in [room], once it ends.
+  /// At hang-up, before anything is awaited: no answer counts after [endedAt].
+  void closeCall(CallRoom room, {required DateTime endedAt});
+
+  Future<void> sendCallLine(CallRoom room);
 
   Future<void> connectMedia(CallServer server, CallMediaState media);
 

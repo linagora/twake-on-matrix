@@ -18,6 +18,7 @@ import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills_style.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:twake_chat/providers/room_list/folded_spaces_controller.dart';
 import 'package:twake_chat/providers/room_list/folders_controller.dart';
@@ -48,7 +49,7 @@ const statusBar = 47.0;
 const headerBlockHeight =
     48 +
     ChatListHeaderStyle.newChatCapsuleGap +
-    RoomListFilterStyle.pillsHeight +
+    FilterPillsStyle.height +
     statusBar;
 
 /// What the Scaffold gives the appBar of a wide layout.

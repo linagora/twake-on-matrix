@@ -403,28 +403,39 @@ This replaces the generic text by default (2026-10-29) for clear rooms, and
 the decrypted preview of encrypted rooms (2026-10-24), both decided before
 this file. Android is unchanged.
 
-## D21. Who a call rings (proposed by Clément, 2026-11-23)
+## D21. Who a call rings, and how it rings in the app (proposed by Clément, 2026-11-23; who rings decided by Johann, 2026-11-23)
 
 When someone joins a call that nobody else is in, Twake Chat sends a MatrixRTC
 ring (MSC4075) in the room. Another device of the same account in the call
 counts as someone: only the first to join rings.
 
-- A direct chat rings the partner, even before they join, while at most two
-  members have joined.
-- A group, or a direct chat with three or more joined members, gets a
-  `notification` with no mention: nobody is rung.
+- The whole room rings, direct chats and groups alike, as Twake Space Chat
+  rings it: `notification_type: ring`, a lifetime of 60 s (decided by Johann,
+  2026-11-23: mobile behaves as the web).
+- Unlike matrix-js-sdk 43, the ring mentions nobody (`m.mentions: {}`, D29).
+  A ring that names other people only does not ring.
 - The ring is sent in the clear, also in an encrypted room: the push gateway
   and the other devices read it without the keys of the room. It holds no
   message content.
-- The ring sound comes from two underride push rules of the account, one for
-  the ring and one for the legacy `call.notify`, added only when absent. An
-  override would sound over the mute of a room. Trade-off: the mentioned
-  partner of a direct chat gets the mention sound, not the ring.
+- The ring sound of the push comes from two underride push rules of the
+  account, one for the ring and one for the legacy `call.notify`, added only
+  when absent, once the account has synced its push rules, at each start of
+  the app. An override would sound over the mute of a room.
+- With the app open, a ring shows over the app: « Pierre is calling you » for
+  a direct chat, « Clément · is calling you in General » for a group, with
+  « Decline » and « Answer » (the words of Twake Space Chat, its D134). It
+  rings, in a loop, two rising triplets every two seconds (the notes of Twake
+  Space Chat), until it is answered, declined, its ring lapses (60 s, at most
+  120 s for other clients) or another device of the account joins or
+  declines. During another call it shows without its sound; « Answer » leaves
+  that call.
+- « Answer » joins at once, audio only, and opens the call. « Decline » sends
+  the decline of MSC4310 in the clear; in a direct chat the caller leaves the
+  call and reads « Call declined ». A group call goes on.
+- Calls start audio only (decided by Johann, 2026-11-23).
 
-Open with the product owner: Twake Space Chat rings the whole room in direct
-chats and groups alike. A group call started from Twake Space Chat rings the
-mobile users, and one started from mobile rings no Twake Space Chat user.
-Should both clients do the same?
+Not yet: a ring with the app in the background or closed, the system call
+screen (CallKit), the missed calls and the call history.
 
 Completes D12, which left the ring push rules for later.
 
@@ -479,8 +490,13 @@ says « Online »; an away person shows when they were last active.
 Opening a screen shows the cached presence at once, then asks the server once
 (`GET /presence/{userId}/status`); after that the `/sync` the app already
 runs keeps it current (no polling, unlike Twake Space Chat, whose sliding sync
-carries none). The chat list, members,
-contacts and the avatars of messages get the dot in the next changes.
+carries none).
+
+Lists show the same dot, without the text: the direct chats of the chat list
+(not the groups), the members of a group, and the contacts on Twake (the
+contacts tab, the search and the pickers of a new chat or group, which share
+its row). A list shows the presence the `/sync` keeps, without asking the
+server for each row. The avatars of messages get the dot in a next change.
 
 ## D26. Calls start audio-only; the camera and the speaker are buttons (decided by Johann, 2026-11-23)
 
@@ -550,6 +566,24 @@ the first one, crossed, means no colour.
 In the Folders list, a folder's colour shows as a tint behind its emoji, under
 a « Your folders » header. Each folder keeps its own delete button.
 
+## D29. Rings carry no mention (decided by Johann, 2026-11-26)
+
+A ring of Twake Chat (MSC4075) sends `m.mentions: {}`, where matrix-js-sdk 43,
+and so Twake Space Chat, sends `room: true`.
+
+With `room: true`, Synapse's default override `.m.rule.is_room_mention` takes
+the push of any caller allowed to mention the room (power level 50 or more)
+before the ring rule of D21, an underride: the push is highlighted but plays no
+ring sound, and a room set to « mentions only » is still notified. With no
+mention, the ring rule takes every ring: the push plays the ring sound whoever
+calls, and a room set to « mentions only » stays silent. Seen on Synapse 1.162,
+2026-11-25. Twake Space Chat rings without reading the mentions of a ring.
+
+Trade-off, accepted: a client that rings only when a ring mentions it or the
+room does not ring for these calls. Twake Chat builds before this one do so,
+through `shouldNotifyUser` of the Dart SDK; the review of #3760 reports the same
+for Element X.
+
 ## D30. Voice messages play one after the other (proposed by Johann, 2026-11-24)
 
 When a voice message plays to its end, the next message of the chat plays at
@@ -567,3 +601,40 @@ once if it is a voice message too (#2796). The run stops:
 Events the chat does not show (reactions, edits) do not stop the run. On the
 thread screen, the run plays the replies of that thread only, from its root
 too; in the chat, it skips the thread replies, as the chat does.
+
+## D31. Every call leaves one line in the chat, written by its caller (proposed, 2026-11-26; the event of Twake Space Chat adopted as is: decided by Johann, 2026-11-23)
+
+The device that rang a call (D21) writes one `app.twake.chat.call` event when
+it leaves it, exactly as Twake Space Chat writes it (its D682): `intent`
+(`audio` or `video`), `started_ts`, `answered_ts` when another user joined,
+`ended_ts`, and an `m.reference` to its ring. It goes out in the clear, like
+the ring. The other devices never write it. Every client of the room reads
+the same line:
+
+- one bubble per call, with nothing to act on: a phone or camera icon,
+  « Incoming call » or « Outgoing call » (« … video call »), then the outcome
+  and the time; own calls on the right, received ones on the left;
+- the caller reads its duration in green when someone answered, else
+  « Canceled » in red; the others read the duration, or « Missed » in red;
+- in the chat list: « Missed call » (« Missed video call »), else the title of
+  the bubble.
+
+The duration is the time the caller stayed after the answer, as on the web,
+shown `mm:ss` (`h:mm:ss` past an hour) like a voice message, where the web
+writes « 1 min 5 s ».
+
+Deviations from Twake Space Chat, to keep this first version small:
+
+- A group call that someone else answered reads as answered, with its
+  duration, for a member who never joined it; the web reads it « Missed » for
+  them. The web also hides an unanswered line for a member who declined or
+  was not rung; mobile shows « Missed ».
+- The line counts whatever ring it names: the web ignores a line whose ring is
+  not in the room or has another sender (forged lines).
+- A ring with no line (an older call, or a caller whose app was killed) shows
+  nothing; the web shows it as a missed call. A missed call does not make the
+  room unread, nor show in a notification of its own: the ring already
+  notified.
+- The card of a call thread root (the web's D806) is not drawn.
+
+Completes D12, which showed a call only while it went on.

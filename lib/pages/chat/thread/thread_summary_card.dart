@@ -1,75 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/thread/thread_resolved_mark.dart';
-import 'package:twake_chat/utils/date_time_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 
 class ThreadSummaryCardStyle {
-  static const double radius = LinagoraSpacing.base;
-  static const double barWidth = 3;
+  static const int maxFaces = 3;
+  static const double faceSize = 20;
+  static const double ringWidth = 2;
+  static const double ringedSize = faceSize + 2 * ringWidth;
+
+  /// Distance between two faces: the rings overlap by 8 px.
+  static const double faceStep = 16;
+  static const double iconSize = 24;
   static const double unreadDotSize = LinagoraSpacing.base;
+
+  /// The label is the body of a message (15) less 2 px, as the web.
+  static const double labelSize = 13;
   static const EdgeInsets padding = EdgeInsets.symmetric(
     horizontal: LinagoraSpacing.base * 1.5,
     vertical: LinagoraSpacing.base,
   );
-  static const EdgeInsetsDirectional unreadDotMargin =
-      EdgeInsetsDirectional.only(end: LinagoraSpacing.base * 0.75);
 }
 
-/// Card inside the bubble of a thread root: number of messages, then author, text and age of
-/// the last reply. It does not repeat the root text, which is right above.
+/// The thread of a root, as ONE row at the very foot of its bubble, edge to
+/// edge, a 1 px line above it: the faces of who replied, the thread icon and
+/// « N comments ». The whole row is one button; the faces are decoration.
 class ThreadSummaryCard extends StatelessWidget {
   const ThreadSummaryCard({
     super.key,
     required this.replyCount,
-    this.lastReplyAuthor,
-    this.lastReplyText,
-    this.lastReplyTime,
+    this.repliers = const [],
     required this.onTap,
     this.unreadCount = 0,
-    this.onOwnBubble = false,
     this.isResolved = false,
+    this.onOwnBubble = false,
   });
 
   final int replyCount;
 
-  /// Null when no reply is left to show: the card shows the count only.
-  final String? lastReplyAuthor;
-  final String? lastReplyText;
-  final DateTime? lastReplyTime;
+  /// Most recent first; the row shows the first three.
+  final List<ThreadReplier> repliers;
   final int unreadCount;
 
-  /// The thread was marked as resolved: the card carries a check.
+  /// The thread was marked as resolved: the row carries a check.
   final bool isResolved;
 
-  /// The card sits on a bubble of the user (the paper of the theme) rather
-  /// than on a received one (a raised surface).
+  /// The row sits on a bubble of the user rather than a received one: the
+  /// colour of the ring of the faces.
   final bool onOwnBubble;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    final textStyle = LinagoraTextStyle.material();
-    final count = l10n.threadMessagesCount(replyCount);
     final scheme = Theme.of(context).colorScheme;
+    final primary = LinagoraSysColors.material().primary;
+    final count = l10n.threadCommentsCount(replyCount);
     final unread = unreadCount > 0;
-    final secondary = textStyle.bodySmall.copyWith(color: scheme.secondary);
-    final reply = lastReplyTime == null
-        ? null
-        : TextSpan(
-            style: secondary,
-            children: [
-              TextSpan(
-                text: lastReplyAuthor,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-              TextSpan(text: ': $lastReplyText'),
-            ],
-          );
-    final age = lastReplyTime == null
-        ? null
-        : ' · ${lastReplyTime!.ageFrom(context)}';
+    final faces = repliers.take(ThreadSummaryCardStyle.maxFaces).toList();
 
     return Semantics(
       container: true,
@@ -79,137 +70,103 @@ class ThreadSummaryCard extends StatelessWidget {
         count,
         if (unread) l10n.threadUnreadMessagesCount(unreadCount),
         if (isResolved) l10n.threadResolved,
-        ?reply == null ? null : '${reply.toPlainText()}$age',
       ].join(', '),
       onTap: onTap,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(ThreadSummaryCardStyle.radius),
-          onTap: onTap,
-          child: Container(
-            // Takes the width it is given; shrinks if it is unbounded.
-            alignment: AlignmentDirectional.centerStart,
-            padding: ThreadSummaryCardStyle.padding,
-            decoration: BoxDecoration(
-              color: onOwnBubble
-                  ? scheme.surfaceContainerLowest
-                  : scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(
-                ThreadSummaryCardStyle.radius,
-              ),
-              border: _LeftBarBorder(
-                bar: unread ? scheme.primary : scheme.outline,
-                outline: scheme.outline,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (unread)
-                      Container(
-                        width: ThreadSummaryCardStyle.unreadDotSize,
-                        height: ThreadSummaryCardStyle.unreadDotSize,
-                        margin: ThreadSummaryCardStyle.unreadDotMargin,
-                        decoration: BoxDecoration(
-                          color: scheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    // Its minimum width is its whole text: it never wraps.
-                    IntrinsicWidth(
-                      child: Text(
-                        '$count ›',
-                        style: textStyle.bodySmall.copyWith(
-                          color: scheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: scheme.outline)),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: ThreadSummaryCardStyle.padding,
+              child: Row(
+                children: [
+                  if (faces.isNotEmpty) ...[
+                    _Faces(faces: faces, ring: _bubbleColor),
+                    const SizedBox(width: LinagoraSpacing.base),
+                  ],
+                  Icon(
+                    Icons.forum_outlined,
+                    size: ThreadSummaryCardStyle.iconSize,
+                    color: primary,
+                  ),
+                  const SizedBox(width: LinagoraSpacing.base * 0.5),
+                  Flexible(
+                    child: Text(
+                      count,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: LinagoraTextStyle.material().bodyMedium4.copyWith(
+                        fontSize:
+                            ThreadSummaryCardStyle.labelSize *
+                            AppConfig.fontSizeFactor,
+                        fontWeight: FontWeight.w500,
+                        color: primary,
                       ),
                     ),
-                    if (isResolved) const ResolvedMark(),
-                  ],
-                ),
-                // Only the reply is cut when the line is too long: the age stays whole.
-                if (reply != null)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text.rich(
-                          reply,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      Text(age!, style: secondary, softWrap: false),
-                    ],
                   ),
-              ],
+                  if (unread)
+                    Container(
+                      width: ThreadSummaryCardStyle.unreadDotSize,
+                      height: ThreadSummaryCardStyle.unreadDotSize,
+                      margin: const EdgeInsetsDirectional.only(
+                        start: LinagoraSpacing.base,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  if (isResolved) const ResolvedMark(),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+
+  /// The colours [MessageBubble] of linagora_design_flutter paints.
+  Color get _bubbleColor => onOwnBubble
+      ? LinagoraRefColors.material().primary[95]!
+      : LinagoraSysColors.material().onPrimary;
 }
 
-/// A 1 px outline with a 3 px bar on the start side (`left` holds the bar,
-/// whichever the direction). A [Border] with a wider side
-/// cannot be painted with a radius, so this one draws both itself.
-class _LeftBarBorder extends Border {
-  _LeftBarBorder({required Color bar, required Color outline})
-    : super(
-        top: BorderSide(color: outline),
-        right: BorderSide(color: outline),
-        bottom: BorderSide(color: outline),
-        left: BorderSide(color: bar, width: ThreadSummaryCardStyle.barWidth),
-      );
+class _Faces extends StatelessWidget {
+  const _Faces({required this.faces, required this.ring});
+
+  final List<ThreadReplier> faces;
+  final Color ring;
 
   @override
-  EdgeInsetsGeometry get dimensions => EdgeInsetsDirectional.fromSTEB(
-    left.width,
-    top.width,
-    right.width,
-    bottom.width,
+  Widget build(BuildContext context) => SizedBox(
+    width:
+        ThreadSummaryCardStyle.ringedSize +
+        ThreadSummaryCardStyle.faceStep * (faces.length - 1),
+    height: ThreadSummaryCardStyle.ringedSize,
+    child: Stack(
+      children: [
+        for (final (i, face) in faces.indexed)
+          PositionedDirectional(
+            start: ThreadSummaryCardStyle.faceStep * i,
+            child: Container(
+              width: ThreadSummaryCardStyle.ringedSize,
+              height: ThreadSummaryCardStyle.ringedSize,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: ring, shape: BoxShape.circle),
+              child: Avatar(
+                mxContent: face.avatarUrl,
+                name: face.displayName ?? face.userId,
+                size: ThreadSummaryCardStyle.faceSize,
+                fontSize: 10,
+              ),
+            ),
+          ),
+      ],
+    ),
   );
-
-  @override
-  void paint(
-    Canvas canvas,
-    Rect rect, {
-    TextDirection? textDirection,
-    BoxShape shape = BoxShape.rectangle,
-    BorderRadius? borderRadius,
-  }) {
-    final rrect = (borderRadius ?? BorderRadius.zero).toRRect(rect);
-    final rtl = textDirection == TextDirection.rtl;
-    final barLeft = rtl ? rect.right - left.width : rect.left;
-    // The bar lives inside the rounded shape; the outline starts after it.
-    canvas
-      ..save()
-      ..clipRRect(rrect)
-      ..drawRect(
-        Rect.fromLTWH(barLeft, rect.top, left.width, rect.height),
-        Paint()..color = left.color,
-      )
-      ..clipRect(
-        Rect.fromLTRB(
-          rtl ? rect.left : rect.left + left.width,
-          rect.top,
-          rtl ? barLeft : rect.right,
-          rect.bottom,
-        ),
-      )
-      ..drawRRect(
-        rrect.deflate(0.5),
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..color = top.color,
-      )
-      ..restore();
-  }
 }
