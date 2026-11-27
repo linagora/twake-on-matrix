@@ -7,7 +7,7 @@ import 'package:twake_chat/domain/personalization/room_sections.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/seen_readers.dart';
 import 'package:twake_chat/pages/personalize/personalize_choices.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:twake_chat/widgets/option_cards/option_cards.dart';
 

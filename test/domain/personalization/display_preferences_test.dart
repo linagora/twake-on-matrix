@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
 
 void main() {
   group('the display preferences', () {

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
 import 'package:twake_chat/domain/personalization/personalize_step.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 /// Where this device keeps the display choices and the personalization steps

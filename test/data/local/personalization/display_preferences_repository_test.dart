@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/data/local/personalization/display_preferences_repository.dart';
 import 'package:twake_chat/data/local/personalization/display_preferences_repository.provider.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/domain/personalization/display_preferences.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
 
 /// The repository of the app, over the device storage holding [stored].
 DisplayPreferencesRepository _repository(Map<String, Object> stored) {

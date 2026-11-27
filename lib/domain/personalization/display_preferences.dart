@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 
 part 'display_preferences.freezed.dart';
 

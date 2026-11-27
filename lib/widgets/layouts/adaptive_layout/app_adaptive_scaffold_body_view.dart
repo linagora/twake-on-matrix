@@ -224,7 +224,9 @@ class _ColumnPageView extends ConsumerWidget {
           onOpenSettings: onOpenSettings,
           adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
           searchOpen: searchOpen,
-          searchStyle: ref.watch(displayPreferencesProvider).searchStyle,
+          searchStyle: ref.watch(
+            displayPreferencesProvider.select((p) => p.searchStyle),
+          ),
           searchResults: Search(
             embedded: true,
             textEditingController: searchQuery,

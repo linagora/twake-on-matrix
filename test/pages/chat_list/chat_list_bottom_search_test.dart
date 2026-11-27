@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/personalization/chat_list_search_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_pills.dart';
 import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_search_style.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/floating_navigation_bar.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
