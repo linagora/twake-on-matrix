@@ -1,10 +1,4 @@
-// Need (Clément, 2026-11-26): on mobile a formatted message with Markdown
-// headings (release notes: `# Title`, `## Section`) is far too big; it must
-// look like the web app. Twake Space Chat draws every heading of a message
-// at the size of the message text, bold, with no margin
-// (`src/ds/MessageBubble/MessageBubble.tsx`:
-// `'& h1, & h2, & h3, & h4, & h5, & h6': { fontSize: '1em', m: 0 }`,
-// `'& p': { m: 0 }`; the bold is the browser default for h1..h6).
+// Message headings render at body size, bold, with no margin.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
