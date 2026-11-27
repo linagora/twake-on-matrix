@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/profile/entities/account_profile.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view_web_style.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
@@ -21,7 +22,7 @@ class SettingsProfileViewWeb extends StatelessWidget {
   final List<Widget>? menuChildren;
   final MenuController? menuController;
   final Function(MatrixFile) onImageLoaded;
-  final ValueNotifier<Profile?> currentProfile;
+  final AccountProfile? currentProfile;
   final bool canEditAvatar;
 
   const SettingsProfileViewWeb({
@@ -108,40 +109,34 @@ class SettingsProfileViewWeb extends StatelessWidget {
                                       }
                                       return child!;
                                     }),
-                                child: ValueListenableBuilder(
-                                  valueListenable: currentProfile,
-                                  builder: (context, profile, _) {
-                                    final displayName =
-                                        profile?.displayName ??
-                                        client.mxid(context).localpart ??
-                                        client.mxid(context);
-                                    return Material(
-                                      elevation:
-                                          Theme.of(context)
-                                              .appBarTheme
-                                              .scrolledUnderElevation ??
-                                          4,
-                                      shadowColor: Theme.of(
+                                child: Material(
+                                  elevation:
+                                      Theme.of(
                                         context,
-                                      ).appBarTheme.shadowColor,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                          color: Theme.of(context).dividerColor,
-                                        ),
-                                        borderRadius: BorderRadius.circular(
-                                          AvatarStyle.defaultSize,
-                                        ),
-                                      ),
-                                      child: Avatar(
-                                        mxContent: profile?.avatarUrl,
-                                        name: displayName,
-                                        size: SettingsProfileViewWebStyle
-                                            .avatarSize,
-                                        fontSize: SettingsProfileViewWebStyle
-                                            .avatarFontSize,
-                                      ),
-                                    );
-                                  },
+                                      ).appBarTheme.scrolledUnderElevation ??
+                                      4,
+                                  shadowColor: Theme.of(
+                                    context,
+                                  ).appBarTheme.shadowColor,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                      color: Theme.of(context).dividerColor,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      AvatarStyle.defaultSize,
+                                    ),
+                                  ),
+                                  child: Avatar(
+                                    mxContent: currentProfile?.avatarUrl,
+                                    name:
+                                        currentProfile?.displayName ??
+                                        client.mxid(context).localpart ??
+                                        client.mxid(context),
+                                    size:
+                                        SettingsProfileViewWebStyle.avatarSize,
+                                    fontSize: SettingsProfileViewWebStyle
+                                        .avatarFontSize,
+                                  ),
                                 ),
                               ),
                               if (canEditAvatar)
