@@ -5,6 +5,8 @@ import 'package:twake_chat/domain/spaces/folders.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_item.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills_style.dart';
 
 /// « All », then the folders: what the room list shows.
 class RoomListFilterBar extends ConsumerStatefulWidget {
@@ -77,49 +79,53 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
     final items = ref.watchRoomListFilterItems(l10n, enabled: widget.enabled);
-    return SizedBox(
-      height: RoomListFilterStyle.height,
-      child: Row(
-        children: [
-          if (_overflows)
-            _ScrollArrow(
-              icon: Icons.chevron_left,
-              tooltip: l10n.previous,
-              visible: _canScrollBack,
-              onPressed: () => _scrollBy(-RoomListFilterStyle.scrollStep),
-            ),
-          Expanded(
-            // The arrows come and go: the list must not be rebuilt with them.
-            key: const ValueKey('room_list_filter_chips'),
-            child: Semantics(
-              label: l10n.roomListFilters,
-              child: NotificationListener<Notification>(
-                onNotification: _onScroll,
-                child: ListView(
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    for (final item in items)
-                      _FilterChip(
-                        label: item.label,
-                        color: item.color,
-                        isSelected: item.isSelected,
-                        onSelected: item.onSelected,
-                        onMenu: item.onMenu,
-                      ),
-                  ],
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: FilterPillsStyle.maxTextScale,
+      child: SizedBox(
+        height: RoomListFilterStyle.height,
+        child: Row(
+          children: [
+            if (_overflows)
+              _ScrollArrow(
+                icon: Icons.chevron_left,
+                tooltip: l10n.previous,
+                visible: _canScrollBack,
+                onPressed: () => _scrollBy(-RoomListFilterStyle.scrollStep),
+              ),
+            Expanded(
+              // The arrows come and go: the list must not be rebuilt with them.
+              key: const ValueKey('room_list_filter_chips'),
+              child: Semantics(
+                label: l10n.roomListFilters,
+                child: NotificationListener<Notification>(
+                  onNotification: _onScroll,
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: RoomListFilterStyle.listPadding,
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      for (final item in items)
+                        _FolderPill(
+                          label: item.label,
+                          color: item.color,
+                          isSelected: item.isSelected,
+                          onSelected: item.onSelected,
+                          onMenu: item.onMenu,
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          if (_overflows)
-            _ScrollArrow(
-              icon: Icons.chevron_right,
-              tooltip: l10n.next,
-              visible: _canScrollForward,
-              onPressed: () => _scrollBy(RoomListFilterStyle.scrollStep),
-            ),
-        ],
+            if (_overflows)
+              _ScrollArrow(
+                icon: Icons.chevron_right,
+                tooltip: l10n.next,
+                visible: _canScrollForward,
+                onPressed: () => _scrollBy(RoomListFilterStyle.scrollStep),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -155,10 +161,10 @@ class _ScrollArrow extends StatelessWidget {
   );
 }
 
-/// The chip of the design system, with what a folder adds around it: its
-/// colour, and its menu once selected or on a right click.
-class _FilterChip extends StatefulWidget {
-  const _FilterChip({
+/// The pill of the phone, with the menu button of the selected folder: a mouse
+/// has no long press.
+class _FolderPill extends StatefulWidget {
+  const _FolderPill({
     required this.label,
     required this.isSelected,
     required this.onSelected,
@@ -175,12 +181,12 @@ class _FilterChip extends StatefulWidget {
   final void Function(BuildContext context, Offset position)? onMenu;
 
   @override
-  State<_FilterChip> createState() => _FilterChipState();
+  State<_FolderPill> createState() => _FolderPillState();
 }
 
-class _FilterChipState extends State<_FilterChip> {
+class _FolderPillState extends State<_FolderPill> {
   @override
-  void didUpdateWidget(_FilterChip oldWidget) {
+  void didUpdateWidget(_FolderPill oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isSelected && !oldWidget.isSelected) _scrollIntoView();
   }
@@ -213,33 +219,18 @@ class _FilterChipState extends State<_FilterChip> {
   Widget build(BuildContext context) {
     final color = widget.color;
     final onMenu = widget.onMenu;
-    final onSelected = widget.onSelected;
     return Padding(
       padding: RoomListFilterStyle.chipMargin,
-      child: GestureDetector(
-        onSecondaryTapUp: onMenu == null
-            ? null
-            : (details) => onMenu(context, details.globalPosition),
+      child: Center(
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (color != null)
-              Padding(
-                padding: RoomListFilterStyle.chipLeadingPadding,
-                child: CircleAvatar(
-                  radius: RoomListFilterStyle.colorDotRadius,
-                  backgroundColor: Color(color.argb),
-                ),
-              ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: RoomListFilterStyle.chipMaxWidth,
-              ),
-              child: LinagoraFilterChip(
-                label: widget.label,
-                selected: widget.isSelected,
-                onSelected: onSelected == null ? null : (_) => onSelected(),
-              ),
+            FilterPill(
+              label: widget.label,
+              dotColor: color == null ? null : Color(color.argb),
+              isSelected: widget.isSelected,
+              onTap: widget.onSelected,
+              onMenu: onMenu,
             ),
             if (widget.isSelected && onMenu != null)
               Builder(
