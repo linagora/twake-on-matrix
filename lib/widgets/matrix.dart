@@ -158,7 +158,6 @@ class MatrixState extends ConsumerState<Matrix>
   XFile? loginAvatar;
   String? loginUsername;
   String? loginType;
-  bool? loginRegistrationSupported;
 
   bool waitForFirstSync = false;
 
