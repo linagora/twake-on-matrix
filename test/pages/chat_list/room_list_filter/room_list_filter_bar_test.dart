@@ -26,6 +26,7 @@ Future<void> _pump(
   WidgetTester tester,
   List<Folder> folders, {
   bool enabled = true,
+  double textScale = 1,
 }) async {
   _container = ProviderContainer.test(
     retry: (_, _) => null,
@@ -37,7 +38,10 @@ Future<void> _pump(
   await pumpLocalized(
     tester,
     _container,
-    Scaffold(body: RoomListFilterBar(enabled: enabled)),
+    MediaQuery(
+      data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+      child: Scaffold(body: RoomListFilterBar(enabled: enabled)),
+    ),
   );
 }
 
@@ -251,6 +255,15 @@ void _roomListFilterBarScrollTests() {
       expect(pill('All').color, colors.primary);
       expect(pill('Work').color, colors.surface);
       expect(pill('Work').shape, const StadiumBorder());
+    });
+
+    testWidgets('whenTextIsVeryLarge_capsItLikeThePhone', (tester) async {
+      await _pump(tester, const [Folder.user('Work')], textScale: 2);
+
+      expect(
+        MediaQuery.textScalerOf(tester.element(find.text('Work'))).scale(10),
+        moreOrLessEquals(13),
+      );
     });
 
     testWidgets('whenDisabled_ignoresATap', (tester) async {

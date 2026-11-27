@@ -6,6 +6,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_item.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/widgets/twake_components/filter_pills.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills_style.dart';
 
 /// « All », then the folders: what the room list shows.
 class RoomListFilterBar extends ConsumerStatefulWidget {
@@ -78,50 +79,53 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
     final items = ref.watchRoomListFilterItems(l10n, enabled: widget.enabled);
-    return SizedBox(
-      height: RoomListFilterStyle.height,
-      child: Row(
-        children: [
-          if (_overflows)
-            _ScrollArrow(
-              icon: Icons.chevron_left,
-              tooltip: l10n.previous,
-              visible: _canScrollBack,
-              onPressed: () => _scrollBy(-RoomListFilterStyle.scrollStep),
-            ),
-          Expanded(
-            // The arrows come and go: the list must not be rebuilt with them.
-            key: const ValueKey('room_list_filter_chips'),
-            child: Semantics(
-              label: l10n.roomListFilters,
-              child: NotificationListener<Notification>(
-                onNotification: _onScroll,
-                child: ListView(
-                  controller: _scrollController,
-                  padding: RoomListFilterStyle.listPadding,
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    for (final item in items)
-                      _FolderPill(
-                        label: item.label,
-                        color: item.color,
-                        isSelected: item.isSelected,
-                        onSelected: item.onSelected,
-                        onMenu: item.onMenu,
-                      ),
-                  ],
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: FilterPillsStyle.maxTextScale,
+      child: SizedBox(
+        height: RoomListFilterStyle.height,
+        child: Row(
+          children: [
+            if (_overflows)
+              _ScrollArrow(
+                icon: Icons.chevron_left,
+                tooltip: l10n.previous,
+                visible: _canScrollBack,
+                onPressed: () => _scrollBy(-RoomListFilterStyle.scrollStep),
+              ),
+            Expanded(
+              // The arrows come and go: the list must not be rebuilt with them.
+              key: const ValueKey('room_list_filter_chips'),
+              child: Semantics(
+                label: l10n.roomListFilters,
+                child: NotificationListener<Notification>(
+                  onNotification: _onScroll,
+                  child: ListView(
+                    controller: _scrollController,
+                    padding: RoomListFilterStyle.listPadding,
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      for (final item in items)
+                        _FolderPill(
+                          label: item.label,
+                          color: item.color,
+                          isSelected: item.isSelected,
+                          onSelected: item.onSelected,
+                          onMenu: item.onMenu,
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          if (_overflows)
-            _ScrollArrow(
-              icon: Icons.chevron_right,
-              tooltip: l10n.next,
-              visible: _canScrollForward,
-              onPressed: () => _scrollBy(RoomListFilterStyle.scrollStep),
-            ),
-        ],
+            if (_overflows)
+              _ScrollArrow(
+                icon: Icons.chevron_right,
+                tooltip: l10n.next,
+                visible: _canScrollForward,
+                onPressed: () => _scrollBy(RoomListFilterStyle.scrollStep),
+              ),
+          ],
+        ),
       ),
     );
   }
