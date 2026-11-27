@@ -9,6 +9,7 @@ import 'activity_test_support.dart';
 /// Chats (#3773).
 void main() {
   group('filter pills', _filterPillTests);
+  group('touch target', _touchTargetTests);
   group('page', _pageTests);
 }
 
@@ -77,6 +78,25 @@ void _filterPillTests() {
         .widgetList<FilterPill>(find.byType(FilterPill))
         .where((pill) => pill.isSelected);
     expect(selected.map((pill) => pill.label), ['Mentions']);
+  });
+}
+
+void _touchTargetTests() {
+  testWidgets('a tap just above the pill still selects it', (tester) async {
+    await _pumpPage(tester);
+    final pill = tester.getRect(
+      find
+          .descendant(
+            of: find.widgetWithText(FilterPill, 'Unread'),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+
+    await tester.tapAt(Offset(pill.center.dx, pill.top - 6));
+    await tester.pump();
+
+    expect(_pill(tester, 'Unread').color, LinagoraSysColors.material().primary);
   });
 }
 

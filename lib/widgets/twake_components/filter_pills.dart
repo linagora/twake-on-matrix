@@ -87,52 +87,73 @@ class FilterPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = LinagoraSysColors.material();
     final onMenu = this.onMenu;
-    final dotColor = this.dotColor;
+    final VoidCallback? onLongPress = onMenu == null
+        ? null
+        : () => onMenu(context, _center(context));
+    final GestureTapUpCallback? onSecondaryTapUp = onMenu == null
+        ? null
+        : (details) => onMenu(context, details.globalPosition);
+    // The margin above and below the 32 dp pill still answers the finger.
     return Semantics(
+      container: true,
       button: true,
       selected: isSelected,
-      child: Material(
-        color: isSelected ? colors.primary : colors.surface,
-        shape: const StadiumBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: onMenu == null
-              ? null
-              : () => onMenu(context, _center(context)),
-          onSecondaryTapUp: onMenu == null
-              ? null
-              : (details) => onMenu(context, details.globalPosition),
-          child: Container(
-            height: FilterPillsStyle.pillHeight,
-            constraints: const BoxConstraints(
-              maxWidth: FilterPillsStyle.pillMaxWidth,
-            ),
-            padding: FilterPillsStyle.pillContentPadding,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (dotColor != null) ...[
-                  CircleAvatar(
-                    radius: FilterPillsStyle.dotRadius,
-                    backgroundColor: dotColor,
-                  ),
-                  const SizedBox(width: FilterPillsStyle.dotGap),
-                ],
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: LinagoraTextStyle.material().labelLarge.copyWith(
-                      color: isSelected ? colors.onPrimary : colors.onSurface,
-                    ),
-                  ),
-                ),
-              ],
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        onSecondaryTapUp: onSecondaryTapUp,
+        child: SizedBox(
+          height: FilterPillsStyle.touchTargetHeight,
+          child: Center(
+            widthFactor: 1,
+            child: Material(
+              color: isSelected ? colors.primary : colors.surface,
+              shape: const StadiumBorder(),
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onTap,
+                onLongPress: onLongPress,
+                onSecondaryTapUp: onSecondaryTapUp,
+                child: _content(colors),
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _content(LinagoraSysColors colors) {
+    final dotColor = this.dotColor;
+    return Container(
+      height: FilterPillsStyle.pillHeight,
+      constraints: const BoxConstraints(
+        maxWidth: FilterPillsStyle.pillMaxWidth,
+      ),
+      padding: FilterPillsStyle.pillContentPadding,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (dotColor != null) ...[
+            CircleAvatar(
+              radius: FilterPillsStyle.dotRadius,
+              backgroundColor: dotColor,
+            ),
+            const SizedBox(width: FilterPillsStyle.dotGap),
+          ],
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: LinagoraTextStyle.material().labelLarge.copyWith(
+                color: isSelected ? colors.onPrimary : colors.onSurface,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
