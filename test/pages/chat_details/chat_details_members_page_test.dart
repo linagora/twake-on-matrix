@@ -1,5 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ProviderContainer, UncontrolledProviderScope;
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -9,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_page_view/chat_details_members_page.dart';
+import 'package:twake_chat/providers/person_presence_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 
@@ -79,21 +82,31 @@ Future<void> _pumpMembersPage(
   addTearDown(membersNotifier.dispose);
 
   await tester.pumpWidget(
-    MaterialApp(
-      theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-      localizationsDelegates: L10n.localizationsDelegates,
-      home: Provider<MatrixState>.value(
-        value: _FakeMatrixState(),
-        child: Scaffold(
-          body: ChatDetailsMembersPage(
-            displayMembersNotifier: membersNotifier,
-            actualMembersCount: 1,
-            openDialogInvite: () {},
-            requestMoreMembersAction: () {},
-            isMobileAndTablet: false,
-            selectedUsersMapChangeNotifier: selectedUsersNotifier,
-            onAddMembers: onAddMembers,
-            onSelectMember: onSelectMember,
+    UncontrolledProviderScope(
+      container: ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: [
+          syncedPersonPresenceProvider(
+            '@member:example.com',
+          ).overrideWith((ref) => Stream.value(null)),
+        ],
+      ),
+      child: MaterialApp(
+        theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
+        localizationsDelegates: L10n.localizationsDelegates,
+        home: Provider<MatrixState>.value(
+          value: _FakeMatrixState(),
+          child: Scaffold(
+            body: ChatDetailsMembersPage(
+              displayMembersNotifier: membersNotifier,
+              actualMembersCount: 1,
+              openDialogInvite: () {},
+              requestMoreMembersAction: () {},
+              isMobileAndTablet: false,
+              selectedUsersMapChangeNotifier: selectedUsersNotifier,
+              onAddMembers: onAddMembers,
+              onSelectMember: onSelectMember,
+            ),
           ),
         ),
       ),

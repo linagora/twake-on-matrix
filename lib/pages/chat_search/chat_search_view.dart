@@ -19,7 +19,6 @@ import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:twake_chat/widgets/highlight_text.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/search/empty_search_widget.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
@@ -27,6 +26,8 @@ import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 class ChatSearchView extends StatelessWidget {
   final ChatSearchController controller;
@@ -169,7 +170,7 @@ class _EmptyView extends StatelessWidget {
   }
 }
 
-class _SearchItem extends StatelessWidget {
+class _SearchItem extends ConsumerWidget {
   final Event event;
   final String searchWord;
   final void Function(Event) onTap;
@@ -181,7 +182,8 @@ class _SearchItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ownUserId = ref.watch(activeMatrixClientProvider)?.userID;
     return FutureBuilder(
       future: event.fetchSenderUser(),
       builder: (context, snapshot) {
@@ -212,7 +214,7 @@ class _SearchItem extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                user.id == Matrix.of(context).client.userID
+                                user.id == ownUserId
                                     ? L10n.of(context)!.you
                                     : user.calcDisplayname(),
                                 maxLines: 1,

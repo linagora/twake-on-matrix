@@ -1,21 +1,22 @@
 import 'package:twake_chat/pages/media_viewer/media_viewer_view.dart';
 import 'package:twake_chat/utils/image_zoom_scope.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class MediaViewer extends StatefulWidget {
+class MediaViewer extends ConsumerStatefulWidget {
   const MediaViewer({super.key, required this.event});
 
   final Event event;
 
   @override
-  State<MediaViewer> createState() => MediaViewerController();
+  ConsumerState<MediaViewer> createState() => MediaViewerController();
 }
 
-class MediaViewerController extends State<MediaViewer> {
+class MediaViewerController extends ConsumerState<MediaViewer> {
   List<Event> mediaEvents = [];
   String? forwardToken;
   String? backwardToken;
@@ -28,7 +29,7 @@ class MediaViewerController extends State<MediaViewer> {
   Client? get client {
     if (!context.mounted) return null;
 
-    return Matrix.of(context).client;
+    return ref.read(matrixClientProvider);
   }
 
   bool get noTokenAvailable => forwardToken == null && backwardToken == null;

@@ -47,6 +47,7 @@ import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:photo_manager/photo_manager.dart' as photo_manager;
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 class ChatDetailsEdit extends ConsumerStatefulWidget {
   final String roomId;
@@ -94,7 +95,7 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
   final isRoomEnabledEncryptionNotifier = ValueNotifier<bool>(false);
   final roomAccessDraftNotifier = ValueNotifier(const RoomAccessDraft());
 
-  Client get client => Matrix.of(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   bool _isDeleteAvatar = false;
 
@@ -421,9 +422,9 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
             'ChatDetailsEdit::_handleUpdateGroupInfoOnEvents() - UpdateAvatarGroupChatSuccess',
           );
           _handleSaveIconOnUpdateSuccess();
-          await Future.delayed(_delayedUpdateAvatarDuration).then((_) {
-            room = Matrix.of(context).client.getRoomById(widget.roomId);
-          });
+          await Future.delayed(_delayedUpdateAvatarDuration);
+          if (!mounted) return;
+          room = client.getRoomById(widget.roomId);
           _isDeleteAvatar = false;
           avatarFilePicker = null;
           avatarAssetEntity = null;
@@ -608,7 +609,7 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
 
   @override
   void initState() {
-    room = Matrix.of(context).client.getRoomById(widget.roomId);
+    room = client.getRoomById(widget.roomId);
     isRoomEnabledEncryptionNotifier.value = room?.encrypted ?? false;
     _setupGroupNameTextEditingController();
     _setupDescriptionTextEditingController();

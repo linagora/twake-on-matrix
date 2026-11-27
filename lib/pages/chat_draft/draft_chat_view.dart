@@ -22,7 +22,6 @@ import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_di
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
@@ -135,7 +134,7 @@ class DraftChatView extends StatelessWidget {
                         TwakeInkWell(
                           onTap: () async => controller.onTapUnblockUser(
                             context: context,
-                            client: Matrix.of(context).client,
+                            client: controller.client,
                             displayName:
                                 controller.presentationContact.matrixId ?? '',
                             userID:

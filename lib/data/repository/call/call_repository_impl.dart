@@ -66,6 +66,13 @@ class CallRepositoryImpl implements CallRepository {
   Future<void> leaveMembership(CallRoom room) => _rtc.leaveMembership(room);
 
   @override
+  void closeCall(CallRoom room, {required DateTime endedAt}) =>
+      _rtc.closeCall(room, endedAt: endedAt);
+
+  @override
+  Future<void> sendCallLine(CallRoom room) => _rtc.sendCallLine(room);
+
+  @override
   Future<void> connectMedia(CallServer server, CallMediaState media) =>
       _media.connect(server, media);
 

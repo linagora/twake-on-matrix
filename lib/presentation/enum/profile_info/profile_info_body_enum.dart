@@ -7,7 +7,8 @@ enum ProfileInfoActions {
   sendMessage,
   downgradeToReadOnly,
   removeFromGroup,
-  transferOwnership;
+  transferOwnership,
+  reportUser;
 
   String label(BuildContext context) {
     final L10n l10n = L10n.of(context)!;
@@ -20,6 +21,8 @@ enum ProfileInfoActions {
         return l10n.downgradeToReadOnly;
       case ProfileInfoActions.transferOwnership:
         return l10n.transferOwnership;
+      case ProfileInfoActions.reportUser:
+        return l10n.reportUser;
     }
   }
 
@@ -36,6 +39,7 @@ enum ProfileInfoActions {
         );
       case ProfileInfoActions.downgradeToReadOnly:
       case ProfileInfoActions.transferOwnership:
+      case ProfileInfoActions.reportUser:
         return textTheme.labelLarge!.copyWith(
           color: LinagoraSysColors.material().primary,
         );
@@ -52,6 +56,7 @@ enum ProfileInfoActions {
       case ProfileInfoActions.removeFromGroup:
       case ProfileInfoActions.downgradeToReadOnly:
       case ProfileInfoActions.transferOwnership:
+      case ProfileInfoActions.reportUser:
         return null;
     }
   }
@@ -64,6 +69,7 @@ enum ProfileInfoActions {
         return const EdgeInsets.only(top: 8, bottom: 8);
       case ProfileInfoActions.downgradeToReadOnly:
       case ProfileInfoActions.transferOwnership:
+      case ProfileInfoActions.reportUser:
         return const EdgeInsets.only(bottom: 8);
     }
   }
@@ -80,6 +86,7 @@ enum ProfileInfoActions {
         );
       case ProfileInfoActions.sendMessage:
       case ProfileInfoActions.downgradeToReadOnly:
+      case ProfileInfoActions.reportUser:
         return null;
     }
   }
@@ -96,6 +103,11 @@ enum ProfileInfoActions {
         return Icon(
           Icons.delete_outline_outlined,
           color: LinagoraSysColors.material().error,
+        );
+      case ProfileInfoActions.reportUser:
+        return Icon(
+          Icons.flag_outlined,
+          color: LinagoraSysColors.material().primary,
         );
       case ProfileInfoActions.downgradeToReadOnly:
       case ProfileInfoActions.transferOwnership:

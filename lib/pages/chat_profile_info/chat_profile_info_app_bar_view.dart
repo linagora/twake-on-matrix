@@ -31,6 +31,8 @@ class ChatProfileInfoAppBarView extends ConsumerWidget {
     required this.blockUserLoadingNotifier,
     this.room,
     this.onLeaveChat,
+    this.onReportChat,
+    this.onReportUser,
     required this.groupInfoHeight,
     required this.maxGroupInfoHeight,
     required this.onChatInfoTap,
@@ -49,6 +51,8 @@ class ChatProfileInfoAppBarView extends ConsumerWidget {
   final ValueNotifier<bool?> blockUserLoadingNotifier;
   final Room? room;
   final void Function()? onLeaveChat;
+  final VoidCallback? onReportChat;
+  final VoidCallback? onReportUser;
   final double groupInfoHeight;
   final double maxGroupInfoHeight;
   final VoidCallback onChatInfoTap;
@@ -122,6 +126,8 @@ class ChatProfileInfoAppBarView extends ConsumerWidget {
               blockUserLoadingNotifier: blockUserLoadingNotifier,
               room: room,
               onLeaveChat: onLeaveChat,
+              onReportChat: onReportChat,
+              onReportUser: onReportUser,
             ),
           ],
         );

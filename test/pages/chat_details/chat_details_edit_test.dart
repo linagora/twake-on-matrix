@@ -23,6 +23,7 @@ import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -133,6 +134,7 @@ void main() {
         driveConfigProvider.overrideWithValue(
           const DriveConfig(ssoUrl: '', ssoClientId: ''),
         ),
+        matrixClientProvider.overrideWithValue(client),
         loginHomeserverSummaryProvider.overrideWithBuild(
           (_, _) => summaryWith(isPublicGroupsEnabled: true),
         ),
