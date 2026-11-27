@@ -100,7 +100,6 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     'displayname': '@room',
   };
 
-  // Never first for a bare @, where Enter would notify everyone by mistake.
   static bool _isRoomMentionQuery(String query) =>
       query.isNotEmpty &&
       [
@@ -233,8 +232,6 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       final userId = widget.room!.client.userID;
       final canMentionRoom =
           userId != null && widget.room!.canSendNotification(userId);
-      final roomMentionFirst = canMentionRoom && _isRoomMentionQuery(query);
-      if (roomMentionFirst) ret.add(_roomMentionSuggestion);
       final usersStart = ret.length;
       final users = widget.room!
           .getParticipants()
@@ -255,10 +252,10 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
           break;
         }
       }
+      // After the members, so that Enter never notifies everyone by mistake.
       if (canMentionRoom &&
-          !roomMentionFirst &&
-          query.isEmpty &&
-          ret.length > usersStart) {
+          (_isRoomMentionQuery(query) ||
+              (query.isEmpty && ret.length > usersStart))) {
         ret.add(_roomMentionSuggestion);
       }
     }

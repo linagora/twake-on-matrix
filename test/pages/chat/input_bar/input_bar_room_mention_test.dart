@@ -39,6 +39,7 @@ class _FakeGroupRoom extends Fake implements Room {
       Membership.knock,
     ],
   ]) => [
+    User('@alice:example.org', displayName: 'alice', room: this),
     User('@bob:example.org', displayName: 'bob', room: this),
     User('@robert:example.org', displayName: 'robert', room: this),
   ];
@@ -111,16 +112,16 @@ void main() {
 
     await _type(tester, '@');
 
-    expect(_mentions(suggestions), ['@bob', '@robert', '@room']);
+    expect(_mentions(suggestions), ['@alice', '@bob', '@robert', '@room']);
   });
 
-  testWidgets('a word of room, all or everyone puts @room first', (
+  testWidgets('a word of room, all or everyone offers @room after members', (
     tester,
   ) async {
     final (_, suggestions) = await _pumpInputBar(tester, canNotifyRoom: true);
 
     await _type(tester, '@ro');
-    expect(_mentions(suggestions), ['@room', '@robert']);
+    expect(_mentions(suggestions), ['@robert', '@room']);
 
     await _type(tester, '@every');
     expect(_mentions(suggestions), ['@room']);
@@ -129,13 +130,22 @@ void main() {
     expect(_mentions(suggestions), ['@bob']);
   });
 
+  testWidgets('a one-letter query keeps the matching member first', (
+    tester,
+  ) async {
+    final (_, suggestions) = await _pumpInputBar(tester, canNotifyRoom: true);
+
+    await _type(tester, '@a');
+    expect(_mentions(suggestions), ['@alice', '@room']);
+  });
+
   testWidgets('no @room without the power level to notify the room', (
     tester,
   ) async {
     final (_, suggestions) = await _pumpInputBar(tester, canNotifyRoom: false);
 
     await _type(tester, '@');
-    expect(_mentions(suggestions), ['@bob', '@robert']);
+    expect(_mentions(suggestions), ['@alice', '@bob', '@robert']);
 
     await _type(tester, '@ro');
     expect(_mentions(suggestions), ['@robert']);
@@ -152,7 +162,7 @@ void main() {
       find.byType(TypeAheadField<Map<String, String?>>),
     );
     expect(find.text('Notify everyone in the conversation'), findsOneWidget);
-    typeAhead.onSelected!(suggestions.suggestions!.first);
+    typeAhead.onSelected!(suggestions.suggestions!.last);
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(controller.text, 'hi @room ');
