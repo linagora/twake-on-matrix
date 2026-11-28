@@ -124,7 +124,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                   );
           },
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: ChatListItemStyle.readIconGap),
         AnimatedContainer(
           duration: TwakeThemes.animationDuration,
           curve: TwakeThemes.animationCurve,

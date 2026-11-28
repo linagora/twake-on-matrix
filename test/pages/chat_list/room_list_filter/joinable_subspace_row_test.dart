@@ -10,6 +10,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/joinable_subspace_row.dart';
 import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 
 import '../../space_home/open_space_child_test.mocks.dart';
 
@@ -72,4 +73,54 @@ void main() {
     verify(repository.joinRoom('sub', via: ['good.org'])).called(1);
     expect(find.text('room sub'), findsOneWidget);
   });
+
+  testWidgets(
+    'a joinable sub-space shows its name and members line right after the '
+    'avatar, like a chat title',
+    (tester) async {
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final repository = MockSpaceRepository();
+      when(
+        repository.watchRoomChanges(),
+      ).thenAnswer((_) => const Stream.empty());
+      when(repository.getRoomListEntries()).thenReturn(const []);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: ProviderContainer.test(
+            retry: (_, _) => null,
+            overrides: [spaceRepositoryProvider.overrideWithValue(repository)],
+          ),
+          child: MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: L10n.localizationsDelegates,
+            supportedLocales: L10n.supportedLocales,
+            home: Scaffold(
+              body: JoinableSubspaceRow(
+                row: RoomListJoinableRow(
+                  const SpaceChannel(
+                    roomId: 'sub',
+                    name: 'Sub',
+                    memberCount: 3,
+                    via: ['good.org'],
+                  ),
+                  parentSpaceId: '!s',
+                  depth: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final paddedAvatar = find
+          .ancestor(of: find.byType(Avatar), matching: find.byType(Padding))
+          .first;
+      final titleStart = tester.getTopRight(paddedAvatar).dx;
+
+      expect(tester.getTopLeft(find.text('Sub')).dx, titleStart);
+      expect(tester.getTopLeft(find.text('Join · 3 members')).dx, titleStart);
+    },
+  );
 }

@@ -9,6 +9,11 @@ class ChatListItemStyle {
 
   static const double readIconSize = 20;
 
+  static const double readIconGap = 4;
+
+  /// Room kept free at the end of a row for the read-status icon.
+  static const double dividerEndInset = readIconSize + readIconGap;
+
   static const double mentionIconWidth = 20;
 
   static const double chatItemHeight = 72;

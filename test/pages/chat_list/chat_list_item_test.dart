@@ -6,6 +6,7 @@ import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/pages/chat/events/message_time_style.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_row_divider.dart';
 import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
@@ -23,7 +24,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
-    show LinagoraRefColors, TwakeListItem;
+    show LinagoraRefColors;
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -387,14 +388,19 @@ void main() {
       await tester.pump();
 
       // Assert
-      final row = tester.getRect(find.byType(TwakeListItem));
+      final line = tester.getRect(
+        find.descendant(
+          of: find.byType(ChatListRowDivider),
+          matching: find.byType(ColoredBox),
+        ),
+      );
       final badge = tester.getRect(
         find.descendant(
           of: find.byType(AvatarWithKindBadge),
           matching: find.byType(Icon),
         ),
       );
-      expect(badge.bottom, lessThanOrEqualTo(row.bottom - 1));
+      expect(badge.bottom, lessThanOrEqualTo(line.top));
     });
 
     testWidgets('build_whenSpace_matchesTheRoomAvatarAndRowSize', (
@@ -422,7 +428,7 @@ void main() {
 
       // Assert
       final avatars = find.byType(AvatarWithKindBadge);
-      final rows = find.byType(TwakeListItem);
+      final rows = find.byType(ChatListItem);
       expect(tester.getSize(avatars.at(0)), tester.getSize(avatars.at(1)));
       expect(
         tester.getSize(rows.at(0)).height,
