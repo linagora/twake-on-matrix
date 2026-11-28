@@ -128,24 +128,45 @@ void main() {
     expect(log, ['listen:a-sync']);
   });
 
-  test(
-    'a cancel that fails is thrown and a second call finishes the rest',
-    () async {
-      subscriptions
-        ..open('a')
-        ..keep('a', 'one', listen('one'))
-        ..keep('a', 'two', listen('two'))
-        ..keep('a', 'three', listen('three'));
-      failing.add('two');
+  test('a cancel that fails is thrown once the others ran, and a second call '
+      'retries it', () async {
+    subscriptions
+      ..open('a')
+      ..keep('a', 'one', listen('one'))
+      ..keep('a', 'two', listen('two'))
+      ..keep('a', 'three', listen('three'));
+    failing.add('two');
 
-      await expectLater(subscriptions.cancel('a'), throwsStateError);
-      failing.clear();
-      log.clear();
-      await subscriptions.cancel('a');
+    await expectLater(subscriptions.cancel('a'), throwsStateError);
+    expect(log.where((e) => e.startsWith('cancel:')), [
+      'cancel:one',
+      'cancel:two',
+      'cancel:three',
+    ]);
+    failing.clear();
+    log.clear();
+    await subscriptions.cancel('a');
 
-      expect(log, ['cancel:two', 'cancel:three']);
-    },
-  );
+    expect(log, ['cancel:two']);
+  });
+
+  test('every cancel starts before a slow one is awaited', () {
+    final gate = Completer<void>();
+    subscriptions
+      ..open('a')
+      ..keep(
+        'a',
+        'slow',
+        () =>
+            () => gate.future,
+      )
+      ..keep('a', 'sync', listen('a-sync'));
+
+    unawaited(subscriptions.cancel('a'));
+
+    expect(log, ['listen:a-sync', 'cancel:a-sync']);
+    gate.complete();
+  });
 
   test('cancelAll cancels every client', () async {
     openWithSync(['a', 'b']);

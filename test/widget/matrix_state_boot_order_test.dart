@@ -94,6 +94,19 @@ class _WatchedController<T> extends CachedStreamController<T> {
   }
 }
 
+/// Tells whether something still listens to its stream.
+class _ListenedController<T> extends CachedStreamController<T> {
+  final _controller = StreamController<T>.broadcast();
+
+  bool get hasListener => _controller.hasListener;
+
+  @override
+  Stream<T> get stream => _controller.stream;
+
+  @override
+  void add(T value) => _controller.add(value);
+}
+
 class _CountingToMDatabase implements HiveCollectionToMDatabase {
   int clears = 0;
 
@@ -112,7 +125,7 @@ class _BootClient extends FakeAccountClient {
   final _onKeyVerificationRequest = CachedStreamController<KeyVerification>();
   final _onLoginStateChanged = _WatchedController<LoginState>();
   final _onUiaRequest = CachedStreamController<UiaRequest>();
-  final _onSyncStatus = CachedStreamController<SyncStatusUpdate>();
+  final _onSyncStatus = _ListenedController<SyncStatusUpdate>();
   final _onToDeviceEvent = CachedStreamController<ToDeviceEvent>();
   final _onSync = CachedStreamController<SyncUpdate>();
   final _httpClient = http.Client();
@@ -146,7 +159,7 @@ class _BootClient extends FakeAccountClient {
   CachedStreamController<UiaRequest> get onUiaRequest => _onUiaRequest;
 
   @override
-  CachedStreamController<SyncStatusUpdate> get onSyncStatus => _onSyncStatus;
+  _ListenedController<SyncStatusUpdate> get onSyncStatus => _onSyncStatus;
 
   @override
   CachedStreamController<ToDeviceEvent> get onToDeviceEvent => _onToDeviceEvent;
@@ -958,17 +971,87 @@ void main() {
       await harness.unmount();
     });
 
-    expect(subscriptions.cancelAlls, 0);
+    expect(subscriptions.cancelAlls, 1);
     expect(logout.disposes, 0);
     expect(push.disposes, 0);
     expect(candidate.disposes, 0);
 
     harness.container.dispose();
 
-    expect(subscriptions.cancelAlls, 1);
+    expect(subscriptions.cancelAlls, 2);
     expect(logout.disposes, 1);
     expect(push.disposes, 1);
     expect(candidate.disposes, 1);
+  });
+
+  testWidgets('a sync status after the unmount does not reach MatrixState', (
+    tester,
+  ) async {
+    final client = _BootClient('a', userID: '@a:s');
+    final harness = _Harness(tester, [client]);
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+      expect(client.onSyncStatus.hasListener, isTrue);
+      await harness.unmount();
+
+      client.onSyncStatus.add(const SyncStatusUpdate(SyncStatus.finished));
+      await harness.settle();
+    });
+
+    expect(client.onSyncStatus.hasListener, isFalse);
+  });
+
+  testWidgets('a cancel that fails at the unmount is reported, not thrown', (
+    tester,
+  ) async {
+    final reports = <String>[];
+    final subscriptions = ClientSubscriptions()
+      ..open('a')
+      ..keep(
+        'a',
+        'broken',
+        () =>
+            () async => throw StateError('cancel failed'),
+      );
+    final harness = _Harness(
+      tester,
+      [_BootClient('a', userID: '@a:s')],
+      overrides: [
+        clientSubscriptionsProvider.overrideWithValue(subscriptions),
+        reportFailureProvider.overrideWithValue(
+          (error, stackTrace, what) => reports.add(what),
+        ),
+      ],
+    );
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+      await harness.unmount();
+      await harness.settle();
+    });
+
+    expect(reports, ['MatrixState: subscriptions at dispose']);
+  });
+
+  testWidgets('a MatrixState mounted again on the same container listens to '
+      'its clients again', (tester) async {
+    final client = _BootClient('a', userID: '@a:s');
+    final harness = _Harness(tester, [client]);
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+      await harness.unmount();
+      client.onLoginStateChanged.listened = false;
+
+      await harness.mount();
+      await harness.settle();
+    });
+
+    expect(client.onLoginStateChanged.listened, isTrue);
   });
 
   testWidgets('the set-up of a login uses the authentication server of the '
