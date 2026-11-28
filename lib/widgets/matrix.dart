@@ -156,7 +156,6 @@ class MatrixState extends ConsumerState<Matrix>
       ref.read(loginHomeserverSummaryProvider.notifier).set(summary);
   String? _authUrl;
   XFile? loginAvatar;
-  String? loginUsername;
   String? loginType;
 
   bool waitForFirstSync = false;
@@ -211,8 +210,6 @@ class MatrixState extends ConsumerState<Matrix>
   int getClientIndexByMatrixId(String matrixId) =>
       accountClients.indexWhere((client) => client.userID == matrixId);
 
-  late String currentClientSecret;
-  RequestTokenResponse? currentThreepidCreds;
   String? supportChatRoomId;
 
   /// True when [target] is the active account and no switch away from it is

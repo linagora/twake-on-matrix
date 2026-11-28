@@ -45,7 +45,6 @@ import 'package:twake_chat/pages/settings_dashboard/settings_security/settings_s
 import 'package:twake_chat/pages/settings_dashboard/settings_stories/settings_stories.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_personalization/settings_personalization.dart';
 import 'package:twake_chat/pages/share/share.dart';
-import 'package:twake_chat/pages/sign_up/signup.dart';
 import 'package:twake_chat/pages/splash/splash.dart';
 import 'package:twake_chat/pages/story/story_page.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome.dart';
@@ -240,15 +239,6 @@ class ConnectRoute extends GoRouteData with $ConnectRoute {
         context,
         ConnectPage(owner: $extra ?? LoginClientOwner.thisPage),
       );
-}
-
-@TypedGoRoute<SignupRoute>(path: '/signup')
-class SignupRoute extends GoRouteData with $SignupRoute {
-  const SignupRoute();
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const SignupPage());
 }
 
 @TypedGoRoute<LogsRoute>(path: '/logs')

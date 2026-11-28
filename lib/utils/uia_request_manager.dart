@@ -65,31 +65,7 @@ extension UiaRequestManager on MatrixState {
             ),
           );
         case AuthenticationTypes.emailIdentity:
-          if (currentThreepidCreds == null) {
-            return uiaRequest.cancel(
-              UiaException(L10n.of(context)!.serverRequiresEmail),
-            );
-          }
-          final auth = AuthenticationThreePidCreds(
-            session: uiaRequest.session,
-            type: AuthenticationTypes.emailIdentity,
-            threepidCreds: ThreepidCreds(
-              sid: currentThreepidCreds!.sid,
-              clientSecret: currentClientSecret,
-            ),
-          );
-          if (ConfirmResult.ok ==
-              await showConfirmAlertDialog(
-                useRootNavigator: false,
-                context: TwakeApp.routerKey.currentContext!,
-                title: l10n.weSentYouAnEmail,
-                message: l10n.pleaseClickOnLink,
-                okLabel: l10n.iHaveClickedOnLink,
-                cancelLabel: l10n.cancel,
-              )) {
-            return await uiaRequest.completeStage(auth);
-          }
-          return uiaRequest.cancel();
+          return uiaRequest.cancel(UiaException(l10n.serverRequiresEmail));
         case AuthenticationTypes.dummy:
           return await uiaRequest.completeStage(
             AuthenticationData(
