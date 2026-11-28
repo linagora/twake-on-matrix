@@ -1,3 +1,33 @@
+## [2.30.0] - 2026-11-28
+### Added
+- #3825, #3841, #3842, #3843, #3844, #3859: Personalization settings
+- #3760: Ring incoming calls in the app, like the web
+- #3817: Show every call as one line of the chat, written by its caller
+- #3799: Show the thread as a comments row with the repliers' faces
+- #3818: Presence dot in the chat list, members and contacts
+- #3823: Report a group, a direct chat or a user with a reason
+- #3845: Show the answered message above the reply bubble
+- #3824: Search the chat list from the bottom bar on a phone
+- #3777: Play the next voice message when one ends
+- #3780: Scribe integration, domain and data layer
+
+### Changed
+- #3819, #3820, #3832, #3847, #3848: Read clients and settings from Riverpod
+- #3822: Align the activity filters with the Chats pills
+- #3815: Bump fastlane to 2.242.0 to stop false TestFlight upload failures
+- #3791: Announce every store build
+
+### Fixed
+- #3853: Markdown headings at body size, as on web
+- #3857: Open the thread from an iOS notification
+- #3856: Start a thread on an album and show its card
+- #3840: Give space avatars the size of chat avatars
+- #3809: Show a file's icon and caption in the chat list preview
+- #3808: Resubscribe the connection header when the active account changes
+
+### Tests
+- #3803, #3821: Cover swipe to reply, mentions, in-chat search, profile save
+
 ## [2.29.0] - 2026-11-26
 ### Added
 - #3606: Threads on mobile
