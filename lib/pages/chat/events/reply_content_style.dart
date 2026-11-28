@@ -16,14 +16,9 @@ class ReplyContentStyle {
     bottom: 8.0,
   );
 
-  static BoxDecoration replyParentContainerDecoration(
-    BuildContext context,
-    bool ownMessage,
-  ) {
+  static BoxDecoration replyParentContainerDecoration(BuildContext context) {
     return BoxDecoration(
-      color: ownMessage
-          ? LinagoraSysColors.material().primaryContainer
-          : LinagoraSysColors.material().onSurface.withOpacity(0.08),
+      color: LinagoraSysColors.material().onSurface.withOpacity(0.08),
       borderRadius: BorderRadius.circular(8.0),
     );
   }
@@ -58,9 +53,36 @@ class ReplyContentStyle {
     );
   }
 
-  static EdgeInsetsDirectional get marginReplyContent =>
-      EdgeInsetsDirectional.symmetric(
-        vertical: 4.0 * AppConfig.bubbleSizeFactor,
+  /// How far a message bubble covers the bubble quoted above it.
+  static const double quoteOverlap = 12;
+
+  /// Width of the gap that parts the two bubbles.
+  static const double quoteRingWidth = 2;
+
+  static const double quoteCaptionIconSize = 14;
+
+  static const EdgeInsets quoteCaptionPadding = EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 4,
+  );
+
+  static const EdgeInsets quoteBubblePadding = EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 8,
+  );
+
+  static BoxDecoration get quoteBubbleDecoration => BoxDecoration(
+    // Opaque, or the wallpaper shows through behind the quoted text
+    color: Color.alphaBlend(
+      LinagoraSysColors.material().onSurface.withValues(alpha: 0.06),
+      LinagoraSysColors.material().surface,
+    ),
+    borderRadius: BorderRadius.circular(16),
+  );
+
+  static TextStyle? quoteCaptionTextStyle(BuildContext context) =>
+      Theme.of(context).textTheme.labelSmall?.copyWith(
+        color: LinagoraRefColors.material().neutral[50],
       );
 
   static const double replyContainerHeight = 60;

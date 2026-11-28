@@ -18,7 +18,6 @@ mixin MessageContentBuilderMixin {
     BuildContext context, {
     required Event event,
     required double maxWidth,
-    bool ownMessage = false,
     bool hideDisplayName = false,
     bool isEdited = false,
     Timeline? timeline,
@@ -54,7 +53,7 @@ mixin MessageContentBuilderMixin {
       timeline: timeline,
     );
 
-    if (ownMessage || hideDisplayName) {
+    if (hideDisplayName) {
       return messageMetrics;
     }
 
@@ -62,9 +61,9 @@ mixin MessageContentBuilderMixin {
 
     final totalDisplayNameWidth = sizeWidthDisplayName + rightSpaceDisplayName;
 
-    final totalWidth = max<double>(
-      totalDisplayNameWidth,
-      messageMetrics.totalMessageWidth,
+    final totalWidth = min<double>(
+      maxWidth,
+      max<double>(totalDisplayNameWidth, messageMetrics.totalMessageWidth),
     );
 
     return MessageMetrics(
@@ -82,7 +81,7 @@ mixin MessageContentBuilderMixin {
       textScaler: MediaQuery.textScalerOf(context),
       text: TextSpan(
         text: event.isCaptionModeOrReply()
-            ? event.body
+            ? event.bodyWithoutReplyFallback
             : event.senderFromMemoryOrFallback
                   .calcDisplayname()
                   .shortenDisplayName(
@@ -113,7 +112,7 @@ mixin MessageContentBuilderMixin {
       textScaler: MediaQuery.textScalerOf(context),
       text: TextSpan(
         text: displayEvent.isCaptionModeOrReply()
-            ? displayEvent.body
+            ? displayEvent.bodyWithoutReplyFallback
             : displayEvent.calcLocalizedBodyFallback(
                 MatrixLocals(L10n.of(context)!),
                 hideReply: true,

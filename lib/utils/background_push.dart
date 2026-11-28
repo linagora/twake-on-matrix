@@ -722,7 +722,11 @@ class BackgroundPush {
     // roomId is payload if noti is local
     String? roomId = noti['room_id'];
     var eventId = noti['event_id'] as String?;
-    String? threadRootId;
+    // Set by the NSE from the relation of the event, which stays in clear.
+    final pushedThreadRootId = AppConfig.threadsEnabled
+        ? noti['thread_root_id'] as String?
+        : null;
+    String? threadRootId = pushedThreadRootId;
     String? receiverId = noti['receiver_id'] as String?;
 
     // Remote APN notifications nest the routing data inside 'payload'.
@@ -734,7 +738,7 @@ class BackgroundPush {
           if (parsed.roomId != null) roomId = parsed.roomId;
           if (parsed.receiverId != null) receiverId = parsed.receiverId;
           eventId ??= parsed.eventId;
-          threadRootId = parsed.threadRootId;
+          threadRootId = parsed.threadRootId ?? threadRootId;
         }
       } catch (e) {
         Logs().w('[Push] iOSUserSelectedNoti: failed to parse payload', e);
@@ -747,6 +751,7 @@ class BackgroundPush {
       roomId,
       eventId: eventId,
       threadRootId: threadRootId,
+      threadRootKnown: pushedThreadRootId != null,
       switchedClient: outcome is NotificationAccountSwitched
           ? outcome.client
           : null,

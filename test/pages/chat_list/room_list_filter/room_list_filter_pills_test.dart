@@ -36,9 +36,11 @@ Future<void> _pump(
   );
 }
 
-Material _pill(WidgetTester tester, String label) => tester.widget<Material>(
-  find.ancestor(of: find.text(label), matching: find.byType(Material)).first,
-);
+Finder _pillFinder(String label) =>
+    find.ancestor(of: find.text(label), matching: find.byType(Material)).first;
+
+Material _pill(WidgetTester tester, String label) =>
+    tester.widget<Material>(_pillFinder(label));
 
 Color? _labelColor(WidgetTester tester, String label) =>
     tester.widget<Text>(find.text(label)).style?.color;
@@ -109,6 +111,16 @@ void main() {
 
     expect(_selected(), const RoomListFilter.builtin(BuiltinFolder.spaces));
     expect(_pill(tester, 'Spaces').color, LinagoraSysColors.material().primary);
+  });
+
+  testWidgets('whenTappedJustBelowThePill_selectsItsFolder', (tester) async {
+    await _pump(tester, const [_spaces]);
+    final pill = tester.getRect(_pillFinder('Spaces'));
+
+    await tester.tapAt(Offset(pill.center.dx, pill.bottom + 6));
+    await tester.pump();
+
+    expect(_selected(), const RoomListFilter.builtin(BuiltinFolder.spaces));
   });
 
   testWidgets('whenPillIsLongPressed_opensTheFolderMenu', (tester) async {

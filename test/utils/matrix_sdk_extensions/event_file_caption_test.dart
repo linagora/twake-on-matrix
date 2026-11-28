@@ -1,18 +1,11 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 
 import '../../fake_client.dart';
 
-/// Issue #3263: the chat list shows the caption a file was sent with, not
-/// « sent a file ». Per the Matrix spec (v1.10, `m.file`), `body` is a caption
-/// only when `filename` is present and differs from it.
-/// https://spec.matrix.org/v1.10/client-server-api/#mfile
 void main() {
   late Room room;
-  final l10n = lookupL10n(const Locale('en'));
   const pdf = 'Contributions.pdf';
 
   Event file(Map<String, Object?> content, {String msgtype = 'm.file'}) =>
@@ -28,6 +21,13 @@ void main() {
         originServerTs: DateTime.fromMillisecondsSinceEpoch(1894270481925),
         room: room,
       );
+
+  Event captionEdit(String caption, {bool outerFilename = true}) => file({
+    'body': '* $caption',
+    if (outerFilename) 'filename': pdf,
+    'm.new_content': {'msgtype': 'm.file', 'body': caption, 'filename': pdf},
+    'm.relates_to': {'rel_type': 'm.replace', 'event_id': '\$file:example.org'},
+  });
 
   setUpAll(() async {
     room = Room(id: '!room:example.org', client: await getClient());
@@ -70,27 +70,45 @@ void main() {
     });
   });
 
-  group('chat list preview of a file', () {
-    test('shows the caption on one line', () async {
+  group('Event.chatListFileText', () {
+    test('puts a multi-line caption on one line', () {
       final event = file({'body': 'Would this\ndo?', 'filename': pdf});
 
-      expect(
-        await event.calcLocalizedBodyRemoveBreakLine(l10n),
-        'Would this do?',
-      );
-      expect(
-        event.calcLocalizedBodyFallbackRemoveBreakLine(l10n),
-        'Would this do?',
-      );
+      expect(event.chatListFileText, 'Would this do?');
     });
 
-    test('still says a file was sent when there is no caption', () async {
-      final event = file({'body': pdf, 'filename': pdf});
+    test('is the file name when there is no caption', () {
+      expect(file({'body': pdf, 'filename': pdf}).chatListFileText, pdf);
+    });
 
-      expect(
-        await event.calcLocalizedBodyRemoveBreakLine(l10n),
-        contains('sent a file'),
-      );
+    test('is the file name for a reply whose body is only the fallback', () {
+      final event = file({
+        'body': '> <@bob:example.org> the report?',
+        'filename': pdf,
+        'm.relates_to': {
+          'm.in_reply_to': {'event_id': '\$question:example.org'},
+        },
+      });
+
+      expect(event.chatListFileText, pdf);
+    });
+
+    test('is the new caption of a caption edit', () {
+      expect(captionEdit('new caption').chatListFileText, 'new caption');
+    });
+
+    test('is the file name when an edit removes the caption', () {
+      expect(captionEdit('').chatListFileText, pdf);
+    });
+
+    test('is the new caption of an edit without a file name outside', () {
+      final edit = captionEdit('new caption', outerFilename: false);
+
+      expect(edit.chatListFileText, 'new caption');
+    });
+
+    test('is the file name of an edit that removes the caption', () {
+      expect(captionEdit('', outerFilename: false).chatListFileText, pdf);
     });
   });
 }

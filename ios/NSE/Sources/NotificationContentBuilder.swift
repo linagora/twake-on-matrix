@@ -64,6 +64,7 @@ struct NotificationContentBuilder {
         notification.receiverID = notificationItem.receiverID
         notification.roomID = notificationItem.roomID
         notification.eventID = notificationItem.eventID
+        notification.threadRootID = notificationItem.threadRootID
         notification.sound = notificationItem.isNoisy ? UNNotificationSound(named: UNNotificationSoundName(rawValue: "message.caf")) : nil
         // So that the UI groups notification that are received for the same room but also for the same user
         // Removing the @ fixes an iOS bug where the notification crashes if the mute button is tapped

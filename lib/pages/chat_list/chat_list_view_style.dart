@@ -3,6 +3,7 @@ import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -10,6 +11,10 @@ class ChatListViewStyle {
   static final responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const double editIconSize = 18.0;
+
+  /// The title of a section of the room order « sections ».
+  static const EdgeInsetsDirectional paddingSectionTitle =
+      EdgeInsetsDirectional.fromSTEB(16, 12, 16, 4);
 
   static const double _audioPlayerHeight = 40;
 
@@ -25,8 +30,7 @@ class ChatListViewStyle {
     return Size.fromHeight(
       AppConfig.toolbarHeight(context) +
           ChatListHeaderStyle.newChatCapsuleGap +
-          ChatListHeaderStyle.searchBarContainerHeight +
-          RoomListFilterStyle.pillsHeight +
+          FilterPillsStyle.height +
           audioPlayer,
     );
   }

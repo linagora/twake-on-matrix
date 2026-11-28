@@ -35,6 +35,7 @@ struct HTTPNotificationItem: NotificationItemProxyProtocol {
     let isInvite: Bool
     let isNoisy: Bool
     let isNeutral: Bool
+    let threadRootID: String?
 
     var event: NotificationEvent? { nil }
     var roomCanonicalAlias: String? { nil }
@@ -73,6 +74,9 @@ struct NSEHTTPSession: MediaProviderProtocol {
         let isInvite = classified.isInvite
         let neutral = classified.encryption == .unknown
         var noisy = true
+        // The relation stays in clear in an encrypted event.
+        let relation = content?["m.relates_to"] as? [String: Any]
+        let threadRootID = relation?["rel_type"] as? String == "m.thread" ? relation?["event_id"] as? String : nil
 
         func item(sender senderName: String?, senderAvatar: String?, roomName: String?, roomAvatar: String?, isDirect: Bool) -> HTTPNotificationItem {
             HTTPNotificationItem(eventID: eventID,
@@ -88,7 +92,8 @@ struct NSEHTTPSession: MediaProviderProtocol {
                                  body: body,
                                  isInvite: isInvite,
                                  isNoisy: noisy,
-                                 isNeutral: neutral)
+                                 isNeutral: neutral,
+                                 threadRootID: threadRootID)
         }
 
         if isInvite {

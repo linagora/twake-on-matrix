@@ -15,6 +15,18 @@ class ChatInputRowStyle {
     Radius.circular(25),
   );
   static const double chatInputRowPaddingBtnWeb = 10.0;
+
+  /// The modern composer of a wide screen: a rounded rectangle, the text
+  /// above the row of tools.
+  static const BorderRadius modernComposerBorderRadius = BorderRadius.all(
+    Radius.circular(14),
+  );
+  static const EdgeInsets modernComposerFieldPadding = EdgeInsets.fromLTRB(
+    12,
+    2,
+    12,
+    0,
+  );
   static const EdgeInsets chatInputRowMoreBtnMarginMobile = EdgeInsets.only(
     right: 4.0,
   );

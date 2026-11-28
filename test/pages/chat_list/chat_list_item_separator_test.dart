@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart'
@@ -10,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_row_divider.dart';
 import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
 import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -21,102 +21,25 @@ import 'chat_list_item_test.mocks.dart';
 /// The need (Clément): the line between two rows of the chat list starts
 /// after the avatar, at the left edge of the title, and stops before the
 /// read-status icon at the end of the row. It keeps its colour and thickness.
-///
-/// The specs read the line in the painted pixels, as the user sees it, so the
-/// fix is free to draw it any way.
-const _shot = ValueKey('separator-shot');
+final _divider = LinagoraDividerStyle.material();
 
-/// A horizontal run shorter than this is not a separator (glyph, badge).
-const _minLineLength = 24;
-
-Widget _rows(List<Widget> rows) => wrap(
-  RepaintBoundary(
-    key: _shot,
-    child: Column(children: rows),
+/// The lines of the design-system colour drawn by the rows' dividers.
+final _lines = find.descendant(
+  of: find.byType(ChatListRowDivider),
+  matching: find.byWidgetPredicate(
+    (widget) => widget is ColoredBox && widget.color == _divider.color,
   ),
 );
 
-bool _near(int a, int b) => (a - b).abs() <= 2;
-
-/// The separators painted on screen: every horizontal line that has the
-/// colour of [LinagoraDividerStyle] over the background of the row.
-Future<List<Rect>> _separators(WidgetTester tester) async {
-  final boundary = tester.renderObject<RenderRepaintBoundary>(
-    find.byKey(_shot),
-  );
-  final origin = tester.getTopLeft(find.byKey(_shot));
-  final (width, height, bytes) = (await tester.runAsync(() async {
-    final image = await boundary.toImage();
-    final data = await image.toByteData();
-    final result = (image.width, image.height, data!);
-    image.dispose();
-    return result;
-  }))!;
-
-  Color pixel(int x, int y) {
-    final i = (y * width + x) * 4;
-    return Color.fromARGB(
-      255,
-      bytes.getUint8(i),
-      bytes.getUint8(i + 1),
-      bytes.getUint8(i + 2),
-    );
-  }
-
-  int channel(double value) => (value * 255).round();
-
-  // An empty spot of the row: inside its body, above the avatar and the text.
-  final row = tester.getRect(find.byType(ChatListItem).first);
-  final background = pixel(
-    (row.left - origin.dx).round() + 10,
-    (row.top - origin.dy).round() + 2,
-  );
-  final line = Color.alphaBlend(
-    LinagoraDividerStyle.material().color,
-    background,
-  );
-  bool isLine(int x, int y) {
-    final c = pixel(x, y);
-    return _near(channel(c.r), channel(line.r)) &&
-        _near(channel(c.g), channel(line.g)) &&
-        _near(channel(c.b), channel(line.b));
-  }
-
-  final lines = <Rect>[];
-  for (var y = 0; y < height; y++) {
-    var x = 0;
-    while (x < width) {
-      if (!isLine(x, y)) {
-        x++;
-        continue;
-      }
-      final start = x;
-      while (x < width && isLine(x, y)) {
-        x++;
-      }
-      if (x - start < _minLineLength) continue;
-      final run = Rect.fromLTRB(
-        start + origin.dx,
-        y + origin.dy,
-        x + origin.dx,
-        y + 1 + origin.dy,
-      );
-      final above = lines.indexWhere(
-        (l) =>
-            l.left == run.left && l.right == run.right && l.bottom == run.top,
-      );
-      if (above == -1) {
-        lines.add(run);
-      } else {
-        lines[above] = lines[above].expandToInclude(run);
-      }
-    }
-  }
-  return lines;
-}
+/// The separators on screen, top to bottom.
+List<Rect> _separators(WidgetTester tester) => [
+  for (var i = 0; i < _lines.evaluate().length; i++)
+    tester.getRect(_lines.at(i)),
+];
 
 /// A row without preview animates its placeholder for ever: no pumpAndSettle.
-Future<void> _settle(WidgetTester tester) async {
+Future<void> _pumpRows(WidgetTester tester, List<Widget> rows) async {
+  await tester.pumpWidget(wrap(Column(children: rows)));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 500));
 }
@@ -138,6 +61,13 @@ MockRoom _chat(String name, {String id = '!room:server.tld'}) {
   return room;
 }
 
+/// A row whose last message is mine: it shows the read-status icon.
+ChatListItem _readRow(MockRoom room) =>
+    ChatListItem(room, previewResult: RoomPreviewFound(_ownMessage(room)));
+
+double _titleLeft(WidgetTester tester, String title) =>
+    tester.getRect(find.text(title)).left;
+
 void main() {
   setUpAll(() {
     final getIt = GetIt.instance;
@@ -150,146 +80,120 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   group('separator of a chat row', () {
-    testWidgets('starts at the left edge of the title, after the avatar', (
-      tester,
-    ) async {
-      await tester.pumpWidget(_rows([ChatListItem(_chat('Project Apollo'))]));
-      await _settle(tester);
+    _startsAtTheTitle();
+    _stopsBeforeTheReadStatus();
+    _looksLikeTheDesignSystemDivider();
+    _keepsTheSpaceBadgeAbove();
+  });
+}
 
-      final line = (await _separators(tester)).single;
-      expect(line.left, tester.getRect(find.text('Project Apollo')).left);
-    });
+void _startsAtTheTitle() {
+  testWidgets('starts at the left edge of the title, after the avatar', (
+    tester,
+  ) async {
+    await _pumpRows(tester, [ChatListItem(_chat('Project Apollo'))]);
 
-    testWidgets('starts at the left edge of the title of a room indented in '
-        'a space', (tester) async {
-      await tester.pumpWidget(
-        _rows([ChatListItem(_chat('General'), depth: 1)]),
-      );
-      await _settle(tester);
+    final line = _separators(tester).single;
+    expect(line.left, _titleLeft(tester, 'Project Apollo'));
+  });
 
-      final line = (await _separators(tester)).single;
-      expect(line.left, tester.getRect(find.text('General')).left);
-    });
+  testWidgets('starts at the left edge of the title of a room indented in '
+      'a space', (tester) async {
+    await _pumpRows(tester, [ChatListItem(_chat('General'), depth: 1)]);
 
-    testWidgets('starts at the left edge of the title in select mode', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _rows([
-          ChatListItem(
-            _chat('Project Apollo'),
-            isEnableSelectMode: true,
-            checkBoxWidget: Checkbox(value: false, onChanged: (_) {}),
-          ),
-        ]),
-      );
-      await _settle(tester);
+    final line = _separators(tester).single;
+    expect(line.left, _titleLeft(tester, 'General'));
+  });
 
-      final line = (await _separators(tester)).single;
-      expect(line.left, tester.getRect(find.text('Project Apollo')).left);
-    });
+  testWidgets('starts at the left edge of the title in select mode', (
+    tester,
+  ) async {
+    await _pumpRows(tester, [
+      ChatListItem(
+        _chat('Project Apollo'),
+        isEnableSelectMode: true,
+        checkBoxWidget: Checkbox(value: false, onChanged: (_) {}),
+      ),
+    ]);
 
-    testWidgets('stops before the read-status icon', (tester) async {
-      final room = _chat('Project Apollo');
+    final line = _separators(tester).single;
+    expect(line.left, _titleLeft(tester, 'Project Apollo'));
+  });
+}
 
-      await tester.pumpWidget(
-        _rows([
-          ChatListItem(
-            room,
-            previewResult: RoomPreviewFound(_ownMessage(room)),
-          ),
-        ]),
-      );
-      await _settle(tester);
+void _stopsBeforeTheReadStatus() {
+  testWidgets('stops before the read-status icon', (tester) async {
+    await _pumpRows(tester, [_readRow(_chat('Project Apollo'))]);
 
-      final line = (await _separators(tester)).single;
-      final readStatus = tester.getRect(find.byType(SeenByRow));
-      expect(line.right, lessThanOrEqualTo(readStatus.left));
-    });
+    final line = _separators(tester).single;
+    final readStatus = tester.getRect(find.byType(SeenByRow));
+    expect(line.right, lessThanOrEqualTo(readStatus.left));
+  });
 
-    testWidgets('stops at the same place on a row without read-status icon', (
-      tester,
-    ) async {
-      final withIcon = _chat('Project Apollo');
-      final withoutIcon = _chat('Project Gemini', id: '!other:server.tld');
+  testWidgets('stops at the same place on a row without read-status icon', (
+    tester,
+  ) async {
+    await _pumpRows(tester, [
+      _readRow(_chat('Project Apollo')),
+      ChatListItem(_chat('Project Gemini', id: '!other:server.tld')),
+    ]);
 
-      await tester.pumpWidget(
-        _rows([
-          ChatListItem(
-            withIcon,
-            previewResult: RoomPreviewFound(_ownMessage(withIcon)),
-          ),
-          ChatListItem(withoutIcon),
-        ]),
-      );
-      await _settle(tester);
+    final lines = _separators(tester);
+    final readStatus = tester.getRect(find.byType(SeenByRow));
+    expect(lines, hasLength(2));
+    expect(lines.last.right, lines.first.right);
+    expect(lines.last.right, lessThanOrEqualTo(readStatus.left));
+  });
+}
 
-      final lines = await _separators(tester);
-      final readStatus = tester.getRect(find.byType(SeenByRow));
-      expect(lines, hasLength(2));
-      expect(lines.last.right, lines.first.right);
-      expect(lines.last.right, lessThanOrEqualTo(readStatus.left));
-    });
+void _looksLikeTheDesignSystemDivider() {
+  testWidgets('keeps the colour and the thickness of the design system '
+      'divider', (tester) async {
+    await _pumpRows(tester, [ChatListItem(_chat('Project Apollo'))]);
 
-    testWidgets('keeps the colour and the thickness of the design system '
-        'divider', (tester) async {
-      await tester.pumpWidget(_rows([ChatListItem(_chat('Project Apollo'))]));
-      await _settle(tester);
+    // Only lines of the LinagoraDividerStyle colour are found.
+    final line = _separators(tester).single;
+    expect(line.height, _divider.thickness);
+  });
 
-      // Only lines of the LinagoraDividerStyle colour are found.
-      final line = (await _separators(tester)).single;
-      expect(line.height, LinagoraDividerStyle.material().thickness);
-    });
+  testWidgets('draws exactly one line per row, under the row', (tester) async {
+    await _pumpRows(tester, [
+      ChatListItem(_chat('Project Apollo')),
+      ChatListItem(_chat('Project Gemini', id: '!other:server.tld')),
+    ]);
 
-    testWidgets('draws exactly one line per row, under the row', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _rows([
-          ChatListItem(_chat('Project Apollo')),
-          ChatListItem(_chat('Project Gemini', id: '!other:server.tld')),
-        ]),
-      );
-      await _settle(tester);
+    final lines = _separators(tester);
+    final rows = find.byType(ChatListItem);
+    expect(lines, hasLength(2));
+    expect(lines.first.bottom, tester.getRect(rows.first).bottom);
+    expect(lines.last.bottom, tester.getRect(rows.last).bottom);
+  });
+}
 
-      final lines = await _separators(tester);
-      final rows = find.byType(ChatListItem);
-      expect(lines, hasLength(2));
-      expect(lines.first.bottom, tester.getRect(rows.first).bottom);
-      expect(lines.last.bottom, tester.getRect(rows.last).bottom);
-    });
+// #3711: the kind badge of a space avatar sat on the line under the row.
+void _keepsTheSpaceBadgeAbove() {
+  testWidgets('a space row keeps its kind badge above the line', (
+    tester,
+  ) async {
+    final space = _chat('Team');
+    when(space.isDirectChat).thenReturn(false);
+    when(space.isSpace).thenReturn(true);
+    final row = SpaceRowData(
+      fold: SpaceFold.none,
+      unreadCount: 0,
+      mentionCount: 0,
+      onToggleFold: () {},
+    );
 
-    // #3711: the kind badge of a space avatar sat on the line under the row.
-    testWidgets('a space row keeps its kind badge above the line', (
-      tester,
-    ) async {
-      final space = _chat('Team');
-      when(space.isDirectChat).thenReturn(false);
-      when(space.isSpace).thenReturn(true);
+    await _pumpRows(tester, [ChatListItem(space, space: row)]);
 
-      await tester.pumpWidget(
-        _rows([
-          ChatListItem(
-            space,
-            space: SpaceRowData(
-              fold: SpaceFold.none,
-              unreadCount: 0,
-              mentionCount: 0,
-              onToggleFold: () {},
-            ),
-          ),
-        ]),
-      );
-      await _settle(tester);
-
-      final line = (await _separators(tester)).single;
-      final badge = tester.getRect(
-        find.descendant(
-          of: find.byType(AvatarWithKindBadge),
-          matching: find.byType(Icon),
-        ),
-      );
-      expect(badge.bottom, lessThanOrEqualTo(line.top));
-    });
+    final line = _separators(tester).single;
+    final badge = tester.getRect(
+      find.descendant(
+        of: find.byType(AvatarWithKindBadge),
+        matching: find.byType(Icon),
+      ),
+    );
+    expect(badge.bottom, lessThanOrEqualTo(line.top));
   });
 }

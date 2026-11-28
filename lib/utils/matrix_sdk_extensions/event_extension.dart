@@ -4,8 +4,10 @@ import 'package:collection/collection.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/domain/model/call/call_line.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/presentation/extensions/call_line_extension.dart';
 import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
@@ -205,20 +207,16 @@ extension LocalizedBody on Event {
 
   bool get isOwnMessage => senderId == room.client.userID;
 
-  bool get shouldAlignOwnMessageInDifferentSide =>
-      isOwnMessage && AppConfig.enableRightAndLeftMessageAlignmentOnWeb;
+  /// An own message drawn on the other side, when [alignOwnRight] (the
+  /// preference `alignOwnMessagesRightProvider`).
+  bool shouldAlignOwnMessageInDifferentSide(bool alignOwnRight) =>
+      isOwnMessage && alignOwnRight;
 
-  bool get shouldDisplayContextMenuInLeftBubble {
-    return AppConfig.enableRightAndLeftMessageAlignmentOnWeb
-        ? _isContextMenuForLeftAlignedMessage()
-        : false;
-  }
+  bool shouldDisplayContextMenuInLeftBubble(bool alignOwnRight) =>
+      alignOwnRight && _isContextMenuForLeftAlignedMessage();
 
-  bool get shouldDisplayContextMenuInRightBubble {
-    return AppConfig.enableRightAndLeftMessageAlignmentOnWeb
-        ? _isContextMenuForRightAlignedMessage()
-        : true;
-  }
+  bool shouldDisplayContextMenuInRightBubble(bool alignOwnRight) =>
+      !alignOwnRight || _isContextMenuForRightAlignedMessage();
 
   bool _isContextMenuForLeftAlignedMessage() => isOwnMessage;
 
@@ -235,12 +233,16 @@ extension LocalizedBody on Event {
     MessageTypes.File,
   }.contains(messageType);
 
-  bool hideDisplayName(Event? nextEvent, bool isMobile) =>
-      isMobile && (isOwnMessage || room.isDirectChat) ||
+  bool hideDisplayName(
+    Event? nextEvent, {
+    required bool isMobile,
+    required bool alignOwnRight,
+  }) =>
+      isMobile && room.isDirectChat ||
       !isSameSenderWith(nextEvent) ||
       (isOwnMessage && redacted) ||
       type == EventTypes.Encrypted ||
-      shouldAlignOwnMessageInDifferentSide;
+      shouldAlignOwnMessageInDifferentSide(alignOwnRight);
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 
@@ -670,17 +672,36 @@ extension FutureEventExtension on Event {
   String callThreadRootText(L10n l10n) =>
       l10n.callStartedAt(DateFormat('HH:mm').format(originServerTs));
 
-  /// The caption a file was sent with, null when it has none: the chat list
-  /// shows it instead of « sent a file », like the text of any message.
-  String? get fileCaption =>
-      messageType == MessageTypes.File && isBodyDiffersFromFilename()
-      ? bodyWithoutReplyFallback
+  CallLine? get callLine => type == CallEventTypes.callLine && !redacted
+      ? CallLine.fromContent(content, isOwn: senderId == room.client.userID)
       : null;
+
+  String? get fileCaption {
+    final shownFilename = _shownContent.tryGet<String>('filename');
+    if (messageType != MessageTypes.File || shownFilename == null) return null;
+    final caption = _editContent == null
+        ? bodyWithoutReplyFallback
+        : _editContent!.tryGet<String>(MatrixEventFields.body) ?? '';
+    if (caption.trim().isEmpty || caption == shownFilename) return null;
+    return caption;
+  }
+
+  Map<String, Object?>? get _editContent =>
+      relationshipType == RelationshipTypes.edit
+      ? content.tryGetMap<String, Object?>(MatrixEventFields.newContent)
+      : null;
+
+  Map<String, Object?> get _shownContent => _editContent ?? content;
+
+  String get chatListFileText =>
+      (fileCaption ?? _shownContent.tryGet<String>('filename') ?? filename)
+          .replaceAll(RegExp(r'\n'), ' ');
+
+  String get chatListFileIcon => mimeType.getIcon(fileType: fileType);
 
   Future<String> calcLocalizedBodyRemoveBreakLine(L10n l10n) async {
     if (isCallThreadRoot) return callThreadRootText(l10n);
-    final caption = fileCaption;
-    if (caption != null) return caption.replaceAll(RegExp(r'\n'), ' ');
+    if (callLine case final line?) return line.previewText(l10n);
     final body = await calcLocalizedBody(
       MatrixLocals(l10n),
       hideReply: true,
@@ -694,8 +715,7 @@ extension FutureEventExtension on Event {
 
   String calcLocalizedBodyFallbackRemoveBreakLine(L10n l10n) {
     if (isCallThreadRoot) return callThreadRootText(l10n);
-    final caption = fileCaption;
-    if (caption != null) return caption.replaceAll(RegExp(r'\n'), ' ');
+    if (callLine case final line?) return line.previewText(l10n);
     final body = calcLocalizedBodyFallback(
       MatrixLocals(l10n),
       hideReply: true,

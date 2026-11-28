@@ -15,7 +15,11 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/widgets/avatar/person_presence_badge.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/domain/personalization/display_preferences.dart';
+import 'package:twake_chat/providers/personalization/display_preferences_controller.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -24,7 +28,7 @@ import 'package:matrix/matrix.dart';
 
 enum ArchivedRoomAction { delete, rejoin }
 
-class ChatListItem extends StatelessWidget with ChatListItemMixin {
+class ChatListItem extends ConsumerWidget with ChatListItemMixin {
   final Room room;
   final bool activeChat;
   final bool isSelectedItem;
@@ -102,9 +106,16 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isChild = depth > 0;
-    final isTopSpace = space != null && !isChild;
+    final compact = ref.watch(
+      displayPreferencesProvider.select(
+        (preferences) => preferences.density == ChatListDensity.compact,
+      ),
+    );
+    final bodyPadding = compact
+        ? ChatListItemStyle.compactPaddingBody
+        : ChatListItemStyle.paddingBody;
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
@@ -119,10 +130,19 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
               MatrixLocals(L10n.of(context)!),
             );
             return Container(
-              height: space != null
+              height: space != null && isChild
                   ? ChatListItemStyle.spaceItemHeight
+                  : compact
+                  ? null
                   : ChatListItemStyle.chatItemHeight,
-              padding: ChatListItemStyle.paddingBody.add(
+              // A compact group row shows three lines: it grows past the
+              // minimum instead of overflowing.
+              constraints: space == null && compact
+                  ? const BoxConstraints(
+                      minHeight: ChatListItemStyle.compactChatItemHeight,
+                    )
+                  : null,
+              padding: bodyPadding.add(
                 EdgeInsetsDirectional.only(
                   start: depth * ChatListItemStyle.depthIndent,
                 ),
@@ -132,60 +152,72 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                 children: [
                   if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
                   Padding(
-                    padding: isTopSpace
-                        ? ChatListItemStyle.paddingSpaceAvatar
-                        : ChatListItemStyle.paddingAvatar,
+                    padding: ChatListItemStyle.paddingAvatar,
                     child: _ChatListAvatar(
                       room: room,
                       name: displayName,
                       size: isChild
                           ? ChatListItemStyle.childAvatarSize
-                          : isTopSpace
-                          ? ChatListItemStyle.spaceAvatarSize
+                          : compact
+                          ? ChatListItemStyle.compactAvatarSize
                           : AvatarStyle.defaultSize,
                       onTap: onTapAvatar,
                     ),
                   ),
                   Expanded(
                     child: ChatListRowDivider(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: space != null
-                                  ? MainAxisAlignment.center
-                                  : MainAxisAlignment.start,
-                              children: [
-                                ChatListItemTitle(
-                                  room: room,
-                                  originServerTs: switch (previewResult) {
-                                    RoomPreviewFound(:final event)
-                                        when space == null =>
-                                      event.originServerTs,
-                                    _ => null,
-                                  },
-                                ),
-                                // A space is no conversation: nothing to preview.
-                                if (space == null)
-                                  ChatListItemSubtitle(
+                      bottomInset: bodyPadding.bottom,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: space == null && compact
+                              ? ChatListItemStyle.compactChatItemHeight -
+                                    bodyPadding.vertical
+                              : 0,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: space == null && compact
+                                    ? MainAxisSize.min
+                                    : MainAxisSize.max,
+                                mainAxisAlignment: space != null
+                                    ? MainAxisAlignment.center
+                                    : MainAxisAlignment.start,
+                                children: [
+                                  ChatListItemTitle(
                                     room: room,
-                                    previewResult: previewResult,
-                                  )
-                                else if (room.isInvitation)
-                                  Text(
-                                    L10n.of(context)!.invited,
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: LinagoraSysColors.material()
-                                              .primary,
-                                        ),
+                                    originServerTs: switch (previewResult) {
+                                      RoomPreviewFound(:final event)
+                                          when space == null =>
+                                        event.originServerTs,
+                                      _ => null,
+                                    },
                                   ),
-                              ],
+                                  // A space is no conversation: nothing to preview.
+                                  if (space == null)
+                                    ChatListItemSubtitle(
+                                      room: room,
+                                      previewResult: previewResult,
+                                    )
+                                  else if (room.isInvitation)
+                                    Text(
+                                      L10n.of(context)!.invited,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: LinagoraSysColors.material()
+                                                .primary,
+                                          ),
+                                    ),
+                                ],
+                              ),
                             ),
-                          ),
-                          if (space case final space?)
-                            SpaceRowActions(name: displayName, space: space),
-                        ],
+                            if (space case final space?)
+                              SpaceRowActions(name: displayName, space: space),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -288,13 +320,16 @@ class _ChatListAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final badge = _badge;
     if (badge == null) {
-      return Avatar(
+      final avatar = Avatar(
         mxContent: room.avatar,
         name: name,
         size: size,
         onTap: onTap,
         keepAlive: true,
       );
+      final peerId = room.directChatMatrixID;
+      if (peerId == null) return avatar;
+      return PersonPresenceBadge(userId: peerId, size: size, child: avatar);
     }
     return AvatarWithKindBadge(
       badge: badge,

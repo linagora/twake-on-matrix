@@ -8,18 +8,9 @@ import 'package:matrix/matrix.dart';
 mixin MessageAvatarMixin {
   ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  bool _shouldDisplayAvatar(
-    bool sameSender,
-    bool ownMessage,
-    BuildContext context,
-  ) {
-    return sameSender && !(ownMessage && responsive.isMobile(context));
-  }
-
   Widget placeHolderWidget(
     Function(Event)? onAvatarTap, {
     required bool sameSender,
-    required bool ownMessage,
     required Event event,
     required BuildContext context,
     required bool selectMode,
@@ -28,7 +19,7 @@ mixin MessageAvatarMixin {
       return const SizedBox.shrink();
     }
 
-    if (_shouldDisplayAvatar(sameSender, ownMessage, context)) {
+    if (sameSender) {
       return Padding(
         padding: MessageStyle.paddingAvatar,
         child: FutureBuilder<User?>(

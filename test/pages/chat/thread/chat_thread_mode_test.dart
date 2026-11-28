@@ -398,6 +398,86 @@ void main() {
     await leaveTheApp(tester);
   });
 
+  /// Report (26/11): "I cannot open my thread on iOS". Hypothesis H3: the
+  /// thread screen does not get past its loading state when its root cannot
+  /// be shown: slow, missing, or not decrypted. Whatever the root does, the
+  /// user reads the replies of the thread.
+  group('a thread whose root cannot be shown', () {
+    Finder loading() => find.byKey(const ValueKey('chat_loading_view'));
+    Finder theReply() =>
+        find.textContaining('text of $_r1', findRichText: true);
+
+    setUp(() {
+      threads.page = () async => [_event(room, _r1, 1)];
+    });
+
+    testWidgets('a root that never arrives: the replies show after a while, '
+        'not a loading screen forever', (tester) async {
+      await openThread(tester);
+      await tester.pump(const Duration(seconds: 30));
+      await tester.pump();
+
+      expect(loading(), findsNothing, reason: 'still loading after 30 s');
+      expect(theReply(), findsWidgets);
+      await leaveTheApp(tester);
+    });
+
+    testWidgets('a root the server does not find: the replies show', (
+      tester,
+    ) async {
+      room.rootLoad.complete(null);
+      await openThread(tester);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(tester.takeException(), isNull);
+      expect(loading(), findsNothing);
+      expect(theReply(), findsWidgets);
+      await leaveTheApp(tester);
+    });
+
+    testWidgets('a root whose load fails: the replies show', (tester) async {
+      // Handled by the screen once it asks for the root.
+      room.rootLoad
+        ..future.ignore()
+        ..completeError(MatrixException.fromJson({'errcode': 'M_NOT_FOUND'}));
+      await openThread(tester);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(tester.takeException(), isNull);
+      expect(loading(), findsNothing);
+      expect(theReply(), findsWidgets);
+      await leaveTheApp(tester);
+    });
+
+    testWidgets('a root that cannot be decrypted: the replies show', (
+      tester,
+    ) async {
+      room.rootLoad.complete(
+        Event(
+          type: EventTypes.Encrypted,
+          content: {
+            'algorithm': AlgorithmTypes.megolmV1AesSha2,
+            'ciphertext': 'AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg',
+            'device_id': 'DEVICE',
+            'sender_key': 'sender-key',
+            'session_id': 'unknown-session',
+          },
+          eventId: _rootId,
+          senderId: '@bob:example.org',
+          originServerTs: DateTime.utc(2026, 11, 16, 10),
+          room: room,
+        ),
+      );
+      await openThread(tester);
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(tester.takeException(), isNull);
+      expect(loading(), findsNothing);
+      expect(theReply(), findsWidgets);
+      await leaveTheApp(tester);
+    });
+  });
+
   group('a first page of replies that fails', () {
     late Completer<List<Event>> firstPage;
 

@@ -1,8 +1,8 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_controller.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_item.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_redirection_edit_button.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile.dart';
@@ -23,7 +23,7 @@ import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class SettingsProfileView extends ConsumerWidget {
-  final SettingsProfileController controller;
+  final SettingsProfileScreenState controller;
   final ProfileEditCapabilities? capabilities;
   final UserInfo? userInfo;
 
@@ -37,7 +37,11 @@ class SettingsProfileView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final client = ref.watch(matrixClientProvider);
-    final responsive = getIt.get<ResponsiveUtils>();
+    final responsive = ResponsiveUtils();
+    final profileState = ref.watch(settingsProfileControllerProvider);
+    final profile = profileState.value?.profile;
+    final accounts = ref.watch(settingsProfileAccountsProvider);
+    final hasAvatar = profile?.avatarUrl?.toString().isNotEmpty ?? false;
     return Scaffold(
       appBar: TwakeAppBar(
         title: L10n.of(context)!.profile,
@@ -104,11 +108,13 @@ class SettingsProfileView extends ConsumerWidget {
                 responsive: responsive,
                 settingsProfileUIState: controller.pickAvatarUIState,
                 onTapAvatar: controller.onTapAvatarInMobile,
-                onTapMultipleAccountsButton: (multipleAccounts) => controller
-                    .onBottomButtonTap(multipleAccounts: multipleAccounts),
-                settingsMultiAccountsUIState:
-                    controller.settingsMultiAccountsUIState,
-                menuChildren: controller.listContextMenuBuilder(context),
+                onTapMultipleAccountsButton: controller.onBottomButtonTap,
+                isLoadingAccounts: accounts.isLoading,
+                accounts: accounts.value,
+                menuChildren: controller.listContextMenuBuilder(
+                  context,
+                  hasAvatar: hasAvatar,
+                ),
                 menuController: controller.menuController,
                 animationController: controller.animationController,
                 onAvatarInfoTap: controller.handleAvatarInfoTap,
@@ -156,7 +162,7 @@ class SettingsProfileView extends ConsumerWidget {
                   itemCount: controller.getListProfileMobile.length,
                 ),
                 onImageLoaded: controller.updateMatrixFile,
-                currentProfile: controller.currentProfile,
+                currentProfile: profile,
                 canEditAvatar: capabilities?.canEditAvatar == true,
               );
             },
@@ -167,10 +173,13 @@ class SettingsProfileView extends ConsumerWidget {
             key: SettingsKeys.profileViewWeb.valueKey,
             builder: (_) {
               return SettingsProfileViewWeb(
-                currentProfile: controller.currentProfile,
+                currentProfile: profile,
                 settingsProfileUIState: controller.pickAvatarUIState,
                 client: client,
-                menuChildren: controller.listContextMenuBuilder(context),
+                menuChildren: controller.listContextMenuBuilder(
+                  context,
+                  hasAvatar: hasAvatar,
+                ),
                 menuController: controller.menuController,
                 basicInfoWidget: ListView.separated(
                   shrinkWrap: true,

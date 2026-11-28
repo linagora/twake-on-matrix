@@ -57,6 +57,7 @@ import 'package:twake_chat/pages/chat/jump_cache_extent.dart';
 import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
 import 'package:twake_chat/domain/thread/usecases/get_thread_replies_use_case.provider.dart';
 import 'package:twake_chat/pages/chat/providers/message_link_providers.dart';
+import 'package:twake_chat/pages/scribe/scribe_controller.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
@@ -581,6 +582,10 @@ class ChatController extends ConsumerState<Chat>
 
   Map<String, List<Event>> _threadEventsByRoot = const {};
 
+  /// Roots with at least one live reply: a thread just started here has no
+  /// server summary yet, so the album index needs them.
+  Set<String> get liveThreadRootIds => _threadEventsByRoot.keys.toSet();
+
   /// The thread counters of the account; widgets listen to it themselves.
   ThreadUnreadStore? get threadUnreadStore => client.threadUnread;
 
@@ -662,7 +667,10 @@ class ChatController extends ConsumerState<Chat>
     final room = this.room;
     if (room == null) return;
     try {
-      _threadRootEvent = await room.getEventById(threadRootId!);
+      // Bounded: a root that never arrives must not hold the replies back.
+      _threadRootEvent = await room
+          .getEventById(threadRootId!)
+          .timeout(const Duration(seconds: 10));
     } catch (e, s) {
       Logs().w('Unable to load the root of the thread', e, s);
     }
@@ -1987,6 +1995,8 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void onInputBarSubmitted() async {
+    final roomId = room?.id;
+    if (roomId != null && ref.read(scribeControllerProvider(roomId))) return;
     await Future.delayed(const Duration(milliseconds: 100));
     await send();
     FocusScope.of(context).requestFocus(inputFocus);
@@ -2034,14 +2044,26 @@ class ChatController extends ConsumerState<Chat>
   Timer? _storeInputTimeoutTimer;
   static const Duration _storeInputTimeout = Duration(milliseconds: 500);
 
-  void onInputBarChanged(String text) {
-    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
-      return;
-    }
+  void _storeDraft(String text) {
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
       await _draftStorage.save(roomId!, text, threadRootId: threadRootId);
     });
+  }
+
+  void replaceDraft(String text) {
+    sendController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    _storeDraft(text);
+  }
+
+  void onInputBarChanged(String text) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
+      return;
+    }
+    _storeDraft(text);
     typingCoolDown?.cancel();
     typingCoolDown = Timer(const Duration(seconds: 2), () {
       typingCoolDown = null;

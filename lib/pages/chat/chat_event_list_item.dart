@@ -26,6 +26,7 @@ class ChatEventListItem extends StatelessWidget {
     this.nextEvent,
     this.albumMembers,
     this.hiddenAlbumMember = false,
+    this.readers = const [],
   });
 
   final ChatController controller;
@@ -40,6 +41,9 @@ class ChatEventListItem extends StatelessWidget {
   /// image can be selected on its own.
   final List<Event>? albumMembers;
   final bool hiddenAlbumMember;
+
+  /// Who stopped reading at [event], when it is an own message.
+  final List<User> readers;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +84,7 @@ class ChatEventListItem extends StatelessWidget {
           ? null
           : _summaryCard(context, threadSummary),
       onStartThread: canStartThread
-          ? (event) => _openThread(context, start: true)
+          ? (root) => _openThread(context, start: true, root: root)
           : null,
       // No reply to quote in a thread: replyAction does nothing there.
       onSwipe: controller.isThread
@@ -103,6 +107,7 @@ class ChatEventListItem extends StatelessWidget {
         (e) => e.eventId == event.eventId,
       ),
       timeline: controller.timeline!,
+      readers: readers,
       previousEvent: previousEvent,
       nextEvent: nextEvent,
       onHover: (isHover, event) => controller.onHover(isHover, event),
@@ -173,11 +178,12 @@ class ChatEventListItem extends StatelessWidget {
     );
   }
 
-  void _openThread(BuildContext context, {bool start = false}) => ThreadRoute(
-    roomid: event.room.id,
-    rootid: event.eventId,
-    start: start,
-  ).push<void>(context);
+  void _openThread(BuildContext context, {bool start = false, Event? root}) =>
+      ThreadRoute(
+        roomid: event.room.id,
+        rootid: (root ?? event).eventId,
+        start: start,
+      ).push<void>(context);
 
   Widget _summaryCard(BuildContext context, ThreadSummary summary) =>
       ListenableBuilder(

@@ -44,7 +44,6 @@ import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart'
@@ -59,6 +58,7 @@ import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
@@ -93,7 +93,7 @@ class DraftChatController extends ConsumerState<DraftChat>
         AudioMixin {
   EmojiData get emojiData => ref.read(emojiDataProvider).requireValue;
 
-  Client get client => Matrix.read(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   late final UploadManager uploadManager = ref.read(uploadManagerProvider);
 

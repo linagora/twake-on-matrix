@@ -256,6 +256,7 @@ void main() {
             EventTypes.RoomMember: 10,
             EventTypes.RoomTopic: 80,
             'app.twake.chat.thread_resolved': 0,
+            'app.twake.chat.scribe': 100,
             CallEventTypes.callMember: 0,
           },
           'invite': 80,
@@ -334,6 +335,32 @@ void main() {
         levels['events'],
         containsPair('app.twake.chat.thread_resolved', 0),
       );
+    });
+
+    test('createGroup_always_letsOnlyAdminsSwitchScribe', () async {
+      await datasource.createGroup(
+        const CreateNewGroupChatRequest(
+          groupName: 'Team',
+          enableEncryption: true,
+        ),
+      );
+
+      final levels =
+          verify(
+                mockClient.createGroupChat(
+                  groupName: anyNamed('groupName'),
+                  enableEncryption: anyNamed('enableEncryption'),
+                  preset: anyNamed('preset'),
+                  initialState: anyNamed('initialState'),
+                  visibility: anyNamed('visibility'),
+                  federated: anyNamed('federated'),
+                  powerLevelContentOverride: captureAnyNamed(
+                    'powerLevelContentOverride',
+                  ),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(levels['events'], containsPair('app.twake.chat.scribe', 100));
     });
 
     test('createGroup_whenPrivate_createsAPrivateRoom', () async {

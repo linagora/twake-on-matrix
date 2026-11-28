@@ -16,9 +16,9 @@ abstract final class SettingsProfileEditRules {
       editedDisplayName(text: text, currentName: currentName) != null ||
       hasPendingAvatar;
 
-  static bool shouldOverwriteName({
-    required String textBeforeRead,
-    required String textAfterRead,
-    required bool hadUnsavedEditBeforeRead,
-  }) => !hadUnsavedEditBeforeRead && textAfterRead == textBeforeRead;
+  /// The field follows a new profile name unless the user edited it.
+  static bool shouldSyncName({
+    required String text,
+    required String shownName,
+  }) => editedDisplayName(text: text, currentName: shownName) == null;
 }

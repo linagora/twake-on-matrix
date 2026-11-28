@@ -16,7 +16,9 @@ import 'package:twake_chat/pages/activity/activity_open_item.dart';
 import 'package:twake_chat/pages/activity/activity_row.dart';
 import 'package:twake_chat/pages/activity/activity_search.dart';
 import 'package:twake_chat/pages/activity/activity_view_controller.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_appbar_style.dart';
+import 'package:twake_chat/widgets/twake_components/filter_pills.dart';
 
 /// THR-M-12: the tab that gathers what happened in the rooms of the user.
 class ActivityPage extends ConsumerStatefulWidget {
@@ -117,7 +119,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     ];
     return Scaffold(
       extendBody: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: LinagoraSysColors.material().onPrimary,
       bottomNavigationBar: widget.bottomNavigationBar,
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -149,25 +151,30 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          Container(
+            height: ChatListHeaderStyle.searchBarContainerHeight,
+            padding: ChatListHeaderStyle.searchInputPadding,
             child: TextField(
               controller: _search,
+              textInputAction: TextInputAction.search,
               onChanged: ref
                   .read(activityViewControllerProvider.notifier)
                   .search,
-              decoration: InputDecoration(
-                hintText: l10n.search,
-                prefixIcon: const Icon(Icons.search),
-                isDense: true,
-              ),
+              decoration: ChatListHeaderStyle.searchInputDecoration(context),
             ),
           ),
-          _Filters(
-            selected: view.filter,
-            onSelected: ref
-                .read(activityViewControllerProvider.notifier)
-                .selectFilter,
+          FilterPills(
+            semanticsLabel: l10n.roomListFilters,
+            pills: [
+              for (final filter in ActivityFilter.values)
+                FilterPill(
+                  label: filter.label(l10n),
+                  isSelected: filter == view.filter,
+                  onTap: () => ref
+                      .read(activityViewControllerProvider.notifier)
+                      .selectFilter(filter),
+                ),
+            ],
           ),
           Expanded(
             child: view.filter == ActivityFilter.mentions
@@ -238,46 +245,6 @@ class _CountBadge extends StatelessWidget {
         style: Theme.of(
           context,
         ).textTheme.labelMedium?.copyWith(color: scheme.onError),
-      ),
-    );
-  }
-}
-
-class _Filters extends StatelessWidget {
-  const _Filters({required this.selected, required this.onSelected});
-
-  final ActivityFilter selected;
-  final ValueChanged<ActivityFilter> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = L10n.of(context)!;
-    // The four filters share the width, whatever the size of the text.
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        children: [
-          for (final filter in ActivityFilter.values)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: ChoiceChip(
-                  showCheckmark: false,
-                  visualDensity: VisualDensity.compact,
-                  labelPadding: EdgeInsets.zero,
-                  label: SizedBox(
-                    width: double.infinity,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(filter.label(l10n)),
-                    ),
-                  ),
-                  selected: filter == selected,
-                  onSelected: (_) => onSelected(filter),
-                ),
-              ),
-            ),
-        ],
       ),
     );
   }

@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
-import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -16,12 +15,15 @@ import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:twake_chat/event/twake_event_dispatcher.dart';
 import 'package:twake_chat/event/twake_inapp_event_types.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
+import 'package:twake_chat/domain/profile/entities/account_profile.dart';
 import 'package:twake_chat/pages/multiple_accounts/multiple_accounts_picker.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_controller.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_edit_rules.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:twake_chat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
@@ -31,13 +33,11 @@ import 'package:twake_chat/presentation/enum/settings/settings_profile_enum.dart
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/single_image_picker_mixin.dart';
-import 'package:twake_chat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,15 +52,14 @@ class SettingsProfile extends ConsumerStatefulWidget {
   const SettingsProfile({super.key});
 
   @override
-  ConsumerState<SettingsProfile> createState() => SettingsProfileController();
+  ConsumerState<SettingsProfile> createState() => SettingsProfileScreenState();
 }
 
-class SettingsProfileController extends ConsumerState<SettingsProfile>
+class SettingsProfileScreenState extends ConsumerState<SettingsProfile>
     with
         CommonMediaPickerMixin,
         SingleImagePickerMixin,
         PopupContextMenuActionMixin,
-        OnProfileChangeMixin,
         PickAvatarMixin,
         SingleTickerProviderStateMixin {
   final uploadProfileInteractor = getIt.get<UpdateProfileInteractor>();
@@ -75,22 +74,23 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
   ValueNotifier<bool> isExpandedAvatar = ValueNotifier(false);
   Timer? _avatarToggleTimer;
 
-  final ValueNotifier<Profile?> currentProfile = ValueNotifier<Profile?>(null);
   AssetEntity? assetEntity;
   MatrixFile? matrixFile;
 
-  List<TwakeChatPresentationAccount> _multipleAccounts = [];
+  ProviderSubscription<AsyncValue<SettingsProfileState>>? _profileSubscription;
 
   final TwakeEventDispatcher twakeEventDispatcher = getIt
       .get<TwakeEventDispatcher>();
 
   final ValueNotifier<bool> isEditedProfileNotifier = ValueNotifier(false);
 
-  final settingsMultiAccountsUIState = ValueNotifier<Either<Failure, Success>>(
-    Right(GetClientsInitialUIState()),
-  );
-
   Client get client => ref.read(matrixClientProvider);
+
+  SettingsProfileController get _profileController =>
+      ref.read(settingsProfileControllerProvider.notifier);
+
+  AccountProfile? get _profile =>
+      ref.read(settingsProfileControllerProvider).value?.profile;
 
   String? get _editedDisplayName => SettingsProfileEditRules.editedDisplayName(
     text: displayNameEditingController.text,
@@ -107,8 +107,10 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
     );
   }
 
-  String get displayName =>
-      currentProfile.value?.displayName ??
+  String get displayName => _nameOf(_profile);
+
+  String _nameOf(AccountProfile? profile) =>
+      profile?.displayName ??
       client.mxid(context).localpart ??
       client.mxid(context);
 
@@ -132,8 +134,7 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
     SettingsProfileEnum.matrixId,
   ];
 
-  bool get hasAvatar =>
-      currentProfile.value?.avatarUrl?.toString().isNotEmpty ?? false;
+  bool get hasAvatar => _profile?.avatarUrl?.toString().isNotEmpty ?? false;
 
   List<SheetAction<AvatarAction>> actions() => [
     SheetAction(
@@ -236,17 +237,17 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
     _showImagesPickerAction();
   }
 
-  List<Widget> listContextMenuBuilder(BuildContext context) {
+  List<Widget> listContextMenuBuilder(
+    BuildContext context, {
+    required bool hasAvatar,
+  }) {
     return [
-      ValueListenableBuilder<Profile?>(
-        valueListenable: currentProfile,
-        builder: (context, profile, _) => SettingsProfileContextMenu(
-          hasAvatar: profile?.avatarUrl?.toString().isNotEmpty ?? false,
-          onAction: (action) {
-            menuController.close();
-            _handleActionContextMenu(action);
-          },
-        ),
+      SettingsProfileContextMenu(
+        hasAvatar: hasAvatar,
+        onAction: (action) {
+          menuController.close();
+          _handleActionContextMenu(action);
+        },
       ),
     ];
   }
@@ -265,7 +266,13 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
     }
   }
 
-  void _sendAccountDataEvent({required Profile profile}) async {
+  static Profile _toSdkProfile(AccountProfile profile) => Profile(
+    userId: profile.userId,
+    displayName: profile.displayName,
+    avatarUrl: profile.avatarUrl,
+  );
+
+  void _sendAccountDataEvent({required AccountProfile profile}) async {
     Logs().d(
       'SettingsProfileController::_handleSyncProfile() - Syncing profile',
     );
@@ -273,7 +280,7 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
       client: client,
       basicEvent: BasicEvent(
         type: TwakeInappEventTypes.uploadAvatarEvent,
-        content: profile.toJson(),
+        content: _toSdkProfile(profile).toJson(),
       ),
     );
     Logs().d(
@@ -326,9 +333,6 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
     }
     if (matrixFile != null) {
       matrixFile = null;
-    }
-    if (currentProfile.value != null) {
-      currentProfile.value = null;
     }
   }
 
@@ -427,31 +431,22 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
           'SettingsProfile::_handleUploadProfileOnData() - success: $success',
         );
         if (success is UpdateProfileSuccess) {
-          final newProfile = Profile(
-            userId: client.userID!,
-            displayName: success.displayName ?? displayName,
-            avatarUrl: success.avatar ?? currentProfile.value?.avatarUrl,
+          _applySavedProfile(
+            AccountProfile(
+              userId: client.userID!,
+              displayName: success.displayName ?? displayName,
+              avatarUrl: success.avatar ?? _profile?.avatarUrl,
+            ),
           );
-          _sendAccountDataEvent(profile: newProfile);
-          currentProfile.value = newProfile;
-          _clearImageInLocal();
-          _refreshEditedState();
-          _getCurrentProfile(client, fresh: true);
-          TwakeDialog.hideLoadingDialog(context);
         }
 
         if (success is DeleteProfileSuccess) {
-          final newProfile = Profile(
-            userId: client.userID!,
-            displayName: success.displayName ?? displayName,
-            avatarUrl: null,
+          _applySavedProfile(
+            AccountProfile(
+              userId: client.userID!,
+              displayName: success.displayName ?? displayName,
+            ),
           );
-          _sendAccountDataEvent(profile: newProfile);
-          currentProfile.value = newProfile;
-          _clearImageInLocal();
-          _refreshEditedState();
-          _getCurrentProfile(client, fresh: true);
-          TwakeDialog.hideLoadingDialog(context);
           pickAvatarUIState.value = Right<Failure, Success>(
             DeleteAvatarUIStateSuccess(),
           );
@@ -460,29 +455,25 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
     );
   }
 
-  void _getCurrentProfile(Client client, {bool fresh = false}) async {
-    final userId = client.userID!;
-    final textBeforeRead = displayNameEditingController.text;
-    final hadUnsavedEdit = _editedDisplayName != null;
-    // SDK access goes through Riverpod (transitional container read).
-    final data = await ProviderScope.containerOf(context, listen: false).read(
-      fresh
-          ? freshMatrixUserProfileProvider(userId).future
-          : matrixUserProfileProvider(userId).future,
-    );
-    if (!mounted) return;
-    // A failed fresh read keeps the profile the save just confirmed.
-    if (data != null || !fresh) {
-      final profile = data.toProfile(userId);
-      Logs().d(
-        'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
-      );
-      currentProfile.value = profile;
-    }
-    if (SettingsProfileEditRules.shouldOverwriteName(
-      textBeforeRead: textBeforeRead,
-      textAfterRead: displayNameEditingController.text,
-      hadUnsavedEditBeforeRead: hadUnsavedEdit,
+  void _applySavedProfile(AccountProfile profile) {
+    _sendAccountDataEvent(profile: profile);
+    _profileController.applySaved(profile);
+    _clearImageInLocal();
+    _refreshEditedState();
+    unawaited(_profileController.refresh());
+    TwakeDialog.hideLoadingDialog(context);
+  }
+
+  void _onProfileChanged(
+    AsyncValue<SettingsProfileState>? previous,
+    AsyncValue<SettingsProfileState> next,
+  ) {
+    final previousProfile = previous?.value?.profile;
+    final profile = next.value?.profile;
+    if (profile == null || profile == previousProfile) return;
+    if (SettingsProfileEditRules.shouldSyncName(
+      text: displayNameEditingController.text,
+      shownName: _nameOf(previousProfile),
     )) {
       displayNameEditingController.text = displayName;
     }
@@ -512,62 +503,27 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
     }
   }
 
-  Future<void> _getMultipleAccounts(Client currentActiveClient) async {
-    try {
-      settingsMultiAccountsUIState.value = Right(GetClientsLoadingUIState());
-      final profileBundles = await _getClientProfiles();
-      _multipleAccounts = profileBundles
-          .where((clientProfile) => clientProfile != null)
-          .map(
-            (clientProfile) => clientProfile!.toTwakeChatPresentationAccount(
-              currentActiveClient,
-            ),
-          )
-          .toList();
-      settingsMultiAccountsUIState.value = Right(
-        GetClientsSuccessUIState(multipleAccounts: _multipleAccounts),
-      );
-    } catch (e) {
-      Logs().e('SettingsProfileController::_getMultipleAccounts() - Error: $e');
-      settingsMultiAccountsUIState.value = Left<Failure, Success>(
-        GetClientsFailureUIState(exception: e),
-      );
-    }
-  }
-
-  Future<List<ClientProfilePresentation?>> _getClientProfiles() async {
-    try {
-      final profiles = await Future.wait(
-        ClientManager.loggedIn(await ClientManager.getClients()).map((
-          client,
-        ) async {
-          final profileBundle = await client.fetchOwnProfile();
-          Logs().d(
-            'SettingsProfileController::getProfileBundles() - ClientName - ${client.clientName}',
-          );
-          Logs().d(
-            'SettingsProfileController::getProfileBundles() - UserId - ${client.userID}',
-          );
-          return ClientProfilePresentation(
-            profile: profileBundle,
-            client: client,
-          );
-        }),
-      );
-
-      return profiles.toList();
-    } catch (e) {
-      Logs().e('SettingsProfileController::getProfileBundles() - Error: $e');
-      rethrow;
-    }
-  }
-
-  void onBottomButtonTap({
-    required List<TwakeChatPresentationAccount> multipleAccounts,
-  }) {
+  // TODO: [transitional] #3828 MultipleAccountsPickerController still takes Clients.
+  void onBottomButtonTap(List<AccountProfile> accounts) {
+    final profile = _profile;
+    final clients = ClientManager.loggedIn(
+      ref.read(accountClientRegistryProvider).clients,
+    );
     MultipleAccountsPickerController(
       context: context,
-      multipleAccounts: multipleAccounts,
+      multipleAccounts: [
+        for (final account in accounts)
+          if (clients.firstWhereOrNull((c) => c.userID == account.userId)
+              case final accountClient?)
+            ClientProfilePresentation(
+              client: accountClient,
+              profile: _toSdkProfile(
+                profile != null && account.userId == profile.userId
+                    ? profile
+                    : account,
+              ),
+            ).toTwakeChatPresentationAccount(client),
+      ],
     ).showMultipleAccountsPicker(
       client,
       onGoToAccountSettings: () {
@@ -615,8 +571,9 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
     TwakeSnackBar.show(context, errorMessage);
     _clearImageInLocal();
     _refreshEditedState();
-    if (currentProfile.value != null) {
-      _sendAccountDataEvent(profile: currentProfile.value!);
+    final profile = _profile;
+    if (profile != null) {
+      _sendAccountDataEvent(profile: profile);
     }
   }
 
@@ -667,51 +624,25 @@ class SettingsProfileController extends ConsumerState<SettingsProfile>
       duration: const Duration(milliseconds: _animationDuration),
     );
     _handleViewState();
-    _getCurrentProfile(client);
-    listenToPickAvatarUIState(context);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      updateNewProfileForAccount();
-      _getMultipleAccounts(client);
-    });
-  }
-
-  void updateNewProfileForAccount() {
-    listenOnProfileChangeStream(
-      client: client,
-      currentProfile: currentProfile.value,
-      onProfileChanged: (newProfile) {
-        final indexOldAccount = _multipleAccounts.indexWhere(
-          (element) => element.accountId == client.userID,
-        );
-        if (indexOldAccount < 0) {
-          return;
-        }
-        final newAccount = ClientProfilePresentation(
-          client: client,
-          profile: newProfile,
-        ).toTwakeChatPresentationAccount(client);
-        _multipleAccounts[indexOldAccount] = newAccount;
-        settingsMultiAccountsUIState.value = Right<Failure, Success>(
-          GetClientsSuccessUIState(multipleAccounts: _multipleAccounts),
-        );
-      },
+    _profileSubscription = ref.listenManual(
+      settingsProfileControllerProvider,
+      _onProfileChanged,
     );
+    listenToPickAvatarUIState(context);
   }
 
   @override
   void dispose() {
+    _profileSubscription?.close();
     animationController.dispose();
     isExpandedAvatar.dispose();
     _clearImageInLocal();
     _clearImageInMemory();
     disposePickAvatarMixin();
-    currentProfile.dispose();
-    onAccountDataSubscription?.cancel();
     displayNameEditingController.dispose();
     matrixIdEditingController.dispose();
     displayNameFocusNode.dispose();
     isEditedProfileNotifier.dispose();
-    settingsMultiAccountsUIState.dispose();
     _avatarToggleTimer?.cancel();
     super.dispose();
   }
